@@ -9,6 +9,7 @@
 <?import javafx.scene.input.KeyCombination?>
 <BorderPane prefHeight="768.0" prefWidth="1028.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml"
             fx:controller="edu.utah.bmi.simple.gui.controller.RootLayoutController">
+
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
@@ -29,10 +30,13 @@
                 </Menu>
                 <Menu mnemonicParsing="true" text="_Help">
                     <items>
-                        <MenuItem mnemonicParsing="true" text="_About" onAction="#openHelpURL">
+                        <MenuItem mnemonicParsing="true" text="_OnlineWiki" onAction="#openHelpURL">
                             <accelerator>
                                 <KeyCodeCombination alt="UP" code="F1" control="UP" meta="UP" shift="UP" shortcut="UP"></KeyCodeCombination>
                             </accelerator>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="true" text="_About" onAction="#about">
+
                         </MenuItem>
                     </items>
                 </Menu>

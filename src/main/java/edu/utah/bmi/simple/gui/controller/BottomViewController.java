@@ -86,5 +86,9 @@ public class BottomViewController {
         });
     }
 
+    public void setMsg(String msg) {
+        this.msg.setText(msg);
+    }
+
 
 }

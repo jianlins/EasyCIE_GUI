@@ -12,7 +12,7 @@ import java.io.InputStreamReader;
 
 /**
  * @author Jianlin Shi
- *         Created on 2/13/17.
+ * Created on 2/13/17.
  */
 public class ExecuteOsCommand extends javafx.concurrent.Task {
     protected String command;
@@ -37,15 +37,24 @@ public class ExecuteOsCommand extends javafx.concurrent.Task {
             p = rt.exec(command);
 
             // Show exit code of process
-            p.waitFor();
+
             BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line = "";
             while ((line = b.readLine()) != null) {
                 System.out.println(line);
-                stb.append(line);
-                stb.append("\n");
+                if (line.startsWith("prg:")) {
+                    String[] progressNums = line.substring(4).trim().split(",");
+                    Long workDone = Long.parseLong(progressNums[0]);
+                    Long max = Long.parseLong(progressNums[1]);
+                    updateProgress(workDone, max);
+                } else if (line.startsWith("msg:")) {
+                    updateMessage(line.substring(4));
+                } else {
+                    stb.append(line);
+                    stb.append("\n");
+                }
             }
-
+            p.waitFor();
             b.close();
         } catch (IOException e) {
             e.printStackTrace();

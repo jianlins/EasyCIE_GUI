@@ -20,14 +20,14 @@ import org.apache.commons.io.FileUtils;
 
 import java.awt.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+
+import javafx.scene.image.Image;
 
 
 /**
@@ -60,9 +60,13 @@ public class Main extends Application {
 
 
     public void start(Stage primaryStage) throws Exception {
-        this.basePath=System.getProperty("user.dir");
+        this.basePath = System.getProperty("user.dir");
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("EasyCIE");
+//        System.out.println(Paths.get(Thread.currentThread().getContextClassLoader().getResource("edu/utah/bmi/simple/gui/view/big.png").toURI()).toString());
+//        Image anotherIcon = new Image(Paths.get(getClass().getClassLoader().getResource("edu/utah/bmi/simple/gui/view/big.png").toURI()).toString());
+        Image anotherIcon = new Image("edu/utah/bmi/simple/gui/view/transbig.png");
+        primaryStage.getIcons().add(anotherIcon);
         initRootLayout();
         String configFile = getLastConfigFile();
         currentConfigFile = new File(configFile);
@@ -74,8 +78,8 @@ public class Main extends Application {
         initiateSetting();
         showBottomView();
         showTaskOverview();
-        System.out.println("Refresh loading from "+getRelativePath(currentConfigFile.getAbsolutePath(), basePath));
-        logMsg("Load: " + getRelativePath(currentConfigFile.getAbsolutePath(), basePath));
+        System.out.println("Refresh loading from " + getRelativePath(currentConfigFile.getAbsolutePath(), basePath));
+        setMsg("Load: " + getRelativePath(currentConfigFile.getAbsolutePath(), basePath));
         TaskFX currentTask = tasks.getTask("simcda-core");
     }
 
@@ -107,7 +111,7 @@ public class Main extends Application {
     private void insertTop(String filePath) {
         try {
             List<String> lines = FileUtils.readLines(logFile);
-            if(filePath.equals(lines.get(0)))
+            if (filePath.equals(lines.get(0)))
                 return;
             lines.add(0, filePath);
             FileUtils.writeLines(logFile, lines);
@@ -125,7 +129,7 @@ public class Main extends Application {
                     System.out.println("The last used configuration file: " +
                             new File(conf).getAbsolutePath() +
                             " does not exists, please choose another one.");
-                    logMsg( getRelativePath(new File(conf).getAbsolutePath(), basePath)+ " does not exists");
+                    setMsg(getRelativePath(new File(conf).getAbsolutePath(), basePath) + " does not exists");
                     openConfigFile();
                 }
             } catch (IOException e) {
@@ -133,7 +137,7 @@ public class Main extends Application {
             }
         } else {
             System.out.println(logFile.getAbsolutePath() + " does not exists, please choose another one.");
-            logMsg(getRelativePath(logFile.getAbsolutePath(), basePath)+ " does not exists");
+            setMsg(getRelativePath(logFile.getAbsolutePath(), basePath) + " does not exists");
             openConfigFile();
         }
         return conf;
@@ -245,11 +249,11 @@ public class Main extends Application {
         System.exit(0);
     }
 
-    public void logMsg(String msg) {
+    public void setMsg(String msg) {
         if (bottomViewController != null) {
 //            bottomViewController.progressBar.setPrefWidth(1);
 //            bottomViewController.msg.setPrefWidth(580);
-            bottomViewController.msg.setText(msg);
+            bottomViewController.setMsg(msg);
         }
     }
 
