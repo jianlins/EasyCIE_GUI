@@ -1,0 +1,16 @@
+cd "$( dirname "$0" )";
+export CLASSPATH=./classes:$(find "$PWD"/lib -name '*.jar' | xargs echo | tr ' ' ‘’:);
+PARA="$@"
+echo $PARA
+if [ -z $PARA ]
+then
+	echo "For detailed information, use help+following class names:"
+	echo "Import"
+	echo "Runpipe"
+	echo "Viewer"
+	echo "RunCPE"
+	echo "XMISQLAgainstGoldCompare"
+	echo "Compare"
+else
+    ${java.path} -cp $CLASSPATH edu.utah.bmi.runner."$@" help
+fi

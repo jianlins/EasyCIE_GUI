@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<typeSystemDescription xmlns="http://uima.apache.org/resourceSpecifier">
+    <types>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.Sentence</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.SentenceOdd</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.type.system.Sentence</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.Token</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.ConceptBASE</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>Category</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Text</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Negation</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Temporality</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Experiencer</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Annotator</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Note</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.Concept</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.type.system.ConceptBASE</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.PseudoConcept</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.type.system.ConceptBASE</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.Context</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>Negation</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Temporality</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Experiencer</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>org.apache.uima.examples.SourceDocumentInformation</name>
+            <description>Stores detailed information about the original source document from which the current CAS was initialized. All information (like size) refers to the source document and not to the document in the CAS which may be converted and filtered by a CAS Initializer. For example this information will be written to the Semantic Search index so that the original document contents can be retrieved by queries.</description>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>uri</name>
+                    <description>URI of document. (For example, file:///MyDirectory/myFile.txt for a simple file or http://incubator.apache.org/uima/index.html for content from a web source.)</description>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>offsetInSource</name>
+                    <description>Byte offset of the start of document content within original source file or other input source. Only used if the CAS document was retrieved from an source where one physical source file contained several conceptual documents. Zero otherwise.</description>
+                    <rangeTypeName>uima.cas.Integer</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>documentSize</name>
+                    <description>Size of original document in bytes before processing by CAS Initializer. Either absolute file size of size within file or other source.</description>
+                    <rangeTypeName>uima.cas.Integer</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>lastSegment</name>
+                    <description>For a CAS that represents a segment of a larger source document, this flag indicates whether this CAS is the final segment of the source document.  This is useful for downstream components that want to take some action after having seen all of the segments of a particular source document.</description>
+                    <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.Fever_absent</name>
+            <description>an automatic generated type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.Fever_present</name>
+            <description>an automatic generated type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.NegatedConcept</name>
+            <description>an automatic generated type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.NoPres_DOC</name>
+            <description>an automatic generated type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.NonPatientConcept</name>
+            <description>an automatic generated type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.PastConcept</name>
+            <description>an automatic generated type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.PastPres_DOC</name>
+            <description>an automatic generated type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.Pres_DOC</name>
+            <description>an automatic generated type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.Dx_TEST</name>
+            <description>an automatic generated concept type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>Toxic</name>
+                    <description>Automatic generated Type</description>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>TestType</name>
+                    <description>Automatic generated Type</description>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.CAUSES_RSKFCT</name>
+            <description>an automatic generated concept type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.SIGN_SYMPTOM</name>
+            <description>an automatic generated concept type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.TREATMENT</name>
+            <description>an automatic generated concept type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.type.system.EVIDENCE_OF_PNEUMONIA</name>
+            <description>an automatic generated type</description>
+            <supertypeName>edu.utah.bmi.type.system.Concept</supertypeName>
+        </typeDescription>
+    </types>
+</typeSystemDescription>

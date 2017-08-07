@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cpeDescription xmlns="http://uima.apache.org/resourceSpecifier">
+    <collectionReader>
+        <collectionIterator>
+            <descriptor>
+                <import location="../ae/SQLTextReader.xml"/>
+            </descriptor>
+        </collectionIterator>
+    </collectionReader>
+    <casProcessors casPoolSize="2" processingUnitThreadCount="1">
+    <casProcessor deployment="integrated" name="SQL Writer CasConsumer">
+        <descriptor>
+            <import location="../ae/SQLWriterCasConsumer.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+            <filter/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="100/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000"/>
+        </errorHandling>
+        <checkpoint batch="10000"/>
+    </casProcessor>
+    </casProcessors>
+    <cpeConfig>
+        <numToProcess>-1</numToProcess>
+        <deployAs>immediate</deployAs>
+        <checkpoint batch="0" time="300000"/>
+        <timerImpl/>
+    </cpeConfig>
+</cpeDescription>

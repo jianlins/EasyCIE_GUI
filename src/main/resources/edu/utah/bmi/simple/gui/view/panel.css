@@ -1,0 +1,16 @@
+
+.label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #333333;
+}
+#status {
+    -fx-font-weight: bold;
+}
+.hbox {
+    -fx-spacing: 10;
+}
+#executePanel{
+    -fx-hgap: 5;
+    -fx-vgap: 5;
+    -fx-pref-height: 80;
+}

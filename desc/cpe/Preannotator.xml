@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cpeDescription xmlns="http://uima.apache.org/resourceSpecifier">
+    <collectionReader>
+        <collectionIterator>
+            <descriptor>
+                <import location="../ae/SQLTextReader.xml"/>
+            </descriptor>
+            <configurationParameterSettings>
+                <nameValuePair>
+                    <name>SQLFile</name>
+                    <value>
+                        <string>data/fever.sqlite</string>
+                    </value>
+                </nameValuePair>
+            </configurationParameterSettings>
+        </collectionIterator>
+    </collectionReader>
+    <casProcessors casPoolSize="2" processingUnitThreadCount="1">
+    <casProcessor deployment="integrated" name="RuSH AE">
+        <descriptor>
+            <import location="../ae/RuSH_AE.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="0/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000" default="-1"/>
+        </errorHandling>
+        <checkpoint batch="10000" time="1000ms"/>
+    </casProcessor>
+    <casProcessor deployment="integrated" name="SQL Writer CasConsumer">
+        <descriptor>
+            <import location="../ae/SQLWriterCasConsumer.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+            <filter/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="100/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000"/>
+        </errorHandling>
+        <checkpoint batch="10000"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>WriteConcepts</name>
+                <value>
+                    <string>Sentence</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+    </casProcessor>
+    </casProcessors>
+    <cpeConfig>
+        <numToProcess>-1</numToProcess>
+        <deployAs>immediate</deployAs>
+        <checkpoint batch="0" time="300000"/>
+        <timerImpl/>
+    </cpeConfig>
+</cpeDescription>

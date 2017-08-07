@@ -1,0 +1,10 @@
+cd "$( dirname "$0" )";
+export CLASSPATH=./classes:$(find "$PWD"/lib -name '*.jar' | xargs echo | tr ' ' '':);
+PARA="$@"
+#echo $CLASSPATH
+if [[ -z $PARA ]]
+then
+	echo "use \"./run classname parameters\"" to execute classes.
+else
+	${java.path} -cp $CLASSPATH edu.utah.bmi.runner."$@"
+fi
