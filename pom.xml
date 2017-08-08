@@ -45,7 +45,6 @@
             <artifactId>domainontology</artifactId>
             <version>2016.12.2-SNAPSHOT</version>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>
