@@ -1,5 +1,6 @@
 package edu.utah.bmi.simple.gui.doubleclick;
 
+import edu.utah.bmi.simple.gui.controller.Main;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.Setting;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -32,8 +33,9 @@ public class ConfigDirectoryChooser extends javafx.concurrent.Task {
                     dirChooser.setInitialDirectory(oldParentDir);
                 File file = dirChooser.showDialog(null);
                 if (file != null) {
-                    String value = file.getAbsolutePath();
-                    currentTask.setValue(setting.getSettingName(), value, setting.getSettingDesc(), setting.getDoubleClick());
+                    String newValue = Main.getRelativePath(file.getAbsolutePath());
+                    Main.valueChanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName(), newValue);
+                    currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick());
                     TasksOverviewController.currentTasksOverviewController.getSettingTable().refresh();
                 }
             }

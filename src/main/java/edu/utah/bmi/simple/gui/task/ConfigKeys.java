@@ -14,17 +14,16 @@ public class ConfigKeys {
 
     public static final String ruleFile = "pipeLineSetting/ruleFile";
     public static final String cRuleFile = "pipeLineSetting/cRuleFile";
+    public static final String contextRule= "pipeLineSetting/contextRule";
     public static final String reportPreannotating = "pipeLineSetting/report";
     public static final String fastNerCaseSensitive = "pipeLineSetting/fastNERCaseSensitive";
-    public static final String featureInfEvidenceConcept = "pipeLineSetting/featureInfEvidenceConcept";
     public static final String featureInfRule = "pipeLineSetting/featureInfRule";
     public static final String docInfRule = "pipeLineSetting/docInfRule";
-    public static final String docInfDefault = "pipeLineSetting/docInfDefault";
 
     public static final String outputEhostDir = "format/ehost";
     public static final String outputBratDir = "format/brat";
     public static final String outputXMIDir = "format/uima";
-    public static final String uimaTypes = "format/uimaTypes";
+    public static final String exportTypes = "format/exportTypes";
 
 
     public static final String maintask = "easycie";
@@ -43,12 +42,15 @@ public class ConfigKeys {
     public static final String report = "report";
 
 
-    public static final String corpusDBFile = "import/dbFile";
-    public static final String corpusDBTable = "import/table";
+    public static final String readDBConfigFile = "import/dbFile";
+    public static final String inputTableName = "import/table";
     public static final String overwrite = "import/overwrite";
+    public static final String datasetId = "import/datasetId";
 
-    public static final String outputDBFile = "output/dbFile";
-    public static final String outputDBTable = "output/table";
+    public static final String writeConfigFileName = "output/dbFile";
+    public static final String outputTableName = "output/table";
+
+    public static final String rushRule = "nlpComponents/rush";
 
 
 }

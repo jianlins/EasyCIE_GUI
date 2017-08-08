@@ -1,14 +1,175 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typeSystemDescription xmlns="http://uima.apache.org/resourceSpecifier">
-    <name>All_Types</name>
-    <description>Derive from TestStanfordCoreNLPUIMAWrapper-typeSystemDescriptor
-        including token sentence dependency types.
-    </description>
-    <version>1.0</version>
-    <vendor/>
-    <imports>
-        <import location="FastNER_Types.xml"></import>
-        <import location="FastContext_Types.xml"></import>
-        <import name="org.apache.uima.examples.SourceDocumentInformation"/>
-    </imports>
+    <types>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.Sentence</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.SentenceOdd</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.Sentence</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.Token</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.EntityBASE</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>Note</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.ConceptBASE</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.EntityBASE</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>Category</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Text</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Section</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Negation</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Certainty</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Temporality</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Experiencer</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Annotator</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.Concept</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.ConceptBASE</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.PseudoConcept</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.ConceptBASE</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.Context</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.EntityBASE</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>ModifierName</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>ModifierValue</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>TargetConcept</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.Doc_Base</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.EntityBASE</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>Topic</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Features</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>Note</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>org.apache.uima.examples.SourceDocumentInformation</name>
+            <description>Stores detailed information about the original source document from which the current CAS was
+                initialized. All information (like size) refers to the source document and not to the document in the
+                CAS which may be converted and filtered by a CAS Initializer. For example this information will be
+                written to the Semantic Search index so that the original document contents can be retrieved by queries.
+            </description>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>uri</name>
+                    <description>URI of document. (For example, file:///MyDirectory/myFile.txt for a simple file or
+                        http://incubator.apache.org/uima/index.html for content from a web source.)
+                    </description>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>offsetInSource</name>
+                    <description>Byte offset of the start of document content within original source file or other input
+                        source. Only used if the CAS document was retrieved from an source where one physical source
+                        file contained several conceptual documents. Zero otherwise.
+                    </description>
+                    <rangeTypeName>uima.cas.Integer</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>documentSize</name>
+                    <description>Size of original document in bytes before processing by CAS Initializer. Either
+                        absolute file size of size within file or other source.
+                    </description>
+                    <rangeTypeName>uima.cas.Integer</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>lastSegment</name>
+                    <description>For a CAS that represents a segment of a larger source document, this flag indicates
+                        whether this CAS is the final segment of the source document. This is useful for downstream
+                        components that want to take some action after having seen all of the segments of a particular
+                        source document.
+                    </description>
+                    <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+    </types>
 </typeSystemDescription>

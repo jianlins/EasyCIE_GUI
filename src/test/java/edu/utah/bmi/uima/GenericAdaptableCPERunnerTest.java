@@ -16,7 +16,7 @@ public class GenericAdaptableCPERunnerTest {
         SettingOper settingOper = new SettingOper("conf/config.xml");
         TasksFX tasksFX = settingOper.readSettings();
         GenericAdaptableCPERunner runner = new GenericAdaptableCPERunner(tasksFX, "testPipeline");
-        runner.call();
+        runner.run();
 
     }
 

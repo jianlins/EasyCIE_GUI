@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright  2017  Department of Biomedical Informatics, University of Utah
+  ~ <p>
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~ <p>
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~ <p>
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<config>
+    <username>test</username>
+    <server>jdbc:sqlite:data/my.sqlite?journal_mode=WAL&amp;synchronous=OFF</server>
+    <password>test</password>
+    <databaseName>mysqlite</databaseName>
+    <driver>org.sqlite.JDBC</driver>
+    <concurUpdatable>false</concurUpdatable>
+    <createTables>
+        <item>
+            <name>LOG</name>
+            <sql>
+                <item>
+                    CREATE TABLE LOG (
+                    RUN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ANNOTATOR TEXT,
+                    START_DTM DATETIME,
+                    END_DTM DATETIME,
+                    NUM_NOTES NUMBER(22,0),
+                    COMMENTS TEXT);
+                </item>
+            </sql>
+        </item>
+        <item>
+            <name>ANNOTATORS</name>
+            <sql>
+                <item>
+                    CREATE TABLE ANNOTATORS (
+                    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ANNOTATOR TEXT,
+                    ADD_DTM DATETIME);
+                </item>
+                <item>
+                    CREATE INDEX IF NOT EXISTS ANNOTATORS_INX ON ANNOTATORS (ANNOTATOR);
+                </item>
+            </sql>
+        </item>
+    </createTables>
+    <dropTables>
+        <item>
+            <name>LOG</name>
+            <sql>
+                <item>DROP TABLE LOG</item>
+            </sql>
+        </item>
+        <item>
+            <name>ANNOTATORS</name>
+            <sql>
+                <item>DROP TABLE ANNOTATORS</item>
+            </sql>
+        </item>
+    </dropTables>
+    <queryStatements>
+        <item>
+            <name>queryAnnotators</name>
+            <sql>SELECT ANNOTATOR FROM ANNOTATORS;</sql>
+        </item>
+        <item>
+            <name>checkAnnotatorExist</name>
+            <sql>SELECT COUNT(*) FROM ANNOTATORS WHERE ANNOTATOR=?</sql>
+        </item>
+        <item>
+            <name>getColumnsInfo</name>
+            <sql>PRAGMA table_info({tableName});</sql>
+        </item>
+        <item>
+            <name>checkTableExists</name>
+            <sql>
+                select count(*) from sqlite_master where type='table' and name=?;
+            </sql>
+        </item>
+        <item>
+            <name>lastIdofLOG</name>
+            <sql>SELECT RUN_ID FROM LOG ORDER BY RUN_ID DESC LIMIT 1;</sql>
+        </item>
+        <item>
+            <name>masterInputQuery</name>
+            <sql>SELECT DOC_ID, DATASET_ID,DOC_NAME,TEXT FROM {tableName} WHERE DATASET_ID = ?;
+            </sql>
+        </item>
+        <item>
+            <name>masterCountQuery</name>
+            <sql>SELECT COUNT(*) FROM {tableName} WHERE DATASET_ID = ?;
+            </sql>
+        </item>
+        <item>
+            <name>logQuery</name>
+            <sql>SELECT RUN_ID, START_DTM, END_DTM, NUM_NOTES, COMMENTS FROM LOG WHERE RUN_ID=?;
+            </sql>
+        </item>
+        <item>
+            <name>maxRunID</name>
+            <sql>SELECT MAX(RUN_ID) FROM {tableName} WHERE ANNOTATOR=?</sql>
+        </item>
+        <!--<item>-->
+        <!--<sql>SELECT DOC_NAME, TYPE, ANNO_TEXT, FEATURES,SNIPPET, ANNOTATOR,BEGIN, END,SNIPPET_BEGIN,-->
+        <!--SNIPPET_END,TEXT-->
+        <!--FROM OUTPUT JOIN DOCUMENTS ON OUTPUT.DOC_ID=DOCUMENTS.DOC_ID-->
+        <!--</sql>-->
+        <!--</item>-->
+    </queryStatements>
+
+    <insertStatements>
+        <item>
+            <name>LOG</name>
+            <returnKey>RUN_ID</returnKey>
+            <sql>INSERT INTO LOG (ANNOTATOR, START_DTM, END_DTM, NUM_NOTES, COMMENTS) VALUES (?,?,?,?,?)
+            </sql>
+        </item>
+        <item>
+            <name>ANNOTATORS</name>
+            <returnKey>ID</returnKey>
+            <sql>INSERT INTO ANNOTATORS (ANNOTATOR, ADD_DTM) VALUES (?,CURRENT_TIMESTAMP)
+            </sql>
+        </item>
+    </insertStatements>
+    <updateStatements>
+        <item>
+            <name>LOG</name>
+            <sql>UPDATE LOG SET ANNOTATOR=?,START_DTM=?, END_DTM=?, NUM_NOTES=?, COMMENTS=? WHERE RUN_ID=?
+            </sql>
+        </item>
+    </updateStatements>
+    <templates>
+        <item>
+            <name>ANNOTATION_TABLE</name>
+            <sql>
+                <item>
+                    CREATE TABLE {tableName}(ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    DOC_NAME TEXT,
+                    ANNOTATOR TEXT,
+                    RUN_ID INT,
+                    TYPE TEXT,
+                    BEGIN INT,
+                    END INT,
+                    SNIPPET_BEGIN INT,
+                    TEXT TEXT,
+                    FEATURES TEXT,
+                    SNIPPET TEXT,
+                    COMMENTS TEXT,
+                    CREATE_DTM DATETIME DEFAULT CURRENT_TIMESTAMP);
+                </item>
+                <item>
+                    CREATE INDEX IF NOT EXISTS {tableName}_RUN_IND ON {tableName} (RUN_ID);
+                </item>
+                <item>
+                    CREATE INDEX IF NOT EXISTS {tableName}_TYPE_IND ON {tableName} (TYPE);
+                </item>
+                <item>
+                    CREATE INDEX IF NOT EXISTS {tableName}_ANNO_IND ON {tableName} (ANNOTATOR);
+                </item>
+                <item>
+                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {tableName} (DOC_NAME);
+                </item>
+            </sql>
+            <returnKey>ID</returnKey>
+            <insert>INSERT INTO {tableName} (DOC_NAME,ANNOTATOR, RUN_ID,TYPE,BEGIN,END,SNIPPET_BEGIN, TEXT,
+                FEATURES,SNIPPET,COMMENTS)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?);
+            </insert>
+            <query>SELECT * FROM {tableName} WHERE ANNOTATOR=?;</query>
+            <drop>
+                <item>DROP TABLE {tableName};</item>
+            </drop>
+        </item>
+        <item>
+            <!--this should be a view in production env, the table is only for testing purposes-->
+            <name>DOCUMENTS</name>
+            <sql>
+                <item>
+                    CREATE TABLE {tableName} (
+                    DOC_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    DATASET_ID CHAR(10),
+                    DOC_NAME TEXT,
+                    TEXT TEXT,
+                    INSERT_DTM DATETIME);
+                </item>
+                <item>
+                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {tableName} (DOC_NAME);
+                </item>
+                <item>
+                    CREATE INDEX IF NOT EXISTS {tableName}_DATATSET_IND ON {tableName} (DATASET_ID);
+                </item>
+            </sql>
+            <insert>INSERT INTO {tableName} (DATASET_ID, DOC_NAME, TEXT,INSERT_DTM) VALUES (?,?,?,CURRENT_TIMESTAMP);
+            </insert>
+            <query>SELECT * FROM {tableName} WHERE DOC_ID=?;</query>
+            <drop>
+                <item>DROP TABLE {tableName};</item>
+            </drop>
+        </item>
+    </templates>
+
+</config>

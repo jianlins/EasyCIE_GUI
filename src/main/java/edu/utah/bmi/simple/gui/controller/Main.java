@@ -39,11 +39,11 @@ public class Main extends Application {
     private BorderPane rootLayout;
     private ObservableList<TaskFX> taskParameters = FXCollections.observableArrayList();
     public TasksFX tasks;
-    protected HashMap<String, String> valueChanges = new HashMap<>(), memochanges = new HashMap<>();
+    public static HashMap<String, String> valueChanges = new HashMap<>(), memochanges = new HashMap<>();
     private SettingOper settingOper;
     public BottomViewController bottomViewController;
     private File currentConfigFile;
-    private String basePath;
+    private static String basePath;
     private final File logFile = new File("conf/.log");
 
 
@@ -60,7 +60,7 @@ public class Main extends Application {
 
 
     public void start(Stage primaryStage) throws Exception {
-        this.basePath = System.getProperty("user.dir");
+        basePath = System.getProperty("user.dir");
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("EasyCIE");
 //        System.out.println(Paths.get(Thread.currentThread().getContextClassLoader().getResource("edu/utah/bmi/simple/gui/view/big.png").toURI()).toString());
@@ -78,8 +78,8 @@ public class Main extends Application {
         initiateSetting();
         showBottomView();
         showTaskOverview();
-        System.out.println("Refresh loading from " + getRelativePath(currentConfigFile.getAbsolutePath(), basePath));
-        setMsg("Load: " + getRelativePath(currentConfigFile.getAbsolutePath(), basePath));
+        System.out.println("Refresh loading from " + getRelativePath(currentConfigFile.getAbsolutePath()));
+        setMsg("Load: " + getRelativePath(currentConfigFile.getAbsolutePath()));
         TaskFX currentTask = tasks.getTask("simcda-core");
     }
 
@@ -102,7 +102,7 @@ public class Main extends Application {
                 if (file != null) {
                     currentConfigFile = file;
                     refreshSettings();
-                    insertTop(getRelativePath(currentConfigFile.getAbsolutePath(), basePath));
+                    insertTop(getRelativePath(currentConfigFile.getAbsolutePath()));
                 }
             }
         });
@@ -129,7 +129,7 @@ public class Main extends Application {
                     System.out.println("The last used configuration file: " +
                             new File(conf).getAbsolutePath() +
                             " does not exists, please choose another one.");
-                    setMsg(getRelativePath(new File(conf).getAbsolutePath(), basePath) + " does not exists");
+                    setMsg(getRelativePath(new File(conf).getAbsolutePath()) + " does not exists");
                     openConfigFile();
                 }
             } catch (IOException e) {
@@ -137,7 +137,7 @@ public class Main extends Application {
             }
         } else {
             System.out.println(logFile.getAbsolutePath() + " does not exists, please choose another one.");
-            setMsg(getRelativePath(logFile.getAbsolutePath(), basePath) + " does not exists");
+            setMsg(getRelativePath(logFile.getAbsolutePath()) + " does not exists");
             openConfigFile();
         }
         return conf;
@@ -257,9 +257,10 @@ public class Main extends Application {
         }
     }
 
-    private String getRelativePath(String file, String base) {
+
+    public static String getRelativePath(String file) {
         Path pathAbsolute = Paths.get(file);
-        Path pathBase = Paths.get(base);
+        Path pathBase = Paths.get(basePath);
         Path pathRelative = pathBase.relativize(pathAbsolute);
         return pathRelative.toString();
     }

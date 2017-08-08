@@ -24,7 +24,7 @@ public class ViewDiffDB extends javafx.concurrent.Task {
         annotatorCompare = config.getValue(ConfigKeys.annotatorCompare);
         annotatorAgainst = config.getValue(ConfigKeys.annotatorAgainst);
         config = tasks.getTask("settings");
-        outputDB = config.getValue(ConfigKeys.outputDBFile);
+        outputDB = config.getValue(ConfigKeys.writeConfigFileName);
         diffTable = config.getValue(ConfigKeys.compareTable).trim();
     }
 
@@ -40,7 +40,7 @@ public class ViewDiffDB extends javafx.concurrent.Task {
                 }
                 // Update UI here.
                 if (annotatorCompare.trim().length() > 0 && annotatorAgainst.trim().length() > 0) {
-                    boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(outputDB, diffTable,
+                    boolean res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, diffTable,
                             " WHERE annotator='" + annotatorCompare + "_vs_" + annotatorAgainst + "'", "diff");
                     if (res)
                         updateMessage("data loaded");

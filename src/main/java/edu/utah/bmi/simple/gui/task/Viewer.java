@@ -1,8 +1,8 @@
 package edu.utah.bmi.simple.gui.task;
 
+import edu.utah.bmi.nlp.uima.MyAnnotationViewerPlain;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
-import edu.utah.bmi.uima.MyAnnotationViewerPlain;
 
 import javax.swing.*;
 import java.io.File;
@@ -22,7 +22,7 @@ public class Viewer extends javafx.concurrent.Task {
     private void initiate(TasksFX tasks) {
         TaskFX config = tasks.getTask("export");
         xmiDir = config.getValue(ConfigKeys.outputXMIDir);
-        String typeString = config.getValue(ConfigKeys.uimaTypes).trim();
+        String typeString = config.getValue(ConfigKeys.exportTypes).trim();
         if (typeString.length() > 0) {
             types = typeString.split(",");
         }

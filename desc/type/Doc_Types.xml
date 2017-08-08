@@ -24,22 +24,21 @@
     <vendor/>
     <types>
         <typeDescription>
-            <name>edu.utah.bmi.nlp.type.system.Context</name>
+            <name>edu.utah.bmi.nlp.type.system.Doc_Base</name>
             <description/>
             <supertypeName>edu.utah.bmi.nlp.type.system.EntityBASE</supertypeName>
             <features>
                 <featureDescription>
-                    <name>ModifierName</name>
+                    <name>Topic</name>
                     <description/>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
                 <featureDescription>
-                    <name>ModifierValue</name>
-                    <description/>
+                    <name>Features</name>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
                 <featureDescription>
-                    <name>TargetConcept</name>
+                    <name>Note</name>
                     <description/>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>

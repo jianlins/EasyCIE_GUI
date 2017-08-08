@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configurations>
+    <import>
+        <documents>
+            <corpusDir memo="the directory that stores the txt files"
+                       doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/input
+            </corpusDir>
+            <fileFilter
+                    memo="filter files by extension names (separate by whitespace). If not filter defined, all files will be read">
+                txt
+            </fileFilter>
+        </documents>
+        <annotations memo="support Brat and eHOST format, the format will be automatically detected.">
+            <projectDir memo="the directory that hosts the eHOST project"
+                        doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">
+                /media/brokenjade/Data/Dropbox/JLS_HF_AnnotationTask/JLS_Ann_Training/Training_1
+            </projectDir>
+            <overWriteAnnotatorName
+                    memo="if a name is set, all the annotations' annotator will be overwritten by this name"/>
+        </annotations>
+        <executes>
+            <ImportDocuments memo="Import corpus to database">edu.utah.bmi.simple.gui.task.Import</ImportDocuments>
+            <ViewInDatabase memo="View the imported files in database">edu.utah.bmi.simple.gui.task.ViewImportDB
+            </ViewInDatabase>
+            <ImportAnnotations memo="Import ehost annotations into the output table">
+                edu.utah.bmi.simple.gui.task.ImportEhost
+            </ImportAnnotations>
+        </executes>
+    </import>
+    <easycie>
+        <pipeLineSetting>
+            <ruleFile memo="token based rules" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser"
+                      openable="true">conf/pneumonia/concept_rule.xlsx
+            </ruleFile>
+            <fastNERCaseSensitive memo="whether the rule above for the FastNER is case sensitive">false
+            </fastNERCaseSensitive>
+            <cRuleFile memo="character based rules" doubleClick=" edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser"
+                       openable="true"/>
+            <contextRule memo="FastContext rule file location"
+                         doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">
+                conf/pneumonia/context.xlsx
+            </contextRule>
+            <featureInfRule memo="Feature inference rule file location"
+                            doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default
+            </featureInfRule>
+            <docInfRule memo="Document inference rule file location"
+                        doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default
+            </docInfRule>
+            <report memo="whether report the processing details at the end">false</report>
+        </pipeLineSetting>
+        <annotators>
+            <current memo="Mark current annotations with annotator: ">v5</current>
+        </annotators>
+        <executes>
+            <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunEasyCIE</RunEasyCIE>
+            <ViewOutputInDB memo="View the output in database">edu.utah.bmi.simple.gui.task.ViewOutputDB
+            </ViewOutputInDB>
+        </executes>
+    </easycie>
+    <compare>
+        <compare>
+            <sourceAnnotator memo="Compare annotations from annotator: ">v2</sourceAnnotator>
+            <referenceAnnotator memo="Compare annotations against annotator: ">v1</referenceAnnotator>
+            <strictCompare>true</strictCompare>
+            <typeFilter memo="limit the comparison to a certain type"/>
+            <categoryFilter memo="limit the comparison to a certain category"/>
+        </compare>
+        <executes>
+            <Compare memo="Compare the difference between two annotators">edu.utah.bmi.simple.gui.task.Compare</Compare>
+            <ViewComparedResults memo="View the output in database">edu.utah.bmi.simple.gui.task.ViewDiffDB
+            </ViewComparedResults>
+        </executes>
+    </compare>
+    <export>
+        <format>
+            <ehost memo="the directory to save the exported ehost files"
+                   doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/ehost
+            </ehost>
+            <brat memo="the directory to save the exported brat files"
+                  doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/brat
+            </brat>
+            <uima memo="the directory to save the exported uima xmi files"
+                  doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/xmi
+            </uima>
+            <uimaTypes memo="If specified, then only these types will be displayed(separate by comma)"></uimaTypes>
+        </format>
+        <executes>
+            <ExportEhost memo="Run Preannotator and export the annotation to eHOST format">
+                edu.utah.bmi.simple.gui.task.RunEasyCIE ehost
+            </ExportEhost>
+            <ExportBrat memo="Run Preannotator and export the annotation to brat format">
+                edu.utah.bmi.simple.gui.task.RunEasyCIE brat
+            </ExportBrat>
+            <ExportXMI memo="Run Preannotator and export the annotation to UIMA XMI format">
+                edu.utah.bmi.simple.gui.task.RunEasyCIE xmi
+            </ExportXMI>
+            <View memo="View exported UIMA annotation format">edu.utah.bmi.simple.gui.task.Viewer</View>
+        </executes>
+    </export>
+    <settings>
+        <import>
+            <dbFile memo="the db file(or configuration file) used to saved the txt corpus"
+                    doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml
+            </dbFile>
+            <table memo="the table used to saved the txt corpus">DOCUMENTS</table>
+            <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">
+                0
+            </datasetId>
+            <overwrite memo="if the table exist, whether overwrite it">true</overwrite>
+        </import>
+        <output>
+            <dbFile memo="the db file(or configuration file) used to saved the outputs"
+                    doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml
+            </dbFile>
+            <table memo="the table used to saved the annotations">OUTPUT</table>
+            <compareTable memo="the table used to saved the annotations">DIFF</compareTable>
+        </output>
+        <nlpComponents>
+            <rush memo="RuSH sentence segmenter configuration file"
+                  doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/rush.xlsx
+            </rush>
+        </nlpComponents>
+        <viewer>
+            <preTag>&lt;html&gt;&lt;body style="margin: 0; padding: 0"&gt; &lt;div id="mydiv"&gt;</preTag>
+            <postTag>&lt;/div&gt; &lt;/body&gt;&lt;/html&gt;</postTag>
+            <highlighter_begin
+                    memo="Set default color to FFFFF, then the viewer will pick one from the color pool below.">&lt;span
+                style="background-color: #FFFFFF"&gt;
+            </highlighter_begin>
+            <highlighter_end>&lt;/span&gt;</highlighter_end>
+            <snippet_length>90</snippet_length>
+            <random_pick_color memo="whether randomly pick a color from the color pool below or pick in order">true
+            </random_pick_color>
+            <color_pool>
+                e32636|efdecd|ffbf00|00ffff|9966cc|ed872d|a3c1ad|a4c639|8db600|89cff0|fbceb1|7fffd4|e9d66b|87a96b|ff9966|21abcd|deb887|848482|fdee00|f4c2c2|ff2052|a1caf1|007fff|b2beb5|5d8aa8
+            </color_pool>
+        </viewer>
+    </settings>
+</configurations>

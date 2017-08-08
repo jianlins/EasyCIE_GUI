@@ -22,8 +22,8 @@ public class ViewImportDB extends javafx.concurrent.Task {
     private void initiate(TasksFX tasks) {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
-        SQLFile = config.getValue(ConfigKeys.corpusDBFile);
-        corpusTable = config.getValue(ConfigKeys.corpusDBTable);
+        SQLFile = config.getValue(ConfigKeys.readDBConfigFile);
+        corpusTable = config.getValue(ConfigKeys.inputTableName);
     }
 
 
@@ -37,7 +37,7 @@ public class ViewImportDB extends javafx.concurrent.Task {
                     return;
                 }
                 // Update UI here.
-                boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(SQLFile, corpusTable, "", "output");
+                boolean res = TasksOverviewController.currentTasksOverviewController.showDocTable(SQLFile, corpusTable, "", "output");
                 if (res)
                     updateMessage("data loaded");
                 else

@@ -1,11 +1,10 @@
 package edu.utah.bmi.simple.gui.controller;
 
 import com.sun.javafx.collections.ObservableMapWrapper;
+import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.*;
-import edu.utah.bmi.sql.DAO;
-import edu.utah.bmi.sql.DAOFactory;
-import edu.utah.bmi.sql.Record;
-import edu.utah.bmi.sql.RecordIterator;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -59,13 +58,13 @@ public class TasksOverviewController {
     private SplitPane dbPanel;
 
     @FXML
-    private TableView dbTableView;
+    private TableView annoTableView;
 
 
     @FXML
     private TableView featureTable;
     @FXML
-    private TableColumn<Map.Entry<String, String>, String> featureNameColumn, featureValueColumn;
+    private TableColumn<String[], String> featureNameColumn, featureValueColumn;
 
     @FXML
     private HTMLEditor htmlEditor;
@@ -99,6 +98,8 @@ public class TasksOverviewController {
     @FXML
     private TableView<Map.Entry<String, SettingAb>> settingTable;
 
+    private boolean doctable = true;
+
 
     public TasksOverviewController() {
     }
@@ -123,11 +124,11 @@ public class TasksOverviewController {
 
         featureNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         featureNameColumn.setCellValueFactory(p -> {
-            return new SimpleStringProperty(p.getValue().getKey());
+            return new SimpleStringProperty(p.getValue()[0]);
         });
         featureValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         featureValueColumn.setCellValueFactory(p -> {
-            return new SimpleStringProperty(p.getValue().getValue());
+            return new SimpleStringProperty(p.getValue()[1]);
         });
 
 
@@ -154,8 +155,8 @@ public class TasksOverviewController {
         dbPanel.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if (dbTableView.getColumns() != null && dbTableView.getColumns().size() > 1) {
-                    TableColumn col = (TableColumn) dbTableView.getColumns().get(1);
+                if (annoTableView.getColumns() != null && annoTableView.getColumns().size() > 1) {
+                    TableColumn col = (TableColumn) annoTableView.getColumns().get(1);
                     col.setMaxWidth((int) newValue.doubleValue() * 0.9);
                     col.setPrefWidth((int) newValue.doubleValue() * 0.4);
                     htmlEditor.setPrefWidth(newValue.doubleValue() * 0.15);
@@ -184,7 +185,10 @@ public class TasksOverviewController {
                         condition = " WHERE " + condition;
                     }
                 }
-                showDBTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
+                if (doctable)
+                    showDocTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
+                else
+                    showAnnoTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
             }
         });
 
@@ -199,7 +203,10 @@ public class TasksOverviewController {
                             condition = " WHERE " + condition;
                         }
                     }
-                    showDBTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
+                    if (doctable)
+                        showDocTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
+                    else
+                        showAnnoTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
                 }
             }
         });
@@ -256,8 +263,8 @@ public class TasksOverviewController {
             String newValue = event.getNewValue();
             Map.Entry<String, Setting> entry = event.getRowValue();
             Setting setting = entry.getValue();
-            currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick(),setting.isOpenable());
-            mainApp.valueChanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName(), newValue);
+            currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick(), setting.isOpenable());
+            Main.valueChanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName(), newValue);
             mainApp.tasks.addTask(currentTask);
 //            if (currentTask.getTaskName().equals("preannotate")) {
 //                readViewerSettings();
@@ -276,7 +283,7 @@ public class TasksOverviewController {
             Map.Entry<String, Setting> entry = event.getRowValue();
             Setting setting = entry.getValue();
             currentTask.setValue(setting.getSettingName(), setting.getSettingValue(), newDesc, setting.getDoubleClick());
-            mainApp.memochanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName() + "/@memo", newDesc);
+            Main.memochanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName() + "/@memo", newDesc);
             mainApp.tasks.addTask(currentTask);
         });
     }
@@ -301,10 +308,38 @@ public class TasksOverviewController {
         currentTableName = "";
     }
 
-    public boolean showDBTable(String dbName, String tableName, String filter, String colorDifferential) {
+
+    public boolean showAnnoTable(String dbName, String tableName, String filter, String colorDifferential) {
+        ArrayList<String> columnNames = new ArrayList<>();
+        columnNames.add("ID");
+        columnNames.add("SNIPPET");
+        columnNames.add("TYPE");
+        columnNames.add("DOC_NAME");
+        columnNames.add("ANNOTATOR");
+        columnNames.add("DOC_NAME");
+        columnNames.add("COMMENTS");
+        if (doctable)
+            annoTableView.getColumns().clear();
+        doctable = false;
+        return showDBTable(dbName, columnNames, tableName, filter, colorDifferential);
+    }
+
+    public boolean showDocTable(String dbName, String tableName, String filter, String colorDifferential) {
+        ArrayList<String> columnNames = new ArrayList<>();
+        columnNames.add("DOC_ID");
+        columnNames.add("DATASET_ID");
+        columnNames.add("DOC_NAME");
+        if (!doctable)
+            annoTableView.getColumns().clear();
+        doctable = true;
+        return showDBTable(dbName, columnNames, tableName, filter, colorDifferential);
+    }
+
+
+    public boolean showDBTable(String dbName, ArrayList<String> columnNames, String tableName, String filter, String colorDifferential) {
 //        settingPanel.settingPanel.setVisible(false);
         dbPanel.setVisible(true);
-        dbTableView.setVisible(true);
+        annoTableView.setVisible(true);
         if (!currentTableName.equals(tableName) || !currentDBName.equals(dbName) || !currentFilter.equals(filter) || enableRefresh) {
             currentTableName = tableName;
             currentDBName = dbName;
@@ -314,18 +349,15 @@ public class TasksOverviewController {
             return true;
         }
 
-        ArrayList<String> columnNames = new ArrayList<>();
-        DAO dao = DAOFactory.getDAO(new File(dbName));
+
+        DAO dao = new DAO(new File(dbName));
         String condition = filter;
         if (filter.length() > 7) {
             condition = filter.substring(filter.toLowerCase().indexOf(" where ") + 7).trim();
         }
         sqlFilter.setText(condition);
 
-        RecordIterator rs = dao.queryRecords(tableName, filter);
-        columnNames.add("ID");
-        columnNames.add("Snippet");
-        columnNames.addAll(rs.getMetaDataLabels());
+        RecordRowIterator rs = queryRecords(dao, tableName, filter);
 
 
         ObservableList<ObservableList> data = FXCollections.observableArrayList();
@@ -338,34 +370,33 @@ public class TasksOverviewController {
                     }
                 };
 
-        if (dbTableView.getColumns().size() == 0) {
+        if (annoTableView.getColumns().size() == 0) {
             for (int i = 0; i < columnNames.size(); i++) {
                 //We are using non property style for making dynamic table
                 final int j = i;
                 TableColumn col = new TableColumn(columnNames.get(i));
                 if (i == 1) {
-                    col = new TableColumn("snippet");
+                    col = new TableColumn("SNIPPET");
                     col.setMaxWidth(dbPanel.getWidth() * 0.7);
                     col.setPrefWidth(StaticVariables.snippetLength * 5);
                     col.setCellFactory(cellFactory);
                 }
-                System.out.println(col.getText());
                 col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
                     public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
                         Object record = param.getValue().get(j);
                         return new SimpleObjectProperty<Object>(record);
                     }
                 });
-                dbTableView.getColumns().addAll(col);
+                annoTableView.getColumns().addAll(col);
             }
-            dbTableView.setRowFactory(tv -> {
+            annoTableView.setRowFactory(tv -> {
                 TableRow<ObservableList> row = new TableRow<>();
                 row.focusedProperty().addListener(new ChangeListener<Boolean>() {
                     @Override
                     public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                         if (newValue && !row.isEmpty()) {
                             ObservableList clickedRow = row.getItem();
-                            updateHTMLEditor((Record) clickedRow.get(1));
+                            updateHTMLEditor((RecordRow) clickedRow.get(1));
                         }
                     }
                 });
@@ -376,45 +407,64 @@ public class TasksOverviewController {
         while (rs != null && rs.hasNext()) {
             //Iterate Row
             ObservableList<Object> row = FXCollections.observableArrayList();
-            Record record = rs.next();
-            row.add(record.id);
+            RecordRow record = rs.next();
+            row.add(record.getValueByColumnName(columnNames.get(0)));
             row.add(record);
-            for (Map.Entry<String, Object> col : record.getmetaData().entrySet()) {
-                row.add(col.getValue());
+            for (int i = 2; i < columnNames.size(); i++) {
+                row.add(record.getValueByColumnName(columnNames.get(i)));
             }
             data.add(row);
             readed = true;
         }
-        dbTableView.setItems(data);
-        dbTableView.refresh();
+        annoTableView.setItems(data);
+        annoTableView.refresh();
         dao.close();
         return readed;
     }
 
 
-    private void updateHTMLEditor(Record record) {
-        String text = record.getSentence();
+    public RecordRowIterator queryRecords(DAO dao, String tableName, String condition) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT * FROM ");
+        sql.append(tableName);
+        if (condition != null && condition.length() > 0) {
+            sql.append(condition);
+        }
+        if (sql.charAt(sql.length() - 1) != ';')
+            sql.append(";");
+
+        RecordRowIterator recordIterator = dao.queryRecords(sql.toString());
+        return recordIterator;
+    }
+
+
+    private void updateHTMLEditor(RecordRow record) {
+        String text;
+        if (doctable)
+            text = record.getStrByColumnName("TEXT");
+        else
+            text = record.getStrByColumnName("SNIPPET");
         String color = ColorAnnotationCell.pickColor(record, ColorAnnotationCell.colorDifferential);
         if (text == null || text.length() == 0) {
-            text = record.getText();
-        } else {
-            text = ColorAnnotationCell.generateHTML(text, record.getBegin(), record.getEnd(), color);
+            text = record.getStrByColumnName("TEXT");
+        } else if (!doctable) {
+            text = ColorAnnotationCell.generateHTML(text, (int) record.getValueByColumnName("BEGIN"), (int) record.getValueByColumnName("END"), color);
         }
         text = text.replaceAll("\\n", "<br>");
         htmlEditor.setHtmlText(text);
-        if (record.features != null && record.features.size() > 0) {
+        if (record.getStrByColumnName("FEATURES") != null && record.getStrByColumnName("FEATURES").length() > 0) {
             annoDetails.setBottom(featureTable);
-            updateFeatureTable(record);
+            updateFeatureTable(record.getStrByColumnName("FEATURES"));
         } else {
             annoDetails.setBottom(null);
         }
     }
 
-    private void updateFeatureTable(Record record) {
-        ObservableList<Map.Entry<String, String>> data = FXCollections.observableArrayList();
-        for (Map.Entry<String, String> featureNameValue : record.getFeatures().entrySet()) {
+    private void updateFeatureTable(String features) {
+        ObservableList<String[]> data = FXCollections.observableArrayList();
+        for (String featureNameValue : features.split("\\n")) {
             ObservableList<Object> row = FXCollections.observableArrayList();
-            data.add(featureNameValue);
+            data.add(featureNameValue.split(":"));
         }
         featureTable.setItems(data);
         featureTable.refresh();

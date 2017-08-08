@@ -36,9 +36,9 @@
             <version>2.4</version>
         </dependency>
         <dependency>
-            <groupId>edu.utah.bmi</groupId>
-            <artifactId>preannotator</artifactId>
-            <version>1.0</version>
+            <groupId>edu.utah.bmi.nlp</groupId>
+            <artifactId>easycie</artifactId>
+            <version>2.0</version>
         </dependency>
         <dependency>
             <groupId>edu.utah.blulab</groupId>

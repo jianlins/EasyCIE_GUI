@@ -1,44 +1,67 @@
 package edu.utah.bmi.simple.gui.task;
 
-import edu.utah.bmi.fastcner.FastCNER;
-import edu.utah.bmi.fastcner.demo.FastCNER_AE_General;
-import edu.utah.bmi.fastcontext.uima.FastContext_General_AE;
-import edu.utah.bmi.fastner.FastNER;
-import edu.utah.bmi.fastner.demo.FastNER_AE_General;
-import edu.utah.bmi.rush.uima.RuSHTestAE_General;
-import edu.utah.bmi.rush.uima.RuSH_AE;
+
+import edu.utah.bmi.nlp.ae.DocInferenceAnnotator;
+import edu.utah.bmi.nlp.ae.FeatureInferenceAnnotator;
+import edu.utah.bmi.nlp.core.DeterminantValueSet;
+import edu.utah.bmi.nlp.core.GUITask;
+import edu.utah.bmi.nlp.core.TypeDefinition;
+import edu.utah.bmi.nlp.easycie.CoordinateNERResults_AE;
+import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
+import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
+import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
+import edu.utah.bmi.nlp.runner.CommonFunc;
+import edu.utah.bmi.nlp.runner.RunPipe;
+import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
+import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.type.system.SentenceOdd;
+import edu.utah.bmi.nlp.uima.*;
+import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
+import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
+import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
+import edu.utah.bmi.nlp.writer.EhostWriter_AE;
+import edu.utah.bmi.nlp.writer.SQLWriterCasConsumer;
+import edu.utah.bmi.nlp.writer.XMIWritter_AE;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
-import edu.utah.bmi.uima.*;
-import edu.utah.bmi.uima.ae.DocInferenceAnnotator;
-import edu.utah.bmi.uima.ae.FeatureInferenceAnnotator;
-import edu.utah.bmi.uima.loggers.ConsoleLogger;
-import edu.utah.bmi.uima.writer.XMIWritter_AE;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.TreeSet;
+import java.util.Collection;
 
+import static edu.utah.bmi.nlp.runner.CommonFunc.addOption;
+import static edu.utah.bmi.nlp.runner.CommonFunc.getCmdValue;
 
 /**
- * Created by u0876964 on 9/19/16.
+ * Created by Jianlin Shi on 9/19/16.
  */
-public class RunEasyCIE extends AdaptableUIMACPETaskRunner {
-    protected String inputDB, inputTable, outputDB, outputTable, ruleFile, cRuleFile, ehostDir, bratDir, xmiDir, annotator;
-    protected String featureInfEvidenceConcept, featureInfRule, docInfRule, docInfDefault;
-    protected boolean overwrite = false;
-    protected String[] filters;
+public class RunEasyCIE extends GUITask {
     public static boolean debug = false;
+    protected String readDBConfigFile, writeConfigFileName, inputTableName, outputTableName,
+            ehostDir, bratDir, xmiDir, annotator, datasetId;
     public boolean report = false, fastNerCaseSensitive = true;
-    private String defaultDomain = "edu.utah.bmi.type.system.";
+    protected String rushRule = "", fastNERRule = "", fastCNERRule = "", contextRule = "",
+            featureInfRule = "", docInfRule = "";
+    public AdaptableUIMACPETaskRunner runner;
+    protected DAO rdao, wdao;
+    private boolean ehost = false, brat = false, xmi = false;
+    private String exporttypes;
+    private String customTypeDescriptor;
+
+    public static void main(String[] args) {
+        RunPipe runPipe = new RunPipe(args);
+        runPipe.run();
+    }
+
+    public RunEasyCIE() {
+
+    }
 
 
-    /**
-     * By default, it will write to database rather than export to other format xmls.
-     *
-     * @param tasks
-     */
     public RunEasyCIE(TasksFX tasks) {
         initiate(tasks, "db");
     }
@@ -51,210 +74,246 @@ public class RunEasyCIE extends AdaptableUIMACPETaskRunner {
 
     private void initiate(TasksFX tasks, String option) {
         updateMessage("Initiate configurations..");
-
-
         TaskFX config = tasks.getTask(ConfigKeys.maintask);
-
         annotator = config.getValue(ConfigKeys.annotator);
-        ruleFile = config.getValue(ConfigKeys.ruleFile);
-        cRuleFile = config.getValue(ConfigKeys.cRuleFile);
+        fastNERRule = config.getValue(ConfigKeys.ruleFile);
+        fastCNERRule = config.getValue(ConfigKeys.cRuleFile);
+        contextRule = config.getValue(ConfigKeys.contextRule);
+        featureInfRule = config.getValue(ConfigKeys.featureInfRule);
+        docInfRule = config.getValue(ConfigKeys.docInfRule);
+
         String reportString = config.getValue(ConfigKeys.reportPreannotating);
         report = reportString.length() > 0 && (reportString.charAt(0) == 't' || reportString.charAt(0) == 'T' || reportString.charAt(0) == '1');
         reportString = config.getValue(ConfigKeys.fastNerCaseSensitive);
         fastNerCaseSensitive = reportString.length() > 0 && (reportString.charAt(0) == 't' || reportString.charAt(0) == 'T' || reportString.charAt(0) == '1');
 
-        featureInfEvidenceConcept = config.getValue(ConfigKeys.featureInfEvidenceConcept);
-        featureInfRule = config.getValue(ConfigKeys.featureInfRule);
-        docInfRule = config.getValue(ConfigKeys.docInfRule);
-        docInfDefault = config.getValue(ConfigKeys.docInfDefault);
 
         config = tasks.getTask("settings");
-        inputDB = config.getValue(ConfigKeys.corpusDBFile);
-        inputTable = config.getValue(ConfigKeys.corpusDBTable);
-        outputDB = config.getValue(ConfigKeys.outputDBFile);
-        outputTable = config.getValue(ConfigKeys.outputDBTable);
+        readDBConfigFile = config.getValue(ConfigKeys.readDBConfigFile);
+        inputTableName = config.getValue(ConfigKeys.inputTableName);
+        datasetId = config.getValue(ConfigKeys.datasetId);
+        writeConfigFileName = config.getValue(ConfigKeys.writeConfigFileName);
+        outputTableName = config.getValue(ConfigKeys.outputTableName);
+        rushRule = config.getValue(ConfigKeys.rushRule);
+
+
         TaskFX exportConfig = tasks.getTask("export");
         ehostDir = exportConfig.getValue(ConfigKeys.outputEhostDir);
         bratDir = exportConfig.getValue(ConfigKeys.outputBratDir);
         xmiDir = exportConfig.getValue(ConfigKeys.outputXMIDir);
+        exporttypes = exportConfig.getValue(ConfigKeys.exportTypes);
 
-
-        String typeDescriptor = "desc/type/customized";
-        if (!new File(typeDescriptor + ".xml").exists()) {
-            typeDescriptor = "desc/type/All_Types";
-        }
-        updateMessage("Initiate preannotator...");
-        if (report)
-            setLogger(new ConsoleLogger());
-        dynamicTypeGenerator = new DynamicTypeGenerator(typeDescriptor);
-        initTypes();
-
-        File input = new File(inputDB);
-        if (!input.exists()) {
-            System.out.println("File " + input.getAbsolutePath() + " doesn't exist. ");
-        }
-
-        setCollectionReader(SQLTextReader.class, new Object[]{"SQLFile", inputDB, "TableName", inputTable});
-        addAnalysisEngines();
-        addWriter(option);
-    }
-
-
-    /**
-     * Read through all the annotations, iterate all the types and attributes,
-     * check to see if the type descriptor has included all of them, if not create
-     * the missed types and attributes
-     */
-    protected void initTypes() {
-        FastCNER fastCNER = new FastCNER(cRuleFile);
-        TreeSet<String> conceptNames = fastCNER.getNENameList();
-        FastNER fastNER = new FastNER(ruleFile, fastNerCaseSensitive);
-        conceptNames.addAll(fastNER.getNENameList());
-
-        getNewConceptFromFeatureInf(featureInfRule,conceptNames);
-        getNewConceptFromDocInf(docInfRule,conceptNames);
-
-        TreeSet<String> importedTypes = getImportedTypeNames();
-        conceptNames.removeAll(importedTypes);
-
-        conceptNames.forEach(e -> {
-            if (e.indexOf(".") == -1) {
-                e = "edu.utah.bmi.type.system." + e;
-            }
-            addConceptType(e);
-        });
-
-
-        if (conceptNames.size() > 0)
-            reInitTypeSystem("desc/type/customized.xml");
-    }
-
-    public void addWriter(String option) {
         switch (option) {
             case "ehost":
-                addAnalysisEngine(EhostWriter_AE.class, new Object[]{EhostWriter_AE.PARAM_OUTPUTDIR, mkDir(ehostDir), EhostWriter_AE.PARAM_ANNOTATOR, annotator});
+                ehost = true;
                 break;
             case "brat":
-                addAnalysisEngine(BratConceptAnnotationWritter_AE.class, new Object[]{"OutputDirectory", mkDir(bratDir)});
+                brat = true;
                 break;
             case "xmi":
-                addAnalysisEngine(XMIWritter_AE.class, new Object[]{"OutputDirectory", mkDir(xmiDir), "Annotator", annotator});
+                xmi = true;
                 break;
             default:
-                File outputDBFile = new File(outputDB);
-                if (outputDB.toLowerCase().endsWith(".sqlite")) {
-                    mkDir(outputDBFile.getParentFile());
-                }
-                addAnalysisEngine(SQLWriterCasConsumer.class, new Object[]{SQLWriterCasConsumer.PARAM_SQLFILE, outputDBFile.getAbsolutePath(), SQLWriterCasConsumer.PARAM_TABLENAME, outputTable,
-                        SQLWriterCasConsumer.PARAM_ANNOTATOR, annotator,
-                        SQLWriterCasConsumer.PARAM_OVERWRITETABLE, false, SQLWriterCasConsumer.PARAM_BATCHSIZE, 150});
-                break;
+                ehost = false;
+                brat = false;
+                xmi = false;
         }
+
+        initPipe(readDBConfigFile, datasetId, annotator);
+
+    }
+
+    @Override
+    protected Object call() throws Exception {
+        if (report)
+            runner.setLogger(new ConsoleLogger());
+        runner.setTask(this);
+        runner.run();
+        return null;
     }
 
 
-    protected String mkDir(File dir) {
-        if (!dir.exists()) {
-            try {
-                FileUtils.forceMkdir(dir);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    protected void initPipe(String readDBConfigFile, String datasetId, String annotator) {
+        rdao = new DAO(new File(readDBConfigFile), true, false);
+        if (writeConfigFileName.equals(readDBConfigFile)) {
+            wdao = rdao;
+        } else {
+            File writeFile = new File(writeConfigFileName);
+            if (writeFile.exists() && writeFile.isFile() &&
+                    (writeConfigFileName.toLowerCase().endsWith(".xml")) ||
+                    (writeConfigFileName.toLowerCase().endsWith(".json")))
+                wdao = new DAO(new File(writeConfigFileName));
         }
-        return dir.getAbsolutePath();
+        UIMALogger logger = addLogger(wdao, annotator);
+        logger.logStartTime();
+        String runId = logger.getRunid() + "";
+
+
+        String defaultTypeDescriptor = "desc/type/All_Types";
+//        JXTransformer jxTransformer;
+        customTypeDescriptor = "desc/type/pipeline_" + annotator;
+
+        if (new File(customTypeDescriptor + ".xml").exists())
+            runner = new AdaptableUIMACPETaskRunner(customTypeDescriptor, "./classes/");
+        else
+            runner = new AdaptableUIMACPETaskRunner(defaultTypeDescriptor, "./classes/");
+        runner.setLogger(logger);
+        initTypes(customTypeDescriptor);
+        addReader(readDBConfigFile, datasetId);
+        addAnalysisEngines(runner);
+//        SQLWriterCasConsumer.debug=true;
+
+        addWriter(runId, annotator);
     }
 
-    protected String mkDir(String dirString) {
-        File dir = new File(dirString);
-        return mkDir(dir);
-    }
-
-    private void addAnalysisEngines() {
+    protected UIMALogger addLogger(DAO dao, String annotator) {
         if (debug)
-            System.out.println("add engine FastCNER_AE_Diff_Concepts");
-        addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_FILE, "conf/rush.csv",
-                RuSH_AE.PARAM_SENTENCE_TYPE_NAME, "edu.utah.bmi.type.system.Sentence",
-                RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, "edu.utah.bmi.type.system.SentenceOdd",
-                RuSH_AE.PARAM_TOKEN_TYPE_NAME, "edu.utah.bmi.type.system.Token",
-                RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true, RuSH_AE.PARAM_FIX_GAPS, true});
+            return new ConsoleLogger();
+        else
+            return new NLPDBLogger(dao, "LOG", "RUN_ID", annotator);
+    }
+
+    /**
+     * Read through all the annotations, iterate all the types and features,
+     * check to see if the type descriptor has included all of them, if not create
+     * the missed types and features
+     */
+    protected void initTypes(String customTypeDescriptor) {
+
+
+        if (fastNERRule.length() > 0)
+            runner.addConceptTypes(FastNER_AE_General.getTypeDefinitions(fastNERRule, false).values());
+
+        if (fastCNERRule.length() > 0)
+            runner.addConceptTypes(FastCNER_AE_General.getTypeDefinitions(fastCNERRule, true).values());
+
+        if (contextRule.length() > 0)
+            runner.addConceptTypes(FastContext_General_AE.getTypeDefinitions(contextRule, false).values());
+
+        if (featureInfRule.length() > 0)
+            runner.addConceptTypes(FeatureInferenceAnnotator.getTypeDefinitions(featureInfRule).values());
+        if (docInfRule.length() > 0)
+            runner.addConceptTypes(DocInferenceAnnotator.getTypeDefinitions(docInfRule).values());
+
+        runner.reInitTypeSystem(customTypeDescriptor);
+    }
+
+    public void initTypes(Collection<TypeDefinition> typeDefinitions) {
+        runner.addConceptTypes(typeDefinitions);
+        runner.reInitTypeSystem(customTypeDescriptor);
+    }
+
+    public void setReader(Class readerClass, Object[] configurations) {
+        runner.setCollectionReader(readerClass, configurations);
+    }
+
+    public void addReader(String readDBConfigFile, String datasetId) {
+        SQLTextReader.dao = rdao;
+        runner.setCollectionReader(SQLTextReader.class, new Object[]{SQLTextReader.PARAM_DB_CONFIG_FILE, readDBConfigFile,
+                SQLTextReader.PARAM_DATASET_ID, datasetId,
+                SQLTextReader.PARAM_DOC_TABLE_NAME, inputTableName,
+                SQLTextReader.PARAM_QUERY_SQL_NAME, "masterInputQuery",
+                SQLTextReader.PARAM_COUNT_SQL_NAME, "masterCountQuery",
+                SQLTextReader.PARAM_DOC_COLUMN_NAME, "TEXT"});
+    }
+
+
+    public void addWriter(String runId, String annotator) {
+        File output = new File(writeConfigFileName);
+        try {
+            if (!output.exists()) {
+                FileUtils.forceMkdir(output);
+            } else if (output.isFile()) {
+                output = new File("data/output");
+                if (!output.exists())
+                    FileUtils.forceMkdir(output.getParentFile());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (ehost)
+            runner.addAnalysisEngine(EhostWriter_AE.class,
+                    new Object[]{EhostWriter_AE.PARAM_OUTPUTDIR, new File(output, "ehost").getAbsolutePath(),
+                            EhostWriter_AE.PARAM_ANNOTATOR, annotator,
+                            EhostWriter_AE.PARAM_UIMATYPES, exporttypes});
+        if (brat)
+            runner.addAnalysisEngine(BratWritter_AE.class,
+                    new Object[]{BratWritter_AE.PARAM_OUTPUTDIR, new File(output, "brat").getAbsolutePath(),
+                            BratWritter_AE.PARAM_ANNOTATOR, annotator,
+                            BratWritter_AE.PARAM_UIMATYPES, exporttypes});
+        if (xmi)
+            runner.addAnalysisEngine(XMIWritter_AE.class,
+                    new Object[]{XMIWritter_AE.PARAM_OUTPUTDIR, new File(output, "xmi").getAbsolutePath(),
+                            "Annotator", annotator,
+                            XMIWritter_AE.PARAM_UIMATYPES, exporttypes});
+
+        if (!(ehost || brat || xmi)) {
+            SQLWriterCasConsumer.dao = wdao;
+            if (!wdao.checkExits("checkAnnotatorExist", annotator)) {
+                wdao.insertRecord("ANNOTATORS", new RecordRow(annotator));
+            }
+            runner.addAnalysisEngine(SQLWriterCasConsumer.class, new Object[]{
+                    SQLWriterCasConsumer.PARAM_SQLFILE, writeConfigFileName,
+                    SQLWriterCasConsumer.PARAM_TABLENAME, outputTableName,
+                    SQLWriterCasConsumer.PARAM_ANNOTATOR, annotator,
+                    SQLWriterCasConsumer.PARAM_VERSION, runId,
+                    SQLWriterCasConsumer.PARAM_OVERWRITETABLE, false, SQLWriterCasConsumer.PARAM_BATCHSIZE, 150});
+        }
+
+    }
+
+    private void addAnalysisEngines(AdaptableUIMACPETaskRunner runner) {
+        if (rushRule.length() > 0) {
+            if (debug)
+                System.out.println("add engine RuSH_AE");
+            if (exporttypes == null || exporttypes.indexOf("Sentence") == -1)
+                runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
+                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true});
+            else
+                runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
+                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
+                        RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
+//			if (debug)
+//				runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+//						DeterminantValueSet.defaultNameSpace + "Sentence"});
+        }
+
+        if (fastCNERRule.length() > 0) {
+            if (debug)
+                System.out.println("add engine FastCNER_AE_General");
+            runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, fastCNERRule,
+                    FastCNER_AE_General.PARAM_MARK_PSEUDO, false,
+            });
+            if (debug) {
+                System.out.println("add engine FastNER_AE_Diff_SP_Concepts");
+                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+                        DeterminantValueSet.defaultNameSpace + "Concept"});
+            }
+        }
+
+        if (fastNERRule.length() > 0) {
+            if (debug)
+                System.out.println("add engine FastNER_AE_General");
+            runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_FILE_OR_STR, fastNERRule,
+                    FastNER_AE_General.PARAM_CASE_SENSITIVE, false,
+                    FastNER_AE_General.PARAM_MARK_PSEUDO, true});
+        }
+
         if (debug)
-            addAnalysisEngine(RuSHTestAE_General.class, new Object[]{RuSHTestAE_General.PARAM_PRINT, true});
+            System.out.println("add engine CoordinateNERResults_AE");
+        runner.addAnalysisEngine(CoordinateNERResults_AE.class, null);
 
-        Object[] configurationData = new Object[]{FastNER_AE_General.PARAM_RULE_FILE_NAME, cRuleFile,
-                FastNER_AE_General.PARAM_SENTENCE_TYPE_NAME, "edu.utah.bmi.type.system.Sentence",
-                FastNER_AE_General.PARAM_TOKEN_TYPE_NAME, "edu.utah.bmi.type.system.Token",
-                FastNER_AE_General.PARAM_MARK_PSEUDO, true,
-                FastNER_AE_General.PARAM_LOG_RULE_INFO, true, FastNER_AE_General.PARAM_CASE_SENSITIVE, fastNerCaseSensitive};
 
-        addAnalysisEngine(FastCNER_AE_General.class, configurationData);
-        if (debug) {
-            System.out.println("add engine FastNER_AE_Diff_SP_Concepts");
-//            runner.addAnalysisEngine(RuSHTestAE_General.class, new Object[]{RuSHTestAE_General.PARAM_PRINT, true});
+//        System.out.println("Read Context rules from " + contextRule);
+        if (contextRule.length() > 0) {
+            if (debug)
+                System.out.println("add engine FastContext_General_AE ");
+            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule});
         }
-        configurationData[1] = ruleFile;
-        addAnalysisEngine(FastNER_AE_General.class, configurationData);
-        if (debug) {
-            System.out.println("add engine FastContext_General_AE");
-            addAnalysisEngine(RuSHTestAE_General.class, new Object[]{RuSHTestAE_General.PARAM_PRINT, true});
-        }
-        String contextRule = "conf/context.csv";
-        if (!new File(contextRule).exists())
-            contextRule = "conf/context.owl";
-        System.out.println("Read Context rules from " + contextRule);
-        edu.utah.bmi.type.system.Concept c;
-        addAnalysisEngine(FastContext_General_AE.class, new Object[]{"RuleFile", contextRule,
-                "Windowsize", 8,
-                "SentenceTypeName", "edu.utah.bmi.type.system.Sentence",
-                "TokenTypeName", "edu.utah.bmi.type.system.Token",
-                "ConceptTypeName", "edu.utah.bmi.type.system.Concept",
-                "ContextTypeName", "edu.utah.bmi.type.system.Concept",
-                "NegationFeatureName", "Negation",
-                "TemporalityFeatureName", "Temporality",
-                "ExperiencerFeatureName", "Experiencer",
-                "Debug", false, "CaseInsensitive", true});
-        if (debug)
-            System.out.println("add engine CheckModifiers_AE");
-        addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_EVIDENCE_CONCEPT, featureInfEvidenceConcept,
-                FeatureInferenceAnnotator.PARAM_OVERWRITE_CONCEPT, true, FeatureInferenceAnnotator.PARAM_REMOVE_OVERLAP, true,
-                FeatureInferenceAnnotator.PARAM_INFERENCES, featureInfRule});
-        addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_CONCEPT_INFERENCES, docInfRule,
-                DocInferenceAnnotator.PARAM_DEFAULT_DOC_TYPE, docInfDefault});
+
+        if (featureInfRule.length() > 0)
+            runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_RULE_FILE_OR_STR, featureInfRule});
+        if (docInfRule.length() > 0)
+            runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_RULE_FILE_OR_STR, docInfRule});
     }
-
-
-    protected void getNewConceptFromFeatureInf(String featureInfRules, TreeSet<String> conceptNames) {
-//        NegatedConcept:Negation,negated|PastConcept:Negation,affirmed&amp;Temporality,historical&amp;Experiencer,patient|NonPatientConcept:Negation,affirmed&amp;Experiencer,nonpatient
-        for (String inferenceRule : featureInfRules.split("\\|")) {
-            String[] rule = inferenceRule.split(":");
-            if (rule.length < 2) {
-                System.err.println("Invalid rule: " + inferenceRule);
-            }
-            conceptNames.add(checkTypeDomain(rule[0]));
-        }
-    }
-
-    protected void getNewConceptFromDocInf(String docInfRules, TreeSet<String> conceptNames) {
-//        Pres_DOC:Concept1, Concept2|PastPres_DOC:PastConcept
-        for (String inferenceRule : docInfRules.split("\\|")) {
-            String[] rule = inferenceRule.split(":");
-            if (rule.length < 2) {
-                System.err.println("Invalid rule: " + inferenceRule);
-            }
-            conceptNames.add(checkTypeDomain(rule[0]));
-            for (String evidenceConcept : rule[1].split(",")) {
-                conceptNames.add(checkTypeDomain(evidenceConcept));
-            }
-        }
-        if(docInfDefault.trim().length()>0){
-            conceptNames.add(checkTypeDomain(docInfDefault));
-        }
-    }
-
-    private String checkTypeDomain(String conceptName) {
-        if (conceptName.indexOf(".") == -1) {
-            conceptName = defaultDomain + conceptName.trim();
-        }
-        return conceptName;
-    }
-
 }

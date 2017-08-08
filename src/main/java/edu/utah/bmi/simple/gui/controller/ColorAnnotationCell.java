@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.controller;
 
+import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.simple.gui.entry.StaticVariables;
-import edu.utah.bmi.sql.Record;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -16,7 +16,7 @@ import static edu.utah.bmi.simple.gui.entry.StaticVariables.snippetLength;
 
 /**
  * @author Jianlin Shi
- *         Created on 2/13/17.
+ * Created on 2/13/17.
  */
 public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
     HBox hbox;
@@ -32,31 +32,34 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         super.updateItem(item, empty);
         if (!empty) {
             hbox = new HBox();
-            addText((Record) item);
+            addText((RecordRow) item);
         }
     }
 
-    private void addText(Record record) {
-        int sentenceLength = record.sentence.length();
-        String pre, marker, post;
-        if (sentenceLength > 0) {
-            maxTxtWindow = (snippetLength - record.getText().length()) / 2;
-            hbox.setPrefWidth(snippetLength + 20);
-            int postCut = cutTail(record);
-            int preCut = cutHeader(record, postCut);
-            String text = record.getSentence();
-            if (preCut > 0)
-                pre = "..." + text.substring(preCut + 3, record.getBegin());
-            else
-                pre = text.substring(preCut, record.getBegin());
+    private void addText(RecordRow RecordRow) {
+        String sentence = (String) RecordRow.getValueByColumnName("SNIPPET");
+        String text = (String) RecordRow.getValueByColumnName("TEXT");
 
-            marker = text.substring(record.getBegin(), record.getEnd());
-            if (postCut < sentenceLength)
-                post = text.substring(record.getEnd(), postCut - 3) + "...";
+        String pre, marker, post;
+        if (sentence!=null && sentence.length() > 0) {
+            int sentenceLength = sentence.length();
+            int begin = Integer.parseInt(RecordRow.getValueByColumnName("BEGIN") + "");
+            int end = Integer.parseInt(RecordRow.getValueByColumnName("END") + "");
+            maxTxtWindow = (snippetLength - text.length()) / 2;
+            hbox.setPrefWidth(snippetLength + 20);
+            int postCut = cutTail(sentence, begin, end);
+            int preCut = cutHeader(postCut, begin, end);
+            if (preCut > 0)
+                pre = "..." + sentence.substring(preCut + 3, begin);
             else
-                post = text.substring(record.getEnd(), postCut);
+                pre = sentence.substring(preCut, begin);
+
+            marker = sentence.substring(begin, end);
+            if (postCut < sentenceLength)
+                post = sentence.substring(end, postCut - 3) + "...";
+            else
+                post = sentence.substring(end, postCut);
         } else {
-            String text = record.getText();
             if (text.length() > snippetLength) {
                 text = text.substring(0, snippetLength) + "...";
             }
@@ -64,22 +67,22 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
             marker = "";
             post = "";
         }
-        String color = pickColor(record, colorDifferential);
+        String color = pickColor(RecordRow, colorDifferential);
         pre = pre.replaceAll("[\\s|\\n]", " ");
         marker = marker.replaceAll("[\\s|\\n]", " ");
         post = post.replaceAll("[\\s|\\n]", " ");
         renderHighlighter(pre, marker, post, color);
     }
 
-    public static String pickColor(Record record, String differential) {
+    public static String pickColor(RecordRow RecordRow, String differential) {
         String color;
         String key = "";
         switch (differential) {
             case "output":
-                key = record.type;
+                key = (String) RecordRow.getValueByColumnName("TYPE");
                 break;
             case "diff":
-                key = record.annotator + "|" + record.note;
+                key = RecordRow.getValueByColumnName("ANNOTATOR") + "|" + RecordRow.getValueByColumnName("COMMENTS");
                 break;
         }
         color = StaticVariables.pickColor(key);
@@ -107,30 +110,28 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
     }
 
 
-    private int cutTail(Record record) {
-        String snippet = record.getSentence();
-        int markerEnd = (record.getEnd());
-        int postLength = snippet.length() - markerEnd;
+    private int cutTail(String snippet, int begin, int end) {
+        int postLength = snippet.length() - end;
         if (snippet.length() < StaticVariables.snippetLength) {
             return snippet.length();
         }
         int minCutLength = maxTxtWindow;
-        int preTxtLength = record.getBegin();
+        int preTxtLength = begin;
         if (preTxtLength < maxTxtWindow) {
             minCutLength += maxTxtWindow - preTxtLength;
         }
         if (postLength > minCutLength) {
             postLength = minCutLength;
         }
-        return markerEnd + postLength;
+        return end + postLength;
     }
 
-    private int cutHeader(Record record, int postCut) {
+    private int cutHeader(int postCut, int begin, int end) {
         if (postCut < StaticVariables.snippetLength) {
             return 0;
         }
-        int preLength = record.getBegin();
-        int markerEnd = (record.getEnd());
+        int preLength = begin;
+        int markerEnd = end;
         int postLength = postCut - markerEnd;
         int minCutLength = maxTxtWindow;
         if (postLength < maxTxtWindow) {

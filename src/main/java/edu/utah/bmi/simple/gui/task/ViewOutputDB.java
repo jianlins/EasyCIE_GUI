@@ -29,8 +29,8 @@ public class ViewOutputDB extends javafx.concurrent.Task {
     protected void initiate(TasksFX tasks, String... paras) {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
-        outputDB = config.getValue(ConfigKeys.outputDBFile);
-        outputTable = config.getValue(ConfigKeys.outputDBTable);
+        outputDB = config.getValue(ConfigKeys.writeConfigFileName);
+        outputTable = config.getValue(ConfigKeys.outputTableName);
         config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
         if (paras != null)
@@ -63,9 +63,9 @@ public class ViewOutputDB extends javafx.concurrent.Task {
                 // Update UI here.
                 boolean res = false;
                 if (annotator.trim().length() > 0)
-                    res = TasksOverviewController.currentTasksOverviewController.showDBTable(outputDB, outputTable, " WHERE annotator='" + annotator + "'", "output");
+                    res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, outputTable, " WHERE annotator='" + annotator + "'", "output");
                 else
-                    res = TasksOverviewController.currentTasksOverviewController.showDBTable(outputDB, outputTable, "", "output");
+                    res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, outputTable, "", "output");
 
                 if (res)
                     updateMessage("data loaded");

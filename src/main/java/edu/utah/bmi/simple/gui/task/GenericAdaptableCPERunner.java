@@ -1,11 +1,11 @@
 package edu.utah.bmi.simple.gui.task;
 
+import edu.utah.bmi.nlp.uima.AdaptableUIMACPEDescriptorTaskRunner;
+import edu.utah.bmi.nlp.uima.DynamicTypeGenerator;
+import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
 import edu.utah.bmi.simple.gui.entry.SettingAb;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
-import edu.utah.bmi.uima.AdaptableUIMACPEDescriptorTaskRunner;
-import edu.utah.bmi.uima.DynamicTypeGenerator;
-import edu.utah.bmi.uima.loggers.ConsoleLogger;
 import org.apache.uima.UIMAFramework;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReaderDescription;

@@ -1,12 +1,12 @@
 package edu.utah.bmi;
 
-import edu.utah.bmi.fastcner.demo.FastCNER_AE_General;
-import edu.utah.bmi.fastcontext.uima.FastContext_General_AE;
-import edu.utah.bmi.fastner.demo.FastNER_AE_General;
-import edu.utah.bmi.rush.uima.RuSH_AE;
-import edu.utah.bmi.type.system.ConceptBASE;
 
-import edu.utah.bmi.uima.DynamicTypeGenerator;
+import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
+import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
+import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
+import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
+import edu.utah.bmi.nlp.type.system.ConceptBASE;
+import edu.utah.bmi.nlp.uima.DynamicTypeGenerator;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CASException;
@@ -75,13 +75,13 @@ public class JCasTest {
                 RuSH_AE.class,
                 RuSH_AE.PARAM_SENTENCE_TYPE_NAME, "edu.utah.bmi.type.system.Sentence",
                 RuSH_AE.PARAM_TOKEN_TYPE_NAME, "edu.utah.bmi.type.system.Token",
-                RuSH_AE.PARAM_RULE_FILE, "conf/rush.csv",
+                RuSH_AE.PARAM_RULE_STR, "conf/rush.csv",
                 RuSH_AE.PARAM_INCLUDE_PUNCTUATION,true,
                 RuSH_AE.PARAM_FIX_GAPS, true);
         FastCNERae = AnalysisEngineFactory.createEngine(
-                FastCNER_AE_General.class, FastCNER_AE_General.PARAM_RULE_FILE_NAME, "conf/fever_crule.csv", FastCNER_AE_General.PARAM_MARK_PSEUDO, true);
+                FastCNER_AE_General.class, FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, "conf/fever_crule.csv", FastCNER_AE_General.PARAM_MARK_PSEUDO, true);
         FastNERae = AnalysisEngineFactory.createEngine(
-                FastNER_AE_General.class, FastNER_AE_General.PARAM_RULE_FILE_NAME, "conf/fever_rule.csv", FastNER_AE_General.PARAM_MARK_PSEUDO, true);
+                FastNER_AE_General.class, FastNER_AE_General.PARAM_RULE_FILE_OR_STR, "conf/fever_rule.csv", FastNER_AE_General.PARAM_MARK_PSEUDO, true);
         FastContext_Generalae = AnalysisEngineFactory.createEngine(
                 FastContext_General_AE.class, "RuleFile", "conf/context.csv",
                 "Windowsize", 8,

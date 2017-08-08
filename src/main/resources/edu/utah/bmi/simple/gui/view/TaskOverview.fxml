@@ -69,7 +69,7 @@
                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <BorderPane>
                         <center>
-                            <TableView fx:id="dbTableView" editable="false">
+                            <TableView fx:id="annoTableView" editable="false">
                             </TableView>
                         </center>
                         <top>
