@@ -4,12 +4,10 @@ import com.sun.javafx.binding.ExpressionHelper;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.StringPropertyBase;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 import java.lang.ref.WeakReference;
-import java.util.Set;
 
 /**
  * @author Jianlin Shi
