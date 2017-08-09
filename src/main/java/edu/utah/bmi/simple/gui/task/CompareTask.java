@@ -134,6 +134,13 @@ public class CompareTask extends javafx.concurrent.Task {
         while (recordIterator.hasNext()) {
             RecordRow record = recordIterator.next();
             String type = record.getValueByColumnName("TYPE") + "";
+
+            int begin = (int) record.getValueByColumnName("BEGIN") + (int) record.getValueByColumnName("SNIPPET_BEGIN");
+            record.addCell("ABEGIN", begin);
+            int end = (int) record.getValueByColumnName("END") + (int) record.getValueByColumnName("SNIPPET_BEGIN");
+            record.addCell("AEND", end);
+
+
             types.add(type);
             if (!annotations.containsKey(type)) {
                 annotations.put(type, new HashMap<>());
