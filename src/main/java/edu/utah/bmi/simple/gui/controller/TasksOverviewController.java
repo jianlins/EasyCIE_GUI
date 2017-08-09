@@ -148,7 +148,10 @@ public class TasksOverviewController {
         });
 
         if (mainApp.tasks.getTasksList().size() > 0) {
-            showTask(mainApp.tasks.getTasksList().get(0).getValue());
+            showTask(mainApp.getCurrentTask());
+            tasklist.requestFocus();
+            tasklist.getSelectionModel().select(mainApp.getCurrentTaskId());
+            tasklist.getFocusModel().focus(mainApp.getCurrentTaskId());
         }
         currentTasksOverviewController = this;
 
@@ -244,7 +247,6 @@ public class TasksOverviewController {
                 File file = new File(setting.getSettingValue());
                 if (file.exists()) {
                     Thread th = new Thread(new Runnable() {
-                        @Override
                         public void run() {
                             try {
                                 Desktop.getDesktop().open(file);
@@ -427,7 +429,7 @@ public class TasksOverviewController {
 
     public RecordRowIterator queryRecords(DAO dao, String tableName, String condition) {
         if (!dao.checkExists(tableName)) {
-            System.out.println(tableName+" doesn't exist");
+            System.out.println(tableName + " doesn't exist");
             return null;
         }
         StringBuilder sql = new StringBuilder();
@@ -477,9 +479,22 @@ public class TasksOverviewController {
     }
 
 
+    /**
+     * Is called by the main application to give a reference back to itself.
+     *
+     * @param mainApp
+     */
+    public void setMainApp(Main mainApp) {
+        this.mainApp = mainApp;
+        // Add observable list data to the table
+        initialize(mainApp.getTasks());
+        this.bottomViewController = mainApp.bottomViewController;
+    }
+
     private void showTask(TaskFX currentTask) {
         dbPanel.setVisible(false);
         this.currentTask = currentTask;
+        mainApp.setCurrentTaskName(currentTask.getTaskName());
 //        settingPanel.settingPanel.setVisible(true);
         settingTable.setItems(currentTask.getSettings());
 //        settingtable.setRowFactory(tv -> {
@@ -521,18 +536,6 @@ public class TasksOverviewController {
             executePanel.getChildren().add(button);
         }
 
-    }
-
-    /**
-     * Is called by the main application to give a reference back to itself.
-     *
-     * @param mainApp
-     */
-    public void setMainApp(Main mainApp) {
-        this.mainApp = mainApp;
-        // Add observable list data to the table
-        initialize(mainApp.getTasks());
-        this.bottomViewController = mainApp.bottomViewController;
     }
 
     public javafx.concurrent.Task getTaskFromString(String taskString) {

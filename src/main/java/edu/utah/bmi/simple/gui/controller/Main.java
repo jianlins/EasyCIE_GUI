@@ -46,7 +46,7 @@ public class Main extends Application {
     private File currentConfigFile;
     private static String basePath;
     private final File logFile = new File("conf/.log");
-
+    private String currentTaskName = "";
 
     @FXML
     private MenuBar menuBar;
@@ -81,7 +81,7 @@ public class Main extends Application {
         showTaskOverview();
         System.out.println("Refresh loading from " + getRelativePath(currentConfigFile.getAbsolutePath()));
         setMsg("Load: " + getRelativePath(currentConfigFile.getAbsolutePath()));
-        TaskFX currentTask = tasks.getTask("simcda-core");
+        TaskFX currentTask = tasks.getTask(currentTaskName);
     }
 
     public void openConfigFile() {
@@ -103,22 +103,18 @@ public class Main extends Application {
                 if (file != null) {
                     currentConfigFile = file;
                     refreshSettings();
-                    insertTop(getRelativePath(currentConfigFile.getAbsolutePath()));
+                    saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()) + "\n" + currentTaskName);
                 }
             }
         });
     }
 
-    private void insertTop(String filePath) {
-        List<String> lines=new ArrayList<>();
-        try {
-            if (logFile.exists()) {
-                lines = FileUtils.readLines(logFile);
-                if (filePath.equals(lines.get(0)))
-                    return;
-            }
-            lines.add(0, filePath);
 
+    private void saveOpenLog(String filePath) {
+        List<String> lines = new ArrayList<>();
+        try {
+            lines.add(filePath);
+            lines.add(currentTaskName);
             FileUtils.writeLines(logFile, lines);
         } catch (IOException e) {
             e.printStackTrace();
@@ -129,7 +125,10 @@ public class Main extends Application {
         String conf = "conf/config.xml";
         if (logFile.exists()) {
             try {
-                conf = FileUtils.readLines(logFile).get(0);
+                List<String> lines = FileUtils.readLines(logFile);
+                if (lines.size() > 0)
+                    conf = lines.get(0);
+                currentTaskName = lines.size() > 1 ? lines.get(1) : "import";
                 if (!new File(conf).exists()) {
                     System.out.println("The last used configuration file: " +
                             new File(conf).getAbsolutePath() +
@@ -251,6 +250,8 @@ public class Main extends Application {
 
 
     public void stop() {
+        saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()));
+        System.out.println(currentTaskName);
         System.exit(0);
     }
 
@@ -268,6 +269,22 @@ public class Main extends Application {
         Path pathBase = Paths.get(basePath);
         Path pathRelative = pathBase.relativize(pathAbsolute);
         return pathRelative.toString();
+    }
+
+    public void setCurrentTaskName(String currentTaskName) {
+        this.currentTaskName = currentTaskName;
+    }
+
+    public String getCurrentTaskName() {
+        return currentTaskName;
+    }
+
+    public TaskFX getCurrentTask() {
+        return tasks.getTask(currentTaskName);
+    }
+
+    public int getCurrentTaskId() {
+        return tasks.getTaskId(currentTaskName);
     }
 }
 
