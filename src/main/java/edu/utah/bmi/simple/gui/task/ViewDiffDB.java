@@ -1,5 +1,8 @@
 package edu.utah.bmi.simple.gui.task;
 
+import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -9,7 +12,7 @@ import java.io.File;
 
 /**
  * @author Jianlin Shi
- *         Created on 2/13/17.
+ * Created on 2/13/17.
  */
 public class ViewDiffDB extends javafx.concurrent.Task {
     protected String outputDB, diffTable, annotatorCompare, annotatorAgainst;
@@ -40,15 +43,20 @@ public class ViewDiffDB extends javafx.concurrent.Task {
                 }
                 // Update UI here.
                 if (annotatorCompare.trim().length() > 0 && annotatorAgainst.trim().length() > 0) {
-                    boolean res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, diffTable,
-                            " WHERE annotator='" + annotatorCompare + "_vs_" + annotatorAgainst + "'", "diff");
-                    if (res)
+                    String annotator = annotatorCompare + "_vs_" + annotatorAgainst;
+                    DAO dao = new DAO(new File(outputDB));
+                    RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunID", diffTable, annotator);
+                    if (recordRowIter.hasNext()) {
+                        RecordRow recordRow = recordRowIter.next();
+                        int lastRunId = (int) recordRow.getValueByColumnId(1);
+                        TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, diffTable,
+                                " WHERE annotator='" + annotator + "' AND RUN_ID=" + lastRunId, "output");
                         updateMessage("data loaded");
-                    else
+                    } else {
                         updateMessage("no record loaded");
+                    }
                     updateProgress(1, 1);
                 }
-
             }
         });
         return null;
