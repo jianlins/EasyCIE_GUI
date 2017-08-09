@@ -3,3 +3,5 @@
 target
 data/output
 data/*.sqlite
+data/*-shm
+data/*-wal

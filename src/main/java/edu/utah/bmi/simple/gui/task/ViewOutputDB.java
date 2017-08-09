@@ -1,5 +1,8 @@
 package edu.utah.bmi.simple.gui.task;
 
+import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -9,7 +12,7 @@ import java.io.File;
 
 /**
  * @author Jianlin Shi
- *         Created on 2/13/17.
+ * Created on 2/13/17.
  */
 public class ViewOutputDB extends javafx.concurrent.Task {
     protected String outputDB, outputTable, annotator;
@@ -62,9 +65,17 @@ public class ViewOutputDB extends javafx.concurrent.Task {
                 }
                 // Update UI here.
                 boolean res = false;
-                if (annotator.trim().length() > 0)
-                    res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, outputTable, " WHERE annotator='" + annotator + "'", "output");
-                else
+                if (annotator.trim().length() > 0) {
+                    DAO dao = new DAO(new File(outputDB));
+                    RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunID", outputTable, annotator);
+                    if (recordRowIter.hasNext()) {
+                        RecordRow recordRow = recordRowIter.next();
+                        int lastRunId = (int) recordRow.getValueByColumnId(1);
+                        res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, outputTable,
+                                " WHERE annotator='" + annotator + "' AND RUN_ID=" + lastRunId, "output");
+                    } else
+                        res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, outputTable, " WHERE annotator='" + annotator + "'", "output");
+                } else
                     res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, outputTable, "", "output");
 
                 if (res)

@@ -30,10 +30,13 @@
                 </Menu>
                 <Menu mnemonicParsing="true" text="_Help">
                     <items>
-                        <MenuItem mnemonicParsing="true" text="_OnlineWiki" onAction="#openHelpURL">
+                        <MenuItem mnemonicParsing="true" text="_Online Help" onAction="#openHelpURL">
                             <accelerator>
                                 <KeyCodeCombination alt="UP" code="F1" control="UP" meta="UP" shift="UP" shortcut="UP"></KeyCodeCombination>
                             </accelerator>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="true" text="_Submit Feedback..." onAction="#report">
+
                         </MenuItem>
                         <MenuItem mnemonicParsing="true" text="_About" onAction="#about">
 

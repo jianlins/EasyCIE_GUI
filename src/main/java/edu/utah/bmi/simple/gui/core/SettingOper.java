@@ -73,7 +73,7 @@ public class SettingOper {
 
     public void ChangeMemos(HashMap<String, String> valueChanges) {
         for (Map.Entry<String, String> entry : valueChanges.entrySet()) {
-            config.setAttributeValue(entry.getKey() + "/@memo", entry.getValue());
+            config.setAttributeValue(entry.getKey(), entry.getValue());
         }
     }
 

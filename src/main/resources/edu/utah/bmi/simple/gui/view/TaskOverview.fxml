@@ -43,7 +43,7 @@
                                 <TableView fx:id="settingTable" editable="true" prefHeight="598.0" prefWidth="625.0" AnchorPane.bottomAnchor="0.0"
                                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <columns>
-                                        <TableColumn fx:id="settingNameColumn" maxWidth="400.0" minWidth="100.0" prefWidth="150.0" sortable="false" text="Parameter"/>
+                                        <TableColumn fx:id="settingNameColumn" maxWidth="400.0" minWidth="100.0" prefWidth="180.0" sortable="false" text="Parameter"/>
                                         <TableColumn fx:id="settingValueColumn" minWidth="300.0" prefWidth="400.0" sortable="false" text="Value"/>
                                         <TableColumn fx:id="settingDesColumn" prefWidth="301.0" sortable="false" text="Description"/>
                                     </columns>

@@ -180,7 +180,7 @@
         </item>
         <item>
             <!--this should be a view in production env, the table is only for testing purposes-->
-            <name>DOCUMENTS</name>
+            <name>DOCUMENTS_TABLE</name>
             <sql>
                 <item>
                     CREATE TABLE {tableName} (

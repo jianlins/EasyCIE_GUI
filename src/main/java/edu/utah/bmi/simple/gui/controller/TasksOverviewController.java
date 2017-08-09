@@ -318,6 +318,7 @@ public class TasksOverviewController {
         columnNames.add("ANNOTATOR");
         columnNames.add("DOC_NAME");
         columnNames.add("COMMENTS");
+        columnNames.add("RUN_ID");
         if (doctable)
             annoTableView.getColumns().clear();
         doctable = false;
@@ -336,7 +337,8 @@ public class TasksOverviewController {
     }
 
 
-    public boolean showDBTable(String dbName, ArrayList<String> columnNames, String tableName, String filter, String colorDifferential) {
+    public boolean showDBTable(String dbName, ArrayList<String> columnNames,
+                               String tableName, String filter, String colorDifferential) {
 //        settingPanel.settingPanel.setVisible(false);
         dbPanel.setVisible(true);
         annoTableView.setVisible(true);
@@ -424,6 +426,10 @@ public class TasksOverviewController {
 
 
     public RecordRowIterator queryRecords(DAO dao, String tableName, String condition) {
+        if (!dao.checkExists(tableName)) {
+            System.out.println(tableName+" doesn't exist");
+            return null;
+        }
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT * FROM ");
         sql.append(tableName);

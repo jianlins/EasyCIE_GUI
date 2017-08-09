@@ -21,8 +21,8 @@ public class ViewDiffDB extends javafx.concurrent.Task {
     private void initiate(TasksFX tasks) {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("compare");
-        annotatorCompare = config.getValue(ConfigKeys.annotatorCompare);
-        annotatorAgainst = config.getValue(ConfigKeys.annotatorAgainst);
+        annotatorCompare = config.getValue(ConfigKeys.targetAnnotator);
+        annotatorAgainst = config.getValue(ConfigKeys.referenceAnnotator);
         config = tasks.getTask("settings");
         outputDB = config.getValue(ConfigKeys.writeConfigFileName);
         diffTable = config.getValue(ConfigKeys.compareTable).trim();

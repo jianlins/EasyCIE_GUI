@@ -20,6 +20,7 @@ import edu.utah.bmi.nlp.uima.*;
 import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
 import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
+import edu.utah.bmi.nlp.writer.BratWritter_AE;
 import edu.utah.bmi.nlp.writer.EhostWriter_AE;
 import edu.utah.bmi.nlp.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.writer.XMIWritter_AE;
@@ -72,6 +73,52 @@ public class RunEasyCIE extends GUITask {
         initiate(tasks, paras);
     }
 
+    public void init(GUITask task, String annotator, String rushRule, String fastNERRule, String fastCNERRule, String contextRule,
+                     String featureInfRule, String docInfRule, boolean report, boolean fastNerCaseSensitive,
+                     String readDBConfigFile, String inputTableName, String datasetId, String writeConfigFileName,
+                     String outputTableName, String ehostDir, String bratDir, String xmiDir, String exporttypes, String option) {
+        this.annotator = annotator;
+        this.rushRule = rushRule;
+        this.fastNERRule = fastNERRule;
+        this.fastCNERRule = fastCNERRule;
+        this.contextRule = contextRule;
+        this.featureInfRule = featureInfRule;
+        this.docInfRule = docInfRule;
+        this.report = report;
+        this.fastNerCaseSensitive = fastNerCaseSensitive;
+        this.readDBConfigFile = readDBConfigFile;
+        this.inputTableName = inputTableName;
+        this.datasetId = datasetId;
+        this.writeConfigFileName = writeConfigFileName;
+        this.outputTableName = outputTableName;
+        this.ehostDir = ehostDir;
+        this.bratDir = bratDir;
+        this.xmiDir = xmiDir;
+        this.exporttypes = exporttypes;
+        switch (option) {
+            case "ehost":
+                ehost = true;
+                break;
+            case "brat":
+                brat = true;
+                break;
+            case "xmi":
+                xmi = true;
+                break;
+            default:
+                ehost = false;
+                brat = false;
+                xmi = false;
+        }
+        if (ehostDir == null || ehostDir.length() == 0)
+            ehost = false;
+        if (bratDir == null || bratDir.length() == 0)
+            brat = false;
+        if (xmiDir == null || xmiDir.length() == 0)
+            xmi = false;
+        initPipe(task, readDBConfigFile, datasetId, annotator);
+    }
+
     private void initiate(TasksFX tasks, String option) {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask(ConfigKeys.maintask);
@@ -119,21 +166,18 @@ public class RunEasyCIE extends GUITask {
                 xmi = false;
         }
 
-        initPipe(readDBConfigFile, datasetId, annotator);
+        initPipe(this, readDBConfigFile, datasetId, annotator);
 
     }
 
     @Override
     protected Object call() throws Exception {
-        if (report)
-            runner.setLogger(new ConsoleLogger());
-        runner.setTask(this);
         runner.run();
         return null;
     }
 
 
-    protected void initPipe(String readDBConfigFile, String datasetId, String annotator) {
+    protected void initPipe(GUITask task, String readDBConfigFile, String datasetId, String annotator) {
         rdao = new DAO(new File(readDBConfigFile), true, false);
         if (writeConfigFileName.equals(readDBConfigFile)) {
             wdao = rdao;
@@ -158,6 +202,7 @@ public class RunEasyCIE extends GUITask {
         else
             runner = new AdaptableUIMACPETaskRunner(defaultTypeDescriptor, "./classes/");
         runner.setLogger(logger);
+        runner.setTask(task);
         initTypes(customTypeDescriptor);
         addReader(readDBConfigFile, datasetId);
         addAnalysisEngines(runner);
@@ -165,6 +210,7 @@ public class RunEasyCIE extends GUITask {
 
         addWriter(runId, annotator);
     }
+
 
     protected UIMALogger addLogger(DAO dao, String annotator) {
         if (debug)

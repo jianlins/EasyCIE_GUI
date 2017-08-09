@@ -10,20 +10,25 @@ import java.io.File;
 
 /**
  * @author Jianlin Shi
- *         Created on 2/13/17.
+ * Created on 2/13/17.
  */
 public class ViewImportDB extends javafx.concurrent.Task {
     protected String SQLFile, corpusTable;
+    protected String importType;
 
-    public ViewImportDB(TasksFX tasks) {
-        initiate(tasks);
+    public ViewImportDB(TasksFX tasks, String importType) {
+        initiate(tasks, importType);
     }
 
-    private void initiate(TasksFX tasks) {
+    private void initiate(TasksFX tasks, String importType) {
+        this.importType = importType;
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
         SQLFile = config.getValue(ConfigKeys.readDBConfigFile);
-        corpusTable = config.getValue(ConfigKeys.inputTableName);
+        if (importType.equals("doc"))
+            corpusTable = config.getValue(ConfigKeys.inputTableName);
+        else
+            corpusTable = config.getValue(ConfigKeys.referenceTable);
     }
 
 
@@ -37,7 +42,11 @@ public class ViewImportDB extends javafx.concurrent.Task {
                     return;
                 }
                 // Update UI here.
-                boolean res = TasksOverviewController.currentTasksOverviewController.showDocTable(SQLFile, corpusTable, "", "output");
+                boolean res = false;
+                if (importType.equals("doc"))
+                    res = TasksOverviewController.currentTasksOverviewController.showDocTable(SQLFile, corpusTable, "", "output");
+                else
+                    res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(SQLFile, corpusTable, "", "output");
                 if (res)
                     updateMessage("data loaded");
                 else

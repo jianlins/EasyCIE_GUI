@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -109,11 +110,15 @@ public class Main extends Application {
     }
 
     private void insertTop(String filePath) {
+        List<String> lines=new ArrayList<>();
         try {
-            List<String> lines = FileUtils.readLines(logFile);
-            if (filePath.equals(lines.get(0)))
-                return;
+            if (logFile.exists()) {
+                lines = FileUtils.readLines(logFile);
+                if (filePath.equals(lines.get(0)))
+                    return;
+            }
             lines.add(0, filePath);
+
             FileUtils.writeLines(logFile, lines);
         } catch (IOException e) {
             e.printStackTrace();

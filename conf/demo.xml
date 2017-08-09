@@ -6,26 +6,30 @@
             <corpusDir memo="the directory that stores the txt files"
                        doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/input
             </corpusDir>
-            <fileFilter
-                    memo="filter files by extension names (separate by whitespace). If not filter defined, all files will be read">
+            <includeFileTypes
+                    memo="filter files by extension names (separate by comma). If not filter defined, all files will be read">
                 txt
-            </fileFilter>
+            </includeFileTypes>
         </documents>
         <annotations memo="support Brat and eHOST format, the format will be automatically detected.">
             <projectDir memo="the directory that hosts the eHOST project"
-                        doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">
-                /media/brokenjade/Data/Dropbox/JLS_HF_AnnotationTask/JLS_Ann_Training/Training_1
+                        doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/brat
             </projectDir>
+            <includeAnnotationTypes/>
+            <enableSentenceSnippet>true</enableSentenceSnippet>
             <overWriteAnnotatorName
                     memo="if a name is set, all the annotations' annotator will be overwritten by this name"/>
         </annotations>
         <executes>
-            <ImportDocuments memo="Import corpus to database">edu.utah.bmi.simple.gui.task.Import</ImportDocuments>
-            <ViewInDatabase memo="View the imported files in database">edu.utah.bmi.simple.gui.task.ViewImportDB
-            </ViewInDatabase>
-            <ImportAnnotations memo="Import ehost annotations into the output table">
-                edu.utah.bmi.simple.gui.task.ImportEhost
+            <ImportDocuments memo="Import corpus to database">edu.utah.bmi.simple.gui.task.Import txt</ImportDocuments>
+            <ViewImportedDocs memo="View the imported files in database">edu.utah.bmi.simple.gui.task.ViewImportDB doc
+            </ViewImportedDocs>
+            <ImportAnnotations memo="Import annotations into the output table">edu.utah.bmi.simple.gui.task.Import
+                anno
             </ImportAnnotations>
+            <ViewImportedAnnotations memo="View the imported annotations in database">
+                edu.utah.bmi.simple.gui.task.ViewImportDB anno
+            </ViewImportedAnnotations>
         </executes>
     </import>
     <easycie>
@@ -60,14 +64,18 @@
     </easycie>
     <compare>
         <compare>
-            <sourceAnnotator memo="Compare annotations from annotator: ">v2</sourceAnnotator>
+            <targetAnnotator memo="Compare annotations from annotator: ">v2</targetAnnotator>
+            <targetRunId memo="run id of target annotator. Default is the latest run id when leave blank"></targetRunId>
             <referenceAnnotator memo="Compare annotations against annotator: ">v1</referenceAnnotator>
+            <referenceRunId
+                    memo="run id of reference annotator. Default is the latest run id when leave blank"></referenceRunId>
+            <referenceTable></referenceTable>
             <strictCompare>true</strictCompare>
             <typeFilter memo="limit the comparison to a certain type"/>
-            <categoryFilter memo="limit the comparison to a certain category"/>
         </compare>
         <executes>
-            <Compare memo="Compare the difference between two annotators">edu.utah.bmi.simple.gui.task.Compare</Compare>
+            <Compare memo="Compare the difference between two annotators">edu.utah.bmi.simple.gui.task.CompareTask
+            </Compare>
             <ViewComparedResults memo="View the output in database">edu.utah.bmi.simple.gui.task.ViewDiffDB
             </ViewComparedResults>
         </executes>
@@ -83,7 +91,8 @@
             <uima memo="the directory to save the exported uima xmi files"
                   doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/xmi
             </uima>
-            <uimaTypes memo="If specified, then only these types will be displayed(separate by comma)"></uimaTypes>
+            <exportTypes
+                    memo="If specified, then only these types will be displayed(separate by comma). If not, only Concepts will be saved"/>
         </format>
         <executes>
             <ExportEhost memo="Run Preannotator and export the annotation to eHOST format">
@@ -109,6 +118,9 @@
             </datasetId>
             <overwrite memo="if the table exist, whether overwrite it">true</overwrite>
         </import>
+        <reference>
+            <table>REFERENCE</table>
+        </reference>
         <output>
             <dbFile memo="the db file(or configuration file) used to saved the outputs"
                     doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml
@@ -136,5 +148,7 @@
                 e32636|efdecd|ffbf00|00ffff|9966cc|ed872d|a3c1ad|a4c639|8db600|89cff0|fbceb1|7fffd4|e9d66b|87a96b|ff9966|21abcd|deb887|848482|fdee00|f4c2c2|ff2052|a1caf1|007fff|b2beb5|5d8aa8
             </color_pool>
         </viewer>
+        <help>https://github.com/jianlins/EasyCIE_GUI/wiki</help>
+        <issues>https://github.com/jianlins/EasyCIE_GUI/issues</issues>
     </settings>
 </configurations>

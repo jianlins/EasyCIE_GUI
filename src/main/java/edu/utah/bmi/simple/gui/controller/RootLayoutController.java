@@ -3,6 +3,7 @@ package edu.utah.bmi.simple.gui.controller;
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
@@ -40,17 +41,28 @@ public class RootLayoutController {
 
     @FXML
     private void openHelpURL() {
-        HostServicesDelegate hostServices = HostServicesFactory.getInstance(mainApp);
         String url = mainApp.tasks.getTask("settings").getValue("help");
+        String hint = "The help document url has not been set up. Please add a \"help\" element with an URL as the value, " +
+                "under \"settings\" inside your configuration file.";
+        openURL(url, hint);
+    }
+
+    @FXML
+    private void report() {
+        String url = mainApp.tasks.getTask("settings").getValue("issues");
+        String hint = "The url to report issues has not been set up. Please add a \"issues\" element with an URL as the value, " +
+                "under \"settings\" inside your configuration file.";
+        openURL(url, hint);
+    }
+
+    private void openURL(String url, String hint) {
+        HostServicesDelegate hostServices = HostServicesFactory.getInstance(mainApp);
         if (url.length() == 0) {
-            System.out.println("help document url has not been set up. Please add a \"help\" element with an URL as the value, " +
-                    "under \"settings\" inside your configuration file.");
-            mainApp.bottomViewController.msg.setText("Help document url has not been set up.");
+            System.out.println(hint);
         } else {
             hostServices.showDocument(url);
             mainApp.bottomViewController.msg.setText("Navigate to EasyCIE wiki.");
         }
-//        hostServices.showDocument("https://sourceforge.net/p/simcda/wiki/usermanual-home/");
     }
 
     @FXML
@@ -59,7 +71,8 @@ public class RootLayoutController {
         alert.setTitle("About EasyCIE");
         alert.setHeaderText("EasyCIE");
         alert.setContentText("Easy Clinical Information Extractor (version 1.0)\n" +
-                "University of Utah School of Medicine\n" +
+                "By Jianlin Shi," +
+                "University of Utah School of Medicine,\n" +
                 "Biomedical Informatics");
 
 
@@ -84,8 +97,8 @@ public class RootLayoutController {
 
 
         alert.setResizable(true);
-        alert.getDialogPane().setPrefSize(800, 240);
-        alert.setX(centerXPosition - 400d);
+        alert.getDialogPane().setPrefSize(600, 240);
+        alert.setX(centerXPosition - 300d);
         alert.setY(centerYPosition - 120d);
 
         alert.showAndWait();
@@ -305,4 +318,6 @@ public class RootLayoutController {
                 "   limitations under the License.";
         return aboutText;
     }
+
+
 }

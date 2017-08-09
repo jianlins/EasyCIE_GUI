@@ -1,5 +1,6 @@
 package edu.utah.bmi.simple.gui.task;
 
+import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.runner.CommonFunc;
 import edu.utah.bmi.nlp.runner.RunPipe;
 import edu.utah.bmi.nlp.sql.DAO;
@@ -23,96 +24,111 @@ import static edu.utah.bmi.nlp.runner.CommonFunc.getCmdValue;
 /**
  * Created by Jianlin Shi on 9/23/16.
  */
-public class Import extends javafx.concurrent.Task {
+public class Import extends GUITask {
     public static final char ehost = 'e', xmi = 'x', brat = 'b', txt = 't', unknown = 'u';
     protected DAO dao;
-    protected boolean print;
+    protected boolean print = true;
 
-    protected String inputPath, SQLFile, corpusTable;
-    protected File inputDir
-    protected boolean overwrite = false;
-    protected String[] filters;
+    protected String inputPath, dbConfigFile, importTable, overWriteAnnotatorName, datasetId, rushRule;
+    protected File inputDir;
+    protected boolean overwrite = false, initSuccess = false;
+    protected String includeTypes;
+    protected char corpusType;
+    protected RunEasyCIE runner;
 
-    public Import(TasksFX tasks) {
-        initiate(tasks);
+    public Import(TasksFX tasks, String importType) {
+        initiate(tasks, importType);
     }
 
-    private void initiate(TasksFX tasks) {
+    private void initiate(TasksFX tasks, String importType) {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("import");
-        inputPath = config.getValue(ConfigKeys.importDir);
-        String filterString = config.getValue(ConfigKeys.importFilters);
-        filters = filterString.split("\\s+");
+        TaskFX settingConfig = tasks.getTask("settings");
+        String documentDir = config.getValue(ConfigKeys.importDir);
+        String includeFileTypes = config.getValue(ConfigKeys.includeFileTypes);
 
-        char corpusType = checkCorpusType(inputDir, includeTypes);
 
-        config = tasks.getTask("settings");
-        SQLFile = config.getValue(ConfigKeys.readDBConfigFile);
-        corpusTable = config.getValue(ConfigKeys.inputTableName);
-        overwrite = config.getValue(ConfigKeys.overwrite).charAt(0) == 't' || config.getValue(ConfigKeys.overwrite).charAt(0) == 'T';
+        String annotationDir = config.getValue(ConfigKeys.annotationDir);
+        String includeAnnotationTypes = config.getValue(ConfigKeys.includeAnnotationTypes);
+        overWriteAnnotatorName = config.getValue(ConfigKeys.overWriteAnnotatorName);
+        boolean enableSentenceSeg = config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 't'
+                || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 'T'
+                || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == '1';
 
+
+        if (importType.equals(ConfigKeys.paraTxtType)) {
+            corpusType = txt;
+            inputPath = documentDir;
+            importTable = settingConfig.getValue(ConfigKeys.inputTableName);
+            inputDir=new File(documentDir);
+            includeTypes = includeFileTypes.replaceAll("\\s+", "");
+        } else {
+            inputDir = new File(annotationDir);
+            inputPath = annotationDir;
+            importTable = settingConfig.getValue(ConfigKeys.referenceTable);
+            corpusType = checkCorpusType(inputDir, includeFileTypes);
+            includeTypes = includeAnnotationTypes.replaceAll("\\s+", "");
+        }
+        if (CommonFunc.checkDirExist(inputDir, "Note:|Sorry:| ")) {
+            initSuccess = false;
+            return;
+        }
+
+        datasetId = settingConfig.getValue(ConfigKeys.datasetId);
+        dbConfigFile = settingConfig.getValue(ConfigKeys.readDBConfigFile);
+        overwrite = settingConfig.getValue(ConfigKeys.overwrite).charAt(0) == 't'
+                || settingConfig.getValue(ConfigKeys.overwrite).charAt(0) == 'T'
+                || settingConfig.getValue(ConfigKeys.overwrite).charAt(0) == '1';
+        rushRule = (enableSentenceSeg) ? config.getValue(ConfigKeys.rushRule) : "";
+        File dbconfig = new File(dbConfigFile);
+        if (CommonFunc.checkFileExist(dbconfig, "dbconfig")) {
+            initSuccess = false;
+            return;
+        }
+        dao = new DAO(dbconfig, true, false);
+        switch (corpusType) {
+            case brat:
+                if(overWriteAnnotatorName.length()==0)
+                    overWriteAnnotatorName="brat_import";
+                importBrat(inputDir, datasetId, overWriteAnnotatorName, importTable, rushRule, includeTypes, overwrite);
+                break;
+            case ehost:
+                if(overWriteAnnotatorName.length()==0)
+                    overWriteAnnotatorName="ehost_import";
+                importEhost(inputDir, datasetId, overWriteAnnotatorName, importTable, rushRule, includeTypes, overwrite);
+                break;
+            case xmi:
+                updateMessage("Note:|Sorry, currently import xmi corpus is not supported.|");
+                return;
+            case unknown:
+                updateMessage("Note:|Sorry, which type of documents are you going to import?|" +
+                        "Currently, there is not any txt or text file in the import directory.\n" +
+                        "Use parameter includeFileTypes to specify the document types, separated by commas.");
+                return;
+        }
+        initSuccess = true;
     }
 
     @Override
     protected Object call() throws Exception {
-        run(inputDir, corpusTable, SQLFile, overwrite, filters);
-        return null;
-    }
-
-    protected void run(CommandLine cmd) {
-        String inputPath = getCmdValue(cmd, "inputdir", "data/input");
-        String dbconfigFile = getCmdValue(cmd, "wconfig", "conf/dbconfig.xml");
-        String outputTableName = getCmdValue(cmd, "writetable", "");
-        String datasetId = getCmdValue(cmd, "datasetid", "0");
-        String annotator = getCmdValue(cmd, "annotator", null);
-        Boolean overwrite = cmd.hasOption("overwrite");
-        String rushRule = (cmd.hasOption("rush")) ? getCmdValue(cmd, "rush", "conf/rush_rule.tsv") : "";
-        String featureinf = (cmd.hasOption("featureinf")) ? getCmdValue(cmd, "featureinf", "") : "";
-        String docinf = (cmd.hasOption("docinf")) ? getCmdValue(cmd, "docinf", "") : "";
-        String includeTypes = getCmdValue(cmd, "includetypes", null);
-        print = cmd.hasOption("print");
-        File inputDir = new File(inputPath);
-        if (CommonFunc.checkDirExist(inputDir, "inputdir")) {
-            System.exit(1);
-        }
-        File dbconfig = new File(dbconfigFile);
-        if (CommonFunc.checkFileExist(dbconfig, "wconfig")) {
-            System.exit(1);
-        }
-        dao = new DAO(dbconfig,true,false);
-        char corpusType = checkCorpusType(inputDir, includeTypes);
-        if (outputTableName.length() == 0) {
-            if (corpusType == txt)
-                outputTableName = "DOCUMENTS";
-            else
-                outputTableName = "REFERENCE";
-        }
-        try {
+        if (initSuccess) {
+            updateMessage("Start import....");
             switch (corpusType) {
                 case txt:
-                    importText(inputDir, datasetId, outputTableName, overwrite,
-                            includeTypes == null ? null : includeTypes.split(","));
+                    importText(inputDir, datasetId, importTable, overwrite,
+                            includeTypes);
                     break;
                 case brat:
-                    importBrat(dbconfigFile, inputDir, datasetId, annotator, outputTableName, rushRule, featureinf, docinf, includeTypes, overwrite);
-                    break;
                 case ehost:
-                    importEhost(dbconfigFile, inputDir, datasetId, annotator, outputTableName, rushRule, featureinf, docinf, includeTypes, overwrite);
-                    break;
-                case xmi:
-                    System.err.println("Sorry, currently import xmi corpus is not supported.");
-                    break;
-                case unknown:
-                    System.err.println("Sorry, which type of documents are you going to import?\n" +
-                            "Currently, there is not any txt or text file in the import directory.\n" +
-                            "Use parameter \"-t <file extension name>\" to specify the document types, separated by commas.");
+                    runner.run();
                     break;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            updateMessage("Import complete");
+            updateProgress(1, 1);
         }
         dao.endBatchInsert();
         dao.close();
+        return null;
     }
 
 
@@ -140,17 +156,20 @@ public class Import extends javafx.concurrent.Task {
     }
 
 
-    protected void importText(File inputDir, String datasetId, String tableName, boolean overWrite, String[] filters) throws IOException {
-        dao.initiateTableFromTemplate("DOCUMENTS", tableName, overWrite);
-        if (filters == null || filters.length == 0)
+    protected void importText(File inputDir, String datasetId, String tableName, boolean overWrite, String includeTypes) throws IOException {
+        dao.initiateTableFromTemplate("DOCUMENTS_TABLE", tableName, overWrite);
+        String[] filters;
+        if (includeTypes.length() == 0)
             filters = null;
-        Iterator iterator = FileUtils.iterateFiles(inputDir, filters, true);
+        else
+            filters = includeTypes.split(",");
+        Collection<File> files = FileUtils.listFiles(inputDir, filters, true);
         if (print)
             System.out.println("Reading files from: " + inputDir.getAbsolutePath() +
                     "\nImporting into table: " + tableName);
+        int total = files.size();
         int counter = 0;
-        while (iterator.hasNext()) {
-            File file = (File) iterator.next();
+        for (File file : files) {
             if (print)
                 System.out.print("Import: " + file.getName() + "\t\t");
             String content = FileUtils.readFileToString(file);
@@ -161,56 +180,49 @@ public class Import extends javafx.concurrent.Task {
             dao.insertRecords(tableName, records);
             if (print)
                 System.out.println("success");
+            updateProgress(counter, total);
             counter++;
         }
         System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
     }
 
-    protected void importEhost(String dbconfigFile, File inputDir, String datasetId, String annotator, String tableName, String rush, String featureInf, String docInf, String includeTypes,
-                               boolean overWrite) {
+    protected void importEhost(File inputDir, String datasetId, String annotator, String tableName,
+                               String rush, String includeTypes, boolean overWrite) {
         if (overWrite)
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", tableName, overWrite);
 
-        RunPipe runner = new RunPipe();
-        if (rush == null)
-            rush = "";
-        if (annotator == null)
+        runner = new RunEasyCIE();
+        if (annotator.length() == 0)
             annotator = "ehost_import";
-        if (includeTypes != null)
-            runner.initPipe(new String[]{"-r", dbconfigFile, "-wt", tableName, "-id", datasetId, "-a", annotator, "-ru",
-                    rush, "-n", "", "-cn", "", "-x", "", "-f", featureInf, "-d", docInf, "-t", includeTypes});
-        else
-            runner.initPipe(new String[]{"-r", dbconfigFile, "-wt", tableName, "-id", datasetId, "-a", annotator, "-ru",
-                    rush, "-n", "", "-cn", "", "-x", "", "-f", featureInf, "-d", docInf});
+        runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "",
+                false, false, dbConfigFile, importTable, datasetId,
+                dbConfigFile, importTable, "", "", "", includeTypes, "db");
+
         runner.initTypes(EhostReader.getTypeDefinitions(inputDir.getAbsolutePath()));
         runner.setReader(EhostReader.class, new Object[]{EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
                 EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, EhostReader.PARAM_PRINT, print});
-        runner.run();
+
     }
 
-    protected void importBrat(String dbconfigFile, File inputDir, String datasetId, String annotator, String tableName, String rush, String featureInf, String docInf, String includeTypes,
+    protected void importBrat(File inputDir, String datasetId, String annotator, String tableName, String rush, String includeTypes,
                               boolean overWrite) {
         if (overWrite)
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", tableName, overWrite);
 
-        RunPipe runner = new RunPipe();
-        if (rush == null)
-            rush = "";
-        if (annotator == null)
+        runner = new RunEasyCIE();
+        if (annotator.length() == 0)
             annotator = "ehost_import";
-        if (includeTypes != null)
-            runner.initPipe(new String[]{"-r", dbconfigFile, "-wt", tableName, "-id", datasetId, "-a", annotator, "-ru",
-                    rush, "-n", "", "-cn", "", "-x", "", "-f", featureInf, "-d", docInf, "-t", includeTypes});
-        else
-            runner.initPipe(new String[]{"-r", dbconfigFile, "-wt", tableName, "-id", datasetId, "-a", annotator, "-ru",
-                    rush, "-n", "", "-cn", "", "-x", "", "-f", featureInf, "-d", docInf});
+        runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "",
+                false, false, dbConfigFile, importTable, datasetId,
+                dbConfigFile, importTable, "", "", "", includeTypes, "db");
+
         runner.initTypes(BratReader.getTypeDefinitions(inputDir.getAbsolutePath()));
         runner.setReader(BratReader.class, new Object[]{EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
                 EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, EhostReader.PARAM_PRINT, print});
-        runner.run();
+
     }
 
-    public static char checkCorpusType(File dir, String includeTypes) {
+    public static char checkCorpusType(File dir, String includeFileTypes) {
         Iterator<File> fileIterator = FileUtils.iterateFiles(dir, null, true);
         boolean containText = false;
         while (fileIterator.hasNext()) {
@@ -227,7 +239,8 @@ public class Import extends javafx.concurrent.Task {
                     containText = true;
             }
         }
-        if (containText || includeTypes != null)
+//        if the documents is not text or txt files, but specified by users, then consider the files as txt files to read.
+        if (containText || includeFileTypes.length() != 0)
             return txt;
         else
             return unknown;

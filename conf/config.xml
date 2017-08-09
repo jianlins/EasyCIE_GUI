@@ -60,7 +60,7 @@
             <categoryFilter memo="limit the comparison to a certain category"/>
         </compare>
         <executes>
-            <Compare memo="Compare the difference  two annotators">edu.utah.bmi.simple.gui.task.Compare</Compare>
+            <Compare memo="Compare the difference  two annotators">edu.utah.bmi.simple.gui.task.CompareTask</Compare>
             <ViewComparedResults memo="View the output in database">edu.utah.bmi.simple.gui.task.ViewDiffDB
             </ViewComparedResults>
         </executes>

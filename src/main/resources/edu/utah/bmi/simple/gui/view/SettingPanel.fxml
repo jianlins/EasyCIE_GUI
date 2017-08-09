@@ -5,16 +5,20 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
-<SplitPane xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" dividerPositions="0.75" orientation="VERTICAL" prefHeight="598.0"
+<SplitPane fx:id="panesplitter" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1"
+           dividerPositions="0.75" orientation="VERTICAL" prefHeight="598.0"
            prefWidth="625.0" fx:controller="edu.utah.bmi.simple.gui.controller.SettingPanelController">
     <items>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
             <children>
-                <TableView fx:id="settingTable" editable="true" prefHeight="598.0" prefWidth="625.0" AnchorPane.bottomAnchor="0.0"
+                <TableView fx:id="settingTable" editable="true" prefHeight="598.0" prefWidth="625.0"
+                           AnchorPane.bottomAnchor="0.0"
                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <columns>
-                        <TableColumn fx:id="settingNameColumn" maxWidth="400.0" minWidth="100.0" prefWidth="150.0" sortable="false" text="Parameter"/>
-                        <TableColumn fx:id="settingValueColumn" minWidth="300.0" prefWidth="400.0" sortable="false" text="Value"/>
+                        <TableColumn fx:id="settingNameColumn" maxWidth="400.0" minWidth="100.0" prefWidth="150.0"
+                                     sortable="false" text="Parameter"/>
+                        <TableColumn fx:id="settingValueColumn" minWidth="300.0" prefWidth="400.0" sortable="false"
+                                     text="Value"/>
                         <TableColumn fx:id="settingDesColumn" prefWidth="301.0" sortable="false" text="Description"/>
                     </columns>
                     <columnResizePolicy>
@@ -23,7 +27,7 @@
                 </TableView>
             </children>
         </AnchorPane>
-        <TitledPane animated="false" text="Execute functions">
+        <TitledPane fx:id="executePane" animated="false" text="Execute functions">
             <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
                     <children>
