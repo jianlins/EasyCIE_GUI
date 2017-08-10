@@ -1,5 +1,6 @@
 package edu.utah.bmi.simple.gui.task;
 
+import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.easycie.EvalCounter;
 import edu.utah.bmi.nlp.runner.Compare;
 import edu.utah.bmi.nlp.sql.DAO;
@@ -22,7 +23,7 @@ import java.util.HashSet;
  * @author Jianlin Shi
  * Created on 7/18/16.
  */
-public class CompareTask extends javafx.concurrent.Task {
+public class CompareTask extends GUITask {
     protected Compare comparior;
     protected HashSet<String> types = new HashSet();
     private String diffTable, outputTable, compareReferenceTable, goldReferenceTable,
@@ -30,6 +31,7 @@ public class CompareTask extends javafx.concurrent.Task {
     private DAO wdao, rdao;
     protected NLPDBLogger logger;
     private boolean strictCompare = false;
+    public static int lastRunId = -1;
 
 
     public CompareTask(TasksFX tasks) {
@@ -94,13 +96,14 @@ public class CompareTask extends javafx.concurrent.Task {
         HashMap<String, EvalCounter> evalCounters = comparior.eval(targetAnnotations, referenceAnnotations, types, strictCompare);
         updateProgress(1, 1);
         updateMessage("Compare complete.");
-        updateMessage("Note|Report: |" + comparior.getScores(evalCounters));
+        popDialog("Note", "Report: ", comparior.getScores(evalCounters));
 
         if (diffTable != null && diffTable.length() > 0) {
             wdao.initiateTableFromTemplate("ANNOTATION_TABLE", diffTable, false);
             comparior.logDiff(wdao, logger, strictCompare, evalCounters.get(comparior.total),
                     targetAnnotator, referenceAnnotator, diffTable);
         }
+        lastRunId = (int) logger.getRunid();
         return null;
     }
 

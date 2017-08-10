@@ -159,6 +159,12 @@ public class Main extends Application {
 //        settingOper.writeTasks(tasks);
         settingOper.ChangeMemos(memochanges);
         settingOper.ChangeValues(valueChanges);
+        int changeCount=valueChanges.size()+memochanges.size();
+        if (changeCount > 0)
+            bottomViewController.setMsg(changeCount+
+                    (changeCount>1?" changes":" change")+" saved");
+        else
+            bottomViewController.setMsg("No change is made.");
         settingOper.saveConfigs();
     }
 

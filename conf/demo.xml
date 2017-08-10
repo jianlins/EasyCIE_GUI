@@ -21,13 +21,13 @@
   </import>  
   <easycie> 
     <pipeLineSetting> 
-      <ruleFile memo="token based rules" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/concept_rule.xlsx</ruleFile>  
-      <fastNERCaseSensitive memo="whether the rule above for the FastNER is case sensitive">false</fastNERCaseSensitive>  
-      <cRuleFile memo="character based rules" doubleClick=" edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true"/>  
-      <contextRule memo="FastContext rule file location" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/context.xlsx</contextRule>  
-      <featureInfRule memo="Feature inference rule file location" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default</featureInfRule>  
-      <docInfRule memo="Document inference rule file location" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default</docInfRule>  
-      <report memo="whether report the processing details at the end">false</report> 
+      <ruleFile memo="FastNER rule file (token based)" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/concept_rule.xlsx</ruleFile>  
+      <fastNERCaseSensitive memo="whether the rule above is case sensitive">false</fastNERCaseSensitive>  
+      <cRuleFile memo="FastCNER rule file (character based). Default blank value will not use FastCNER" doubleClick=" edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true"/>  
+      <contextRule memo="FastContext rule file. Default blank value will not use FastContext" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/context.xlsx</contextRule>  
+      <featureInfRule memo="Feature inference rule file. Default blank value will not use this component." doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default</featureInfRule>  
+      <docInfRule memo="Document inference rule file location. Default blank value will not use this component." doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default</docInfRule>  
+      <report memo="whether report the processing details at the end">t</report> 
     </pipeLineSetting>  
     <annotators> 
       <current memo="Mark current annotations with annotator: ">v1</current> 
@@ -68,7 +68,8 @@
   </export>  
   <settings> 
     <import> 
-      <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml</dbFile>  
+      <dbFile memo="the db file(or configuration file) used to saved the txt corpus"
+              doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml</dbFile>
       <table memo="the table used to saved the txt corpus">DOCUMENTS</table>  
       <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">0</datasetId>  
       <overwrite memo="if the table exist, whether overwrite it">true</overwrite> 
@@ -77,7 +78,8 @@
       <table>REFERENCE</table> 
     </reference>  
     <output> 
-      <dbFile memo="the db file(or configuration file) used to saved the outputs" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml</dbFile>  
+      <dbFile memo="the db file(or configuration file) used to saved the outputs"
+              doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml</dbFile>
       <table memo="the table used to saved the annotations">OUTPUT</table>  
       <compareTable memo="the table used to saved the annotations">DIFF</compareTable> 
     </output>  
