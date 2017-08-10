@@ -60,11 +60,15 @@ public class Import extends GUITask {
             corpusType = txt;
             inputPath = documentDir;
             importTable = settingConfig.getValue(ConfigKeys.inputTableName);
-            inputDir=new File(documentDir);
+            inputDir = new File(documentDir);
+            if (!checkDirExist(inputDir, documentDir, ConfigKeys.importDir))
+                return;
             includeTypes = includeFileTypes.replaceAll("\\s+", "");
         } else {
             inputDir = new File(annotationDir);
             inputPath = annotationDir;
+            if (!checkDirExist(inputDir, annotationDir, ConfigKeys.annotationDir))
+                return;
             importTable = settingConfig.getValue(ConfigKeys.referenceTable);
             corpusType = checkCorpusType(inputDir, includeFileTypes);
             includeTypes = includeAnnotationTypes.replaceAll("\\s+", "");
@@ -88,22 +92,22 @@ public class Import extends GUITask {
         dao = new DAO(dbconfig, true, false);
         switch (corpusType) {
             case brat:
-                if(overWriteAnnotatorName.length()==0)
-                    overWriteAnnotatorName="brat_import";
+                if (overWriteAnnotatorName.length() == 0)
+                    overWriteAnnotatorName = "brat_import";
                 importBrat(inputDir, datasetId, overWriteAnnotatorName, importTable, rushRule, includeTypes, overwrite);
                 break;
             case ehost:
-                if(overWriteAnnotatorName.length()==0)
-                    overWriteAnnotatorName="ehost_import";
+                if (overWriteAnnotatorName.length() == 0)
+                    overWriteAnnotatorName = "ehost_import";
                 importEhost(inputDir, datasetId, overWriteAnnotatorName, importTable, rushRule, includeTypes, overwrite);
                 break;
             case xmi:
-                updateMessage("Note:|Sorry, currently import xmi corpus is not supported.|");
+                popDialog("Note", "Sorry, currently import xmi corpus is not supported.", "");
                 return;
             case unknown:
-                updateMessage("Note:|Sorry, which type of documents are you going to import?|" +
+                popDialog("Note", "Sorry, which type of documents are you going to import?|",
                         "Currently, there is not any txt or text file in the import directory.\n" +
-                        "Use parameter includeFileTypes to specify the document types, separated by commas.");
+                                "Use parameter includeFileTypes to specify the document types, separated by commas.");
                 return;
         }
         initSuccess = true;
@@ -124,10 +128,10 @@ public class Import extends GUITask {
                     break;
             }
             updateMessage("Import complete");
-            updateProgress(1, 1);
         }
         dao.endBatchInsert();
         dao.close();
+        updateProgress(1, 1);
         return null;
     }
 
@@ -220,6 +224,17 @@ public class Import extends GUITask {
         runner.setReader(BratReader.class, new Object[]{EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
                 EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, EhostReader.PARAM_PRINT, print});
 
+    }
+
+    protected boolean checkDirExist(File inputDir, String relativePath, String paraName) {
+        if (!inputDir.exists()) {
+            initSuccess = false;
+            popDialog("Note", "The directory \"" + relativePath + "\" does not exist",
+                    "Please double check your settings of \"" + paraName + "\"");
+            initSuccess = false;
+            return false;
+        }
+        return true;
     }
 
     public static char checkCorpusType(File dir, String includeFileTypes) {

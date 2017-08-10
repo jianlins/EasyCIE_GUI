@@ -87,6 +87,7 @@ public class BottomViewController {
     }
 
     public void setMsg(String msg) {
+        this.msg.textProperty().unbind();
         this.msg.setText(msg);
     }
 

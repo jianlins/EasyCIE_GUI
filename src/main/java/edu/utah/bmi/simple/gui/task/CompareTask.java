@@ -67,7 +67,7 @@ public class CompareTask extends GUITask {
         String goldReferenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
 
         wdao = new DAO(new File(outputDB));
-        if (goldReferenceTable.equals(compareReferenceTable)) {
+        if (goldReferenceTable.equals(compareReferenceTable) && !importDB.equals(outputDB)) {
 //            if compare with gold standard
             rdao = new DAO(new File(importDB));
         } else {
@@ -76,7 +76,7 @@ public class CompareTask extends GUITask {
         }
 
         if (diffTable.length() > 0) {
-            wdao.initiateTable(diffTable, false);
+            wdao.initiateTableFromTemplate("ANNOTATION_TABLE", diffTable, false);
         }
         comparior = new Compare();
         comparior.setStrictCompare(strictCompare);
