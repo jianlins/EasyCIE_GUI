@@ -14,8 +14,8 @@ public class ConfigKeys {
     public static final String enableSentenceSnippet = "annotations/enableSentenceSnippet";
 
 
-    public static final String ruleFile = "pipeLineSetting/ruleFile";
-    public static final String cRuleFile = "pipeLineSetting/cRuleFile";
+    public static final String ruleFile = "pipeLineSetting/tRule";
+    public static final String cRuleFile = "pipeLineSetting/cRule";
     public static final String contextRule = "pipeLineSetting/contextRule";
     public static final String reportPreannotating = "pipeLineSetting/report";
     public static final String fastNerCaseSensitive = "pipeLineSetting/fastNERCaseSensitive";

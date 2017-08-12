@@ -99,8 +99,12 @@
             </sql>
         </item>
         <item>
-            <name>maxRunID</name>
+            <name>maxRunIDofAnnotator</name>
             <sql>SELECT MAX(RUN_ID) FROM {tableName} WHERE ANNOTATOR=?</sql>
+        </item>
+        <item>
+            <name>lastLogRunID</name>
+            <sql>SELECT MAX(RUN_ID) FROM LOG WHERE ANNOTATOR=?</sql>
         </item>
         <item>
             <name>logQuery</name>

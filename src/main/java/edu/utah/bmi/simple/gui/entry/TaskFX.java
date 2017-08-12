@@ -20,6 +20,7 @@ public class TaskFX {
     }
 
     public TaskFX(String taskName) {
+
         init(taskName);
     }
 

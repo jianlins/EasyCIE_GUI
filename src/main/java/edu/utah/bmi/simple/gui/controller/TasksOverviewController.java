@@ -257,6 +257,8 @@ public class TasksOverviewController {
                         }
                     });
                     th.start();
+                }else{
+                    bottomViewController.setMsg("File \""+file+"\" doesn't exist.");
                 }
             }
         });
@@ -268,9 +270,25 @@ public class TasksOverviewController {
             currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick(), setting.isOpenable());
             Main.valueChanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName(), newValue);
             mainApp.tasks.addTask(currentTask);
-//            if (currentTask.getTaskName().equals("preannotate")) {
-//                readViewerSettings();
-//            }
+            if (setting.isOpenable()) {
+                File file = new File(setting.getSettingValue());
+                if (file.exists()) {
+                    Thread th = new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                Desktop.getDesktop().open(file);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    });
+                    th.start();
+                }else{
+                    bottomViewController.setMsg("File \""+file+"\" doesn't exist.");
+                }
+            }
+//
         });
 
 

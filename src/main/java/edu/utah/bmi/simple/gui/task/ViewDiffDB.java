@@ -46,7 +46,7 @@ public class ViewDiffDB extends GUITask {
                 if (annotatorCompare.trim().length() > 0 && annotatorAgainst.trim().length() > 0) {
                     String annotator = annotatorCompare + "_vs_" + annotatorAgainst;
                     DAO dao = new DAO(new File(outputDB));
-                    RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunID", diffTable, annotator);
+                    RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", diffTable, annotator);
                     if (recordRowIter == null) {
                         updateMessage("Table " + diffTable + " hasn't been created.");
                         updateProgress(1, 1);

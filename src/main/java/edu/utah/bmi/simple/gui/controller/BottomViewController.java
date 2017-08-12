@@ -79,6 +79,7 @@ public class BottomViewController {
                     dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
                     textField.setEditable(false);
                     textField.setText(content);
+                    textField.setWrapText(true);
                     dialog.showAndWait();
 
                 }

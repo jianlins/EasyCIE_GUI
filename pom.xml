@@ -9,10 +9,11 @@
     <version>1.0-SNAPSHOT</version>
     <properties>
         <!--for packaging jdk included version-->
-        <java.path>jdk1.8/bin/java</java.path>
+        <!--<java.path>jdk1.8/bin/java</java.path>-->
         <java.win.path>jdk1.8\bin\java</java.win.path>
         <!--for packaging without jdk version-->
-        <!--<java.path>java</java.path>-->
+        <java.path>java</java.path>
+        <java.win.path>java</java.win.path>
     </properties>
     <dependencies>
         <dependency>
@@ -162,6 +163,7 @@
                                     <directory>desc</directory>
                                     <excludes>
                                         <exclude>**/customized*.xml</exclude>
+                                        <exclude>**/pipeline_*.xml</exclude>
                                     </excludes>
                                 </resource>
                             </resources>

@@ -36,4 +36,9 @@ public class TestUnicode {
         m.appendTail(buf);
         return buf;
     }
+
+    @Test
+    public void testCh(){
+        System.out.println(Character.isAlphabetic('1'));
+    }
 }

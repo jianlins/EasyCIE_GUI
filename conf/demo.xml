@@ -21,16 +21,16 @@
   </import>  
   <easycie> 
     <pipeLineSetting> 
-      <ruleFile memo="FastNER rule file (token based)" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/concept_rule.xlsx</ruleFile>  
+      <tRule memo="FastNER rule file (token based)" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/tRule.xlsx</tRule>  
       <fastNERCaseSensitive memo="whether the rule above is case sensitive">false</fastNERCaseSensitive>  
-      <cRuleFile memo="FastCNER rule file (character based). Default blank value will not use FastCNER" doubleClick=" edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true"/>  
+      <cRule memo="FastCNER rule file (character based). Default blank value will not use FastCNER" doubleClick=" edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true"/>  
       <contextRule memo="FastContext rule file. Default blank value will not use FastContext" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/context.xlsx</contextRule>  
       <featureInfRule memo="Feature inference rule file. Default blank value will not use this component." doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default</featureInfRule>  
       <docInfRule memo="Document inference rule file location. Default blank value will not use this component." doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default</docInfRule>  
       <report memo="whether report the processing details at the end">t</report> 
     </pipeLineSetting>  
     <annotators> 
-      <current memo="Mark current annotations with annotator: ">v1</current> 
+      <current memo="Mark current annotations with annotator: ">v2</current> 
     </annotators>  
     <executes> 
       <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunEasyCIE</RunEasyCIE>  
@@ -41,9 +41,9 @@
     <compare> 
       <targetAnnotator memo="Compare annotations from annotator: ">v2</targetAnnotator>  
       <targetRunId memo="run id of target annotator. Default is the latest run id when leave blank"/>  
-      <referenceAnnotator memo="Compare annotations against annotator: ">ehost_import</referenceAnnotator>  
+      <referenceAnnotator memo="Compare annotations against annotator: ">v1</referenceAnnotator>  
       <referenceRunId memo="run id of reference annotator. Default is the latest run id when leave blank"/>  
-      <referenceTable>REFERENCE</referenceTable>  
+      <referenceTable></referenceTable>  
       <strictCompare>true</strictCompare>  
       <typeFilter memo="limit the comparison to a certain type"/> 
     </compare>  

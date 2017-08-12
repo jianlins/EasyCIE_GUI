@@ -28,15 +28,19 @@ public class ConfigFileChooser extends javafx.concurrent.Task {
             public void run() {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Choose " + setting.getSettingName());
-                File thisFile=new File(setting.getSettingValue());
-                File oldParentDir=new File(setting.getSettingValue()).getParentFile();
-                if(oldParentDir.exists())
-                    fileChooser.setInitialDirectory(oldParentDir);
+                File thisFile = new File(setting.getSettingValue());
+                if (thisFile.exists()) {
+                    File oldParentDir = new File(setting.getSettingValue()).getParentFile();
+                    if (oldParentDir.exists())
+                        fileChooser.setInitialDirectory(oldParentDir);
+                } else {
+                    fileChooser.setInitialDirectory(new File("./"));
+                }
                 File file = fileChooser.showOpenDialog(null);
                 if (file != null) {
                     String newValue = Main.getRelativePath(file.getAbsolutePath());
                     Main.valueChanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName(), newValue);
-                    currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick());
+                    currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick(),setting.isOpenable());
                     TasksOverviewController.currentTasksOverviewController.getSettingTable().refresh();
                 }
             }
