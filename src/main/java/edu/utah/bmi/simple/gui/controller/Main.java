@@ -4,6 +4,7 @@ package edu.utah.bmi.simple.gui.controller;
 import edu.utah.bmi.simple.gui.core.SettingOper;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
+import edu.utah.bmi.simple.gui.task.ConfigKeys;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -159,10 +160,10 @@ public class Main extends Application {
 //        settingOper.writeTasks(tasks);
         settingOper.ChangeMemos(memochanges);
         settingOper.ChangeValues(valueChanges);
-        int changeCount=valueChanges.size()+memochanges.size();
+        int changeCount = valueChanges.size() + memochanges.size();
         if (changeCount > 0)
-            bottomViewController.setMsg(changeCount+
-                    (changeCount>1?" changes":" change")+" saved");
+            bottomViewController.setMsg(changeCount +
+                    (changeCount > 1 ? " changes" : " change") + " saved");
         else
             bottomViewController.setMsg("No change is made.");
         settingOper.saveConfigs();
@@ -271,10 +272,7 @@ public class Main extends Application {
 
 
     public static String getRelativePath(String file) {
-        Path pathAbsolute = Paths.get(file);
-        Path pathBase = Paths.get(basePath);
-        Path pathRelative = pathBase.relativize(pathAbsolute);
-        return pathRelative.toString();
+        return ConfigKeys.getRelativePath(basePath, file);
     }
 
     public void setCurrentTaskName(String currentTaskName) {

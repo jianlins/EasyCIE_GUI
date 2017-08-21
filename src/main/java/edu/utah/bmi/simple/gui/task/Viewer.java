@@ -32,7 +32,6 @@ public class Viewer extends javafx.concurrent.Task {
         if (typeString.length() > 0) {
             types.addAll(Arrays.asList(typeString.split(",")));
         }
-
     }
 
     @Override

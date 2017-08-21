@@ -39,30 +39,34 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
     private void addText(RecordRow RecordRow) {
         String sentence = (String) RecordRow.getValueByColumnName("SNIPPET");
         String text = (String) RecordRow.getValueByColumnName("TEXT");
-
+        text = text.replaceAll("\\n", " ");
+        if (text.length() > snippetLength) {
+            text = text.substring(0, snippetLength) + "...";
+        }
         String pre, marker, post;
-        if (sentence!=null && sentence.length() > 0) {
+        if (sentence != null && sentence.length() > 0) {
+            sentence = sentence.replaceAll("\\n", " ");
             int sentenceLength = sentence.length();
             int begin = Integer.parseInt(RecordRow.getValueByColumnName("BEGIN") + "");
+            begin = begin < 0 ? 0 : begin;
             int end = Integer.parseInt(RecordRow.getValueByColumnName("END") + "");
+            end = end < 0 ? 0 : end;
             maxTxtWindow = (snippetLength - text.length()) / 2;
+            maxTxtWindow = maxTxtWindow < 0 ? 0 : maxTxtWindow;
             hbox.setPrefWidth(snippetLength + 20);
             int postCut = cutTail(sentence, begin, end);
             int preCut = cutHeader(postCut, begin, end);
-            if (preCut > 0)
+            if (preCut > 3 && preCut < begin)
                 pre = "..." + sentence.substring(preCut + 3, begin);
             else
                 pre = sentence.substring(preCut, begin);
 
             marker = sentence.substring(begin, end);
-            if (postCut < sentenceLength)
+            if (postCut > 3 + end && postCut < sentenceLength)
                 post = sentence.substring(end, postCut - 3) + "...";
             else
                 post = sentence.substring(end, postCut);
         } else {
-            if (text.length() > snippetLength) {
-                text = text.substring(0, snippetLength) + "...";
-            }
             pre = text;
             marker = "";
             post = "";

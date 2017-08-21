@@ -1,9 +1,14 @@
 package edu.utah.bmi.simple.gui.task;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * Created by u0876964 on 11/6/16.
  */
 public class ConfigKeys {
+
+    public static String mainBasePath = null;
     public static final String importDir = "documents/corpusDir";
 
     public static final String includeFileTypes = "documents/includeFileTypes";
@@ -13,8 +18,11 @@ public class ConfigKeys {
     public static final String overWriteAnnotatorName = "annotations/overWriteAnnotatorName";
     public static final String enableSentenceSnippet = "annotations/enableSentenceSnippet";
 
+    public static final String owlFile = "ontology/owlFile";
+    public static final String owlExportDir = "ontology/exportDir";
 
-    public static final String ruleFile = "pipeLineSetting/tRule";
+
+    public static final String tRuleFile = "pipeLineSetting/tRule";
     public static final String cRuleFile = "pipeLineSetting/cRule";
     public static final String contextRule = "pipeLineSetting/contextRule";
     public static final String reportPreannotating = "pipeLineSetting/report";
@@ -62,4 +70,23 @@ public class ConfigKeys {
     public static final String rushRule = "nlpComponents/rush";
 
 
+    public static final String rushType = "log/rushType";
+    public static final String cNERType = "log/cNERType";
+    public static final String tNERType = "log/tNERType";
+    public static final String contextType = "log/contextType";
+    public static final String featureInfType = "log/featureInfType";
+    public static final String docInfType = "log/docInfType";
+
+    public static String getRelativePath(String basePath, String file) {
+        if (mainBasePath == null)
+            mainBasePath = basePath;
+        Path pathAbsolute = Paths.get(file);
+        Path pathBase = Paths.get(basePath);
+        Path pathRelative = pathBase.relativize(pathAbsolute);
+        return pathRelative.toString();
+    }
+
+    public static String getRelativePath(String file) {
+        return getRelativePath(mainBasePath, file);
+    }
 }

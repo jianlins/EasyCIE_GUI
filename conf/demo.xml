@@ -3,20 +3,25 @@
 <configurations> 
   <import> 
     <documents> 
-      <corpusDir memo="the directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/input</corpusDir>  
+      <corpusDir memo="the directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">../../ichi2017/final</corpusDir>  
       <includeFileTypes memo="filter files by extension names (separate by comma). If not filter defined, all files will be read">txt</includeFileTypes> 
     </documents>  
     <annotations memo="support Brat and eHOST format, the format will be automatically detected."> 
-      <projectDir memo="the directory that hosts the eHOST project" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/brat</projectDir>  
+      <projectDir memo="the directory that hosts the eHOST project" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">../../ichi2017/ichi2017corpus</projectDir>  
       <includeAnnotationTypes/>  
       <enableSentenceSnippet>true</enableSentenceSnippet>  
-      <overWriteAnnotatorName memo="if a name is set, all the annotations' annotator will be overwritten by this name"/> 
+      <overWriteAnnotatorName memo="if a name is set, all the annotations' annotator will be overwritten by this name">gold</overWriteAnnotatorName> 
     </annotations>  
+    <ontology> 
+      <owlFile memo="ontology owl file" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">../easycie/conf/test/colonoscopyQuality.owl</owlFile>  
+      <exportDir memo="the directory to export the rule files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">conf</exportDir> 
+    </ontology>  
     <executes> 
       <ImportDocuments memo="Import corpus to database">edu.utah.bmi.simple.gui.task.Import txt</ImportDocuments>  
       <ViewImportedDocs memo="View the imported files in database">edu.utah.bmi.simple.gui.task.ViewImportDB doc</ViewImportedDocs>  
       <ImportAnnotations memo="Import annotations into the output table">edu.utah.bmi.simple.gui.task.Import anno</ImportAnnotations>  
-      <ViewImportedAnnotations memo="View the imported annotations in database">edu.utah.bmi.simple.gui.task.ViewImportDB anno</ViewImportedAnnotations> 
+      <ViewImportedAnnotations memo="View the imported annotations in database">edu.utah.bmi.simple.gui.task.ViewImportDB anno</ViewImportedAnnotations>  
+      <ImportOntology memo="Convert the ontology file  into excel rule Files">edu.utah.bmi.simple.gui.task.ImportOntology</ImportOntology> 
     </executes> 
   </import>  
   <easycie> 
@@ -25,12 +30,12 @@
       <fastNERCaseSensitive memo="whether the rule above is case sensitive">false</fastNERCaseSensitive>  
       <cRule memo="FastCNER rule file (character based). Default blank value will not use FastCNER" doubleClick=" edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true"/>  
       <contextRule memo="FastContext rule file. Default blank value will not use FastContext" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/context.xlsx</contextRule>  
-      <featureInfRule memo="Feature inference rule file. Default blank value will not use this component." doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default</featureInfRule>  
-      <docInfRule memo="Document inference rule file location. Default blank value will not use this component." doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">default</docInfRule>  
+      <featureInfRule memo="Feature inference rule file. Default blank value will not use this component." doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/featureInf.xlsx</featureInfRule>  
+      <docInfRule memo="Document inference rule file location. Default blank value will not use this component." doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openable="true">conf/test/docInf.xlsx</docInfRule>  
       <report memo="whether report the processing details at the end">t</report> 
     </pipeLineSetting>  
     <annotators> 
-      <current memo="Mark current annotations with annotator: ">v2</current> 
+      <current memo="Mark current annotations with annotator: ">v1</current> 
     </annotators>  
     <executes> 
       <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunEasyCIE</RunEasyCIE>  
@@ -39,12 +44,12 @@
   </easycie>  
   <compare> 
     <compare> 
-      <targetAnnotator memo="Compare annotations from annotator: ">v2</targetAnnotator>  
+      <targetAnnotator memo="Compare annotations from annotator: ">v1</targetAnnotator>  
       <targetRunId memo="run id of target annotator. Default is the latest run id when leave blank"/>  
-      <referenceAnnotator memo="Compare annotations against annotator: ">v1</referenceAnnotator>  
+      <referenceAnnotator memo="Compare annotations against annotator: ">gold</referenceAnnotator>  
       <referenceRunId memo="run id of reference annotator. Default is the latest run id when leave blank"/>  
-      <referenceTable></referenceTable>  
-      <strictCompare>true</strictCompare>  
+      <referenceTable>REFERENCE</referenceTable>  
+      <strictCompare>false</strictCompare>  
       <typeFilter memo="limit the comparison to a certain type"/> 
     </compare>  
     <executes> 
@@ -52,12 +57,25 @@
       <ViewComparedResults memo="View the output in database">edu.utah.bmi.simple.gui.task.ViewDiffDB</ViewComparedResults> 
     </executes> 
   </compare>  
+  <debug> 
+    <log> 
+      <rushType memo="display types of RuSH (sentence segmentor and tokenizer) output"/>  
+      <cNERType memo="display types of FastCNER output"/>  
+      <tNERType memo="display types of FastNER output">Concept</tNERType>  
+      <contextType memo="display types of FastContext output">Concept,Context</contextType>  
+      <featureInfType memo="display types of FeatureInferencer output">Concept</featureInfType>  
+      <docInfType memo="display types of DocInferencer output">Doc_Base</docInfType> 
+    </log>  
+    <executes> 
+      <RunEasyCIEDebugger memo="Debug using string input">edu.utah.bmi.simple.gui.task.RunEasyCIEDebugger</RunEasyCIEDebugger> 
+    </executes> 
+  </debug>  
   <export> 
     <format> 
       <ehost memo="the directory to save the exported ehost files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/ehost</ehost>  
       <brat memo="the directory to save the exported brat files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/brat</brat>  
       <uima memo="the directory to save the exported uima xmi files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/xmi</uima>  
-      <exportTypes memo="If specified, then only these types will be displayed(separate by comma). If not, only Concepts will be saved"/> 
+      <exportTypes memo="If specified, then only these types will be displayed(separate by comma). If not, only Concepts will be saved. To save document conclusion, add type Doc_BASE">Concept</exportTypes> 
     </format>  
     <executes> 
       <ExportEhost memo="Run Preannotator and export the annotation to eHOST format">edu.utah.bmi.simple.gui.task.RunEasyCIE ehost</ExportEhost>  
@@ -70,7 +88,7 @@
     <import> 
       <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml</dbFile>  
       <table memo="the table used to saved the txt corpus">DOCUMENTS</table>  
-      <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">0</datasetId>  
+      <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">n</datasetId>  
       <overwrite memo="if the table exist, whether overwrite it">true</overwrite> 
     </import>  
     <reference> 
@@ -90,8 +108,8 @@
       <highlighter_begin memo="Set default color to FFFFF, then the viewer will pick one from the color pool below.">&lt;span style="background-color: #FFFFFF"&gt;</highlighter_begin>  
       <highlighter_end>&lt;/span&gt;</highlighter_end>  
       <snippet_length>90</snippet_length>  
-      <random_pick_color memo="whether randomly pick a color from the color pool below or pick in order">true</random_pick_color>  
-      <color_pool>e32636|efdecd|ffbf00|00ffff|9966cc|ed872d|a3c1ad|a4c639|8db600|89cff0|fbceb1|7fffd4|e9d66b|87a96b|ff9966|21abcd|deb887|848482|fdee00|f4c2c2|ff2052|a1caf1|007fff|b2beb5|5d8aa8</color_pool> 
+      <random_pick_color memo="whether randomly pick a color from the color pool below or pick in order">t</random_pick_color>  
+      <color_pool>fffe4d|efdecd|ffbf00|00ffff|9966cc|ed872d|a3c1ad|a4c659|8db600|89cff0|fbceb1|7fffd4|e9d66b|87a96b|ff9966|21abcd|deb887|848482|fdee00|f4c2c2|ff2052|a1caf1|007fff|b2beb5|5d8aa8</color_pool> 
     </viewer>  
     <help>https://github.com/jianlins/EasyCIE_GUI/wiki</help>  
     <issues>https://github.com/jianlins/EasyCIE_GUI/issues</issues> 

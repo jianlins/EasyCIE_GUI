@@ -10,7 +10,6 @@ import edu.utah.bmi.nlp.easycie.CoordinateNERResults_AE;
 import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
 import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
 import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
-import edu.utah.bmi.nlp.runner.CommonFunc;
 import edu.utah.bmi.nlp.runner.RunPipe;
 import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.sql.DAO;
@@ -26,16 +25,11 @@ import edu.utah.bmi.nlp.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.writer.XMIWritter_AE;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-
-import static edu.utah.bmi.nlp.runner.CommonFunc.addOption;
-import static edu.utah.bmi.nlp.runner.CommonFunc.getCmdValue;
 
 /**
  * Created by Jianlin Shi on 9/19/16.
@@ -49,9 +43,9 @@ public class RunEasyCIE extends GUITask {
             featureInfRule = "", docInfRule = "";
     public AdaptableUIMACPETaskRunner runner;
     protected DAO rdao, wdao;
-    private boolean ehost = false, brat = false, xmi = false;
-    private String exporttypes;
-    private String customTypeDescriptor;
+    public boolean ehost = false, brat = false, xmi = false;
+    protected String exporttypes;
+    protected String customTypeDescriptor;
 
     public static void main(String[] args) {
         RunPipe runPipe = new RunPipe(args);
@@ -119,11 +113,11 @@ public class RunEasyCIE extends GUITask {
         initPipe(task, readDBConfigFile, datasetId, annotator);
     }
 
-    private void initiate(TasksFX tasks, String option) {
+    protected void initiate(TasksFX tasks, String option) {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
-        fastNERRule = config.getValue(ConfigKeys.ruleFile);
+        fastNERRule = config.getValue(ConfigKeys.tRuleFile);
         fastCNERRule = config.getValue(ConfigKeys.cRuleFile);
         contextRule = config.getValue(ConfigKeys.contextRule);
         featureInfRule = config.getValue(ConfigKeys.featureInfRule);
@@ -203,6 +197,7 @@ public class RunEasyCIE extends GUITask {
             runner = new AdaptableUIMACPETaskRunner(defaultTypeDescriptor, "./classes/");
         runner.setLogger(logger);
         runner.setTask(task);
+
         initTypes(customTypeDescriptor);
         addReader(readDBConfigFile, datasetId);
         addAnalysisEngines(runner);
@@ -303,12 +298,13 @@ public class RunEasyCIE extends GUITask {
                     SQLWriterCasConsumer.PARAM_TABLENAME, outputTableName,
                     SQLWriterCasConsumer.PARAM_ANNOTATOR, annotator,
                     SQLWriterCasConsumer.PARAM_VERSION, runId,
+                    SQLWriterCasConsumer.PARAM_WRITE_CONCEPT,exporttypes,
                     SQLWriterCasConsumer.PARAM_OVERWRITETABLE, false, SQLWriterCasConsumer.PARAM_BATCHSIZE, 150});
         }
 
     }
 
-    private void addAnalysisEngines(AdaptableUIMACPETaskRunner runner) {
+    protected void addAnalysisEngines(AdaptableUIMACPETaskRunner runner) {
         if (rushRule.length() > 0) {
             if (debug)
                 System.out.println("add engine RuSH_AE");
@@ -354,7 +350,8 @@ public class RunEasyCIE extends GUITask {
         if (contextRule.length() > 0) {
             if (debug)
                 System.out.println("add engine FastContext_General_AE ");
-            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule});
+            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule,
+                    FastContext_General_AE.PARAM_AUTO_EXPAND_SCOPE,false});
         }
 
         if (featureInfRule.length() > 0)

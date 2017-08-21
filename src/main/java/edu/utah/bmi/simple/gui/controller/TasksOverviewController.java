@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -257,8 +258,8 @@ public class TasksOverviewController {
                         }
                     });
                     th.start();
-                }else{
-                    bottomViewController.setMsg("File \""+file+"\" doesn't exist.");
+                } else {
+                    bottomViewController.setMsg("File \"" + file + "\" doesn't exist.");
                 }
             }
         });
@@ -284,8 +285,8 @@ public class TasksOverviewController {
                         }
                     });
                     th.start();
-                }else{
-                    bottomViewController.setMsg("File \""+file+"\" doesn't exist.");
+                } else {
+                    bottomViewController.setMsg("File \"" + file + "\" doesn't exist.");
                 }
             }
 //
@@ -336,7 +337,6 @@ public class TasksOverviewController {
         columnNames.add("TYPE");
         columnNames.add("DOC_NAME");
         columnNames.add("ANNOTATOR");
-        columnNames.add("DOC_NAME");
         columnNames.add("COMMENTS");
         columnNames.add("RUN_ID");
         if (doctable)
@@ -356,32 +356,10 @@ public class TasksOverviewController {
         return showDBTable(dbName, columnNames, tableName, filter, colorDifferential);
     }
 
-
-    public boolean showDBTable(String dbName, ArrayList<String> columnNames,
-                               String tableName, String filter, String colorDifferential) {
-//        settingPanel.settingPanel.setVisible(false);
+    public boolean showDBTable(ArrayList<String> columnNames, Iterator rs, String colorDifferential, boolean doctable) {
+        this.doctable = doctable;
         dbPanel.setVisible(true);
         annoTableView.setVisible(true);
-        if (!currentTableName.equals(tableName) || !currentDBName.equals(dbName) || !currentFilter.equals(filter) || enableRefresh) {
-            currentTableName = tableName;
-            currentDBName = dbName;
-            currentFilter = filter;
-            enableRefresh = false;
-        } else {
-            return true;
-        }
-
-
-        DAO dao = new DAO(new File(dbName));
-        String condition = filter;
-        if (filter.length() > 7) {
-            condition = filter.substring(filter.toLowerCase().indexOf(" where ") + 7).trim();
-        }
-        sqlFilter.setText(condition);
-
-        RecordRowIterator rs = queryRecords(dao, tableName, filter);
-
-
         ObservableList<ObservableList> data = FXCollections.observableArrayList();
         ColorAnnotationCell.colorDifferential = colorDifferential;
         Callback<TableColumn, TableCell> cellFactory =
@@ -425,23 +403,50 @@ public class TasksOverviewController {
                 return row;
             });
         }
-        boolean readed = false;
+        boolean haveRead = false;
         while (rs != null && rs.hasNext()) {
             //Iterate Row
             ObservableList<Object> row = FXCollections.observableArrayList();
-            RecordRow record = rs.next();
+            RecordRow record = (RecordRow) rs.next();
             row.add(record.getValueByColumnName(columnNames.get(0)));
             row.add(record);
             for (int i = 2; i < columnNames.size(); i++) {
                 row.add(record.getValueByColumnName(columnNames.get(i)));
             }
             data.add(row);
-            readed = true;
+            haveRead = true;
         }
         annoTableView.setItems(data);
         annoTableView.refresh();
+        return haveRead;
+    }
+
+    public boolean showDBTable(String dbName, ArrayList<String> columnNames,
+                               String tableName, String filter, String colorDifferential) {
+//        settingPanel.settingPanel.setVisible(false);
+
+        if (!currentTableName.equals(tableName) || !currentDBName.equals(dbName) || !currentFilter.equals(filter) || enableRefresh) {
+            currentTableName = tableName;
+            currentDBName = dbName;
+            currentFilter = filter;
+            enableRefresh = false;
+        } else {
+            return true;
+        }
+
+
+        DAO dao = new DAO(new File(dbName));
+        String condition = filter;
+        if (filter.length() > 7) {
+            condition = filter.substring(filter.toLowerCase().indexOf(" where ") + 7).trim();
+        }
+        sqlFilter.setText(condition);
+
+        RecordRowIterator rs = queryRecords(dao, tableName, filter);
+
+        boolean haveRead = showDBTable(columnNames, rs, colorDifferential, doctable);
         dao.close();
-        return readed;
+        return haveRead;
     }
 
 
@@ -487,6 +492,9 @@ public class TasksOverviewController {
     }
 
     private void updateFeatureTable(String features) {
+        if (features.startsWith("Note:")) {
+            features = "\t" + features.substring(5);
+        }
         ObservableList<String[]> data = FXCollections.observableArrayList();
         for (String featureNameValue : features.split("\\n")) {
             ObservableList<Object> row = FXCollections.observableArrayList();
@@ -509,7 +517,7 @@ public class TasksOverviewController {
         this.bottomViewController = mainApp.bottomViewController;
     }
 
-    private void showTask(TaskFX currentTask) {
+    public void showTask(TaskFX currentTask) {
         dbPanel.setVisible(false);
         this.currentTask = currentTask;
         mainApp.setCurrentTaskName(currentTask.getTaskName());

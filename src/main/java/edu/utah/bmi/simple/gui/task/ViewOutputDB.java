@@ -78,7 +78,7 @@ public class ViewOutputDB extends GUITask {
                                         "if the dataset has been imported successfully.\n" +
                                         "EasyCIE will display all the previous outputs if there is any.");
                     } else if (annotatorLastRunid != lastLogRunId) {
-                        popDialog("Note", "There is no output in the most recent run of annotator:\""+annotator+"\"," +
+                        popDialog("Note", "There is no output in the most recent run of annotator:\"" + annotator + "\"," +
                                         " which RUN_ID=" + lastLogRunId,
                                 "Please check the pipeline configuration to see if the rules are configured correctly, and " +
                                         "if the dataset has been imported successfully.\n" +
@@ -106,7 +106,8 @@ public class ViewOutputDB extends GUITask {
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", outputTable, annotator);
         if (recordRowIter.hasNext()) {
             RecordRow recordRow = recordRowIter.next();
-            id = (int) recordRow.getValueByColumnId(1);
+            if (recordRow != null)
+                id = (int) recordRow.getValueByColumnId(1);
 
         }
         return id;
@@ -117,7 +118,8 @@ public class ViewOutputDB extends GUITask {
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("lastLogRunID", annotator);
         if (recordRowIter.hasNext()) {
             RecordRow recordRow = recordRowIter.next();
-            id = (int) recordRow.getValueByColumnId(1);
+            if (recordRow != null)
+                id = (int) recordRow.getValueByColumnId(1);
         }
         return id;
     }

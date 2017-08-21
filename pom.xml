@@ -65,14 +65,14 @@
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-jar-plugin</artifactId>-->
+            <!--<version>2.3.1</version>-->
+            <!--<configuration>-->
+            <!--<outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
+            <!--</configuration>-->
+            <!--</plugin>-->
             <!--<plugin>-->
             <!--<groupId>org.apache.maven.plugins</groupId>-->
             <!--<artifactId>maven-dependency-plugin</artifactId>-->
@@ -143,6 +143,12 @@
                                 <resource>
                                     <directory>script</directory>
                                     <filtering>true</filtering>
+                                    <excludes>
+                                        <exclude>run.*</exclude>
+                                        <exclude>help.*</exclude>
+                                        <exclude>run</exclude>
+                                        <exclude>help</exclude>
+                                    </excludes>
                                 </resource>
                             </resources>
                             <nonFilteredFileExtensions>
@@ -220,6 +226,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

@@ -82,7 +82,7 @@ public class DoubleClickableCell extends TableCell<ObservableList, Object> {
             System.out.println(taskClassName);
             c = Class.forName(taskClassName).asSubclass(javafx.concurrent.Task.class);
             Constructor<? extends javafx.concurrent.Task> taskConstructor;
-            if (para.length() > 0) {
+            if (para.length() > 0 || taskClassName.endsWith("Chooser")) {
                 taskConstructor = c.getConstructor(TaskFX.class, Setting.class);
                 thisTask = taskConstructor.newInstance(currentTask, setting);
             } else {

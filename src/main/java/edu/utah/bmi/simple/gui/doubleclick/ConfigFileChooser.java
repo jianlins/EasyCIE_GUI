@@ -23,6 +23,7 @@ public class ConfigFileChooser extends javafx.concurrent.Task {
         this.setting = setting;
     }
 
+
     protected Object call() throws Exception {
         Platform.runLater(new Runnable() {
             public void run() {
