@@ -23,6 +23,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.web.HTMLEditor;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.util.Callback;
 
 import java.awt.*;
@@ -68,7 +70,7 @@ public class TasksOverviewController {
     private TableColumn<String[], String> featureNameColumn, featureValueColumn;
 
     @FXML
-    private HTMLEditor htmlEditor;
+    private WebView htmlViewer;
 
 
     @FXML
@@ -101,6 +103,7 @@ public class TasksOverviewController {
 
     private boolean doctable = true;
 
+    private WebEngine webEngine;
 
     public TasksOverviewController() {
     }
@@ -163,20 +166,21 @@ public class TasksOverviewController {
                     TableColumn col = (TableColumn) annoTableView.getColumns().get(1);
                     col.setMaxWidth((int) newValue.doubleValue() * 0.9);
                     col.setPrefWidth((int) newValue.doubleValue() * 0.4);
-                    htmlEditor.setPrefWidth(newValue.doubleValue() * 0.15);
+                    htmlViewer.setPrefWidth(newValue.doubleValue() * 0.15);
                 }
             }
         });
 
 //      Enable autoresize of htmleditor
-        GridPane gridPane = (GridPane) htmlEditor.getChildrenUnmodifiable().get(0);
-        RowConstraints row1 = new RowConstraints();
-        row1.setVgrow(Priority.NEVER);
-        RowConstraints row2 = new RowConstraints();
-        row2.setVgrow(Priority.NEVER);
-        RowConstraints row3 = new RowConstraints();
-        row3.setVgrow(Priority.ALWAYS);
-        gridPane.getRowConstraints().addAll(row1, row2, row3);
+//        GridPane gridPane = (GridPane) htmlViewer.getChildrenUnmodifiable().get(0);
+        webEngine=htmlViewer.getEngine();
+//        RowConstraints row1 = new RowConstraints();
+//        row1.setVgrow(Priority.NEVER);
+//        RowConstraints row2 = new RowConstraints();
+//        row2.setVgrow(Priority.NEVER);
+//        RowConstraints row3 = new RowConstraints();
+//        row3.setVgrow(Priority.ALWAYS);
+//        gridPane.getRowConstraints().addAll(row1, row2, row3);
 
 
         tableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
@@ -485,7 +489,8 @@ public class TasksOverviewController {
                     color);
         }
         text = text.replaceAll("\\n", "<br>");
-        htmlEditor.setHtmlText(text);
+//        htmlEditor.setHtmlText(text);
+        webEngine.loadContent(text);
         if (record.getStrByColumnName("FEATURES") != null && record.getStrByColumnName("FEATURES").length() > 0) {
             annoDetails.setBottom(featureTable);
             updateFeatureTable(record.getStrByColumnName("FEATURES"));

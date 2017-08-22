@@ -150,6 +150,7 @@
                                         <exclude>run</exclude>
                                         <exclude>help</exclude>
                                         <exclude>*.xml</exclude>
+                                        <exclude>zipper.sh</exclude>
                                     </excludes>
                                 </resource>
                             </resources>
@@ -226,7 +227,6 @@
                     <mainClass>edu.utah.bmi.simple.gui.controller.Main</mainClass>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
