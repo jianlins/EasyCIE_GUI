@@ -435,6 +435,8 @@ public class TasksOverviewController {
             currentFilter = filter;
             enableRefresh = false;
         } else {
+            dbPanel.setVisible(true);
+            annoTableView.setVisible(true);
             return true;
         }
 
