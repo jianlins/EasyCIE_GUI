@@ -108,7 +108,7 @@
       <highlighter_begin memo="Set default color to FFFFF, then the viewer will pick one from the color pool below.">&lt;span style="background-color: #FFFFFF"&gt;</highlighter_begin>  
       <highlighter_end>&lt;/span&gt;</highlighter_end>  
       <snippet_length>90</snippet_length>  
-      <random_pick_color memo="whether randomly pick a color from the color pool below or pick in order">t</random_pick_color>  
+      <random_pick_color memo="whether randomly pick a color from the color pool below or pick in order">f</random_pick_color>  
       <color_pool>fffe4d|efdecd|ffbf00|00ffff|9966cc|ed872d|a3c1ad|a4c659|8db600|89cff0|fbceb1|7fffd4|e9d66b|87a96b|ff9966|21abcd|deb887|848482|fdee00|f4c2c2|ff2052|a1caf1|007fff|b2beb5|5d8aa8</color_pool> 
     </viewer>  
     <help>https://github.com/jianlins/EasyCIE_GUI/wiki</help>  

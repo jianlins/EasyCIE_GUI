@@ -89,6 +89,21 @@ public class CompareTask extends GUITask {
         types.clear();
         logger = new NLPDBLogger(wdao, "LOG", "RUN_ID", targetAnnotator + "_vs_" + referenceAnnotator);
         logger.logStartTime();
+        if (!wdao.checkExists(outputTable)) {
+            updateMessage("Table '" + outputTable + "' does not exit.");
+            popDialog("Note", "Table '" + outputTable + "' does not exit.",
+                    " You need to execute 'RunEasyCIE' first.");
+            updateProgress(0, 0);
+            return null;
+        }
+        if (!rdao.checkExists(compareReferenceTable)) {
+            updateMessage("Table '" + compareReferenceTable + "' does not exit.");
+            popDialog("Note", "Table '" + compareReferenceTable + "' does not exit.",
+                    " You need to either execute 'RunEasyCIE' or import reference annotations.");
+            updateProgress(0, 0);
+            return null;
+        }
+
         readAnnotations(wdao, targetAnnotations, targetAnnotator, outputTable, typeFilter, targetRunId);
         readAnnotations(rdao, referenceAnnotations, referenceAnnotator, compareReferenceTable, typeFilter, referenceRunId);
         updateMessage("Start comparing...");

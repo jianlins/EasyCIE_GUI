@@ -479,7 +479,10 @@ public class TasksOverviewController {
         if (text == null || text.length() == 0) {
             text = record.getStrByColumnName("TEXT");
         } else if (!doctable) {
-            text = ColorAnnotationCell.generateHTML(text, (int) record.getValueByColumnName("BEGIN"), (int) record.getValueByColumnName("END"), color);
+            text = ColorAnnotationCell.generateHTML(text,
+                    (int) record.getValueByColumnName("BEGIN"),
+                    (int) record.getValueByColumnName("END"),
+                    color);
         }
         text = text.replaceAll("\\n", "<br>");
         htmlEditor.setHtmlText(text);

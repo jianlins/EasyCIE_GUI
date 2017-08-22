@@ -46,6 +46,13 @@ public class ViewDiffDB extends GUITask {
                 if (annotatorCompare.trim().length() > 0 && annotatorAgainst.trim().length() > 0) {
                     String annotator = annotatorCompare + "_vs_" + annotatorAgainst;
                     DAO dao = new DAO(new File(outputDB));
+                    if (!dao.checkExists(diffTable)) {
+                        updateMessage("Table '" + diffTable + "' does not exit.");
+                        popDialog("Note", "Table '" + diffTable + "' does not exit.",
+                                " You need to execute 'Compare' first.");
+                        updateProgress(0, 0);
+                        return;
+                    }
                     RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", diffTable, annotator);
                     if (recordRowIter == null) {
                         updateMessage("Table " + diffTable + " hasn't been created.");
@@ -54,11 +61,19 @@ public class ViewDiffDB extends GUITask {
                     }
                     if (recordRowIter.hasNext()) {
                         RecordRow recordRow = recordRowIter.next();
+                        Object obj = recordRow.getValueByColumnId(1);
+                        if (obj == null) {
+                            popDialog("Note", "There is not compared results" +
+                                            " in the table '" + diffTable + "'.",
+                                    "Make sure you have executed 'Compare' first.");
+                            updateProgress(0,0);
+                            return;
+                        }
                         int lastRunId = (int) recordRow.getValueByColumnId(1);
                         if (CompareTask.lastRunId != -1 && lastRunId < CompareTask.lastRunId) {
                             popDialog("Note", "No difference saved in the most recent comparison. ",
                                     "The last comparison of \"" + annotator + "\" has no difference saved in table \"" + diffTable + "\".\n" +
-                                    "Here displays the previous comparison that has some difference saved.");
+                                            "Here displays the previous comparison that has some difference saved.");
                         }
                         TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, diffTable,
                                 " WHERE annotator='" + annotator + "' AND RUN_ID=" + lastRunId, "diff");

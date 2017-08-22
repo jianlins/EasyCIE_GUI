@@ -70,6 +70,13 @@ public class ViewOutputDB extends GUITask {
                 if (annotator.trim().length() > 0) {
 
                     DAO dao = new DAO(new File(outputDB));
+                    if (!dao.checkExists(outputTable)) {
+                        updateMessage("Table '" + outputTable + "' does not exit.");
+                        popDialog("Note", "Table '" + outputTable + "' does not exit.",
+                                " You need to execute 'RunEasyCIE' first.");
+                        updateProgress(0, 0);
+                        return;
+                    }
                     int annotatorLastRunid = getLastRunIdofAnnotator(dao, outputTable, annotator);
                     int lastLogRunId = getLastLogRunId(dao, annotator);
                     if (annotatorLastRunid == -1) {
@@ -106,7 +113,7 @@ public class ViewOutputDB extends GUITask {
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", outputTable, annotator);
         if (recordRowIter.hasNext()) {
             RecordRow recordRow = recordRowIter.next();
-            if (recordRow != null)
+            if (recordRow != null && recordRow.getValueByColumnId(1)!=null)
                 id = (int) recordRow.getValueByColumnId(1);
 
         }
