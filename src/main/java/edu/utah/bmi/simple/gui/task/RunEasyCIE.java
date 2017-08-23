@@ -88,7 +88,7 @@ public class RunEasyCIE extends GUITask {
         this.ehostDir = ehostDir;
         this.bratDir = bratDir;
         this.xmiDir = xmiDir;
-        this.exporttypes = exporttypes;
+        this.exporttypes = exporttypes.replaceAll("\\s+","");
         switch (option) {
             case "ehost":
                 ehost = true;

@@ -1,7 +1,6 @@
 package edu.utah.bmi.simple.gui.task;
 
 
-import edu.utah.bmi.nlp.ae.AnnotationLogger;
 import edu.utah.bmi.nlp.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.ae.FeatureInferenceAnnotator;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
@@ -28,6 +27,7 @@ import edu.utah.bmi.nlp.writer.BratWritter_AE;
 import edu.utah.bmi.nlp.writer.EhostWriter_AE;
 import edu.utah.bmi.nlp.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.writer.XMIWritter_AE;
+import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;

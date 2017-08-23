@@ -3,6 +3,7 @@ package edu.utah.bmi.simple.gui.task;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.runner.CommonFunc;
 import edu.utah.bmi.nlp.runner.RunPipe;
+import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.BratReader;
@@ -83,7 +84,7 @@ public class Import extends GUITask {
         overwrite = settingConfig.getValue(ConfigKeys.overwrite).charAt(0) == 't'
                 || settingConfig.getValue(ConfigKeys.overwrite).charAt(0) == 'T'
                 || settingConfig.getValue(ConfigKeys.overwrite).charAt(0) == '1';
-        rushRule = (enableSentenceSeg) ? config.getValue(ConfigKeys.rushRule) : "";
+        rushRule = (enableSentenceSeg) ? settingConfig.getValue(ConfigKeys.rushRule) : "";
         File dbconfig = new File(dbConfigFile);
         if (CommonFunc.checkFileExist(dbconfig, "dbconfig")) {
             initSuccess = false;
@@ -196,6 +197,7 @@ public class Import extends GUITask {
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", tableName, overWrite);
 
         runner = new RunEasyCIE();
+
         if (annotator.length() == 0)
             annotator = "ehost_import";
         runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "",
@@ -204,7 +206,9 @@ public class Import extends GUITask {
 
         runner.initTypes(EhostReader.getTypeDefinitions(inputDir.getAbsolutePath()));
         runner.setReader(EhostReader.class, new Object[]{EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
-                EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, EhostReader.PARAM_PRINT, print});
+                EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator,
+                EhostReader.PARAM_READ_TYPES, includeTypes,
+                EhostReader.PARAM_PRINT, print});
 
     }
 
@@ -221,8 +225,11 @@ public class Import extends GUITask {
                 dbConfigFile, importTable, "", "", "", includeTypes, "db");
 
         runner.initTypes(BratReader.getTypeDefinitions(inputDir.getAbsolutePath()));
-        runner.setReader(BratReader.class, new Object[]{EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
-                EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, EhostReader.PARAM_PRINT, print});
+        runner.setReader(BratReader.class, new Object[]{BratReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
+                BratReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator,
+                BratReader.PARAM_READ_TYPES, includeTypes,
+                BratReader.PARAM_PRINT, print});
+
 
     }
 

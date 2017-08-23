@@ -1,15 +1,19 @@
 package edu.utah.bmi;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author Jianlin Shi
- *         Created on 2/26/17.
+ * Created on 2/26/17.
  */
 public class TestArgs {
 
@@ -20,8 +24,8 @@ public class TestArgs {
     @Test
     public void testArgs() {
         test();
-        String a="\u0097";
-        File file=new File("data/output/ehost");
+        String a = "\u0097";
+        File file = new File("data/output/ehost");
         System.out.println(file.getParentFile().getName());
 
     }
@@ -31,7 +35,6 @@ public class TestArgs {
             for (String arg : args)
                 System.out.println(arg);
         }
-
 
 
     }
@@ -50,5 +53,7 @@ public class TestArgs {
 
         b.close();
     }
+
+
 
 }

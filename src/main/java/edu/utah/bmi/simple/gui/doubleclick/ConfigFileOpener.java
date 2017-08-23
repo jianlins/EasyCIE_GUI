@@ -1,5 +1,6 @@
 package edu.utah.bmi.simple.gui.doubleclick;
 
+import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.Setting;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -15,7 +16,7 @@ import java.io.IOException;
  *
  * @Author Jianlin Shi on 4/10/17.
  */
-public class ConfigFileOpener extends javafx.concurrent.Task {
+public class ConfigFileOpener extends GUITask {
     private TaskFX currentTask;
     private Setting setting;
 
@@ -29,12 +30,15 @@ public class ConfigFileOpener extends javafx.concurrent.Task {
             public void run() {
 //                File oldParentDir=new File(setting.getSettingValue()).getParentFile();
                 File thisFile = new File(setting.getSettingValue());
-
-                try {
-                    Desktop.getDesktop().open(thisFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                if (thisFile.exists())
+                    try {
+                        Desktop.getDesktop().open(thisFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                else
+                    popDialog("Note","The file '"+setting.getSettingValue()+"' doesn't exist.",
+                            "Please choose the correct file.");
 
             }
         });

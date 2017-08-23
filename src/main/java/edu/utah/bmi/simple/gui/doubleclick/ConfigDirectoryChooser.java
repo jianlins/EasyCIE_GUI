@@ -29,8 +29,9 @@ public class ConfigDirectoryChooser extends javafx.concurrent.Task {
                 DirectoryChooser dirChooser = new DirectoryChooser();
                 dirChooser.setTitle("Choose " + setting.getSettingName());
                 File oldParentDir = new File(setting.getSettingValue()).getParentFile();
-                if (oldParentDir.exists())
-                    dirChooser.setInitialDirectory(oldParentDir);
+                if (oldParentDir == null || !oldParentDir.exists())
+                    oldParentDir = new File("./");
+                dirChooser.setInitialDirectory(oldParentDir);
                 File file = dirChooser.showDialog(null);
                 if (file != null) {
                     String newValue = Main.getRelativePath(file.getAbsolutePath());

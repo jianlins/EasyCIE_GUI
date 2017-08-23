@@ -52,6 +52,7 @@ public class RunDebugPipe extends RunPipe {
     }
 
     public void run() {
+        AnnotationLogger.reset();
         runner.run();
     }
 
