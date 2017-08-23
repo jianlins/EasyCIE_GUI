@@ -75,7 +75,7 @@
       <ehost memo="the directory to save the exported ehost files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/ehost</ehost>  
       <brat memo="the directory to save the exported brat files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/brat</brat>  
       <uima memo="the directory to save the exported uima xmi files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/xmi</uima>  
-      <exportTypes memo="If specified, then only these types will be displayed(separate by comma). If not, only Concepts will be saved. To save document conclusion, add type Doc_BASE">Concept,Doc_Base</exportTypes> 
+      <exportTypes memo="If specified, then only these types will be displayed(separate by comma). If not, only Concepts will be saved. To save document conclusion, add type Doc_BASE">Concept</exportTypes> 
     </format>  
     <executes> 
       <ExportEhost memo="Run Preannotator and export the annotation to eHOST format">edu.utah.bmi.simple.gui.task.RunEasyCIE ehost</ExportEhost>  

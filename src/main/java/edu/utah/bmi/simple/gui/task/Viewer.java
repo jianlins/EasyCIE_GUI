@@ -56,16 +56,17 @@ public class Viewer extends javafx.concurrent.Task {
         String inputPath = xmiDir.getAbsolutePath();
         String descripterPath = descriptorFile.getAbsolutePath();
 
-        final String[] args = new String[types.size() + 3];
+//        final String[] args = new String[types.size() + 3];
+        final String[]  args = new String[3];
         args[0] = "Annotation Viewer";
         args[1] = inputPath;
         args[2] = descripterPath;
-        if (types.size() > 0)
-            for (int i = 0; i < types.size(); i++) {
-                String type = types.get(i);
-                type = DeterminantValueSet.checkNameSpace(type);
-                args[i + 3] = type;
-            }
+//        if (types.size() > 0)
+//            for (int i = 0; i < types.size(); i++) {
+//                String type = types.get(i);
+//                type = DeterminantValueSet.checkNameSpace(type);
+//                args[i + 3] = type;
+//            }
 
 
         SwingUtilities.invokeLater(new Runnable() {
