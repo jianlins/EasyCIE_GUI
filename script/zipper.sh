@@ -1,4 +1,4 @@
-version="2.0.2"
+version="2.0.3"
 cd ..
 base="$PWD"
 if [ ! -d "$base/target/release" ]; then
