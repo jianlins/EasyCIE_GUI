@@ -36,22 +36,18 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         }
     }
 
-    private void addText(RecordRow RecordRow) {
-        String sentence = (String) RecordRow.getValueByColumnName("SNIPPET");
-        String text = (String) RecordRow.getValueByColumnName("TEXT");
-        text = text.replaceAll("\\n", " ");
-        if (text.length() > snippetLength) {
-            text = text.substring(0, snippetLength) + "...";
-        }
+    private void addText(RecordRow recordRow) {
+        String sentence = (String) recordRow.getValueByColumnName("SNIPPET");
+
         String pre, marker, post;
-        if (sentence != null && sentence.length() > 0) {
+        if (recordRow.getValueByColumnName("BEGIN") != null) {
             sentence = sentence.replaceAll("\\n", " ");
             int sentenceLength = sentence.length();
-            int begin = Integer.parseInt(RecordRow.getValueByColumnName("BEGIN") + "");
+            int begin = Integer.parseInt(recordRow.getValueByColumnName("BEGIN") + "");
             begin = begin < 0 ? 0 : begin;
-            int end = Integer.parseInt(RecordRow.getValueByColumnName("END") + "");
+            int end = Integer.parseInt(recordRow.getValueByColumnName("END") + "");
             end = end < 0 ? 0 : end;
-            maxTxtWindow = (snippetLength - text.length()) / 2;
+            maxTxtWindow = (snippetLength - (end-begin)) / 2;
             maxTxtWindow = maxTxtWindow < 0 ? 0 : maxTxtWindow;
             hbox.setPrefWidth(snippetLength + 20);
             int postCut = cutTail(sentence, begin, end);
@@ -67,11 +63,14 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
             else
                 post = sentence.substring(end, postCut);
         } else {
-            pre = text;
+            if (sentence.length() > snippetLength) {
+                sentence = sentence.substring(0, snippetLength) + "...";
+            }
+            pre = sentence;
             marker = "";
             post = "";
         }
-        String color = pickColor(RecordRow, colorDifferential);
+        String color = pickColor(recordRow, colorDifferential);
         pre = pre.replaceAll("[\\s|\\n]", " ");
         marker = marker.replaceAll("[\\s|\\n]", " ");
         post = post.replaceAll("[\\s|\\n]", " ");

@@ -1,6 +1,7 @@
 package edu.utah.bmi.simple.gui.controller;
 
 import com.sun.javafx.collections.ObservableMapWrapper;
+import edu.utah.bmi.nlp.sql.ColumnInfo;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
@@ -159,21 +160,11 @@ public class TasksOverviewController {
         }
         currentTasksOverviewController = this;
 
-        dbPanel.widthProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if (annoTableView.getColumns() != null && annoTableView.getColumns().size() > 1) {
-                    TableColumn col = (TableColumn) annoTableView.getColumns().get(1);
-                    col.setMaxWidth((int) newValue.doubleValue() * 0.9);
-                    col.setPrefWidth((int) newValue.doubleValue() * 0.4);
-                    htmlViewer.setPrefWidth(newValue.doubleValue() * 0.15);
-                }
-            }
-        });
+
 
 //      Enable autoresize of htmleditor
 //        GridPane gridPane = (GridPane) htmlViewer.getChildrenUnmodifiable().get(0);
-        webEngine=htmlViewer.getEngine();
+        webEngine = htmlViewer.getEngine();
 //        RowConstraints row1 = new RowConstraints();
 //        row1.setVgrow(Priority.NEVER);
 //        RowConstraints row2 = new RowConstraints();
@@ -335,87 +326,113 @@ public class TasksOverviewController {
 
 
     public boolean showAnnoTable(String dbName, String tableName, String filter, String colorDifferential) {
-        ArrayList<String> columnNames = new ArrayList<>();
-        columnNames.add("ID");
-        columnNames.add("SNIPPET");
-        columnNames.add("TYPE");
-        columnNames.add("DOC_NAME");
-        columnNames.add("ANNOTATOR");
-        columnNames.add("COMMENTS");
-        columnNames.add("RUN_ID");
         if (doctable)
             annoTableView.getColumns().clear();
         doctable = false;
-        return showDBTable(dbName, columnNames, tableName, filter, colorDifferential);
+        return showDBTable(dbName, "queryAnnos", tableName, filter, colorDifferential);
     }
 
     public boolean showDocTable(String dbName, String tableName, String filter, String colorDifferential) {
-        ArrayList<String> columnNames = new ArrayList<>();
-        columnNames.add("DOC_ID");
-        columnNames.add("DATASET_ID");
-        columnNames.add("DOC_NAME");
         if (!doctable)
             annoTableView.getColumns().clear();
         doctable = true;
-        return showDBTable(dbName, columnNames, tableName, filter, colorDifferential);
+        return showDBTable(dbName, "queryDocs", tableName, filter, colorDifferential);
     }
 
-    public boolean showDBTable(ArrayList<String> columnNames, Iterator rs, String colorDifferential, boolean doctable) {
+    public boolean showDBTable(RecordRowIterator rs, String colorDifferential, boolean doctable) {
         this.doctable = doctable;
         dbPanel.setVisible(true);
         annoTableView.setVisible(true);
         ObservableList<ObservableList> data = FXCollections.observableArrayList();
         ColorAnnotationCell.colorDifferential = colorDifferential;
-        Callback<TableColumn, TableCell> cellFactory =
+        ColumnInfo columanInfo = rs.getColumninfo();
+        int numOfColumns = columanInfo.getColumnInfo().size();
+        int snippetPos = 1;
+        if (columanInfo.getColumnInfo().containsKey("BEGIN"))
+            numOfColumns -= 2;
+        Callback<TableColumn, TableCell> colorCellFactory =
                 new Callback<TableColumn, TableCell>() {
                     @Override
                     public TableCell call(TableColumn p) {
                         return new ColorAnnotationCell();
                     }
                 };
-
         if (annoTableView.getColumns().size() == 0) {
-            for (int i = 0; i < columnNames.size(); i++) {
+            int i = 0;
+            for (String columnName : columanInfo.getColumnInfo().keySet()) {
                 //We are using non property style for making dynamic table
                 final int j = i;
-                TableColumn col = new TableColumn(columnNames.get(i));
-                if (i == 1) {
-                    col = new TableColumn("SNIPPET");
-                    col.setMaxWidth(dbPanel.getWidth() * 0.7);
-                    col.setPrefWidth(StaticVariables.snippetLength * 5);
-                    col.setCellFactory(cellFactory);
+                TableColumn col = new TableColumn(columnName);
+                switch (columnName.toUpperCase()) {
+                    case "BEGIN":
+                    case "END":
+                    case "TEXT":
+                    case "FEATURES":
+                        continue;
+                    case "SNIPPET":
+                        snippetPos = i;
+                        col.setMaxWidth(dbPanel.getWidth() * 0.7);
+                        col.setPrefWidth(StaticVariables.snippetLength * 5);
+                        col.setCellFactory(colorCellFactory);
+                    default:
+                        col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
+                            public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
+                                Object record = param.getValue().get(j);
+                                return new SimpleObjectProperty<Object>(record);
+                            }
+                        });
+                        annoTableView.getColumns().addAll(col);
+                        i++;
                 }
-                col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
-                    public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
-                        Object record = param.getValue().get(j);
-                        return new SimpleObjectProperty<Object>(record);
-                    }
-                });
-                annoTableView.getColumns().addAll(col);
             }
+            int finalSnippetPos1 = snippetPos;
             annoTableView.setRowFactory(tv -> {
                 TableRow<ObservableList> row = new TableRow<>();
+                int finalSnippetPos = finalSnippetPos1;
                 row.focusedProperty().addListener(new ChangeListener<Boolean>() {
                     @Override
                     public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                         if (newValue && !row.isEmpty()) {
                             ObservableList clickedRow = row.getItem();
-                            updateHTMLEditor((RecordRow) clickedRow.get(1));
+                            updateHTMLEditor((RecordRow) clickedRow.get(finalSnippetPos));
                         }
                     }
                 });
                 return row;
             });
         }
+        int finalSnippetPos2 = snippetPos;
+        dbPanel.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                if (annoTableView.getColumns() != null && annoTableView.getColumns().size() > 1) {
+                    TableColumn col = (TableColumn) annoTableView.getColumns().get(finalSnippetPos2);
+                    col.setMaxWidth((int) newValue.doubleValue() * 0.9);
+                    col.setPrefWidth((int) newValue.doubleValue() * 0.4);
+                    htmlViewer.setPrefWidth(newValue.doubleValue() * 0.15);
+                }
+            }
+        });
         boolean haveRead = false;
         while (rs != null && rs.hasNext()) {
             //Iterate Row
             ObservableList<Object> row = FXCollections.observableArrayList();
-            RecordRow record = (RecordRow) rs.next();
-            row.add(record.getValueByColumnName(columnNames.get(0)));
-            row.add(record);
-            for (int i = 2; i < columnNames.size(); i++) {
-                row.add(record.getValueByColumnName(columnNames.get(i)));
+            RecordRow record = rs.next();
+            for (String columnName : columanInfo.getColumnInfo().keySet()) {
+                TableColumn col = new TableColumn(columnName);
+                switch (columnName.toUpperCase()) {
+                    case "BEGIN":
+                    case "END":
+                    case "TEXT":
+                    case "FEATURES":
+                        continue;
+                    case "SNIPPET":
+                        row.add(record);
+                        break;
+                    default:
+                        row.add(record.getValueByColumnName(columnName));
+                        break;
+                }
             }
             data.add(row);
             haveRead = true;
@@ -425,7 +442,7 @@ public class TasksOverviewController {
         return haveRead;
     }
 
-    public boolean showDBTable(String dbName, ArrayList<String> columnNames,
+    public boolean showDBTable(String dbName, String queryName,
                                String tableName, String filter, String colorDifferential) {
 //        settingPanel.settingPanel.setVisible(false);
 
@@ -448,21 +465,23 @@ public class TasksOverviewController {
         }
         sqlFilter.setText(condition);
 
-        RecordRowIterator rs = queryRecords(dao, tableName, filter);
+        RecordRowIterator rs = queryRecords(dao, queryName, tableName, filter);
 
-        boolean haveRead = showDBTable(columnNames, rs, colorDifferential, doctable);
+
+        boolean haveRead = showDBTable(rs, colorDifferential, doctable);
         dao.close();
         return haveRead;
     }
 
 
-    public RecordRowIterator queryRecords(DAO dao, String tableName, String condition) {
-        if (!dao.checkExists(tableName)) {
+    public RecordRowIterator queryRecords(DAO dao, String queryName, String tableName, String condition) {
+        if (!dao.checkTableExits(tableName)) {
             System.out.println(tableName + " doesn't exist");
             return null;
         }
+
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT * FROM ");
+        sql.append(dao.queries.get(queryName));
         sql.append(tableName);
         if (condition != null && condition.length() > 0) {
             sql.append(condition);

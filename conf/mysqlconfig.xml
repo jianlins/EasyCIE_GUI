@@ -16,22 +16,22 @@
   -->
 <config>
     <username>test</username>
-    <server>jdbc:sqlite:data/my.sqlite?journal_mode=WAL&amp;synchronous=OFF</server>
+    <server>jdbc:mysql://localhost/test?useSSL=false&amp;serverTimezone=America/Boise</server>
     <password>test</password>
-    <databaseName>mysqlite</databaseName>
-    <driver>org.sqlite.JDBC</driver>
-    <concurUpdatable>false</concurUpdatable>
+    <databaseName>test</databaseName>
+    <driver>com.mysql.cj.jdbc.Driver</driver>
+    <concurUpdatable>true</concurUpdatable>
     <createTables>
         <item>
             <name>LOG</name>
             <sql>
                 <item>
-                    CREATE TABLE LOG (
-                    RUN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    ANNOTATOR TEXT,
+                    CREATE TABLE IF NOT EXISTS {databaseName}.LOG (
+                    RUN_ID INT AUTO_INCREMENT PRIMARY KEY,
+                    ANNOTATOR VARCHAR(100),
                     START_DTM DATETIME,
                     END_DTM DATETIME,
-                    NUM_NOTES NUMBER(22,0),
+                    NUM_NOTES INT,
                     COMMENTS TEXT);
                 </item>
             </sql>
@@ -40,13 +40,13 @@
             <name>ANNOTATORS</name>
             <sql>
                 <item>
-                    CREATE TABLE ANNOTATORS (
-                    ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    ANNOTATOR TEXT,
-                    ADD_DTM DATETIME);
+                    CREATE TABLE IF NOT EXISTS {databaseName}.ANNOTATORS (
+                    ID INT AUTO_INCREMENT PRIMARY KEY,
+                    ANNOTATOR VARCHAR(100),
+                    ADD_DTM TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS ANNOTATORS_INX ON ANNOTATORS (ANNOTATOR);
+                    CREATE INDEX IF NOT EXISTS ANNOTATORS_INX ON {databaseName}.ANNOTATORS (ANNOTATOR);
                 </item>
             </sql>
         </item>
@@ -55,73 +55,77 @@
         <item>
             <name>LOG</name>
             <sql>
-                <item>DROP TABLE LOG</item>
+                <item>DROP TABLE {databaseName}.LOG</item>
             </sql>
         </item>
         <item>
             <name>ANNOTATORS</name>
             <sql>
-                <item>DROP TABLE ANNOTATORS</item>
+                <item>DROP TABLE {databaseName}.ANNOTATORS</item>
             </sql>
         </item>
     </dropTables>
     <queryStatements>
         <item>
             <name>queryDocs</name>
-            <sql>SELECT DOC_ID,DOC_NAME, TEXT SNIPPET,TEXT,INSERT_DTM FROM </sql>
+            <sql>SELECT DOC_ID,DOC_NAME, TEXT SNIPPET,TEXT,INSERT_DTM FROM {databaseName}.</sql>
         </item>
         <item>
             <name>queryAnnos</name>
-            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM </sql>
+            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM {databaseName}.</sql>
+        </item>
+        <item>
+            <name>queryCount</name>
+            <sql>SELECT COUNT(*) FROM {databaseName}.</sql>
         </item>
         <item>
             <name>queryAnnotators</name>
-            <sql>SELECT ANNOTATOR FROM ANNOTATORS;</sql>
+            <sql>SELECT ANNOTATOR FROM {databaseName}.AwNNOTATORS;</sql>
         </item>
         <item>
             <name>checkAnnotatorExist</name>
-            <sql>SELECT COUNT(*) FROM ANNOTATORS WHERE ANNOTATOR=?</sql>
+            <sql>SELECT COUNT(*) FROM {databaseName}.ANNOTATORS WHERE ANNOTATOR=?</sql>
         </item>
         <item>
             <name>getColumnsInfo</name>
-            <sql>PRAGMA table_info({tableName});</sql>
+            <sql>SHOW COLUMNS FROM {databaseName}.{tableName};</sql>
         </item>
         <item>
             <name>checkTableExists</name>
             <sql>
-                select count(*) from sqlite_master where type='table' and name=?;
+                SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '{databaseName}' AND table_name =?;
             </sql>
         </item>
         <item>
             <name>lastIdofLOG</name>
-            <sql>SELECT RUN_ID FROM LOG ORDER BY RUN_ID DESC LIMIT 1;</sql>
+            <sql>SELECT RUN_ID FROM {databaseName}.LOG ORDER BY RUN_ID DESC LIMIT 1;</sql>
         </item>
         <item>
             <name>masterInputQuery</name>
-            <sql>SELECT DOC_ID, DATASET_ID,DOC_NAME,TEXT FROM {tableName} WHERE DATASET_ID = ?;
+            <sql>SELECT DOC_ID, DATASET_ID,DOC_NAME,TEXT FROM {databaseName}.{tableName} WHERE DATASET_ID = ?;
             </sql>
         </item>
         <item>
             <name>masterCountQuery</name>
-            <sql>SELECT COUNT(*) FROM {tableName} WHERE DATASET_ID = ?;
+            <sql>SELECT COUNT(*) FROM {databaseName}.{tableName} WHERE DATASET_ID = ?;
             </sql>
         </item>
         <item>
             <name>maxRunIDofAnnotator</name>
-            <sql>SELECT MAX(RUN_ID) FROM {tableName} WHERE ANNOTATOR=?</sql>
+            <sql>SELECT MAX(RUN_ID) FROM {databaseName}.{tableName} WHERE ANNOTATOR=?</sql>
         </item>
         <item>
             <name>lastLogRunID</name>
-            <sql>SELECT MAX(RUN_ID) FROM LOG WHERE ANNOTATOR=?</sql>
+            <sql>SELECT MAX(RUN_ID) FROM {databaseName}.LOG WHERE ANNOTATOR=?</sql>
         </item>
         <item>
             <name>logQuery</name>
-            <sql>SELECT RUN_ID, START_DTM, END_DTM, NUM_NOTES, COMMENTS FROM LOG WHERE RUN_ID=?;
+            <sql>SELECT RUN_ID, START_DTM, END_DTM, NUM_NOTES, COMMENTS FROM {databaseName}.LOG WHERE RUN_ID=?;
             </sql>
         </item>
         <item>
-            <name>maxRunID</name>
-            <sql>SELECT MAX(RUN_ID) FROM {tableName} WHERE ANNOTATOR=?</sql>
+            <name>maxRunIDofAnnotator</name>
+            <sql>SELECT MAX(RUN_ID) FROM {databaseName}.{tableName} WHERE ANNOTATOR=?</sql>
         </item>
         <!--<item>-->
         <!--<sql>SELECT DOC_NAME, TYPE, ANNO_TEXT, FEATURES,SNIPPET, ANNOTATOR,BEGIN, END,SNIPPET_BEGIN,-->
@@ -135,20 +139,21 @@
         <item>
             <name>LOG</name>
             <returnKey>RUN_ID</returnKey>
-            <sql>INSERT INTO LOG (ANNOTATOR, START_DTM, END_DTM, NUM_NOTES, COMMENTS) VALUES (?,?,?,?,?)
+            <sql>INSERT INTO {databaseName}.LOG (ANNOTATOR, START_DTM, END_DTM, NUM_NOTES, COMMENTS) VALUES (?,?,?,?,?)
             </sql>
         </item>
         <item>
             <name>ANNOTATORS</name>
             <returnKey>ID</returnKey>
-            <sql>INSERT INTO ANNOTATORS (ANNOTATOR, ADD_DTM) VALUES (?,CURRENT_TIMESTAMP)
+            <sql>INSERT INTO {databaseName}.ANNOTATORS (ANNOTATOR, ADD_DTM) VALUES (?,CURRENT_TIMESTAMP)
             </sql>
         </item>
     </insertStatements>
     <updateStatements>
         <item>
             <name>LOG</name>
-            <sql>UPDATE LOG SET ANNOTATOR=?,START_DTM=?, END_DTM=?, NUM_NOTES=?, COMMENTS=? WHERE RUN_ID=?
+            <sql>UPDATE {databaseName}.LOG SET ANNOTATOR=?,START_DTM=?, END_DTM=?, NUM_NOTES=?, COMMENTS=? WHERE
+                RUN_ID=?
             </sql>
         </item>
     </updateStatements>
@@ -157,11 +162,11 @@
             <name>ANNOTATION_TABLE</name>
             <sql>
                 <item>
-                    CREATE TABLE {tableName}(ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    DOC_NAME TEXT,
-                    ANNOTATOR TEXT,
+                    CREATE TABLE IF NOT EXISTS {databaseName}.{tableName}(ID INT AUTO_INCREMENT PRIMARY KEY,
+                    DOC_NAME VARCHAR(100),
+                    ANNOTATOR VARCHAR(100),
                     RUN_ID INT,
-                    TYPE TEXT,
+                    TYPE VARCHAR(200),
                     BEGIN INT,
                     END INT,
                     SNIPPET_BEGIN INT,
@@ -169,29 +174,31 @@
                     FEATURES TEXT,
                     SNIPPET TEXT,
                     COMMENTS TEXT,
-                    CREATE_DTM DATETIME DEFAULT CURRENT_TIMESTAMP);
+                    CREATE_DTM DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_RUN_IND ON {tableName} (RUN_ID);
+                    CREATE INDEX IF NOT EXISTS {tableName}_RUN_IND ON {databaseName}.{tableName} (RUN_ID);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_TYPE_IND ON {tableName} (TYPE);
+                    CREATE INDEX IF NOT EXISTS {tableName}_TYPE_IND ON {databaseName}.{tableName} (TYPE);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_ANNO_IND ON {tableName} (ANNOTATOR);
+                    CREATE INDEX IF NOT EXISTS {tableName}_ANNO_IND ON {databaseName}.{tableName} (ANNOTATOR);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {tableName} (DOC_NAME);
+                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {databaseName}.{tableName} (DOC_NAME);
                 </item>
             </sql>
             <returnKey>ID</returnKey>
-            <insert>INSERT INTO {tableName} (DOC_NAME,ANNOTATOR, RUN_ID,TYPE,BEGIN,END,SNIPPET_BEGIN, TEXT,
+            <insert>INSERT INTO {databaseName}.{tableName} (DOC_NAME,ANNOTATOR, RUN_ID,TYPE,BEGIN,END,SNIPPET_BEGIN,
+                TEXT,
                 FEATURES,SNIPPET,COMMENTS)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?);
             </insert>
-            <query>SELECT * FROM {tableName} WHERE ANNOTATOR=?;</query>
+            <query>SELECT * FROM {databaseName}.{tableName} WHERE ANNOTATOR=?;</query>
             <drop>
-                <item>DROP TABLE {tableName};</item>
+                <item>DROP TABLE {databaseName}.{tableName};</item>
             </drop>
         </item>
         <item>
@@ -199,25 +206,26 @@
             <name>DOCUMENTS_TABLE</name>
             <sql>
                 <item>
-                    CREATE TABLE {tableName} (
-                    DOC_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    CREATE TABLE IF NOT EXISTS {databaseName}.{tableName} (
+                    DOC_ID INT AUTO_INCREMENT PRIMARY KEY,
                     DATASET_ID CHAR(10),
-                    DOC_NAME TEXT,
+                    DOC_NAME VARCHAR(100),
                     TEXT TEXT,
-                    INSERT_DTM DATETIME);
+                    INSERT_DTM DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {tableName} (DOC_NAME);
+                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {databaseName}.{tableName} (DOC_NAME);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_DATATSET_IND ON {tableName} (DATASET_ID);
+                    CREATE INDEX IF NOT EXISTS {tableName}_DATATSET_IND ON {databaseName}.{tableName} (DATASET_ID);
                 </item>
             </sql>
-            <insert>INSERT INTO {tableName} (DATASET_ID, DOC_NAME, TEXT,INSERT_DTM) VALUES (?,?,?,CURRENT_TIMESTAMP);
+            <insert>INSERT INTO {databaseName}.{tableName} (DATASET_ID, DOC_NAME, TEXT,INSERT_DTM) VALUES
+                (?,?,?,CURRENT_TIMESTAMP);
             </insert>
-            <query>SELECT * FROM {tableName} WHERE DOC_ID=?;</query>
+            <query>SELECT * FROM {databaseName}.{tableName} LIMIT 15;</query>
             <drop>
-                <item>DROP TABLE {tableName};</item>
+                <item>DROP TABLE {databaseName}.{tableName};</item>
             </drop>
         </item>
     </templates>

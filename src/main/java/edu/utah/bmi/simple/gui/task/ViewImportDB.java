@@ -47,7 +47,7 @@ public class ViewImportDB extends GUITask {
                 // Update UI here.
                 boolean res = false;
                 DAO dao = new DAO(new File(SQLFile), true, false);
-                if (!dao.checkExists(corpusTable)) {
+                if (!dao.checkTableExits(corpusTable)) {
                     popDialog("Note", "Table '" + corpusTable + "' does not exit.",
                             " You need to import documents first.");
                     updateProgress(0, 0);

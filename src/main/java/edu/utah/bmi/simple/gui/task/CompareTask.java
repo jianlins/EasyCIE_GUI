@@ -89,14 +89,14 @@ public class CompareTask extends GUITask {
         types.clear();
         logger = new NLPDBLogger(wdao, "LOG", "RUN_ID", targetAnnotator + "_vs_" + referenceAnnotator);
         logger.logStartTime();
-        if (!wdao.checkExists(outputTable)) {
+        if (!wdao.checkTableExits(outputTable)) {
             updateMessage("Table '" + outputTable + "' does not exit.");
             popDialog("Note", "Table '" + outputTable + "' does not exit.",
                     " You need to execute 'RunEasyCIE' first.");
             updateProgress(0, 0);
             return null;
         }
-        if (!rdao.checkExists(compareReferenceTable)) {
+        if (!rdao.checkTableExits(compareReferenceTable)) {
             updateMessage("Table '" + compareReferenceTable + "' does not exit.");
             popDialog("Note", "Table '" + compareReferenceTable + "' does not exit.",
                     " You need to either execute 'RunEasyCIE' or import reference annotations.");
@@ -177,7 +177,7 @@ public class CompareTask extends GUITask {
     public int countQueryRecords(DAO dao, String tableName, String[] conditions) {
         int count = 0;
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) FROM ");
+        sql.append(dao.queries.get("queryCount"));
         sql.append(tableName);
         if (conditions != null && conditions.length > 0) {
             sql.append(" WHERE");
@@ -193,7 +193,12 @@ public class CompareTask extends GUITask {
 
         RecordRowIterator recordIterator = dao.queryRecords(sql.toString());
         if (recordIterator.hasNext()) {
-            count = (int) recordIterator.next().getValueByColumnId(1);
+            RecordRow recordRow = recordIterator.next();
+            Object value = recordRow.getValueByColumnId(1);
+            if (value instanceof Long)
+                count = ((Long) value).intValue();
+            else
+                count = (int) recordRow.getValueByColumnId(1);
         }
         return count;
     }

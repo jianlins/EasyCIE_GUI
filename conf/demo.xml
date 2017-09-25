@@ -46,9 +46,9 @@
     <compare> 
       <targetAnnotator memo="Compare annotations from annotator: ">v1</targetAnnotator>  
       <targetRunId memo="run id of target annotator. Default is the latest run id when leave blank"/>  
-      <referenceAnnotator memo="Compare annotations against annotator: ">gold</referenceAnnotator>  
+      <referenceAnnotator memo="Compare annotations against annotator: ">v2</referenceAnnotator>  
       <referenceRunId memo="run id of reference annotator. Default is the latest run id when leave blank"/>  
-      <referenceTable>REFERENCE</referenceTable>  
+      <referenceTable></referenceTable>  
       <strictCompare>false</strictCompare>  
       <typeFilter memo="limit the comparison to a certain type">IND_PNEUMONIA,Pos_Doc,Neg_Doc</typeFilter> 
     </compare>  
@@ -86,7 +86,7 @@
   </export>  
   <settings> 
     <import> 
-      <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml</dbFile>  
+      <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/mysqlconfig.xml</dbFile>  
       <table memo="the table used to saved the txt corpus">DOCUMENTS</table>  
       <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">n</datasetId>  
       <overwrite memo="if the table exist, whether overwrite it">true</overwrite> 
@@ -95,7 +95,7 @@
       <table>REFERENCE</table> 
     </reference>  
     <output> 
-      <dbFile memo="the db file(or configuration file) used to saved the outputs" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/dbconfig.xml</dbFile>  
+      <dbFile memo="the db file(or configuration file) used to saved the outputs" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/mysqlconfig.xml</dbFile>  
       <table memo="the table used to saved the annotations">OUTPUT</table>  
       <compareTable memo="the table used to saved the annotations">DIFF</compareTable> 
     </output>  

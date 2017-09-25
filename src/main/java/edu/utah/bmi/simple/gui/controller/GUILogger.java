@@ -45,8 +45,9 @@ public class GUILogger extends ConsoleLogger {
         super.logCompleteTime();
         Platform.runLater(new Runnable() {
             public void run() {
-                boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(columnNames,
-                        AnnotationLogger.records.iterator(), "output", false);
+                boolean res =true;
+//                res = TasksOverviewController.currentTasksOverviewController.showDBTable(columnNames,
+//                        AnnotationLogger.records.iterator(), "output", false);
                 if (res)
                     task.updateGUIMessage("String processing completed.");
                 else
