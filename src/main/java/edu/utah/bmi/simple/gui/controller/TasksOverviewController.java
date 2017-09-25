@@ -106,6 +106,8 @@ public class TasksOverviewController {
 
     private WebEngine webEngine;
 
+    private int snippetPos = 1;
+
     public TasksOverviewController() {
     }
 
@@ -159,7 +161,6 @@ public class TasksOverviewController {
             tasklist.getFocusModel().focus(mainApp.getCurrentTaskId());
         }
         currentTasksOverviewController = this;
-
 
 
 //      Enable autoresize of htmleditor
@@ -329,14 +330,14 @@ public class TasksOverviewController {
         if (doctable)
             annoTableView.getColumns().clear();
         doctable = false;
-        return showDBTable(dbName, "queryAnnos", tableName, filter, colorDifferential);
+        return showDBTable(dbName, "queryAnnos", tableName, filter.trim(), colorDifferential);
     }
 
     public boolean showDocTable(String dbName, String tableName, String filter, String colorDifferential) {
         if (!doctable)
             annoTableView.getColumns().clear();
         doctable = true;
-        return showDBTable(dbName, "queryDocs", tableName, filter, colorDifferential);
+        return showDBTable(dbName, "queryDocs", tableName, filter.trim(), colorDifferential);
     }
 
     public boolean showDBTable(RecordRowIterator rs, String colorDifferential, boolean doctable) {
@@ -347,7 +348,6 @@ public class TasksOverviewController {
         ColorAnnotationCell.colorDifferential = colorDifferential;
         ColumnInfo columanInfo = rs.getColumninfo();
         int numOfColumns = columanInfo.getColumnInfo().size();
-        int snippetPos = 1;
         if (columanInfo.getColumnInfo().containsKey("BEGIN"))
             numOfColumns -= 2;
         Callback<TableColumn, TableCell> colorCellFactory =
@@ -374,6 +374,13 @@ public class TasksOverviewController {
                         col.setMaxWidth(dbPanel.getWidth() * 0.7);
                         col.setPrefWidth(StaticVariables.snippetLength * 5);
                         col.setCellFactory(colorCellFactory);
+                        col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
+                            public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
+                                Object record = param.getValue().get(j);
+                                return new SimpleObjectProperty<Object>(record);
+                            }
+                        });
+                        break;
                     default:
                         col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
                             public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
@@ -381,34 +388,33 @@ public class TasksOverviewController {
                                 return new SimpleObjectProperty<Object>(record);
                             }
                         });
-                        annoTableView.getColumns().addAll(col);
-                        i++;
+                        col.setPrefWidth(85);
                 }
+                annoTableView.getColumns().addAll(col);
+                i++;
             }
-            int finalSnippetPos1 = snippetPos;
             annoTableView.setRowFactory(tv -> {
                 TableRow<ObservableList> row = new TableRow<>();
-                int finalSnippetPos = finalSnippetPos1;
                 row.focusedProperty().addListener(new ChangeListener<Boolean>() {
                     @Override
                     public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                         if (newValue && !row.isEmpty()) {
                             ObservableList clickedRow = row.getItem();
-                            updateHTMLEditor((RecordRow) clickedRow.get(finalSnippetPos));
+                            updateHTMLEditor((RecordRow) clickedRow.get(snippetPos));
                         }
                     }
                 });
                 return row;
             });
         }
-        int finalSnippetPos2 = snippetPos;
         dbPanel.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 if (annoTableView.getColumns() != null && annoTableView.getColumns().size() > 1) {
-                    TableColumn col = (TableColumn) annoTableView.getColumns().get(finalSnippetPos2);
+                    TableColumn col = (TableColumn) annoTableView.getColumns().get(snippetPos);
+                    System.out.println("reset column " + snippetPos);
                     col.setMaxWidth((int) newValue.doubleValue() * 0.9);
-                    col.setPrefWidth((int) newValue.doubleValue() * 0.4);
+                    col.setPrefWidth((int) newValue.doubleValue() * 0.38);
                     htmlViewer.setPrefWidth(newValue.doubleValue() * 0.15);
                 }
             }
@@ -460,8 +466,18 @@ public class TasksOverviewController {
 
         DAO dao = new DAO(new File(dbName));
         String condition = filter;
+        String lowerCasedCondition = condition.toLowerCase();
         if (filter.length() > 7) {
-            condition = filter.substring(filter.toLowerCase().indexOf(" where ") + 7).trim();
+            if (lowerCasedCondition.indexOf("where") != -1) {
+                condition = filter.substring(lowerCasedCondition.indexOf("where") + 5);
+            }
+            if (lowerCasedCondition.indexOf(" limit ") == -1) {
+                if (lowerCasedCondition.endsWith(";")) {
+                    condition = condition.substring(0, condition.length() - 1) + " " + dao.queries.get("limitCondition") + ";";
+                } else {
+                    condition = condition + " " + dao.queries.get("limitCondition") + ";";
+                }
+            }
         }
         sqlFilter.setText(condition);
 
@@ -484,6 +500,7 @@ public class TasksOverviewController {
         sql.append(dao.queries.get(queryName));
         sql.append(tableName);
         if (condition != null && condition.length() > 0) {
+            sql.append(" ");
             sql.append(condition);
         }
         if (sql.charAt(sql.length() - 1) != ';')

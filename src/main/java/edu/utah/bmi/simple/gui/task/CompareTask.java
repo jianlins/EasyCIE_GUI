@@ -174,7 +174,7 @@ public class CompareTask extends GUITask {
     }
 
 
-    public int countQueryRecords(DAO dao, String tableName, String[] conditions) {
+    public static int countQueryRecords(DAO dao, String tableName, String[] conditions) {
         int count = 0;
         StringBuilder sql = new StringBuilder();
         sql.append(dao.queries.get("queryCount"));

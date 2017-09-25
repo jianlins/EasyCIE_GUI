@@ -44,11 +44,11 @@
   </easycie>  
   <compare> 
     <compare> 
-      <targetAnnotator memo="Compare annotations from annotator: ">v1</targetAnnotator>  
+      <targetAnnotator memo="Compare annotations from annotator: ">v3</targetAnnotator>  
       <targetRunId memo="run id of target annotator. Default is the latest run id when leave blank"/>  
       <referenceAnnotator memo="Compare annotations against annotator: ">v2</referenceAnnotator>  
       <referenceRunId memo="run id of reference annotator. Default is the latest run id when leave blank"/>  
-      <referenceTable></referenceTable>  
+      <referenceTable/>  
       <strictCompare>false</strictCompare>  
       <typeFilter memo="limit the comparison to a certain type">IND_PNEUMONIA,Pos_Doc,Neg_Doc</typeFilter> 
     </compare>  

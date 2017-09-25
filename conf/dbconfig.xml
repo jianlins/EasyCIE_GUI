@@ -68,11 +68,19 @@
     <queryStatements>
         <item>
             <name>queryDocs</name>
-            <sql>SELECT DOC_ID,DOC_NAME, TEXT SNIPPET,TEXT,INSERT_DTM FROM </sql>
+            <sql>SELECT DOC_ID,DOC_NAME, TEXT SNIPPET,TEXT,INSERT_DTM FROM</sql>
         </item>
         <item>
             <name>queryAnnos</name>
-            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM </sql>
+            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM</sql>
+        </item>
+        <item>
+            <name>limitCondition</name>
+            <sql>LIMIT 300</sql>
+        </item>
+        <item>
+            <name>queryCount</name>
+            <sql>SELECT COUNT(*) FROM</sql>
         </item>
         <item>
             <name>queryAnnotators</name>

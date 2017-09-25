@@ -75,6 +75,10 @@
             <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM {databaseName}.</sql>
         </item>
         <item>
+            <name>limitCondition</name>
+            <sql>LIMIT 300</sql>
+        </item>
+        <item>
             <name>queryCount</name>
             <sql>SELECT COUNT(*) FROM {databaseName}.</sql>
         </item>
