@@ -15,7 +15,6 @@
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
     <version>${current.version}</version>
-
     <dependencies>
         <dependency>
             <groupId>dom4j</groupId>
@@ -38,7 +37,7 @@
             <version>2.0</version>
         </dependency>
         <dependency>
-            <groupId>edu.utah.blulab</groupId>
+            <groupId>edu.utah.bmi.blulab</groupId>
             <artifactId>domainontology</artifactId>
             <version>2016.12.2-SNAPSHOT</version>
         </dependency>
@@ -224,5 +223,18 @@
             </plugin>
         </plugins>
     </build>
-
+    <profiles>
+        <profile>
+            <id>allow-snapshots</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+            <repositories>
+                <repository>
+                    <id>snapshots-repo</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                    <releases><enabled>false</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
 </project>

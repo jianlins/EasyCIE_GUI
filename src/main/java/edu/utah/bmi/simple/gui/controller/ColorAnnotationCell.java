@@ -10,7 +10,6 @@ import javafx.scene.control.TableCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-
 import static edu.utah.bmi.simple.gui.entry.StaticVariables.snippetLength;
 
 
@@ -22,6 +21,7 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
     HBox hbox;
     private int maxTxtWindow;
     public static String colorDifferential;
+
 
     public ColorAnnotationCell() {
     }

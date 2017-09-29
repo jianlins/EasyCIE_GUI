@@ -75,12 +75,18 @@
       <ehost memo="the directory to save the exported ehost files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/ehost</ehost>  
       <brat memo="the directory to save the exported brat files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/brat</brat>  
       <uima memo="the directory to save the exported uima xmi files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/xmi</uima>  
-      <exportTypes memo="If specified, then only these types will be displayed(separate by comma). If not, only Concepts will be saved. To save document conclusion, add type Doc_BASE">Concept</exportTypes> 
+      <exportTypes memo="If specified, then only these types will be displayed(separate by comma). If not, only Concepts will be saved. To save document conclusion, add type Doc_BASE">Concept,Doc_Base</exportTypes> 
     </format>  
+    <excel> 
+      <directory memo="The dirctory to save the exported excel files">data/output/excel</directory>  
+      <sampleSize memo="If &gt;0, then easyCIE will randomly sample the defined number of documents">8</sampleSize>  
+      <includeMentionTypes>IND_PNEUMONIA,NegatedConcept,PossibleConcept</includeMentionTypes> 
+    </excel>  
     <executes> 
       <ExportEhost memo="Run Preannotator and export the annotation to eHOST format">edu.utah.bmi.simple.gui.task.RunEasyCIE ehost</ExportEhost>  
       <ExportBrat memo="Run Preannotator and export the annotation to brat format">edu.utah.bmi.simple.gui.task.RunEasyCIE brat</ExportBrat>  
       <ExportXMI memo="Run Preannotator and export the annotation to UIMA XMI format">edu.utah.bmi.simple.gui.task.RunEasyCIE xmi</ExportXMI>  
+      <ExportExcel memo="Export the annotations to excel spreadsheet">edu.utah.bmi.simple.gui.task.Export2Excel</ExportExcel>  
       <View memo="View exported UIMA annotation format">edu.utah.bmi.simple.gui.task.Viewer</View> 
     </executes> 
   </export>  
@@ -108,8 +114,8 @@
       <highlighter_begin memo="Set default color to FFFFF, then the viewer will pick one from the color pool below.">&lt;span style="background-color: #FFFFFF"&gt;</highlighter_begin>  
       <highlighter_end>&lt;/span&gt;</highlighter_end>  
       <snippet_length>90</snippet_length>  
-      <random_pick_color memo="whether randomly pick a color from the color pool below or pick in order">f</random_pick_color>  
-      <color_pool>fffe4d|efdecd|ffbf00|00ffff|9966cc|ed872d|a3c1ad|a4c659|8db600|89cff0|fbceb1|7fffd4|e9d66b|87a96b|ff9966|21abcd|deb887|848482|fdee00|f4c2c2|ff2052|a1caf1|007fff|b2beb5|5d8aa8</color_pool> 
+      <random_pick_color memo="whether randomly pick a color from the color pool below or pick in order">t</random_pick_color>  
+      <color_pool>ffa94d|efdecd|ffbf00|00ffff|9966cc|ed872d|a3c13d|a4c659|8db600|89cff0|fb8e51|7fffd4|e9d66b|87a96b|ff9966|21abcd|deb887|848482|f4c2c2|ff2052|a1caf1|007fff|b2beb5|5d8aa8</color_pool>
     </viewer>  
     <help>https://github.com/jianlins/EasyCIE_GUI/wiki</help>  
     <issues>https://github.com/jianlins/EasyCIE_GUI/issues</issues> 
