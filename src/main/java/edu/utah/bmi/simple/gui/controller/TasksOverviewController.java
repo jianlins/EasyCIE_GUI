@@ -471,12 +471,14 @@ public class TasksOverviewController {
             if (lowerCasedCondition.indexOf("where") != -1) {
                 condition = filter.substring(lowerCasedCondition.indexOf("where") + 5);
             }
-            if (lowerCasedCondition.indexOf(" limit ") == -1) {
-                if (lowerCasedCondition.endsWith(";")) {
-                    condition = condition.substring(0, condition.length() - 1) + " " + dao.queries.get("limitCondition") + ";";
-                } else {
-                    condition = condition + " " + dao.queries.get("limitCondition") + ";";
-                }
+        }
+        if (lowerCasedCondition.indexOf(" limit ") == -1) {
+            if (lowerCasedCondition.endsWith(";")) {
+                condition = condition.substring(0, condition.length() - 1) + " " + dao.queries.get("limitCondition") + ";";
+                filter = filter.substring(0, filter.length() - 1) + " " + dao.queries.get("limitCondition") + ";";
+            } else {
+                condition = condition + " " + dao.queries.get("limitCondition") + ";";
+                filter = filter + " " + dao.queries.get("limitCondition") + ";";
             }
         }
         sqlFilter.setText(condition);
@@ -584,6 +586,7 @@ public class TasksOverviewController {
 //            return row;
 //        });
         ObservableList<Map.Entry<String, SettingAb>> executes = currentTask.getExecutes();
+        System.out.println(executes.size());
         executePanel.getChildren().removeAll(executePanel.getChildren());
         for (Map.Entry<String, SettingAb> exe : executes) {
             String label = exe.getKey();

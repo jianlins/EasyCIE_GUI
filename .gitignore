@@ -5,3 +5,4 @@ data/output
 data/*.sqlite
 data/*-shm
 data/*-wal
+conf/mysqlconfig.xml

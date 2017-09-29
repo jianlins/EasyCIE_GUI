@@ -69,7 +69,7 @@ public class ViewOutputDB extends GUITask {
                 String filter = "";
                 if (annotator.trim().length() > 0) {
                     DAO dao = new DAO(new File(outputDB));
-                    if (!dao.checkExists(outputTable)) {
+                    if (!dao.checkTableExits(outputTable)) {
                         updateMessage("Table '" + outputTable + "' does not exit.");
                         popDialog("Note", "Table '" + outputTable + "' does not exit.",
                                 " You need to execute 'RunEasyCIE' first.");

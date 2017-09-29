@@ -39,14 +39,15 @@ public class ExcelExporter {
     }
 
     public void export(File exportFile) {
+        if (total > -1)
+            task.updateGUIMessage("Start exporting...");
         RecordRowIterator recordIter = dao.queryRecords(sql);
         LinkedHashMap<String, String> columnInfo = recordIter.getColumninfo().getColumnInfo();
         if (total > -1)
             task.updateGUIMessage("Initiating spreadsheet...");
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = createTitleRow(workbook, columnInfo);
-        if (total > -1)
-            task.updateGUIMessage("Start exporting...");
+
         writeDataRows(workbook, sheet, recordIter, columnInfo);
         if (total > -1)
             task.updateGUIMessage("Write to disk...");
@@ -89,7 +90,7 @@ public class ExcelExporter {
                     coreColumns.put(upperCaseColumnName, columnName);
                     break;
                 case "SNIPPET":
-                    sheet.setColumnWidth(cellNum , 60 * 256);
+                    sheet.setColumnWidth(cellNum, 60 * 256);
                 case "TYPE":
                     coreColumns.put(upperCaseColumnName, columnName);
                 default:
@@ -155,7 +156,6 @@ public class ExcelExporter {
             cell.setCellStyle(style);
 
 
-
             for (RecordRow snippetRecord : snippets.get(docName)) {
                 int snippetCellNum = cellNum;
                 int begin = Integer.parseInt(snippetRecord.getStrByColumnName(coreColumns.get("BEGIN")));
@@ -192,7 +192,7 @@ public class ExcelExporter {
         if (!color.startsWith("#"))
             color = "#" + color;
         System.out.println(color);
-        font.setColor(new XSSFColor(Color.decode(color)));
+        font.setThemeColor(new XSSFColor(Color.decode(color)).getIndex());
         font.setBold(true);
         typeFonts.put(type, font);
         return font;

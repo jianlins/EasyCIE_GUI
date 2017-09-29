@@ -18,7 +18,7 @@
     <username>test</username>
     <server>jdbc:sqlite:data/my.sqlite?journal_mode=WAL&amp;synchronous=OFF</server>
     <password>test</password>
-    <databaseName>mysqlite</databaseName>
+    <databaseName></databaseName>
     <driver>org.sqlite.JDBC</driver>
     <concurUpdatable>false</concurUpdatable>
     <createTables>
