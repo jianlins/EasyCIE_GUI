@@ -23,7 +23,7 @@ import java.util.HashSet;
  * Created on 2/13/17.
  */
 public class Export2Excel extends GUITask {
-    protected String outputDB, outputTable, annotator;
+    protected String outputDB, outputTable, annotator, sampleOnColumn;
     private File exportDir;
     private int sampleSize = 0;
     private HashSet<String> mentionTypes;
@@ -62,13 +62,16 @@ public class Export2Excel extends GUITask {
             }
         }
 
-        configString = config.getValue(ConfigKeys.includeAnnotationTypes).trim();
+        configString = config.getValue(ConfigKeys.mentionTypes).trim();
         if (configString.length() > 0) {
-            mentionTypes.clear();
+            mentionTypes = new HashSet<>();
             mentionTypes.addAll(Arrays.asList(configString.split("\\s*,\\s*")));
         }
 
 
+        sampleOnColumn = config.getValue(ConfigKeys.sampleOnColumn).trim();
+        if(sampleOnColumn.length()==0)
+            sampleOnColumn="DOC_NAME";
 
 
     }
@@ -110,22 +113,24 @@ public class Export2Excel extends GUITask {
                                         "if the dataset has been imported successfully.\n" +
                                         "Instead, EasyCIE Will display the last run of annotator \"" + annotator + "\" that has some output, which " +
                                         "RUN_ID=" + annotatorLastRunid);
-                        filter = " WHERE annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid;
+                        filter = " WHERE annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid + " ";
                     } else {
-                        filter = " WHERE annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid;
+                        filter = " WHERE annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid + " ";
                     }
-                    RecordRow recordRow = dao.queryRecord("SELECT COUNT(DISTINCT DOC_NAME) FROM " + dao.databaseName + "." + outputTable + filter);
+                    String sql = "SELECT COUNT(DISTINCT " + sampleOnColumn + ") FROM " +
+                            dao.databaseName + "." + outputTable + " OU " + filter;
+                    RecordRow recordRow = dao.queryRecord(sql);
                     int total = Integer.parseInt(recordRow.getValueByColumnId(1) + "");
 //                    TODO extend later
                     if (sampleSize > 0 && total > sampleSize) {
                         filter = " JOIN\n" +
-                                "(SELECT DISTINCT DOC_NAME from `"+outputTable+"` "+filter+" order by RAND() LIMIT "+sampleSize+") DOCLIST" +
-                                " ON `OUTPUT`.DOC_NAME=DOCLIST.DOC_NAME "+filter;
-                        total=sampleSize;
+                                "(SELECT DISTINCT " + sampleOnColumn + " from `" + outputTable + "` " + filter + " order by RAND() LIMIT " + sampleSize + ") DOCLIST" +
+                                " ON "+outputTable+".DOC_NAME=DOCLIST.DOC_NAME " + filter;
+                        total = sampleSize;
                     }
-                    String sql = dao.queries.get("exportExcel").replaceAll("\\{tableName\\}", outputTable)+outputTable+filter;
-                    File excel = new File(exportDir,"exported_"+annotator+"_"+annotatorLastRunid
-                            +"_"+new SimpleDateFormat("yyyy_MM_dd_HH_mm").format(new Date())+".xlsx");
+                    sql = dao.queries.get("exportExcel").replaceAll("\\{tableName\\}", outputTable)  + filter;
+                    File excel = new File(exportDir, "exported_" + annotator + "_" + annotatorLastRunid
+                            + "_" + new SimpleDateFormat("yyyy_MM_dd_HH_mm").format(new Date()) + ".xlsx");
                     ExcelExporter excelExporter = new ExcelExporter(dao, sql, total, task);
                     excelExporter.export(excel);
                 }

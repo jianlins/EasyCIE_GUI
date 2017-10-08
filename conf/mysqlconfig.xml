@@ -15,9 +15,9 @@
   ~ limitations under the License.
   -->
 <config>
+    <server>jdbc:mysql://localhost?useSSL=false</server>
     <username>test</username>
-    <server>jdbc:mysql://localhost/test?useSSL=false&amp;serverTimezone=America/Boise</server>
-    <password>test</password>
+    <password>ENC(TkWPCbk80Qwf3lugXM7YawnCuczVM43a)</password>
     <databaseName>test</databaseName>
     <driver>com.mysql.cj.jdbc.Driver</driver>
     <concurUpdatable>true</concurUpdatable>
@@ -76,7 +76,7 @@
         </item>
         <item>
             <name>exportExcel</name>
-            <sql>SELECT ID,{tableName}.DOC_NAME,TYPE,SNIPPET,BEGIN,END,FEATURES FROM {databaseName}.</sql>
+            <sql>SELECT ID,{tableName}.DOC_NAME,TYPE,SNIPPET,BEGIN,END,FEATURES FROM {databaseName}.{tableName}</sql>
         </item>
         <item>
             <name>limitCondition</name>
@@ -101,7 +101,8 @@
         <item>
             <name>checkTableExists</name>
             <sql>
-                SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '{databaseName}' AND table_name =?;
+                select count(*) from INFORMATION_SCHEMA.TABLES
+                where table_name = ? AND TABLE_SCHEMA='{databaseName}';
             </sql>
         </item>
         <item>
@@ -182,20 +183,20 @@
                     FEATURES TEXT,
                     SNIPPET TEXT,
                     COMMENTS TEXT,
-                    CREATE_DTM DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+                    CREATE_DTM TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_RUN_IND ON {databaseName}.{tableName} (RUN_ID);
+                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_RUN_IND (RUN_ID);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_TYPE_IND ON {databaseName}.{tableName} (TYPE);
+                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_TYPE_IND (TYPE);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_ANNO_IND ON {databaseName}.{tableName} (ANNOTATOR);
+                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_ANNO_IND (ANNOTATOR);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {databaseName}.{tableName} (DOC_NAME);
+                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_DOC_IND (DOC_NAME);
                 </item>
             </sql>
             <returnKey>ID</returnKey>
@@ -219,13 +220,13 @@
                     DATASET_ID CHAR(10),
                     DOC_NAME VARCHAR(100),
                     TEXT TEXT,
-                    INSERT_DTM DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+                    INSERT_DTM TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {databaseName}.{tableName} (DOC_NAME);
+                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_DOC_IND (DOC_NAME);
                 </item>
                 <item>
-                    CREATE INDEX IF NOT EXISTS {tableName}_DATATSET_IND ON {databaseName}.{tableName} (DATASET_ID);
+                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_DATATSET_IND (DATASET_ID);
                 </item>
             </sql>
             <insert>INSERT INTO {databaseName}.{tableName} (DATASET_ID, DOC_NAME, TEXT,INSERT_DTM) VALUES

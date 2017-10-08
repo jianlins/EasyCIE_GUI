@@ -106,6 +106,7 @@ public class ExcelExporter {
     private void writeDataRows(XSSFWorkbook workbook, XSSFSheet sheet, RecordRowIterator recordIter, LinkedHashMap<String, String> columnInfo) {
 //        skip title row
         int rowNum = 2;
+        int progress=0;
         HashMap<String, ArrayList<RecordRow>> snippets = new HashMap<>();
         LinkedHashMap<String, ArrayList<RecordRow>> docConclusions = new LinkedHashMap<>();
         while (recordIter.hasNext()) {
@@ -122,6 +123,8 @@ public class ExcelExporter {
                 docConclusions.get(docName).add(recordRow);
             else
                 snippets.get(docName).add(recordRow);
+            if (total > -1)
+                task.updateGUIProgress(progress++, total);
 
         }
 
@@ -130,6 +133,7 @@ public class ExcelExporter {
         style.setFillBackgroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
+        System.out.println(docConclusions.size());
 
         for (Map.Entry<String, ArrayList<RecordRow>> entry : docConclusions.entrySet()) {
 //        write doc conclusion row
@@ -155,6 +159,10 @@ public class ExcelExporter {
             cell.setCellValue(docName);
             cell.setCellStyle(style);
 
+            if(snippets.get(docName).size()==0){
+                dataRow = sheet.createRow(rowNum++);
+            }
+
 
             for (RecordRow snippetRecord : snippets.get(docName)) {
                 int snippetCellNum = cellNum;
@@ -178,8 +186,7 @@ public class ExcelExporter {
 
                 dataRow = sheet.createRow(rowNum++);
             }
-            if (total > -1)
-                task.updateGUIProgress(rowNum, total);
+
         }
 
     }
@@ -192,7 +199,7 @@ public class ExcelExporter {
         if (!color.startsWith("#"))
             color = "#" + color;
         System.out.println(color);
-        font.setThemeColor(new XSSFColor(Color.decode(color)).getIndex());
+        font.setColor(new XSSFColor(Color.decode(color)));
         font.setBold(true);
         typeFonts.put(type, font);
         return font;
