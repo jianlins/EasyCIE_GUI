@@ -68,27 +68,23 @@
     <queryStatements>
         <item>
             <name>queryDocs</name>
-            <sql>SELECT DOC_ID,DOC_NAME, TEXT SNIPPET,TEXT,INSERT_DTM FROM {databaseName}.</sql>
+            <sql>SELECT DOC_ID,DOC_NAME, TEXT SNIPPET,TEXT,INSERT_DTM FROM {databaseName}.{tableName}</sql>
         </item>
         <item>
             <name>queryAnnos</name>
-            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM {databaseName}.</sql>
+            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM {databaseName}.{tableName}</sql>
         </item>
         <item>
             <name>exportExcel</name>
             <sql>SELECT ID,{tableName}.DOC_NAME,TYPE,SNIPPET,BEGIN,END,FEATURES FROM {databaseName}.{tableName}</sql>
         </item>
         <item>
-            <name>limitCondition</name>
-            <sql>LIMIT 300</sql>
-        </item>
-        <item>
             <name>queryCount</name>
-            <sql>SELECT COUNT(*) FROM {databaseName}.</sql>
+            <sql>SELECT COUNT(*) FROM {databaseName}.{tableName}</sql>
         </item>
         <item>
             <name>queryAnnotators</name>
-            <sql>SELECT ANNOTATOR FROM {databaseName}.AwNNOTATORS;</sql>
+            <sql>SELECT ANNOTATOR FROM {databaseName}.ANNOTATORS;</sql>
         </item>
         <item>
             <name>checkAnnotatorExist</name>
@@ -101,8 +97,7 @@
         <item>
             <name>checkTableExists</name>
             <sql>
-                select count(*) from INFORMATION_SCHEMA.TABLES
-                where table_name = ? AND TABLE_SCHEMA='{databaseName}';
+                SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '{databaseName}' AND table_name =?;
             </sql>
         </item>
         <item>
@@ -183,20 +178,20 @@
                     FEATURES TEXT,
                     SNIPPET TEXT,
                     COMMENTS TEXT,
-                    CREATE_DTM TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+                    CREATE_DTM DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
                 </item>
                 <item>
-                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_RUN_IND (RUN_ID);
+                    CREATE INDEX IF NOT EXISTS {tableName}_RUN_IND ON {databaseName}.{tableName} (RUN_ID);
                 </item>
                 <item>
-                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_TYPE_IND (TYPE);
+                    CREATE INDEX IF NOT EXISTS {tableName}_TYPE_IND ON {databaseName}.{tableName} (TYPE);
                 </item>
                 <item>
-                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_ANNO_IND (ANNOTATOR);
+                    CREATE INDEX IF NOT EXISTS {tableName}_ANNO_IND ON {databaseName}.{tableName} (ANNOTATOR);
                 </item>
                 <item>
-                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_DOC_IND (DOC_NAME);
+                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {databaseName}.{tableName} (DOC_NAME);
                 </item>
             </sql>
             <returnKey>ID</returnKey>
@@ -220,23 +215,29 @@
                     DATASET_ID CHAR(10),
                     DOC_NAME VARCHAR(100),
                     TEXT TEXT,
-                    INSERT_DTM TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+                    INSERT_DTM DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
                 </item>
                 <item>
-                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_DOC_IND (DOC_NAME);
+                    CREATE INDEX IF NOT EXISTS {tableName}_DOC_IND ON {databaseName}.{tableName} (DOC_NAME);
                 </item>
                 <item>
-                    ALTER TABLE {databaseName}.{tableName} ADD INDEX {tableName}_DATATSET_IND (DATASET_ID);
+                    CREATE INDEX IF NOT EXISTS {tableName}_DATATSET_IND ON {databaseName}.{tableName} (DATASET_ID);
                 </item>
             </sql>
             <insert>INSERT INTO {databaseName}.{tableName} (DATASET_ID, DOC_NAME, TEXT,INSERT_DTM) VALUES
                 (?,?,?,CURRENT_TIMESTAMP);
             </insert>
-            <query>SELECT * FROM {databaseName}.{tableName} LIMIT 15;</query>
+            <query>SELECT * FROM {databaseName}.{tableName};</query>
             <drop>
                 <item>DROP TABLE {databaseName}.{tableName};</item>
             </drop>
         </item>
     </templates>
+    <syntax>
+        <item>
+            <name>limit</name>
+            <sql>LIMIT</sql>
+        </item>
+    </syntax>
 
 </config>

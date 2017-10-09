@@ -68,19 +68,15 @@
     <queryStatements>
         <item>
             <name>queryDocs</name>
-            <sql>SELECT DOC_ID,DOC_NAME, TEXT SNIPPET,TEXT,INSERT_DTM FROM</sql>
+            <sql>SELECT DOC_ID,DOC_NAME, TEXT SNIPPET,TEXT,INSERT_DTM FROM {tableName}</sql>
         </item>
         <item>
             <name>queryAnnos</name>
-            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM</sql>
-        </item>
-        <item>
-            <name>limitCondition</name>
-            <sql>LIMIT 300</sql>
+            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM {tableName}</sql>
         </item>
         <item>
             <name>queryCount</name>
-            <sql>SELECT COUNT(*) FROM</sql>
+            <sql>SELECT COUNT(*) FROM {tableName}</sql>
         </item>
         <item>
             <name>queryAnnotators</name>
@@ -229,5 +225,11 @@
             </drop>
         </item>
     </templates>
+    <syntax>
+        <item>
+            <name>limit</name>
+            <sql>LIMIT</sql>
+        </item>
+    </syntax>
 
 </config>

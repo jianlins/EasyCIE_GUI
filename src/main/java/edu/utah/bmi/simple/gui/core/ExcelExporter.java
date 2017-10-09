@@ -5,13 +5,12 @@ import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.StaticVariables;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.*;
 
 import java.awt.*;
+import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.*;
@@ -72,6 +71,8 @@ public class ExcelExporter {
         Font f = workbook.createFont();
         f.setBold(true);
         cs.setFont(f);
+        titleRow.setRowStyle(cs);
+
 
         XSSFCell cell = titleRow.createCell(cellNum++);
         cell.setCellValue("Comments");
@@ -95,7 +96,6 @@ public class ExcelExporter {
                     coreColumns.put(upperCaseColumnName, columnName);
                 default:
                     cell = titleRow.createCell(cellNum++);
-                    cell.setCellStyle(cs);
                     cell.setCellValue(upperCaseColumnName);
                     break;
             }
@@ -130,8 +130,9 @@ public class ExcelExporter {
 
         XSSFRow dataRow = sheet.createRow(rowNum++);
         CellStyle style = workbook.createCellStyle();
-        style.setFillBackgroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+        style.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setAlignment(HorizontalAlignment.CENTER);
 
         System.out.println(docConclusions.size());
 

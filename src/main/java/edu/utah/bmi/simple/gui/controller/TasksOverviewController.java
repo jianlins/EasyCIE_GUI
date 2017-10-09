@@ -106,7 +106,7 @@ public class TasksOverviewController {
 
     private WebEngine webEngine;
 
-    private int snippetPos = 1;
+    private int snippetPos = 1, limitRecords=300;
 
     public TasksOverviewController() {
     }
@@ -120,6 +120,7 @@ public class TasksOverviewController {
 
         dbPanel.setVisible(false);
         mainApp.tasks = tasks;
+        limitRecords=Integer.parseInt(tasks.getTask("settings").getValue("viewer/limit_records").trim());
         readViewerSettings();
         // Initialize the tasks table with the one column.
         taskNameColumn.setCellValueFactory(p -> {
@@ -400,7 +401,8 @@ public class TasksOverviewController {
                     public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                         if (newValue && !row.isEmpty()) {
                             ObservableList clickedRow = row.getItem();
-                            updateHTMLEditor((RecordRow) clickedRow.get(snippetPos));
+                            if (clickedRow.get(snippetPos) instanceof RecordRow)
+                                updateHTMLEditor((RecordRow) clickedRow.get(snippetPos));
                         }
                     }
                 });
@@ -412,7 +414,7 @@ public class TasksOverviewController {
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 if (annoTableView.getColumns() != null && annoTableView.getColumns().size() > 1) {
                     TableColumn col = (TableColumn) annoTableView.getColumns().get(snippetPos);
-                    System.out.println("reset column " + snippetPos);
+//                    System.out.println("reset the width of column " + snippetPos);
                     col.setMaxWidth((int) newValue.doubleValue() * 0.9);
                     col.setPrefWidth((int) newValue.doubleValue() * 0.38);
                     htmlViewer.setPrefWidth(newValue.doubleValue() * 0.15);
@@ -472,13 +474,14 @@ public class TasksOverviewController {
                 condition = filter.substring(lowerCasedCondition.indexOf("where") + 5);
             }
         }
-        if (lowerCasedCondition.indexOf(" limit ") == -1) {
+        String limitSyntacs=dao.configReader.getValue("syntax/limit/sql").toString();
+        if (lowerCasedCondition.indexOf(" "+limitSyntacs.toLowerCase()+" ") == -1) {
             if (lowerCasedCondition.endsWith(";")) {
-                condition = condition.substring(0, condition.length() - 1) + " " + dao.queries.get("limitCondition") + ";";
-                filter = filter.substring(0, filter.length() - 1) + " " + dao.queries.get("limitCondition") + ";";
+                condition = condition.substring(0, condition.length() - 1) + " " + limitSyntacs+" " +limitRecords + ";";
+                filter = filter.substring(0, filter.length() - 1) + " " + limitSyntacs+" " +limitRecords + ";";
             } else {
-                condition = condition + " " + dao.queries.get("limitCondition") + ";";
-                filter = filter + " " + dao.queries.get("limitCondition") + ";";
+                condition = condition + " " + limitSyntacs+" " +limitRecords+ "";
+                filter = filter + " " + limitSyntacs +" "+limitRecords+ "";
             }
         }
         sqlFilter.setText(condition);
@@ -499,8 +502,7 @@ public class TasksOverviewController {
         }
 
         StringBuilder sql = new StringBuilder();
-        sql.append(dao.queries.get(queryName));
-        sql.append(tableName);
+        sql.append(dao.queries.get(queryName).replaceAll("\\{tableName}",tableName));
         if (condition != null && condition.length() > 0) {
             sql.append(" ");
             sql.append(condition);
