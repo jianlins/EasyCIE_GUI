@@ -42,6 +42,8 @@ public class ConfigKeys {
 
     public static final String maintask = "easycie";
     public static final String annotator = "annotators/current";
+
+    public static final String comparetask="compare";
     public static final String targetAnnotator = "compare/targetAnnotator";
     public static final String referenceAnnotator = "compare/referenceAnnotator";
     public static final String compareReferenceTable = "compare/referenceTable";

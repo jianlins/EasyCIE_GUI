@@ -31,7 +31,10 @@ public class RunEasyCIEDebugger extends GUITask {
 
 
     protected void initiate(TasksFX tasks) {
-        updateMessage("Initiate configurations..");
+        if (!Platform.isAccessibilityActive()) {
+            guiEnabled = false;
+        }
+        updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
         fastNERRule = config.getValue(ConfigKeys.tRuleFile);
@@ -70,41 +73,42 @@ public class RunEasyCIEDebugger extends GUITask {
 
     @Override
     protected Object call() throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                AnnotationLogger.reset();
-                Dialog<String> dialog = new Dialog<>();
-                dialog.setTitle("Pipeline Debugger");
-                dialog.setHeaderText("Enter your snippet string here:");
-                TextArea textField = new TextArea();
-                dialog.setHeight(400);
-                dialog.setResizable(true);
-                dialog.getDialogPane().setContent(textField);
-                dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
-                textField.setEditable(true);
-                textField.setWrapText(true);
+        if (guiEnabled)
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    AnnotationLogger.reset();
+                    Dialog<String> dialog = new Dialog<>();
+                    dialog.setTitle("Pipeline Debugger");
+                    dialog.setHeaderText("Enter your snippet string here:");
+                    TextArea textField = new TextArea();
+                    dialog.setHeight(400);
+                    dialog.setResizable(true);
+                    dialog.getDialogPane().setContent(textField);
+                    dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                    dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+                    textField.setEditable(true);
+                    textField.setWrapText(true);
 
-                Optional<String> result = dialog.showAndWait();
-                String entered = "";
+                    Optional<String> result = dialog.showAndWait();
+                    String entered = "";
 
-                if (result.isPresent()) {
-                    entered = textField.getText();
-                }
-                inputStr = entered;
-                if (entered.trim().length() > 0) {
-                    debugRunner.addReader(inputStr,"debug.doc");
+                    if (result.isPresent()) {
+                        entered = textField.getText();
+                    }
+                    inputStr = entered;
+                    if (entered.trim().length() > 0) {
+                        debugRunner.addReader(inputStr, "debug.doc");
 //                    initiate(tasks, "xmi");
-                    updateMessage("Execute pipeline...");
-                    debugRunner.run();
-                } else {
-                    updateMessage("No string entered.");
-                    updateProgress(1, 1);
-                }
+                        updateGUIMessage("Execute pipeline...");
+                        debugRunner.run();
+                    } else {
+                        updateGUIMessage("No string entered.");
+                        updateGUIProgress(1, 1);
+                    }
 
-            }
-        });
+                }
+            });
         return null;
     }
 

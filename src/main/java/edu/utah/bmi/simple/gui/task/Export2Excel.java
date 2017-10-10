@@ -38,7 +38,10 @@ public class Export2Excel extends GUITask {
 
 
     protected void initiate(TasksFX tasks, String... paras) {
-        updateMessage("Initiate configurations..");
+        if (!Platform.isAccessibilityActive()) {
+            guiEnabled = false;
+        }
+        updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
         outputDB = config.getValue(ConfigKeys.writeConfigFileName);
         outputTable = config.getValue(ConfigKeys.outputTableName);
@@ -82,7 +85,7 @@ public class Export2Excel extends GUITask {
         GUITask task = this;
 
         if (!new File(outputDB).exists()) {
-            updateMessage("Database " + outputDB + " not exist");
+            updateGUIMessage("Database " + outputDB + " not exist");
             return null;
         }
         // Update UI here.
@@ -90,10 +93,10 @@ public class Export2Excel extends GUITask {
         if (annotator.trim().length() > 0) {
             DAO dao = new DAO(new File(outputDB));
             if (!dao.checkExists(outputTable)) {
-                updateMessage("Table '" + outputTable + "' does not exit.");
+                updateGUIMessage("Table '" + outputTable + "' does not exit.");
                 popDialog("Note", "Table '" + outputTable + "' does not exit.",
                         " You need to execute 'RunEasyCIE' first.");
-                updateProgress(0, 0);
+                updateGUIProgress(0, 0);
                 return null;
             }
             String filter = "";
@@ -116,7 +119,7 @@ public class Export2Excel extends GUITask {
                 filter = " WHERE annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid + " ";
             }
             String sql = "SELECT COUNT(DISTINCT " + sampleOnColumn + ") FROM " +
-                    dao.databaseName + "." + outputTable + " OU " + filter;
+                    (dao.databaseName == null ? "" : (dao.databaseName + ".") )+ outputTable + " OU " + filter;
             RecordRow recordRow = dao.queryRecord(sql);
             int total = Integer.parseInt(recordRow.getValueByColumnId(1) + "");
 //                    TODO extend later
@@ -133,7 +136,7 @@ public class Export2Excel extends GUITask {
             excelExporter.export(excel);
 
         }
-        updateProgress(1, 1);
+        updateGUIProgress(1, 1);
         return null;
     }
 

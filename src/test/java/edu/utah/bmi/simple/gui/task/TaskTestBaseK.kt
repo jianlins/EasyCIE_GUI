@@ -1,8 +1,10 @@
 package edu.utah.bmi.simple.gui.task
 
 import edu.utah.bmi.nlp.core.GUITask
+import edu.utah.bmi.nlp.runner.RunPipe
 import edu.utah.bmi.nlp.sql.DAO
 import edu.utah.bmi.simple.gui.core.SettingOper
+import edu.utah.bmi.simple.gui.entry.StaticVariables
 import edu.utah.bmi.simple.gui.entry.TasksFX
 import org.junit.BeforeClass
 import org.junit.Test
@@ -15,11 +17,7 @@ import org.junit.Assert.assertTrue
 import org.junit.FixMethodOrder
 import org.junit.runners.MethodSorters
 
-class EvalGUITask(val f: () -> Unit) : GUITask() {
-    override fun call() {
-        f()
-    }
-}
+
 @FixMethodOrder(value = MethodSorters.NAME_ASCENDING)
 
 class TaskTestBaseK {
@@ -43,22 +41,12 @@ class TaskTestBaseK {
 
     }
 
-    private fun creatGUITask(sql: String, value: Int): GUITask {
-        return EvalGUITask({
-            if (value == -1)
-                print(dao!!.queryRecord(sql))
-            else
-                assertTrue(dao!!.queryRecord(sql).getValueByColumnId(0).equals(value))
-        })
-    }
 
-    private fun testTask(task: GUITask, seconds: Int = 5000, evalTask: GUITask? = null) {
+    private fun testTask(task: GUITask, seconds: Int = 5000) {
         val latch = CountDownLatch(1)
         val r = {
             task.guiCall()
             latch.countDown()  //and lets the junit thread when it is done
-            if (evalTask != null)
-                evalTask.guiCall()
         }
         val th = Thread(r)
         th.start()
@@ -73,27 +61,71 @@ class TaskTestBaseK {
     @Test
     fun test1Import() {
         val runImport = Import(tasks, "txt")
-        testTask(runImport, 5000, creatGUITask("SELECT COUNT(*) FROM DOCUMENTS;", -1))
+        testTask(runImport)
+
     }
 
     @Test
     fun test2Runv1() {
-        tasks!!.getTask(ConfigKeys.maintask).setValue(ConfigKeys.annotator,"v1")
+        tasks!!.getTask(ConfigKeys.maintask).setValue(ConfigKeys.annotator, "v1")
         val task = RunEasyCIE(tasks)
-        testTask(task, 5000, creatGUITask("SELECT COUNT(*) FROM OUTPUT;", -1))
+        testTask(task)
     }
 
     @Test
     fun test2Runv2() {
-        tasks!!.getTask(ConfigKeys.maintask).setValue(ConfigKeys.annotator,"v2")
+        tasks!!.getTask(ConfigKeys.maintask).setValue(ConfigKeys.annotator, "v2")
         val task = RunEasyCIE(tasks)
-        testTask(task, 5000, creatGUITask("SELECT COUNT(*) FROM OUTPUT;", -1))
+        testTask(task)
     }
 
     @Test
-    fun test3CompareTask(){
-
+    fun test3CompareTask() {
+        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.targetAnnotator, "v2")
+        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.targetRunId, "")
+        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.referenceAnnotator, "v1")
+        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.referenceRunId, "")
+        val task = CompareTask(tasks)
+        task.print = true
+        testTask(task)
     }
 
+    @Test
+    fun test4Debug() {
+        val task = RunEasyCIEDebugger(tasks)
+        task.debugRunner.addReader("Resp: sats 94-99 3L NC, lungs coarse upper, diminished lower. strong non-productive cough, coughing reduced in frequency, prn robitussin w/ codeine prn, nebs via resp therapy. pt states no SOB.", "debug.doc")
+        RunPipe.debug = true
+        task.debugRunner.run()
+    }
+
+    @Test
+    fun test5ExportEhost() {
+        val task = RunEasyCIE(tasks, "ehost")
+        RunPipe.debug = false
+        testTask(task)
+    }
+
+    @Test
+    fun test6ExportBrat() {
+        val task = RunEasyCIE(tasks, "brat")
+        RunPipe.debug = false
+        testTask(task)
+    }
+
+    @Test
+    fun test6ExportXMI() {
+        val task = RunEasyCIE(tasks, "xmi")
+        RunPipe.debug = false
+        testTask(task)
+    }
+
+    @Test
+    fun test6ExportExcel() {
+        for ((i, color) in tasks!!.getTask("settings")!!.getValue("viewer/color_pool").split("|").withIndex()) {
+            StaticVariables.colorPool.put(i, color.trim({ it <= ' ' }))
+        }
+        val task = Export2Excel(tasks)
+        testTask(task)
+    }
 }
 

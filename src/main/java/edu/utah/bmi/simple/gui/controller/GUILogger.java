@@ -17,19 +17,19 @@ import java.util.ArrayList;
  */
 public class GUILogger extends ConsoleLogger {
 
-    protected final ColumnInfo columnInfo=new ColumnInfo();
+    protected final ColumnInfo columnInfo = new ColumnInfo();
     protected String inputPath, descriptorPath;
     protected GUITask task;
 
     public GUILogger(GUITask task, String inputPath, String descriptorPath) {
         this.task = task;
-        columnInfo.addColumnInfo("ID","string");
-        columnInfo.addColumnInfo("TYPE","string");
-        columnInfo.addColumnInfo("BEGIN","int");
-        columnInfo.addColumnInfo("END","int");
+        columnInfo.addColumnInfo("ID", "string");
+        columnInfo.addColumnInfo("TYPE", "string");
+        columnInfo.addColumnInfo("BEGIN", "int");
+        columnInfo.addColumnInfo("END", "int");
 
-        columnInfo.addColumnInfo("FEATURES","string");
-        columnInfo.addColumnInfo("SNIPPET","string");
+        columnInfo.addColumnInfo("FEATURES", "string");
+        columnInfo.addColumnInfo("SNIPPET", "string");
 //        columnInfo.addColumnInfo("ANNOTATOR","string");
 //        columnInfo.addColumnInfo("RUN_ID","string");
         this.inputPath = inputPath;
@@ -45,20 +45,21 @@ public class GUILogger extends ConsoleLogger {
 
     public void logCompleteTime() {
         super.logCompleteTime();
-        Platform.runLater(new Runnable() {
-            public void run() {
-                boolean res =true;
-                res = TasksOverviewController.currentTasksOverviewController.showDBTable(
-                        AnnotationLogger.records.iterator(),columnInfo, "output",false);
-                if (res)
-                    task.updateGUIMessage("String processing completed.");
-                else
-                    task.updateGUIMessage("No annotation exported.");
+        if (task.guiEnabled)
+            Platform.runLater(new Runnable() {
+                public void run() {
+                    boolean res = true;
+                    res = TasksOverviewController.currentTasksOverviewController.showDBTable(
+                            AnnotationLogger.records.iterator(), columnInfo, "output", false);
+                    if (res)
+                        task.updateGUIMessage("String processing completed.");
+                    else
+                        task.updateGUIMessage("No annotation exported.");
 
-                task.updateGUIProgress(1, 1);
+                    task.updateGUIProgress(1, 1);
 
-            }
-        });
+                }
+            });
 //        SwingUtilities.invokeLater(new Runnable() {
 //            public void run() {
 //                JFrame frame = new MyAnnotationViewerPlain(new String[]{"Pipeline Debug Viewer", inputPath, descriptorPath});

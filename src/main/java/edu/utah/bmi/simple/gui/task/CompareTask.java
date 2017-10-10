@@ -44,7 +44,7 @@ public class CompareTask extends GUITask {
             guiEnabled=false;
         }
         updateGUIMessage("Initiate configurations..");
-        TaskFX config = tasks.getTask("compare");
+        TaskFX config = tasks.getTask(ConfigKeys.comparetask);
 
         targetAnnotator = config.getValue(ConfigKeys.targetAnnotator);
         targetRunId = config.getValue(ConfigKeys.targetRunId);
