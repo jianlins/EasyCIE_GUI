@@ -1,4 +1,4 @@
-package edu.utah.bmi;
+package edu.utah.bmi.nlp;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

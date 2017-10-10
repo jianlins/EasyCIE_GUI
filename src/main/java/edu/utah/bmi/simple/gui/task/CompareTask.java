@@ -9,6 +9,7 @@ import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.nlp.uima.NLPDBLogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
+import javafx.application.Platform;
 
 
 import java.io.File;
@@ -39,7 +40,10 @@ public class CompareTask extends GUITask {
     }
 
     private void initiate(TasksFX tasks) {
-        updateMessage("Initiate configurations..");
+        if(!Platform.isAccessibilityActive()) {
+            guiEnabled=false;
+        }
+        updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("compare");
 
         targetAnnotator = config.getValue(ConfigKeys.targetAnnotator);
@@ -90,27 +94,27 @@ public class CompareTask extends GUITask {
         logger = new NLPDBLogger(wdao, "LOG", "RUN_ID", targetAnnotator + "_vs_" + referenceAnnotator);
         logger.logStartTime();
         if (!wdao.checkTableExits(outputTable)) {
-            updateMessage("Table '" + outputTable + "' does not exit.");
+            updateGUIMessage("Table '" + outputTable + "' does not exit.");
             popDialog("Note", "Table '" + outputTable + "' does not exit.",
                     " You need to execute 'RunEasyCIE' first.");
-            updateProgress(0, 0);
+            updateGUIProgress(0, 0);
             return null;
         }
         if (!rdao.checkTableExits(compareReferenceTable)) {
-            updateMessage("Table '" + compareReferenceTable + "' does not exit.");
+            updateGUIMessage("Table '" + compareReferenceTable + "' does not exit.");
             popDialog("Note", "Table '" + compareReferenceTable + "' does not exit.",
                     " You need to either execute 'RunEasyCIE' or import reference annotations.");
-            updateProgress(0, 0);
+            updateGUIProgress(0, 0);
             return null;
         }
 
         readAnnotations(wdao, targetAnnotations, targetAnnotator, outputTable, typeFilter, targetRunId);
         readAnnotations(rdao, referenceAnnotations, referenceAnnotator, compareReferenceTable, typeFilter, referenceRunId);
-        updateMessage("Start comparing...");
-        updateProgress(0, 1);
+        updateGUIMessage("Start comparing...");
+        updateGUIProgress(0, 1);
         HashMap<String, EvalCounter> evalCounters = comparior.eval(targetAnnotations, referenceAnnotations, types, strictCompare);
-        updateProgress(1, 1);
-        updateMessage("Compare complete.");
+        updateGUIProgress(1, 1);
+        updateGUIMessage("Compare complete.");
         popDialog("Note", "Report: ", comparior.getScores(evalCounters));
 
         if (diffTable != null && diffTable.length() > 0) {
@@ -125,7 +129,7 @@ public class CompareTask extends GUITask {
 
     public void readAnnotations(DAO dao, HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations,
                                 String annotator, String annotatorTable, String typeFilter, String runId) {
-        updateMessage("Read the annotations of \"" + annotator + "\" from table \"" + annotatorTable + "\"....");
+        updateGUIMessage("Read the annotations of \"" + annotator + "\" from table \"" + annotatorTable + "\"....");
         ArrayList<String> conditions = new ArrayList<>();
         if (typeFilter != null && typeFilter.trim().length() > 0) {
             StringBuilder sb = new StringBuilder();
@@ -168,7 +172,7 @@ public class CompareTask extends GUITask {
             if (!fileMap.containsKey(docName))
                 fileMap.put(docName, new ArrayList<>());
             fileMap.get(docName).add(record);
-            updateProgress(count, total);
+            updateGUIProgress(count, total);
             count++;
         }
     }

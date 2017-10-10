@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package edu.utah.bmi.uima;
+package edu.utah.bmi.nlp.uima;
 
 import edu.utah.bmi.nlp.uima.MyAnnotationViewerMain;
 import edu.utah.bmi.nlp.uima.MyAnnotationViewerPlain;

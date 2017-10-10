@@ -2,16 +2,13 @@ package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.runner.CommonFunc;
-import edu.utah.bmi.nlp.runner.RunPipe;
-import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.BratReader;
 import edu.utah.bmi.nlp.uima.EhostReader;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
-
-import org.apache.commons.cli.CommandLine;
+import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -19,8 +16,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-
-import static edu.utah.bmi.nlp.runner.CommonFunc.getCmdValue;
 
 /**
  * Created by Jianlin Shi on 9/23/16.
@@ -42,7 +37,10 @@ public class Import extends GUITask {
     }
 
     private void initiate(TasksFX tasks, String importType) {
-        updateMessage("Initiate configurations..");
+        if(!Platform.isAccessibilityActive()) {
+           guiEnabled=false;
+        }
+        updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("import");
         TaskFX settingConfig = tasks.getTask("settings");
         String documentDir = config.getValue(ConfigKeys.importDir);
@@ -117,7 +115,7 @@ public class Import extends GUITask {
     @Override
     protected Object call() throws Exception {
         if (initSuccess) {
-            updateMessage("Start import....");
+            updateGUIMessage("Start import....");
             switch (corpusType) {
                 case txt:
                     importText(inputDir, datasetId, importTable, overwrite,
@@ -128,17 +126,17 @@ public class Import extends GUITask {
                     runner.run();
                     break;
             }
-            updateMessage("Import complete");
+            updateGUIMessage("Import complete");
         }
         dao.endBatchInsert();
         dao.close();
-        updateProgress(1, 1);
+        updateGUIProgress(1, 1);
         return null;
     }
 
 
     protected void run(String inputDir, String outputTable, String SQLFile, boolean overWrite, String[] filters) throws IOException {
-        updateMessage("Start import....");
+        updateGUIMessage("Start import....");
         DAO dao = new DAO(new File(SQLFile));
         dao.initiateTable(outputTable, overWrite);
         if (filters.length == 0 || filters[0].trim().length() == 0)
@@ -147,7 +145,7 @@ public class Import extends GUITask {
         int total = files.size();
         int counter = 1;
         for (File file : files) {
-            updateProgress(counter, total);
+            updateGUIProgress(counter, total);
             counter++;
             String content = FileUtils.readFileToString(file);
             ArrayList<RecordRow> records = new ArrayList<>();
@@ -156,8 +154,8 @@ public class Import extends GUITask {
         }
         dao.endBatchInsert();
         dao.close();
-        updateMessage("Import complete");
-        updateProgress(1, 1);
+        updateGUIMessage("Import complete");
+        updateGUIProgress(1, 1);
     }
 
 
@@ -185,7 +183,7 @@ public class Import extends GUITask {
             dao.insertRecords(tableName, records);
             if (print)
                 System.out.println("success");
-            updateProgress(counter, total);
+            updateGUIProgress(counter, total);
             counter++;
         }
         System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");

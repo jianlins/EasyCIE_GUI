@@ -1,4 +1,4 @@
-package edu.utah.bmi;
+package edu.utah.bmi.nlp;
 
 
 import edu.utah.bmi.nlp.uima.EhostReader;

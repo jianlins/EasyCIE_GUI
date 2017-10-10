@@ -1,4 +1,4 @@
-package edu.utah.bmi;
+package edu.utah.bmi.nlp;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;

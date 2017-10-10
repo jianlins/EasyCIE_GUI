@@ -1,4 +1,4 @@
-package edu.utah.bmi.uima;
+package edu.utah.bmi.nlp.uima;
 
 import edu.utah.bmi.simple.gui.core.SettingOper;
 import edu.utah.bmi.simple.gui.entry.TasksFX;

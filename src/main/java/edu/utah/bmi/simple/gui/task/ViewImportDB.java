@@ -1,6 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 
+import com.sun.javafx.application.PlatformImpl;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
@@ -17,14 +18,16 @@ import java.io.File;
 public class ViewImportDB extends GUITask {
     protected String SQLFile, corpusTable;
     protected String importType;
-
     public ViewImportDB(TasksFX tasks, String importType) {
         initiate(tasks, importType);
     }
 
     private void initiate(TasksFX tasks, String importType) {
         this.importType = importType;
-        updateMessage("Initiate configurations..");
+        if (Platform.isAccessibilityActive()) {
+            updateGUIMessage("Initiate configurations..");
+
+        }
         TaskFX config = tasks.getTask("settings");
         SQLFile = config.getValue(ConfigKeys.readDBConfigFile);
         if (importType.equals("doc"))
@@ -40,8 +43,8 @@ public class ViewImportDB extends GUITask {
             @Override
             public void run() {
                 if (!new File(SQLFile).exists()) {
-                    updateMessage("Database " + SQLFile + " not exist");
-                    updateProgress(0, 0);
+                    updateGUIMessage("Database " + SQLFile + " not exist");
+                    updateGUIProgress(0, 0);
                     return;
                 }
                 // Update UI here.
@@ -50,7 +53,7 @@ public class ViewImportDB extends GUITask {
                 if (!dao.checkTableExits(corpusTable)) {
                     popDialog("Note", "Table '" + corpusTable + "' does not exit.",
                             " You need to import documents first.");
-                    updateProgress(0, 0);
+                    updateGUIProgress(0, 0);
                     return;
                 }
                 if (importType.equals("doc"))
@@ -58,10 +61,10 @@ public class ViewImportDB extends GUITask {
                 else
                     res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(SQLFile, corpusTable, "", "output");
                 if (res)
-                    updateMessage("data loaded");
+                    updateGUIMessage("data loaded");
                 else
-                    updateMessage("no record loaded");
-                updateProgress(1, 1);
+                    updateGUIMessage("no record loaded");
+                updateGUIProgress(1, 1);
             }
         });
         return null;

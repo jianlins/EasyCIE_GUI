@@ -25,6 +25,7 @@ import edu.utah.bmi.nlp.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.writer.XMIWritter_AE;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
+import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -114,7 +115,10 @@ public class RunEasyCIE extends GUITask {
     }
 
     protected void initiate(TasksFX tasks, String option) {
-        updateMessage("Initiate configurations..");
+        if(!Platform.isAccessibilityActive()) {
+            guiEnabled=false;
+        }
+        updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
         fastNERRule = config.getValue(ConfigKeys.tRuleFile);
