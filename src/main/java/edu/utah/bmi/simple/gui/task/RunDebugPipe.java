@@ -185,8 +185,10 @@ public class RunDebugPipe extends RunPipe {
                         RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
                         RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
             if (rushType.length() > 0)
-                runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION,
-                        "After being processeb by Rush (sentence segmenter):", AnnotationLogger.PARAM_TYPE_NAMES, rushType});
+                runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER,"RuSH",
+                        AnnotationLogger.PARAM_INDICATION,
+                        "After being processeb by Rush (sentence segmenter):",
+                        AnnotationLogger.PARAM_TYPE_NAMES, rushType});
         }
 
         if (fastCNERRule.length() > 0) {
@@ -195,6 +197,7 @@ public class RunDebugPipe extends RunPipe {
             });
             if (cNERType.length() > 0) {
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
+                        AnnotationLogger.PARAM_INDICATION_HEADER,"FastCNER",
                         AnnotationLogger.PARAM_TYPE_NAMES, cNERType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by FastCNER (character based rule NER):"});
@@ -207,6 +210,7 @@ public class RunDebugPipe extends RunPipe {
                     FastNER_AE_General.PARAM_MARK_PSEUDO, true});
             if (tNERType.length() > 0) {
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
+                        AnnotationLogger.PARAM_INDICATION_HEADER,"FastNER",
                         AnnotationLogger.PARAM_TYPE_NAMES, tNERType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by FastNER (token based rule NER):"});
@@ -225,6 +229,7 @@ public class RunDebugPipe extends RunPipe {
             });
             if (contextType.length() > 0) {
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
+                        AnnotationLogger.PARAM_INDICATION_HEADER,"FastContext",
                         AnnotationLogger.PARAM_TYPE_NAMES, contextType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by FastContext (context detector):"});
@@ -235,6 +240,7 @@ public class RunDebugPipe extends RunPipe {
             runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_RULE_FILE_OR_STR, featureInfRule});
             if (contextType.length() > 0) {
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
+                        AnnotationLogger.PARAM_INDICATION_HEADER,"FeatureInferenceAnnotator",
                         AnnotationLogger.PARAM_TYPE_NAMES, featureInfType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by FeatureInferenceAnnotator:"});
@@ -244,6 +250,7 @@ public class RunDebugPipe extends RunPipe {
             runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_RULE_FILE_OR_STR, docInfRule});
             if (contextType.length() > 0) {
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
+                        AnnotationLogger.PARAM_INDICATION_HEADER,"DocInferenceAnnotator",
                         AnnotationLogger.PARAM_TYPE_NAMES, docInfType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by DocInferenceAnnotator:"});

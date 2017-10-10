@@ -15,15 +15,15 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
-import javafx.scene.web.HTMLEditor;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.util.Callback;
@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -106,7 +105,7 @@ public class TasksOverviewController {
 
     private WebEngine webEngine;
 
-    private int snippetPos = 1, limitRecords=300;
+    private int snippetPos = 1, limitRecords = 300;
 
     public TasksOverviewController() {
     }
@@ -120,7 +119,7 @@ public class TasksOverviewController {
 
         dbPanel.setVisible(false);
         mainApp.tasks = tasks;
-        limitRecords=Integer.parseInt(tasks.getTask("settings").getValue("viewer/limit_records").trim());
+        limitRecords = Integer.parseInt(tasks.getTask("settings").getValue("viewer/limit_records").trim());
         readViewerSettings();
         // Initialize the tasks table with the one column.
         taskNameColumn.setCellValueFactory(p -> {
@@ -167,6 +166,7 @@ public class TasksOverviewController {
 //      Enable autoresize of htmleditor
 //        GridPane gridPane = (GridPane) htmlViewer.getChildrenUnmodifiable().get(0);
         webEngine = htmlViewer.getEngine();
+
 //        RowConstraints row1 = new RowConstraints();
 //        row1.setVgrow(Priority.NEVER);
 //        RowConstraints row2 = new RowConstraints();
@@ -181,11 +181,6 @@ public class TasksOverviewController {
             public void handle(MouseEvent event) {
                 enableRefresh = true;
                 String condition = sqlFilter.getText().trim();
-                if (condition.length() > 0) {
-                    if (!condition.startsWith("WHERE") || !condition.startsWith("where")) {
-                        condition = " WHERE " + condition;
-                    }
-                }
                 if (doctable)
                     showDocTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
                 else
@@ -331,23 +326,28 @@ public class TasksOverviewController {
         if (doctable)
             annoTableView.getColumns().clear();
         doctable = false;
-        return showDBTable(dbName, "queryAnnos", tableName, filter.trim(), colorDifferential);
+        return showDBTable(dbName, "queryAnnos", tableName, filter, colorDifferential);
     }
 
     public boolean showDocTable(String dbName, String tableName, String filter, String colorDifferential) {
         if (!doctable)
             annoTableView.getColumns().clear();
         doctable = true;
-        return showDBTable(dbName, "queryDocs", tableName, filter.trim(), colorDifferential);
+        return showDBTable(dbName, "queryDocs", tableName, filter, colorDifferential);
     }
 
-    public boolean showDBTable(RecordRowIterator rs, String colorDifferential, boolean doctable) {
-        this.doctable = doctable;
+    public boolean showDBTable(RecordRowIterator rs, String colorDifferential) {
+        ColumnInfo columanInfo = rs.getColumninfo();
+        return showDBTable(rs, columanInfo, colorDifferential, doctable);
+    }
+
+
+    public boolean showDBTable(Iterator rs, ColumnInfo columanInfo, String colorDifferential, boolean doctable) {
         dbPanel.setVisible(true);
         annoTableView.setVisible(true);
+        this.doctable = doctable;
         ObservableList<ObservableList> data = FXCollections.observableArrayList();
         ColorAnnotationCell.colorDifferential = colorDifferential;
-        ColumnInfo columanInfo = rs.getColumninfo();
         int numOfColumns = columanInfo.getColumnInfo().size();
         if (columanInfo.getColumnInfo().containsKey("BEGIN"))
             numOfColumns -= 2;
@@ -358,8 +358,11 @@ public class TasksOverviewController {
                         return new ColorAnnotationCell();
                     }
                 };
-        if (annoTableView.getColumns().size() == 0) {
+//        System.out.println("annoTableView.getColumns().size=" + annoTableView.getColumns().size());
+//        System.out.println("columanInfo size=" + columanInfo.getColumnInfo().size());
+        if (annoTableView.getColumns().size() == 0 || annoTableView.getColumns().size() != columanInfo.getColumnInfo().size() - 4) {
             int i = 0;
+            annoTableView.getColumns().clear();
             for (String columnName : columanInfo.getColumnInfo().keySet()) {
                 //We are using non property style for making dynamic table
                 final int j = i;
@@ -369,6 +372,7 @@ public class TasksOverviewController {
                     case "END":
                     case "TEXT":
                     case "FEATURES":
+                    case "SNIPPET_BEGIN":
                         continue;
                     case "SNIPPET":
                         snippetPos = i;
@@ -425,7 +429,7 @@ public class TasksOverviewController {
         while (rs != null && rs.hasNext()) {
             //Iterate Row
             ObservableList<Object> row = FXCollections.observableArrayList();
-            RecordRow record = rs.next();
+            RecordRow record = (RecordRow) rs.next();
             for (String columnName : columanInfo.getColumnInfo().keySet()) {
                 TableColumn col = new TableColumn(columnName);
                 switch (columnName.toUpperCase()) {
@@ -433,6 +437,7 @@ public class TasksOverviewController {
                     case "END":
                     case "TEXT":
                     case "FEATURES":
+                    case "SNIPPET_BEGIN":
                         continue;
                     case "SNIPPET":
                         row.add(record);
@@ -471,25 +476,32 @@ public class TasksOverviewController {
         String lowerCasedCondition = condition.toLowerCase();
         if (filter.length() > 7) {
             if (lowerCasedCondition.indexOf("where") != -1) {
-                condition = filter.substring(lowerCasedCondition.indexOf("where") + 5);
+                filter = filter.substring(lowerCasedCondition.indexOf("where") + 5);
+                condition = filter;
             }
         }
-        String limitSyntacs=dao.configReader.getValue("syntax/limit/sql").toString();
-        if (lowerCasedCondition.indexOf(" "+limitSyntacs.toLowerCase()+" ") == -1) {
+        String limitSyntacs = dao.configReader.getValue("syntax/limit/sql").toString();
+        String limitSyntacsLowerCase = limitSyntacs.toLowerCase();
+        if (!lowerCasedCondition.trim().startsWith(limitSyntacsLowerCase + " ") &&
+                lowerCasedCondition.indexOf(" " + limitSyntacsLowerCase + " ") == -1) {
             if (lowerCasedCondition.endsWith(";")) {
-                condition = condition.substring(0, condition.length() - 1) + " " + limitSyntacs+" " +limitRecords + ";";
-                filter = filter.substring(0, filter.length() - 1) + " " + limitSyntacs+" " +limitRecords + ";";
+                condition = condition.substring(0, condition.length() - 1) + " " + limitSyntacs + " " + limitRecords + ";";
+                filter = filter.substring(0, filter.length() - 1) + " " + limitSyntacs + " " + limitRecords + ";";
             } else {
-                condition = condition + " " + limitSyntacs+" " +limitRecords+ "";
-                filter = filter + " " + limitSyntacs +" "+limitRecords+ "";
+                condition = condition + " " + limitSyntacs + " " + limitRecords + "";
+                filter = filter + " " + limitSyntacs + " " + limitRecords + "";
             }
         }
+        if (!filter.trim().toLowerCase().startsWith(limitSyntacsLowerCase)) {
+            filter = " where " + filter;
+        }
+
         sqlFilter.setText(condition);
 
         RecordRowIterator rs = queryRecords(dao, queryName, tableName, filter);
 
 
-        boolean haveRead = showDBTable(rs, colorDifferential, doctable);
+        boolean haveRead = showDBTable(rs, colorDifferential);
         dao.close();
         return haveRead;
     }
@@ -502,7 +514,7 @@ public class TasksOverviewController {
         }
 
         StringBuilder sql = new StringBuilder();
-        sql.append(dao.queries.get(queryName).replaceAll("\\{tableName}",tableName));
+        sql.append(dao.queries.get(queryName).replaceAll("\\{tableName}", tableName));
         if (condition != null && condition.length() > 0) {
             sql.append(" ");
             sql.append(condition);

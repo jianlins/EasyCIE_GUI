@@ -26,11 +26,11 @@ public class RunEasyCIEDebugger extends GUITask {
 
 
     public RunEasyCIEDebugger(TasksFX tasks) {
-        this.tasks = tasks;
+        initiate(tasks);
     }
 
 
-    protected void initiate(TasksFX tasks, String option) {
+    protected void initiate(TasksFX tasks) {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
@@ -94,13 +94,15 @@ public class RunEasyCIEDebugger extends GUITask {
                 }
                 inputStr = entered;
                 if (entered.trim().length() > 0) {
-                    initiate(tasks, "xmi");
+                    debugRunner.addReader(inputStr,"debug.doc");
+//                    initiate(tasks, "xmi");
                     updateMessage("Execute pipeline...");
                     debugRunner.run();
                 } else {
                     updateMessage("No string entered.");
                     updateProgress(1, 1);
                 }
+
             }
         });
         return null;

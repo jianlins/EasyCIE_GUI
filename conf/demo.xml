@@ -35,7 +35,7 @@
       <report memo="whether report the processing details at the end">t</report> 
     </pipeLineSetting>  
     <annotators> 
-      <current memo="Mark current annotations with annotator: ">v1</current> 
+      <current memo="Mark current annotations with annotator: ">v3</current> 
     </annotators>  
     <executes> 
       <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunEasyCIE</RunEasyCIE>  
@@ -112,7 +112,7 @@
     <viewer> 
       <preTag>&lt;html&gt;&lt;body style="margin: 0; padding: 0"&gt; &lt;div id="mydiv"&gt;</preTag>  
       <postTag>&lt;/div&gt; &lt;/body&gt;&lt;/html&gt;</postTag>  
-      <highlighter_begin memo="Set default color to FFFFF, then the viewer will pick one from the color pool below.">&lt;span style="background-color: #FF6633"&gt;</highlighter_begin>  
+      <highlighter_begin memo="Set default color to FFFFF, then the viewer will pick one from the color pool below.">&lt;span style="background-color: #ffffff"&gt;</highlighter_begin>  
       <highlighter_end>&lt;/span&gt;</highlighter_end>  
       <snippet_length>90</snippet_length>  
       <limit_records>300</limit_records>  

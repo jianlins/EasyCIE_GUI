@@ -2,6 +2,7 @@ package edu.utah.bmi.simple.gui.controller;
 
 
 import edu.utah.bmi.nlp.core.GUITask;
+import edu.utah.bmi.nlp.sql.ColumnInfo;
 import edu.utah.bmi.nlp.uima.MyAnnotationViewerPlain;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
@@ -16,20 +17,21 @@ import java.util.ArrayList;
  */
 public class GUILogger extends ConsoleLogger {
 
-    protected final ArrayList<String> columnNames;
+    protected final ColumnInfo columnInfo=new ColumnInfo();
     protected String inputPath, descriptorPath;
     protected GUITask task;
 
     public GUILogger(GUITask task, String inputPath, String descriptorPath) {
         this.task = task;
-        columnNames = new ArrayList<>();
-        columnNames.add("ID");
-        columnNames.add("SNIPPET");
-        columnNames.add("TYPE");
-        columnNames.add("DOC_NAME");
-        columnNames.add("ANNOTATOR");
-        columnNames.add("COMMENTS");
-        columnNames.add("RUN_ID");
+        columnInfo.addColumnInfo("ID","string");
+        columnInfo.addColumnInfo("TYPE","string");
+        columnInfo.addColumnInfo("BEGIN","int");
+        columnInfo.addColumnInfo("END","int");
+
+        columnInfo.addColumnInfo("FEATURES","string");
+        columnInfo.addColumnInfo("SNIPPET","string");
+//        columnInfo.addColumnInfo("ANNOTATOR","string");
+//        columnInfo.addColumnInfo("RUN_ID","string");
         this.inputPath = inputPath;
         this.descriptorPath = descriptorPath;
 
@@ -46,8 +48,8 @@ public class GUILogger extends ConsoleLogger {
         Platform.runLater(new Runnable() {
             public void run() {
                 boolean res =true;
-//                res = TasksOverviewController.currentTasksOverviewController.showDBTable(columnNames,
-//                        AnnotationLogger.records.iterator(), "output", false);
+                res = TasksOverviewController.currentTasksOverviewController.showDBTable(
+                        AnnotationLogger.records.iterator(),columnInfo, "output",false);
                 if (res)
                     task.updateGUIMessage("String processing completed.");
                 else
@@ -57,14 +59,14 @@ public class GUILogger extends ConsoleLogger {
 
             }
         });
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JFrame frame = new MyAnnotationViewerPlain(new String[]{"Pipeline Debug Viewer", inputPath, descriptorPath});
-                frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-                frame.pack();
-                frame.setVisible(true);
-            }
-        });
+//        SwingUtilities.invokeLater(new Runnable() {
+//            public void run() {
+//                JFrame frame = new MyAnnotationViewerPlain(new String[]{"Pipeline Debug Viewer", inputPath, descriptorPath});
+//                frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+//                frame.pack();
+//                frame.setVisible(true);
+//            }
+//        });
     }
 
 

@@ -25,10 +25,11 @@ import java.util.Iterator;
 public class AnnotationLogger extends JCasAnnotator_ImplBase {
     public static final String PARAM_TYPE_NAMES = "TypeNames";
     public static final String PARAM_INDICATION = "Indication";
+    public static final String PARAM_INDICATION_HEADER = "IndicationHeader";
     public static StringBuilder sb = new StringBuilder();
     public static ArrayList<RecordRow> records = new ArrayList<>();
     private String printTypeNames;
-    private String indication, annotator;
+    private String indication, annotator, header;
 
 
     public AnnotationLogger() {
@@ -49,6 +50,11 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
         obj = cont.getConfigParameterValue(PARAM_INDICATION);
         if (obj != null && obj instanceof String) {
             this.indication = (String) obj;
+        }
+
+        obj = cont.getConfigParameterValue(PARAM_INDICATION_HEADER);
+        if (obj != null && obj instanceof String) {
+            this.header = (String) obj;
         }
         annotator = "debugger";
 
@@ -88,7 +94,8 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 
     private void addIntroductionRecordRow(RecordRow baseRecordRow, ArrayList<RecordRow> records, String indication) {
         RecordRow record = baseRecordRow.clone();
-        record.addCell("TYPE", "")
+        record.addCell("ID", header)
+                .addCell("TYPE", "")
                 .addCell("TEXT", indication)
                 .addCell("SNIPPET", indication)
                 .addCell("SNIPPET_BEGIN", 0)

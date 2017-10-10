@@ -4,6 +4,7 @@ import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
+import edu.utah.bmi.simple.gui.controller.ColorAnnotationCell;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -90,13 +91,13 @@ public class ViewOutputDB extends GUITask {
                                         "if the dataset has been imported successfully.\n" +
                                         "Instead, EasyCIE Will display the last run of annotator \"" + annotator + "\" that has some output, which " +
                                         "RUN_ID=" + annotatorLastRunid);
-                        filter = " WHERE annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid;
+                        filter = "annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid;
                     } else {
-                        filter = " WHERE annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid;
+                        filter = "annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid;
                     }
 
                 }
-                res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, outputTable, filter, "output");
+                res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, outputTable, filter, ColorAnnotationCell.colorOutput);
                 if (res)
                     updateMessage("data loaded");
                 else
@@ -112,7 +113,7 @@ public class ViewOutputDB extends GUITask {
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", outputTable, annotator);
         if (recordRowIter.hasNext()) {
             RecordRow recordRow = recordRowIter.next();
-            if (recordRow != null && recordRow.getValueByColumnId(1)!=null)
+            if (recordRow != null && recordRow.getValueByColumnId(1) != null)
                 id = (int) recordRow.getValueByColumnId(1);
 
         }

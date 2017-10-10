@@ -4,6 +4,7 @@ import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
+import edu.utah.bmi.simple.gui.controller.ColorAnnotationCell;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -76,7 +77,7 @@ public class ViewDiffDB extends GUITask {
                                             "Here displays the previous comparison that has some difference saved.");
                         }
                         TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, diffTable,
-                                " WHERE annotator='" + annotator + "' AND RUN_ID=" + lastRunId, "diff");
+                                " WHERE annotator='" + annotator + "' AND RUN_ID=" + lastRunId, ColorAnnotationCell.colorCompare);
                         updateMessage("data loaded");
                     } else {
                         updateMessage("no record loaded");

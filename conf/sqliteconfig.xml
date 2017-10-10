@@ -72,7 +72,9 @@
         </item>
         <item>
             <name>queryAnnos</name>
-            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,TEXT,FEATURES,ANNOTATOR,RUN_ID FROM {tableName}</sql>
+            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,SNIPPET_BEGIN,TEXT,FEATURES,COMMENTS,ANNOTATOR,RUN_ID FROM
+                {tableName}
+            </sql>
         </item>
         <item>
             <name>queryCount</name>

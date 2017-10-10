@@ -10,6 +10,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+
 import static edu.utah.bmi.simple.gui.entry.StaticVariables.snippetLength;
 
 
@@ -21,6 +22,8 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
     HBox hbox;
     private int maxTxtWindow;
     public static String colorDifferential;
+    public final static String colorOutput = "output";
+    public final static String colorCompare = "diff";
 
 
     public ColorAnnotationCell() {
@@ -47,7 +50,7 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
             begin = begin < 0 ? 0 : begin;
             int end = Integer.parseInt(recordRow.getValueByColumnName("END") + "");
             end = end < 0 ? 0 : end;
-            maxTxtWindow = (snippetLength - (end-begin)) / 2;
+            maxTxtWindow = (snippetLength - (end - begin)) / 2;
             maxTxtWindow = maxTxtWindow < 0 ? 0 : maxTxtWindow;
             hbox.setPrefWidth(snippetLength + 20);
             int postCut = cutTail(sentence, begin, end);
@@ -81,10 +84,10 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         String color;
         String key = "";
         switch (differential) {
-            case "output":
+            case colorOutput:
                 key = (String) RecordRow.getValueByColumnName("TYPE");
                 break;
-            case "diff":
+            case colorCompare:
                 key = RecordRow.getValueByColumnName("ANNOTATOR") + "|" + RecordRow.getValueByColumnName("COMMENTS");
                 break;
         }
