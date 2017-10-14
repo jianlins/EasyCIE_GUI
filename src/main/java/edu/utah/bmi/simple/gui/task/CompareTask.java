@@ -40,8 +40,8 @@ public class CompareTask extends GUITask {
     }
 
     private void initiate(TasksFX tasks) {
-        if(!Platform.isAccessibilityActive()) {
-            guiEnabled=false;
+        if (!Platform.isFxApplicationThread()) {
+            guiEnabled = false;
         }
         updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask(ConfigKeys.comparetask);

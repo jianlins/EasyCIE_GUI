@@ -31,7 +31,7 @@ public class RunEasyCIEDebugger extends GUITask {
 
 
     protected void initiate(TasksFX tasks) {
-        if (!Platform.isAccessibilityActive()) {
+        if (!Platform.isFxApplicationThread()) {
             guiEnabled = false;
         }
         updateGUIMessage("Initiate configurations..");

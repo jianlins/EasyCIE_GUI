@@ -37,8 +37,8 @@ public class Import extends GUITask {
     }
 
     private void initiate(TasksFX tasks, String importType) {
-        if(!Platform.isAccessibilityActive()) {
-           guiEnabled=false;
+        if (!Platform.isFxApplicationThread()) {
+            guiEnabled = false;
         }
         updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("import");

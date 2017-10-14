@@ -38,7 +38,7 @@ public class Export2Excel extends GUITask {
 
 
     protected void initiate(TasksFX tasks, String... paras) {
-        if (!Platform.isAccessibilityActive()) {
+        if (!Platform.isFxApplicationThread()) {
             guiEnabled = false;
         }
         updateGUIMessage("Initiate configurations..");
@@ -125,7 +125,7 @@ public class Export2Excel extends GUITask {
 //                    TODO extend later
             if (sampleSize > 0 && total > sampleSize) {
                 filter = " JOIN\n" +
-                        "(SELECT DISTINCT " + sampleOnColumn + " from `" + outputTable + "` " + filter + " order by RAND() LIMIT " + sampleSize + ") DOCLIST" +
+                        "(SELECT DISTINCT " + sampleOnColumn + " from "+(dao.databaseName == null ? "" : (dao.databaseName + ".") )+"`" + outputTable + "` " + filter + " order by RAND() LIMIT " + sampleSize + ") DOCLIST" +
                         " ON " + outputTable + ".DOC_NAME=DOCLIST.DOC_NAME " + filter;
                 total = sampleSize;
             }

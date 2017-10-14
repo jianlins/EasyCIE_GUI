@@ -115,8 +115,8 @@ public class RunEasyCIE extends GUITask {
     }
 
     protected void initiate(TasksFX tasks, String option) {
-        if(!Platform.isAccessibilityActive()) {
-            guiEnabled=false;
+        if (!Platform.isFxApplicationThread()) {
+            guiEnabled = false;
         }
         updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask(ConfigKeys.maintask);

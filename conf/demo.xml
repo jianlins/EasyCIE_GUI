@@ -35,7 +35,7 @@
       <report memo="whether report the processing details at the end">t</report> 
     </pipeLineSetting>  
     <annotators> 
-      <current memo="Mark current annotations with annotator: ">v3</current> 
+      <current memo="Mark current annotations with annotator: ">v1</current> 
     </annotators>  
     <executes> 
       <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunEasyCIE</RunEasyCIE>  
@@ -79,7 +79,7 @@
     </format>  
     <excel> 
       <directory memo="The dirctory to save the exported excel files">data/output/excel</directory>  
-      <sampleSize memo="If &gt;0, then easyCIE will randomly sample the defined number of documents">300</sampleSize>  
+      <sampleSize memo="If &gt;0, then easyCIE will randomly sample the defined number of documents">500</sampleSize>  
       <sampleOnColumn memo="On which column the sampling will be conducted">DOC_NAME</sampleOnColumn>  
       <includeMentionTypes>IND_PNEUMONIA,NegatedConcept,PossibleConcept</includeMentionTypes> 
     </excel>  
