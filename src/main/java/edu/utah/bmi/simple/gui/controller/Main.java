@@ -64,7 +64,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         basePath = System.getProperty("user.dir");
         this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("EasyCIE");
+
 //        System.out.println(Paths.get(Thread.currentThread().getContextClassLoader().getResource("edu/utah/bmi/simple/gui/view/big.png").toURI()).toString());
 //        Image anotherIcon = new Image(Paths.get(getClass().getClassLoader().getResource("edu/utah/bmi/simple/gui/view/big.png").toURI()).toString());
         Image anotherIcon = new Image("edu/utah/bmi/simple/gui/view/transbig.png");
@@ -72,6 +72,7 @@ public class Main extends Application {
         initRootLayout();
         String configFile = getLastConfigFile();
         currentConfigFile = new File(configFile);
+        this.primaryStage.setTitle("EasyCIE(__"+currentConfigFile.getName()+"__)");
         refreshSettings();
     }
 
@@ -103,6 +104,8 @@ public class Main extends Application {
                 File file = fileChooser.showOpenDialog(null);
                 if (file != null) {
                     currentConfigFile = file;
+                    primaryStage.setTitle("EasyCIE(__"+file.getName()+"__)");
+
                     refreshSettings();
                     saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()) + "\n" + currentTaskName);
                 }
@@ -168,6 +171,41 @@ public class Main extends Application {
             bottomViewController.setMsg("No change is made.");
         settingOper.saveConfigs();
     }
+
+
+    public void saveAsSetting() {
+        settingOper.ChangeMemos(memochanges);
+        settingOper.ChangeValues(valueChanges);
+        int changeCount = valueChanges.size() + memochanges.size();
+        if (changeCount > 0)
+            bottomViewController.setMsg(changeCount +
+                    (changeCount > 1 ? " changes" : " change") + " saved");
+        else
+            bottomViewController.setMsg("No change is made.");
+        Platform.runLater(new Runnable() {
+            public void run() {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Choose configuration file: ");
+                File oldParentDir;
+                if (!currentConfigFile.exists())
+                    oldParentDir = new File("./");
+                else {
+                    oldParentDir = currentConfigFile.getParentFile();
+                }
+                if (oldParentDir.exists())
+                    fileChooser.setInitialDirectory(oldParentDir);
+                if (currentConfigFile.exists())
+                    fileChooser.setInitialFileName(currentConfigFile.getName());
+                File file = fileChooser.showOpenDialog(null);
+                if (file != null) {
+                    settingOper.saveConfigs(file);
+                }
+            }
+        });
+
+
+    }
+
 
     public HashMap<String, String> getValueChanges() {
         return valueChanges;

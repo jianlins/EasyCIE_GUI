@@ -40,6 +40,12 @@ public class RootLayoutController {
     }
 
     @FXML
+    private void saveas(){
+        mainApp.saveAsSetting();
+
+    }
+
+    @FXML
     private void openHelpURL() {
         String url = mainApp.tasks.getTask("settings").getValue("help");
         String hint = "The help document url has not been set up. Please add a \"help\" element with an URL as the value, " +

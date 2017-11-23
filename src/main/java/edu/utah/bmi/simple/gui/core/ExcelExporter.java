@@ -113,11 +113,14 @@ public class ExcelExporter {
             RecordRow recordRow = recordIter.next();
             String type = recordRow.getStrByColumnName(coreColumns.get("TYPE")).toUpperCase();
             String docName = recordRow.getStrByColumnName("DOC_NAME");
+            String docText=recordRow.getStrByColumnName("TEXT");
 
             if (!docConclusions.containsKey(docName)) {
                 docConclusions.put(docName, new ArrayList<>());
                 snippets.put(docName, new ArrayList<>());
             }
+
+
 
             if (type.endsWith("_DOC"))
                 docConclusions.get(docName).add(recordRow);

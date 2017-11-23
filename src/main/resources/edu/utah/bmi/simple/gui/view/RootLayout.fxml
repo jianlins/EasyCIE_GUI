@@ -25,6 +25,11 @@
                                 <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                             </accelerator>
                         </MenuItem>
+                        <MenuItem mnemonicParsing="true" text="_SaveAs..." onAction="#saveas">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+                            </accelerator>
+                        </MenuItem>
                         <MenuItem mnemonicParsing="true" text="_Exit" onAction="#exit"/>
                     </items>
                 </Menu>

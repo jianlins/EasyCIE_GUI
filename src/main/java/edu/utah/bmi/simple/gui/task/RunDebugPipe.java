@@ -13,6 +13,7 @@ import edu.utah.bmi.nlp.runner.RunPipe;
 import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
 import edu.utah.bmi.nlp.uima.AdaptableUIMACPERunner;
+import edu.utah.bmi.nlp.uima.AdaptableUIMACPETaskRunner;
 import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
 import edu.utah.bmi.nlp.uima.reader.StringMetaReader;
 import edu.utah.bmi.nlp.writer.XMIWritter_AE;
@@ -103,9 +104,10 @@ public class RunDebugPipe extends RunPipe {
 //        JXTransformer jxTransformer;
         customTypeDescriptor = "desc/type/pipeline_" + annotator;
 
-        if (!new File(customTypeDescriptor + ".xml").exists())
-            customTypeDescriptor = defaultTypeDescriptor;
-        runner = new AdaptableUIMACPERunner(customTypeDescriptor, "./classes/");
+        if (new File(customTypeDescriptor + ".xml").exists())
+            runner = new AdaptableUIMACPERunner(customTypeDescriptor, "./classes/");
+        else
+            runner = new AdaptableUIMACPERunner(defaultTypeDescriptor, "./classes/");
         UIMALogger logger = new GUILogger(task, exportDir, customTypeDescriptor + ".xml");
         logger.logStartTime();
         runner.setLogger(logger);
@@ -179,15 +181,15 @@ public class RunDebugPipe extends RunPipe {
         if (rushRule.length() > 0) {
             if (rushType.indexOf("Sentence") == -1)
                 runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
-                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true});
+                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,RuSH_AE.PARAM_DEBUG,true});
             else
                 runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
-                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
+                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,RuSH_AE.PARAM_DEBUG,true,
                         RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
             if (rushType.length() > 0)
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER,"RuSH",
                         AnnotationLogger.PARAM_INDICATION,
-                        "After being processeb by Rush (sentence segmenter):",
+                        "After being processed by Rush (sentence segmenter):",
                         AnnotationLogger.PARAM_TYPE_NAMES, rushType});
         }
 

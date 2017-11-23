@@ -21,7 +21,7 @@ public class XMLConfigOper {
     private String configFile;
 
     public XMLConfigOper(String configFile) {
-        this.configFile=configFile;
+        this.configFile = configFile;
         try {
             File inputFile = new File(configFile);
             SAXReader reader = new SAXReader();
@@ -65,11 +65,15 @@ public class XMLConfigOper {
     }
 
     public void save() {
+        save(new File(configFile));
+    }
+
+    public void save(File configFile) {
         OutputFormat format = OutputFormat.createPrettyPrint();
         XMLWriter writer;
         try {
 //            writer = new XMLWriter( System.out, format );
-            writer = new XMLWriter(new FileWriter(new File(configFile)), format);
+            writer = new XMLWriter(new FileWriter(configFile), format);
             writer.write(document);
             writer.close();
         } catch (UnsupportedEncodingException e) {

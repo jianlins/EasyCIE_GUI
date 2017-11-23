@@ -176,7 +176,7 @@ public class RunEasyCIE extends GUITask {
 
 
     protected void initPipe(GUITask task, String readDBConfigFile, String datasetId, String annotator) {
-        rdao = new DAO(new File(readDBConfigFile), true, false);
+        rdao = new DAO(new File(readDBConfigFile), false, false);
         if (writeConfigFileName.equals(readDBConfigFile)) {
             wdao = rdao;
         } else {

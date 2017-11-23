@@ -48,7 +48,7 @@ public class SettingOper {
             String command = ele.attributeValue("doubleClick");
             boolean openable = ele.attributeValue("openable") != null;
             if (!elementName.startsWith("executes")) {
-                task.setValue(elementName, value, memo, command,openable);
+                task.setValue(elementName, value, memo, command, openable);
                 iterateTaskElement(ele, task, elementName);
             } else {
                 for (Iterator s = ele.elementIterator(); s.hasNext(); ) {
@@ -81,6 +81,9 @@ public class SettingOper {
         config.save();
     }
 
+    public void saveConfigs(File file) {
+        config.save(file);
+    }
 
     public void writeTasks(TasksFX tasks) {
         Element root = config.document.getRootElement();
