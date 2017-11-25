@@ -10,12 +10,46 @@
         <!--for packaging without jdk version-->
         <java.path>java</java.path>
         <java.win.path>java</java.win.path>
-        <current.version>2.0.5</current.version>
+        <current.version>2.0.4</current.version>
         <kotlin.version>1.1.51</kotlin.version>
     </properties>
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
     <version>${current.version}</version>
+    <url>https://github.com/jianlins/EasyCIE_GUI</url>
+    <scm>
+        <connection>https://github.com/jianlins/EasyCIE_GUI.git</connection>
+        <url>scm:git:git@github.com:jianlins/EasyCIE_GUI.git</url>
+        <developerConnection>scm:git:git@github.com:jianlins/EasyCIE_GUI.git</developerConnection>
+    </scm>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+    <organization>
+        <name>The Department of Biomedical Informatics, University of Utah</name>
+        <url>bmi.utah.edu</url>
+    </organization>
+    <developers>
+        <developer>
+            <name>Jianlin Shi</name>
+            <email>jianlinshi.cn@gmail.com</email>
+            <organization>The Department of Biomedical Informatics, University of Utah</organization>
+            <organizationUrl>bmi.utah.edu</organizationUrl>
+        </developer>
+    </developers>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>dom4j</groupId>
@@ -81,6 +115,20 @@
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <!--<plugin>-->
             <!--<groupId>org.apache.maven.plugins</groupId>-->

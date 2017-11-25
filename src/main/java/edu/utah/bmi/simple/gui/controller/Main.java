@@ -46,13 +46,22 @@ public class Main extends Application {
     public BottomViewController bottomViewController;
     private File currentConfigFile;
     private static String basePath;
-    private final File logFile = new File("conf/.log");
+    private static File logFile = new File("conf/.log");
     private String currentTaskName = "";
 
     @FXML
     private MenuBar menuBar;
+    private static String conf = "conf/config.xml";
 
     public static void main(String[] args) {
+        if (args.length > 0) {
+            logFile = new File(args[0]);
+        }
+
+        if (args.length > 1) {
+            conf = args[1];
+        }
+
         launch(args);
     }
 
@@ -72,7 +81,7 @@ public class Main extends Application {
         initRootLayout();
         String configFile = getLastConfigFile();
         currentConfigFile = new File(configFile);
-        this.primaryStage.setTitle("EasyCIE(__"+currentConfigFile.getName()+"__)");
+        this.primaryStage.setTitle("EasyCIE(__" + currentConfigFile.getName() + "__)");
         refreshSettings();
     }
 
@@ -104,7 +113,7 @@ public class Main extends Application {
                 File file = fileChooser.showOpenDialog(null);
                 if (file != null) {
                     currentConfigFile = file;
-                    primaryStage.setTitle("EasyCIE(__"+file.getName()+"__)");
+                    primaryStage.setTitle("EasyCIE(__" + file.getName() + "__)");
 
                     refreshSettings();
                     saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()) + "\n" + currentTaskName);

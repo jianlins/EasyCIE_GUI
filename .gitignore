@@ -6,3 +6,4 @@ data/*.sqlite
 data/*-shm
 data/*-wal
 conf/poetconfig.xml
+conf/.log

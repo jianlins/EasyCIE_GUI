@@ -128,13 +128,5 @@ class TaskTestBaseK {
         testTask(task)
     }
 
-    @Test
-    fun test6ExportExcel2() {
-        for ((i, color) in tasks!!.getTask("settings")!!.getValue("viewer/color_pool").split("|").withIndex()) {
-            StaticVariables.colorPool.put(i, color.trim({ it <= ' ' }))
-        }
-        val task = Export2Excel2(tasks)
-        testTask(task)
-    }
 }
 

@@ -77,14 +77,14 @@ public class ViewOutputDB extends GUITask {
                         updateProgress(0, 0);
                         return;
                     }
-                    int annotatorLastRunid = getLastRunIdofAnnotator(dao, outputTable, annotator);
-                    int lastLogRunId = getLastLogRunId(dao, annotator);
-                    if (annotatorLastRunid == -1) {
+                    String annotatorLastRunid = getLastRunIdofAnnotator(dao, outputTable, annotator);
+                    String lastLogRunId = getLastLogRunId(dao, annotator);
+                    if (annotatorLastRunid.equals("-1")) {
                         popDialog("Note", "There is no output in the previous runs of the annotator: \"" + annotator + "\"",
                                 "Please check the pipeline configuration to see if the rules are configured correctly, and " +
                                         "if the dataset has been imported successfully.\n" +
                                         "EasyCIE will display all the previous outputs if there is any.");
-                    } else if (annotatorLastRunid != lastLogRunId) {
+                    } else if (annotatorLastRunid.equals(lastLogRunId)) {
                         popDialog("Note", "There is no output in the most recent run of annotator:\"" + annotator + "\"," +
                                         " which RUN_ID=" + lastLogRunId,
                                 "Please check the pipeline configuration to see if the rules are configured correctly, and " +
@@ -108,25 +108,32 @@ public class ViewOutputDB extends GUITask {
         return null;
     }
 
-    public int getLastRunIdofAnnotator(DAO dao, String outputTable, String annotator) {
-        int id = -1;
+    public String getLastRunIdofAnnotator(DAO dao, String outputTable, String annotator) {
+        String id = "-1";
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", outputTable, annotator);
         if (recordRowIter.hasNext()) {
             RecordRow recordRow = recordRowIter.next();
-            if (recordRow != null && recordRow.getValueByColumnId(1) != null)
-                id = (int) recordRow.getValueByColumnId(1);
-
+            if (recordRow != null) {
+                Object value=recordRow.getValueByColumnId(1);
+                if(value!=null){
+                    id=value+"";
+                }
+            }
         }
         return id;
     }
 
-    public int getLastLogRunId(DAO dao, String annotator) {
-        int id = -1;
+    public String getLastLogRunId(DAO dao, String annotator) {
+        String id = "-1";
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("lastLogRunID", annotator);
         if (recordRowIter.hasNext()) {
             RecordRow recordRow = recordRowIter.next();
-            if (recordRow != null)
-                id = (int) recordRow.getValueByColumnId(1);
+            if (recordRow != null) {
+                Object value = recordRow.getValueByColumnId(1);
+                if (value != null) {
+                    id = value + "";
+                }
+            }
         }
         return id;
     }
