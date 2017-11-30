@@ -1,7 +1,6 @@
 package edu.utah.bmi.simple.gui.task
 
 import edu.utah.bmi.nlp.core.GUITask
-import edu.utah.bmi.nlp.runner.RunPipe
 import edu.utah.bmi.nlp.sql.DAO
 import edu.utah.bmi.simple.gui.core.SettingOper
 import edu.utah.bmi.simple.gui.entry.StaticVariables
@@ -94,28 +93,24 @@ class TaskTestBaseK {
     fun test4Debug() {
         val task = RunEasyCIEDebugger(tasks)
         task.debugRunner.addReader("Resp: sats 94-99 3L NC, lungs coarse upper, diminished lower. strong non-productive cough, coughing reduced in frequency, prn robitussin w/ codeine prn, nebs via resp therapy. pt states no SOB.", "debug.doc")
-        RunPipe.debug = true
         task.debugRunner.run()
     }
 
     @Test
     fun test5ExportEhost() {
         val task = RunEasyCIE(tasks, "ehost")
-        RunPipe.debug = false
         testTask(task)
     }
 
     @Test
     fun test6ExportBrat() {
         val task = RunEasyCIE(tasks, "brat")
-        RunPipe.debug = false
         testTask(task)
     }
 
     @Test
     fun test6ExportXMI() {
         val task = RunEasyCIE(tasks, "xmi")
-        RunPipe.debug = false
         testTask(task)
     }
 

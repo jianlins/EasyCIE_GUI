@@ -56,8 +56,8 @@ public class ExcelExporter2 {
         docLevelColumns.add("DOC_NAME");
     }
 
-    public void setExportText(boolean exportText){
-        this.exportText=exportText;
+    public void setExportText(boolean exportText) {
+        this.exportText = exportText;
     }
 
     public void export(File exportFile) {
@@ -67,8 +67,8 @@ public class ExcelExporter2 {
         LinkedHashMap<String, String> columnInfo = recordIter.getColumninfo().getColumnInfo();
         if (total > -1)
             task.updateGUIMessage("Initiating spreadsheet...");
-        if(exportText){
-            rptDir=new File(exportFile.getParentFile(),"docs");
+        if (exportText) {
+            rptDir = new File(exportFile.getParentFile(), "docs");
             if (!rptDir.exists())
                 try {
                     FileUtils.forceMkdir(rptDir);
@@ -155,7 +155,7 @@ public class ExcelExporter2 {
                 snippets.put(docName, new ArrayList<>());
                 if (total > -1) {
                     task.updateGUIProgress(progress++, total);
-                    if(progress>total)
+                    if (progress > total)
                         break;
                 }
             }
@@ -177,7 +177,7 @@ public class ExcelExporter2 {
         style.setAlignment(HorizontalAlignment.CENTER);
 
         CreationHelper createHelper = workbook.getCreationHelper();
-        XSSFHyperlink link=null;
+        XSSFHyperlink link = null;
 
 //        System.out.println(docConclusions.size());
 
@@ -185,7 +185,7 @@ public class ExcelExporter2 {
 //        write doc conclusion row
 
             String docName = entry.getKey();
-            if(exportText){
+            if (exportText) {
                 link = (XSSFHyperlink) createHelper
                         .createHyperlink(HyperlinkType.URL);
                 link.setAddress("./docs/" + docName + ".txt");
@@ -201,7 +201,7 @@ public class ExcelExporter2 {
                         XSSFCell cell = dataRow.getCell(pos);
                         cell.setCellValue(docRow.getStrByColumnName(docColumn));
                         cell.setCellStyle(style);
-                        if(exportText && docColumn.equals("DOC_NAME")){
+                        if (exportText && docColumn.equals("DOC_NAME")) {
                             cell.setHyperlink(link);
                             exportRpt(docName, docRow.getStrByColumnName("TEXT"));
                         }
@@ -281,7 +281,7 @@ public class ExcelExporter2 {
 
     private void exportRpt(String rptId, String text) {
         try {
-            FileUtils.writeStringToFile(new File(rptDir, rptId + ".txt"), text, StandardCharsets.UTF_8);
+            FileUtils.writeStringToFile(new File(rptDir, rptId + ".txt"), text, "UTF_8");
         } catch (IOException e) {
             e.printStackTrace();
         }

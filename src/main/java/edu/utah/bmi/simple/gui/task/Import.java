@@ -1,11 +1,11 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.runner.CommonFunc;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.uima.BratReader;
-import edu.utah.bmi.nlp.uima.EhostReader;
+import edu.utah.bmi.nlp.uima.reader.BratReader;
+import edu.utah.bmi.nlp.uima.reader.EhostReader;
+import edu.utah.bmi.simple.gui.core.CommonFunc;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;

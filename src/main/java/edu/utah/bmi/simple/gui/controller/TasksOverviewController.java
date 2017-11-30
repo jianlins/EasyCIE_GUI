@@ -600,7 +600,7 @@ public class TasksOverviewController {
 //            return row;
 //        });
         ObservableList<Map.Entry<String, SettingAb>> executes = currentTask.getExecutes();
-        System.out.println(executes.size());
+//        System.out.println(executes.size());
         executePanel.getChildren().removeAll(executePanel.getChildren());
         for (Map.Entry<String, SettingAb> exe : executes) {
             String label = exe.getKey();

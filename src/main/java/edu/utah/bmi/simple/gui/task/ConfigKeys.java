@@ -21,14 +21,17 @@ public class ConfigKeys {
     public static final String owlFile = "ontology/owlFile";
     public static final String owlExportDir = "ontology/exportDir";
 
-
+    public static final String sectionRule = "pipeLineSetting/sectionRule";
     public static final String tRuleFile = "pipeLineSetting/tRule";
     public static final String cRuleFile = "pipeLineSetting/cRule";
+    public static final String includesections = "pipeLineSetting/includesections";
+
     public static final String contextRule = "pipeLineSetting/contextRule";
     public static final String reportPreannotating = "pipeLineSetting/report";
     public static final String fastNerCaseSensitive = "pipeLineSetting/fastNERCaseSensitive";
     public static final String featureInfRule = "pipeLineSetting/featureInfRule";
     public static final String docInfRule = "pipeLineSetting/docInfRule";
+    public static final String featureMergerRule = "pipeLineSetting/featureMergerRule";
 
     public static final String outputEhostDir = "format/ehost";
     public static final String outputBratDir = "format/brat";
@@ -43,7 +46,7 @@ public class ConfigKeys {
     public static final String maintask = "easycie";
     public static final String annotator = "annotators/current";
 
-    public static final String comparetask="compare";
+    public static final String comparetask = "compare";
     public static final String targetAnnotator = "compare/targetAnnotator";
     public static final String referenceAnnotator = "compare/referenceAnnotator";
     public static final String compareReferenceTable = "compare/referenceTable";
@@ -82,6 +85,7 @@ public class ConfigKeys {
     public static final String contextType = "log/contextType";
     public static final String featureInfType = "log/featureInfType";
     public static final String docInfType = "log/docInfType";
+
 
     public static String getRelativePath(String basePath, String file) {
         if (mainBasePath == null)

@@ -64,10 +64,7 @@ public class RunEasyCIEDebugger extends GUITask {
                 + (featureInfType.length() > 0 ? "," + featureInfType : "")
                 + (docInfType.length() > 0 ? "," + docInfType : "");
 
-        debugRunner = new RunDebugPipe(this, inputStr, annotator, fastNerCaseSensitive,
-                rushRule, fastNERRule, fastCNERRule, contextRule, featureInfRule,
-                docInfRule, "target/generated-test-sources", exporttypes, rushType, cNERType, tNERType, contextType,
-                featureInfType, docInfType);
+
 
     }
 

@@ -1,12 +1,8 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.easycie.OntologyOperator;
-import edu.utah.bmi.nlp.sql.DAO;
-import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.simple.gui.controller.Main;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
+import edu.utah.bmi.simple.gui.core.OntologyOperator;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
