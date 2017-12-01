@@ -10,7 +10,7 @@
         <!--for packaging without jdk version-->
         <java.path>java</java.path>
         <java.win.path>java</java.win.path>
-        <current.version>2.0.5</current.version>
+        <current.version>2.0.5-SNAPSHOT</current.version>
         <kotlin.version>1.1.61</kotlin.version>
     </properties>
     <groupId>edu.utah.bmi.nlp</groupId>
