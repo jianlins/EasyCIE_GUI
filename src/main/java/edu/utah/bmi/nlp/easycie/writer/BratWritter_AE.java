@@ -1,4 +1,4 @@
-package edu.utah.bmi.nlp.uima.writer;
+package edu.utah.bmi.nlp.easycie.writer;
 
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;

@@ -4,7 +4,7 @@ import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.nlp.uima.NLPDBLogger;
+import edu.utah.bmi.nlp.easycie.NLPDBLogger;
 import edu.utah.bmi.simple.gui.core.Compare;
 import edu.utah.bmi.simple.gui.core.EvalCounter;
 import edu.utah.bmi.simple.gui.entry.TaskFX;

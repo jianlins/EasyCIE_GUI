@@ -1,4 +1,4 @@
-package edu.utah.bmi.nlp.uima.reader;
+package edu.utah.bmi.nlp.easycie.reader;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one

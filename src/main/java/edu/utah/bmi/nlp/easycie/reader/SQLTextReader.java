@@ -1,4 +1,4 @@
-package edu.utah.bmi.nlp.uima.reader;
+package edu.utah.bmi.nlp.easycie.reader;
 
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;

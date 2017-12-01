@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package edu.utah.bmi.nlp.uima.writer;
+package edu.utah.bmi.nlp.easycie.writer;
 
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
+import edu.utah.bmi.nlp.uima.writer.EhostConfigurator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.uima.UimaContext;
@@ -61,7 +62,7 @@ import java.util.LinkedHashSet;
  * will be written</li>
  * </ul>
  */
-public class EhostWriter_AE extends XMIWritter_AE {
+public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_AE {
     /**
      * Name of configuration parameter that must be set to the path of a
      * directory into which the output files will be written.

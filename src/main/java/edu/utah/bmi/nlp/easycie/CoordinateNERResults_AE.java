@@ -1,4 +1,4 @@
-package edu.utah.bmi.nlp.uima;
+package edu.utah.bmi.nlp.easycie;
 
 import edu.utah.bmi.nlp.core.Interval1D;
 import edu.utah.bmi.nlp.core.IntervalST;

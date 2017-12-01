@@ -1,10 +1,11 @@
-package edu.utah.bmi.nlp.uima.reader;
+package edu.utah.bmi.nlp.easycie.reader;
 
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.type.system.Concept;
 import edu.utah.bmi.nlp.type.system.Doc_Base;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
+import edu.utah.bmi.nlp.uima.reader.AbFileCollectionReader;
 import org.apache.commons.io.FileUtils;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;

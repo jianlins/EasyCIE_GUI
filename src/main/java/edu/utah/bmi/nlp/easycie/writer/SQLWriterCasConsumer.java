@@ -1,4 +1,4 @@
-package edu.utah.bmi.nlp.uima.writer;
+package edu.utah.bmi.nlp.easycie.writer;
 
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.Interval1D;

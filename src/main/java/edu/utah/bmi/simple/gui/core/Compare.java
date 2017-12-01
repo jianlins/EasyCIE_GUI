@@ -6,7 +6,7 @@ import edu.utah.bmi.nlp.core.IntervalST;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.nlp.uima.NLPDBLogger;
+import edu.utah.bmi.nlp.easycie.NLPDBLogger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
