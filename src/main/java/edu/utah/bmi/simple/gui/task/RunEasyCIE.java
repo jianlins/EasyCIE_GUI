@@ -194,12 +194,9 @@ public class RunEasyCIE extends GUITask {
     }
 
     protected void initUIMALogger() {
-        if (logger.isLoggable(Level.FINE))
-            uimaLogger = new ConsoleLogger();
-        else {
-            uimaLogger = new NLPDBLogger(wdao, "LOG", "RUN_ID", annotator);
-            wdao = new DAO(new File(writeConfigFileName), false, false);
-        }
+        wdao = new DAO(new File(writeConfigFileName), false, false);
+        uimaLogger = new NLPDBLogger(wdao, "LOG", "RUN_ID", annotator);
+
         uimaLogger.logStartTime();
     }
 
