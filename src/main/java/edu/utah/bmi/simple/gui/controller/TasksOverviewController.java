@@ -136,7 +136,6 @@ public class TasksOverviewController {
         });
         featureValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         featureValueColumn.setCellValueFactory(p -> {
-            System.out.println(Arrays.asList(p.getValue()));
             return new SimpleStringProperty(p.getValue()[1]);
         });
 
