@@ -81,8 +81,10 @@ public class Main extends Application {
         initRootLayout();
         String configFile = getLastConfigFile();
         currentConfigFile = new File(configFile);
-        this.primaryStage.setTitle("EasyCIE(__" + currentConfigFile.getName() + "__)");
-        refreshSettings();
+        if (currentConfigFile.exists()) {
+            this.primaryStage.setTitle("EasyCIE(__" + currentConfigFile.getName() + "__)");
+            refreshSettings();
+        }
     }
 
     public void refreshSettings() {
@@ -99,7 +101,7 @@ public class Main extends Application {
         Platform.runLater(new Runnable() {
             public void run() {
                 FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Choose configuration file: ");
+                fileChooser.setTitle("Choose project configuration file: ");
                 File oldParentDir;
                 if (!currentConfigFile.exists())
                     oldParentDir = new File("./");
@@ -331,7 +333,10 @@ public class Main extends Application {
     }
 
     public TaskFX getCurrentTask() {
-        return tasks.getTask(currentTaskName);
+        if (currentTaskName != null && currentTaskName.length() > 0)
+            return tasks.getTask(currentTaskName);
+        else
+            return tasks.getTasksList().get(0).getValue();
     }
 
     public int getCurrentTaskId() {
