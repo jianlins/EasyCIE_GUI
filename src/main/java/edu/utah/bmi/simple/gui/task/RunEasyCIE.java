@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  */
 public class RunEasyCIE extends GUITask {
     public static Logger logger = Logger.getLogger(RunEasyCIE.class.getCanonicalName());
-    protected String readDBConfigFile, writeConfigFileName, inputTableName, outputTableName,
+    protected String readDBConfigFileName, writeConfigFileName, inputTableName, outputTableName,
             ehostDir, bratDir, xmiDir, annotator, datasetId;
     public boolean report = false, fastNERCaseSensitive = true;
     protected String sectionRule = "", rushRule = "", fastNERRule = "", fastCNERRule = "", includesections = "", contextRule = "",
@@ -54,6 +54,7 @@ public class RunEasyCIE extends GUITask {
     public boolean ehost = false, brat = false, xmi = false;
     protected String exporttypes;
     protected String customTypeDescriptor;
+    protected UIMALogger uimaLogger;
 
     public RunEasyCIE() {
 
@@ -83,7 +84,7 @@ public class RunEasyCIE extends GUITask {
         this.docInfRule = docInferenceRule;
         this.report = report;
         this.fastNERCaseSensitive = fastNerCaseSensitive;
-        this.readDBConfigFile = readDBConfigFile;
+        this.readDBConfigFileName = readDBConfigFile;
         this.inputTableName = inputTableName;
         this.datasetId = datasetId;
         this.writeConfigFileName = writeConfigFileName;
@@ -113,7 +114,8 @@ public class RunEasyCIE extends GUITask {
             brat = false;
         if (xmiDir == null || xmiDir.length() == 0)
             xmi = false;
-        initPipe(task, readDBConfigFile, datasetId, annotator);
+        initUIMALogger();
+        initPipe(task);
     }
 
     protected void initiate(TasksFX tasks, String option) {
@@ -125,7 +127,7 @@ public class RunEasyCIE extends GUITask {
             System.setProperty("java.util.logging.config.file", "logging.properties");
         }
         try {
-            LogManager.getLogManager().readConfiguration(new FileInputStream(new File("logging.properties")));
+            LogManager.getLogManager().readConfiguration();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -150,7 +152,7 @@ public class RunEasyCIE extends GUITask {
 
 
         config = tasks.getTask("settings");
-        readDBConfigFile = config.getValue(ConfigKeys.readDBConfigFile);
+        readDBConfigFileName = config.getValue(ConfigKeys.readDBConfigFile);
         inputTableName = config.getValue(ConfigKeys.inputTableName);
         datasetId = config.getValue(ConfigKeys.datasetId);
         writeConfigFileName = config.getValue(ConfigKeys.writeConfigFileName);
@@ -180,7 +182,8 @@ public class RunEasyCIE extends GUITask {
                 xmi = false;
         }
 
-        initPipe(this, readDBConfigFile, datasetId, annotator);
+        initUIMALogger();
+        initPipe(this);
 
     }
 
@@ -190,21 +193,20 @@ public class RunEasyCIE extends GUITask {
         return null;
     }
 
-
-    protected void initPipe(GUITask task, String readDBConfigFile, String datasetId, String annotator) {
-        rdao = new DAO(new File(readDBConfigFile), false, false);
-        if (writeConfigFileName.equals(readDBConfigFile)) {
-            wdao = rdao;
-        } else {
-            File writeFile = new File(writeConfigFileName);
-            if (writeFile.exists() && writeFile.isFile() &&
-                    (writeConfigFileName.toLowerCase().endsWith(".xml")) ||
-                    (writeConfigFileName.toLowerCase().endsWith(".json")))
-                wdao = new DAO(new File(writeConfigFileName));
+    protected void initUIMALogger() {
+        if (logger.isLoggable(Level.FINE))
+            uimaLogger = new ConsoleLogger();
+        else {
+            uimaLogger = new NLPDBLogger(wdao, "LOG", "RUN_ID", annotator);
+            wdao = new DAO(new File(writeConfigFileName), false, false);
         }
-        UIMALogger logger = addLogger(wdao, annotator);
-        logger.logStartTime();
-        String runId = logger.getRunid() + "";
+        uimaLogger.logStartTime();
+    }
+
+
+    protected void initPipe(GUITask task) {
+
+        String runId = uimaLogger.getRunid() + "";
 
 
         String defaultTypeDescriptor = "desc/type/All_Types";
@@ -215,24 +217,17 @@ public class RunEasyCIE extends GUITask {
             runner = new AdaptableUIMACPETaskRunner(customTypeDescriptor, "./classes/");
         else
             runner = new AdaptableUIMACPETaskRunner(defaultTypeDescriptor, "./classes/");
-        runner.setLogger(logger);
+        runner.setLogger(uimaLogger);
         runner.setTask(task);
 
         initTypes(customTypeDescriptor);
-        addReader(readDBConfigFile, datasetId);
-        addAnalysisEngines(runner);
+        addReader();
+        addAnalysisEngines();
 //        SQLWriterCasConsumer.debug=true;
 
-        addWriter(runId, annotator);
+        addWriter(runId);
     }
 
-
-    protected UIMALogger addLogger(DAO dao, String annotator) {
-        if (logger.isLoggable(Level.FINE))
-            return new ConsoleLogger();
-        else
-            return new NLPDBLogger(dao, "LOG", "RUN_ID", annotator);
-    }
 
     /**
      * Read through all the annotations, iterate all the types and features,
@@ -273,9 +268,8 @@ public class RunEasyCIE extends GUITask {
         runner.setCollectionReader(readerClass, configurations);
     }
 
-    public void addReader(String readDBConfigFile, String datasetId) {
-        SQLTextReader.dao = rdao;
-        runner.setCollectionReader(SQLTextReader.class, new Object[]{SQLTextReader.PARAM_DB_CONFIG_FILE, readDBConfigFile,
+    public void addReader() {
+        setReader(SQLTextReader.class, new Object[]{SQLTextReader.PARAM_DB_CONFIG_FILE, readDBConfigFileName,
                 SQLTextReader.PARAM_DATASET_ID, datasetId,
                 SQLTextReader.PARAM_DOC_TABLE_NAME, inputTableName,
                 SQLTextReader.PARAM_QUERY_SQL_NAME, "masterInputQuery",
@@ -284,7 +278,7 @@ public class RunEasyCIE extends GUITask {
     }
 
 
-    public void addWriter(String runId, String annotator) {
+    public void addWriter(String runId) {
         File output = new File(writeConfigFileName);
         try {
             if (!output.exists()) {
@@ -329,7 +323,7 @@ public class RunEasyCIE extends GUITask {
 
     }
 
-    protected void addAnalysisEngines(AdaptableUIMACPETaskRunner runner) {
+    protected void addAnalysisEngines() {
         if (rushRule.length() > 0) {
             logger.finer("add engine RuSH_AE");
             if (exporttypes == null || exporttypes.indexOf("Sentence") == -1)

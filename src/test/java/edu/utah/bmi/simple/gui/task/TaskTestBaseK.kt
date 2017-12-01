@@ -92,7 +92,8 @@ class TaskTestBaseK {
     @Test
     fun test4Debug() {
         val task = RunEasyCIEDebugger(tasks)
-        task.debugRunner.addReader("Resp: sats 94-99 3L NC, lungs coarse upper, diminished lower. strong non-productive cough, coughing reduced in frequency, prn robitussin w/ codeine prn, nebs via resp therapy. pt states no SOB.", "debug.doc")
+
+        task.debugRunner.addReader("Resp: sats 94-99 3L NC, lungs coarse upper, diminished lower. strong non-productive cough, coughing reduced in frequency, prn robitussin w/ codeine prn, nebs via resp therapy. pt states no SOB.")
         task.debugRunner.run()
     }
 

@@ -45,7 +45,8 @@ import java.util.logging.Level;
 public class RunDebugPipe extends RunEasyCIE {
 
     protected TasksFX tasks;
-    protected String sectionType, rushType, cNERType, tNERType, contextType, featureInfType, mergedType, docInfType, inputStr;
+    protected String sectionType, rushType, cNERType, tNERType, contextType, featureInfType, mergedType, docInfType;
+    protected String inputStr="";
     protected boolean fastNerCaseSensitive;
     public static final String exportXmiFile = "snippet_test.txt";
     public static String exportDir;
@@ -59,15 +60,13 @@ public class RunDebugPipe extends RunEasyCIE {
         this.tasks = tasks;
         readDebugConfigs(tasks);
         initiate(tasks, "db");
-
     }
 
 
-    protected UIMALogger addLogger(DAO dao, String annotator) {
-        UIMALogger logger = new GUILogger(this, "target/generated-test-sources",
+    protected void initUIMALogger() {
+        uimaLogger = new GUILogger(this, "target/generated-test-sources",
                 "desc/type/pipeline_" + annotator);
-        logger.logStartTime();
-        return logger;
+        uimaLogger.logStartTime();
     }
 
     public RunDebugPipe(TasksFX tasks, String paras) {
@@ -125,7 +124,7 @@ public class RunDebugPipe extends RunEasyCIE {
                     }
                     inputStr = entered;
                     if (entered.trim().length() > 0) {
-                        addReader(inputStr, "debug.doc");
+                        addReader();
 //                        initiate(tasks, "xmi");
                         updateGUIMessage("Execute pipeline...");
                         runner.run();
@@ -145,15 +144,19 @@ public class RunDebugPipe extends RunEasyCIE {
         runner.run();
     }
 
-    public void addReader(String inputStr, String fileName) {
+    public void addReader(String inputStr) {
+        this.inputStr=inputStr;
+        addReader();
+    }
+    public void addReader() {
         UpdateMessage("Add String reader...");
         if (!inputStr.endsWith(".xml"))
             runner.setCollectionReader(StringMetaReader.class, new Object[]{StringMetaReader.PARAM_INPUT, inputStr,
-                    StringMetaReader.PARAM_META, "DOC_ID,-1|DATASETID,-1|DOC_NAME," + fileName});
+                    StringMetaReader.PARAM_META, "DOC_ID,-1|DATASETID,-1|DOC_NAME,debug.dco"});
     }
 
 
-    public void addWriter(String runId, String annotator) {
+    public void addWriter(String runId) {
         File output = new File(exportDir);
         try {
             if (!output.exists()) {
@@ -277,7 +280,7 @@ public class RunDebugPipe extends RunEasyCIE {
 //                    AnnotationPrinter.PARAM_INDICATION, "After DocInferenceAnnotator\n"});
 //        }
 //    }
-    protected void addAnalysisEngines(AdaptableUIMACPETaskRunner runner) {
+    protected void addAnalysisEngines() {
         UpdateMessage("Add pipeline components...");
         if (sectionRule.length() > 0) {
             logger.finer("add engine SectionDetectorR_AE");

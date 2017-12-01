@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -135,6 +136,7 @@ public class TasksOverviewController {
         });
         featureValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         featureValueColumn.setCellValueFactory(p -> {
+            System.out.println(Arrays.asList(p.getValue()));
             return new SimpleStringProperty(p.getValue()[1]);
         });
 
@@ -554,7 +556,7 @@ public class TasksOverviewController {
     }
 
     private void updateFeatureTable(String features) {
-        if (features.startsWith("Note:")) {
+        if (features.startsWith("Note:") && features.substring(5,features.indexOf("\n")).indexOf(":") > 0) {
             features = "\t" + features.substring(5);
         }
         ObservableList<String[]> data = FXCollections.observableArrayList();

@@ -41,6 +41,10 @@ public class GUILogger extends ConsoleLogger {
     public void reset() {
 
     }
+    public String logItems() {
+        setItem("COMMENTS", "");
+        return "";
+    }
 
 
     public void logCompleteTime() {
