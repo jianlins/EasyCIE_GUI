@@ -86,7 +86,7 @@
       <!--<count>SELECT count(*) FROM IRB00097336.OUTPUT JOIN (SELECT DISTINCT DOC_NAME from IRB00097336.`OUTPUT` OU join ClinicNotes CN on OU.DOC_NAME=CN.NOTE_ID INNER JOIN NP_CN_PTIDS NP ON CN.PAT_ID=NP.PAT_ID WHERE OU.TYPE='Pos_Doc' AND annotator='v1' AND RUN_ID=43 LIMIT 500) DOCLIST ON OUTPUT.DOC_NAME=DOCLIST.DOC_NAME join ClinicNotes CN on OUTPUT.DOC_NAME=CN.NOTE_ID WHERE annotator='v2' AND RUN_ID=45</count>  -->  
       <sql>SELECT CN.PAT_ID,OUTPUT.DOC_NAME,TYPE,SNIPPET,BEGIN,END,FEATURES,NC.`TEXT` FROM eval29note_ids DOCLIST left JOIN IRB00097336.OUTPUT ON OUTPUT.DOC_NAME=DOCLIST.NOTE_ID join ClinicNotes CN on DOCLIST.NOTE_ID=CN.NOTE_ID join NoteContent NC on DOCLIST.NOTE_ID=NC.NOTE_ID</sql>  
       <directory memo="The dirctory to save the exported excel files">data/output/excel</directory>  
-      <sampleSize memo="If &gt;0, then easyCIE will randomly sample the defined number of documents">6</sampleSize> 
+      <sampleSize memo="If &gt;0, then easyCIE will randomly sample the defined number of documents">600</sampleSize> 
     </excel>  
     <executes> 
       <ExportEhost memo="Run Preannotator and export the annotation to eHOST format">edu.utah.bmi.simple.gui.task.RunEasyCIE ehost</ExportEhost>  

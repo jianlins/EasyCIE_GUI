@@ -3,7 +3,6 @@ package edu.utah.bmi.nlp.easycie.reader;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
-import edu.utah.bmi.nlp.uima.reader.AbFileCollectionReader;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.collection.CollectionException;
