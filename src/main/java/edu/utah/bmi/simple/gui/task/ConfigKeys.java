@@ -79,6 +79,7 @@ public class ConfigKeys {
     public static final String rushRule = "nlpComponents/rush";
 
 
+    public static final String sectionType = "log/sectionType";
     public static final String rushType = "log/rushType";
     public static final String cNERType = "log/cNERType";
     public static final String tNERType = "log/tNERType";

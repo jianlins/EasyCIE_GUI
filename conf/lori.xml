@@ -38,7 +38,7 @@
       <report memo="whether report the processing details at the end">t</report> 
     </pipeLineSetting>  
     <annotators> 
-      <current memo="Mark current annotations with annotator: ">v5</current> 
+      <current memo="Mark current annotations with annotator: ">v6</current> 
     </annotators>  
     <executes> 
       <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunEasyCIE</RunEasyCIE>  
@@ -61,7 +61,8 @@
     </executes> 
   </compare>  
   <debug> 
-    <log> 
+    <log>
+      <sectionType memo="display types of sections">SectionBody</sectionType>
       <rushType memo="display types of RuSH (sentence segmentor and tokenizer) output">Sentence</rushType>  
       <cNERType memo="display types of FastCNER output"/>  
       <tNERType memo="display types of FastNER output">Concept</tNERType>  
@@ -70,7 +71,7 @@
       <docInfType memo="display types of DocInferencer output">Doc_Base</docInfType> 
     </log>  
     <executes> 
-      <RunEasyCIEDebugger memo="Debug using string input">edu.utah.bmi.simple.gui.task.RunEasyCIEDebugger</RunEasyCIEDebugger> 
+      <RunEasyCIEDebugger memo="Debug using string input">edu.utah.bmi.simple.gui.task.RunDebugPipe</RunEasyCIEDebugger>
     </executes> 
   </debug>  
   <export> 

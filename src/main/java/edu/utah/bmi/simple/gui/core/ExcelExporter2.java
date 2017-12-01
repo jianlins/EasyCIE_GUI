@@ -281,7 +281,7 @@ public class ExcelExporter2 {
 
     private void exportRpt(String rptId, String text) {
         try {
-            FileUtils.writeStringToFile(new File(rptDir, rptId + ".txt"), text, "UTF_8");
+            FileUtils.writeStringToFile(new File(rptDir, rptId + ".txt"), text, "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
         }

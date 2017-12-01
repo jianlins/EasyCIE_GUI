@@ -228,7 +228,7 @@ public class RunEasyCIE extends GUITask {
 
 
     protected UIMALogger addLogger(DAO dao, String annotator) {
-        if (logger.getLevel().intValue() < Level.WARNING.intValue())
+        if (logger.isLoggable(Level.FINE))
             return new ConsoleLogger();
         else
             return new NLPDBLogger(dao, "LOG", "RUN_ID", annotator);
@@ -347,7 +347,7 @@ public class RunEasyCIE extends GUITask {
         if (sectionRule.length() > 0) {
             logger.finer("add engine SectionDetectorR_AE");
             runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_FILE_OR_STR, sectionRule});
-            if (logger.getLevel().intValue() < Level.FINE.intValue())
+            if (logger.isLoggable(Level.FINE))
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         SectionHeader.class.getCanonicalName(), AnnotationPrinter.PARAM_INDICATION, "After sectiondetector"});
         }
@@ -357,7 +357,7 @@ public class RunEasyCIE extends GUITask {
             logger.finer("add engine FastCNER_AE_General");
             runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, fastCNERRule,
                     FastCNER_AE_General.PARAM_MARK_PSEUDO, false});
-            if (logger.getLevel().intValue() < Level.FINE.intValue()) {
+            if (logger.isLoggable(Level.FINE)) {
                 logger.finer("add engine FastNER_AE_Diff_SP_Concepts");
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         DeterminantValueSet.defaultNameSpace + "Concept",
@@ -370,7 +370,7 @@ public class RunEasyCIE extends GUITask {
             runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_FILE_OR_STR, fastNERRule,
                     FastNER_AE_General.PARAM_MARK_PSEUDO, true, FastNER_AE_General.PARAM_CASE_SENSITIVE, fastNERCaseSensitive,
                     FastNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections});
-            if (logger.getLevel().intValue() < Level.FINE.intValue()) {
+            if (logger.isLoggable(Level.FINE)) {
                 logger.finer("add engine FastNER_AE_Diff_SP_Concepts");
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         DeterminantValueSet.defaultNameSpace + "Concept",
@@ -386,7 +386,7 @@ public class RunEasyCIE extends GUITask {
         if (contextRule.length() > 0) {
             logger.finer("add engine FastContext_General_AE ");
             runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule});
-            if (logger.getLevel().intValue() < Level.FINE.intValue()) {
+            if (logger.isLoggable(Level.FINE)) {
                 logger.finer("print final Concepts");
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         DeterminantValueSet.defaultNameSpace + "Concept",
@@ -399,7 +399,7 @@ public class RunEasyCIE extends GUITask {
 
             runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{
                     FeatureInferenceAnnotator.PARAM_INFERENCE_STR, featureInfRule});
-            if (logger.getLevel().intValue() < Level.FINE.intValue()) {
+            if (logger.isLoggable(Level.FINE)) {
                 logger.finer("print annotation inferenced Concepts");
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         DeterminantValueSet.defaultNameSpace + "Concept",
@@ -413,7 +413,7 @@ public class RunEasyCIE extends GUITask {
             runner.addAnalysisEngine(AnnotationFeatureMergerAnnotator.class, new Object[]{
                     AnnotationFeatureMergerAnnotator.PARAM_INFERENCE_STR, featureMergerRule,
                     AnnotationFeatureMergerAnnotator.PARAM_IN_SITU, false});
-            if (logger.getLevel().intValue() < Level.FINE.intValue()) {
+            if (logger.isLoggable(Level.FINE)) {
                 logger.finer("print annotation inferenced Concepts");
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         DeterminantValueSet.defaultNameSpace + "Concept",
@@ -425,7 +425,7 @@ public class RunEasyCIE extends GUITask {
             logger.finer("add engine DocInferenceAnnotator");
             runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_INFERENCE_STR, docInfRule});
         }
-        if (logger.getLevel().intValue() < Level.FINE.intValue()) {
+        if (logger.isLoggable(Level.FINE)) {
             logger.finer("print final Doc Concepts");
             runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME, Doc_Base.class.getCanonicalName(),
                     AnnotationPrinter.PARAM_INDICATION, "After DocInferenceAnnotator\n"});

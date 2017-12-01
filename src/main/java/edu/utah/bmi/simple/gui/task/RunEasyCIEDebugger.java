@@ -2,6 +2,8 @@ package edu.utah.bmi.simple.gui.task;
 
 
 import edu.utah.bmi.nlp.core.GUITask;
+import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
+import edu.utah.bmi.simple.gui.controller.GUILogger;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -35,36 +37,8 @@ public class RunEasyCIEDebugger extends GUITask {
             guiEnabled = false;
         }
         updateGUIMessage("Initiate configurations..");
-        TaskFX config = tasks.getTask(ConfigKeys.maintask);
-        annotator = config.getValue(ConfigKeys.annotator);
-        fastNERRule = config.getValue(ConfigKeys.tRuleFile);
-        fastCNERRule = config.getValue(ConfigKeys.cRuleFile);
-        contextRule = config.getValue(ConfigKeys.contextRule);
-        featureInfRule = config.getValue(ConfigKeys.featureInfRule);
-        docInfRule = config.getValue(ConfigKeys.docInfRule);
 
-        String reportString = config.getValue(ConfigKeys.fastNerCaseSensitive);
-        fastNerCaseSensitive = reportString.length() > 0 && (reportString.charAt(0) == 't' || reportString.charAt(0) == 'T' || reportString.charAt(0) == '1');
-
-
-        config = tasks.getTask("settings");
-        rushRule = config.getValue(ConfigKeys.rushRule);
-
-        TaskFX debugConfig = tasks.getTask("debug");
-        rushType = debugConfig.getValue(ConfigKeys.rushType).trim();
-        cNERType = debugConfig.getValue(ConfigKeys.cNERType).trim();
-        tNERType = debugConfig.getValue(ConfigKeys.tNERType).trim();
-        contextType = debugConfig.getValue(ConfigKeys.contextType).trim();
-        featureInfType = debugConfig.getValue(ConfigKeys.featureInfType).trim();
-        docInfType = debugConfig.getValue(ConfigKeys.docInfType).trim();
-
-        exporttypes = rushType + (cNERType.length() > 0 ? "," + cNERType : "")
-                + (tNERType.length() > 0 ? "," + tNERType : "")
-                + (contextType.length() > 0 ? "," + contextType : "")
-                + (featureInfType.length() > 0 ? "," + featureInfType : "")
-                + (docInfType.length() > 0 ? "," + docInfType : "");
-
-
+        debugRunner = new RunDebugPipe(tasks);
 
     }
 
@@ -96,7 +70,7 @@ public class RunEasyCIEDebugger extends GUITask {
                     inputStr = entered;
                     if (entered.trim().length() > 0) {
                         debugRunner.addReader(inputStr, "debug.doc");
-//                    initiate(tasks, "xmi");
+//                        initiate(tasks, "xmi");
                         updateGUIMessage("Execute pipeline...");
                         debugRunner.run();
                     } else {
