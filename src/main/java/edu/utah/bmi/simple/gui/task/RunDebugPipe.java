@@ -101,11 +101,14 @@ public class RunDebugPipe extends RunEasyCIE {
                     TextArea textField = new TextArea();
                     dialog.setHeight(400);
                     dialog.setResizable(true);
+                    textField.setEditable(true);
+                    textField.setWrapText(true);
+                    textField.setFocusTraversable(true);
+                    textField.requestFocus();
+
                     dialog.getDialogPane().setContent(textField);
                     dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
                     dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
-                    textField.setEditable(true);
-                    textField.setWrapText(true);
 
                     Optional<String> result = dialog.showAndWait();
                     String entered = "";

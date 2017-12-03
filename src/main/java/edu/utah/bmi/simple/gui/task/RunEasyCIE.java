@@ -330,9 +330,9 @@ public class RunEasyCIE extends GUITask {
                 runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
                         RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
                         RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
-//			if (debug)
-//				runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
-//						DeterminantValueSet.defaultNameSpace + "Sentence"});
+			if (logger.isLoggable(Level.FINER))
+				runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+						DeterminantValueSet.defaultNameSpace + "Sentence"});
         }
 
         if (sectionRule.length() > 0) {
@@ -376,7 +376,8 @@ public class RunEasyCIE extends GUITask {
 //        System.out.println("Read Context rules from " + contextRule);
         if (contextRule.length() > 0) {
             logger.finer("add engine FastContext_General_AE ");
-            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule});
+            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule,
+                    FastContext_General_AE.PARAM_AUTO_EXPAND_SCOPE, false,});
             if (logger.isLoggable(Level.FINE)) {
                 logger.finer("print final Concepts");
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
