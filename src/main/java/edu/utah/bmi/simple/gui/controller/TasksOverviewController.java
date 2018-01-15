@@ -387,6 +387,8 @@ public class TasksOverviewController {
                             }
                         });
                         break;
+                    case "TYPE":
+                        col.setPrefWidth(125);
                     default:
                         col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
                             public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
@@ -394,7 +396,8 @@ public class TasksOverviewController {
                                 return new SimpleObjectProperty<Object>(record);
                             }
                         });
-                        col.setPrefWidth(85);
+                        if (col.getPrefWidth() == 80)
+                            col.setPrefWidth(90);
                 }
                 annoTableView.getColumns().addAll(col);
                 i++;
@@ -555,7 +558,7 @@ public class TasksOverviewController {
     }
 
     private void updateFeatureTable(String features) {
-        if (features.startsWith("Note:") && features.substring(5,features.indexOf("\n")).indexOf(":") > 0) {
+        if (features.startsWith("Note:") && features.substring(5, features.indexOf("\n")).indexOf(":") > 0) {
             features = "\t" + features.substring(5);
         }
         ObservableList<String[]> data = FXCollections.observableArrayList();

@@ -321,20 +321,6 @@ public class RunEasyCIE extends GUITask {
     }
 
     protected void addAnalysisEngines() {
-        if (rushRule.length() > 0) {
-            logger.finer("add engine RuSH_AE");
-            if (exporttypes == null || exporttypes.indexOf("Sentence") == -1)
-                runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
-                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true});
-            else
-                runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
-                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
-                        RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
-			if (logger.isLoggable(Level.FINER))
-				runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
-						DeterminantValueSet.defaultNameSpace + "Sentence"});
-        }
-
         if (sectionRule.length() > 0) {
             logger.finer("add engine SectionDetectorR_AE");
             runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_FILE_OR_STR, sectionRule});
@@ -342,6 +328,24 @@ public class RunEasyCIE extends GUITask {
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         SectionHeader.class.getCanonicalName(), AnnotationPrinter.PARAM_INDICATION, "After sectiondetector"});
         }
+
+        if (rushRule.length() > 0) {
+            logger.finer("add engine RuSH_AE");
+            if (exporttypes == null || exporttypes.indexOf("Sentence") == -1)
+                runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
+                        RuSH_AE.PARAM_INSIDE_SECTIONS,"SectionHeader,SectionBody",
+                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true});
+            else
+                runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
+                        RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
+                        RuSH_AE.PARAM_INSIDE_SECTIONS,"SectionHeader,SectionBody",
+                        RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
+			if (logger.isLoggable(Level.FINER))
+				runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+						DeterminantValueSet.defaultNameSpace + "Sentence"});
+        }
+
+
 
 
         if (fastCNERRule.length() > 0) {

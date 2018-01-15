@@ -3,6 +3,7 @@ package edu.utah.bmi.nlp.easycie.reader;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
+import edu.utah.bmi.simple.gui.task.RunEasyCIE;
 import org.apache.uima.UIMA_IllegalArgumentException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
@@ -16,6 +17,9 @@ import org.apache.uima.util.ProgressImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * This class is  fixed to column names, record identifier is "filename", and the xmi column is "xmi"
@@ -23,6 +27,7 @@ import java.io.IOException;
  * @author Jianlin Shi on 5/20/16.
  */
 public class SQLTextReader extends CollectionReader_ImplBase {
+    public static Logger logger = Logger.getLogger(SQLTextReader.class.getCanonicalName());
     public static final String PARAM_DB_CONFIG_FILE = "DBConfigFile";
     public static final String PARAM_DOC_TABLE_NAME = "DocTableName";
     public static final String PARAM_QUERY_SQL_NAME = "InputQueryName";
@@ -34,6 +39,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     public static DAO dao = null;
     protected int mCurrentIndex, totalDocs;
     protected RecordRowIterator recordIterator;
+    @Deprecated
     public static boolean debug = false;
     private String datasetId;
 
@@ -45,6 +51,15 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     }
 
     protected void readConfigurations() {
+        if (System.getProperty("java.util.logging.config.file") == null &&
+                new File("logging.properties").exists()) {
+            System.setProperty("java.util.logging.config.file", "logging.properties");
+        }
+        try {
+            LogManager.getLogManager().readConfiguration();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         dbConfigFile = new File(readConfigureString(PARAM_DB_CONFIG_FILE, null));
         if (dao == null)
             dao = new DAO(this.dbConfigFile);
@@ -69,7 +84,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
 
     protected void addDocs() {
         totalDocs = dao.countRecords(countSqlName, docTableName, datasetId);
-        if(debug)
+        if(logger.isLoggable(Level.INFO))
             System.out.println("Total documents need to be processed: "+totalDocs);
         recordIterator = dao.queryRecordsFromPstmt(querySqlName, docTableName, datasetId);
     }
@@ -83,6 +98,8 @@ public class SQLTextReader extends CollectionReader_ImplBase {
         RecordRow currentRecord = recordIterator.next();
         String metaInfor = currentRecord.serialize(docColumnName);
         String text = (String) currentRecord.getValueByColumnName(docColumnName);
+        if(logger.isLoggable(Level.INFO))
+            logger.finest("Read document: "+docColumnName);
         if (text == null)
             text = "";
         JCas jcas;
