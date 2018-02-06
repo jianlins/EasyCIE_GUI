@@ -161,7 +161,7 @@ public class RunDebugPipe extends RunEasyCIE {
             e.printStackTrace();
         }
 
-        if (xmi)
+        if (true)
             runner.addAnalysisEngine(XMIWritter_AE.class,
                     new Object[]{XMIWritter_AE.PARAM_OUTPUTDIR, output.getAbsolutePath(),
                             "Annotator", annotator,

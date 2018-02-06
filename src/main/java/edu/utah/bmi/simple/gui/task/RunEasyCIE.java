@@ -51,7 +51,7 @@ public class RunEasyCIE extends GUITask {
             featureInfRule = "", featureMergerRule = "", docInfRule = "";
     public AdaptableUIMACPETaskRunner runner;
     protected DAO rdao, wdao;
-    public boolean ehost = false, brat = false, xmi = false;
+    public boolean ehost = false, brat = false, xmi = true;
     protected String exporttypes;
     protected String customTypeDescriptor;
     protected UIMALogger uimaLogger;
