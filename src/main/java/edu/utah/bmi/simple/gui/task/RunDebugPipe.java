@@ -57,6 +57,8 @@ public class RunDebugPipe extends RunEasyCIE {
     protected void initUIMALogger() {
         uimaLogger = new GUILogger(this, "target/generated-test-sources",
                 "desc/type/pipeline_" + annotator);
+        if(this.tasks.getTask("debug").getValue("log/ShowUimaViewer").toLowerCase().startsWith("t"))
+            ((GUILogger)uimaLogger).setUIMAViewer(true);
         uimaLogger.logStartTime();
     }
 
@@ -289,12 +291,12 @@ public class RunDebugPipe extends RunEasyCIE {
         if (rushRule.length() > 0) {
             if (rushType.indexOf("Sentence") == -1)
                 runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
-                        RuSH_AE.PARAM_INSIDE_SECTIONS, "SectionHeader,SectionBody",
+                        RuSH_AE.PARAM_INSIDE_SECTIONS, includesections,
                         RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true});
             else
                 runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
                         RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
-                        RuSH_AE.PARAM_INSIDE_SECTIONS, "SectionHeader,SectionBody",
+                        RuSH_AE.PARAM_INSIDE_SECTIONS, includesections,
                         RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
             if (rushType.length() > 0 && guiEnabled)
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER, "RuSH",
@@ -306,6 +308,7 @@ public class RunDebugPipe extends RunEasyCIE {
         if (fastCNERRule.length() > 0) {
             runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, fastCNERRule,
                     FastCNER_AE_General.PARAM_MARK_PSEUDO, false,
+                    FastCNER_AE_General.PARAM_INCLUDE_SECTIONS,includesections
             });
             if (cNERType.length() > 0) {
                 if (guiEnabled)
@@ -323,6 +326,7 @@ public class RunDebugPipe extends RunEasyCIE {
         if (fastNERRule.length() > 0) {
             runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_FILE_OR_STR, fastNERRule,
                     FastNER_AE_General.PARAM_CASE_SENSITIVE, false,
+                    FastNER_AE_General.PARAM_INCLUDE_SECTIONS,includesections,
                     FastNER_AE_General.PARAM_MARK_PSEUDO, true});
             if (tNERType.length() > 0) {
                 if (guiEnabled)

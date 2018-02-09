@@ -64,6 +64,7 @@
       <contextType memo="display types of FastContext output">Concept,Context</contextType>
       <featureInfType memo="display types of FeatureInferencer output">Concept</featureInfType>
       <docInfType memo="display types of DocInferencer output">Doc_Base</docInfType>
+      <ShowUimaViewer memo="if true then display UIMA annotation viewer after execution">true</ShowUimaViewer>
     </log>
     <executes>
       <RunEasyCIEDebugger memo="Debug using string input">edu.utah.bmi.simple.gui.task.RunEasyCIEDebugger</RunEasyCIEDebugger>

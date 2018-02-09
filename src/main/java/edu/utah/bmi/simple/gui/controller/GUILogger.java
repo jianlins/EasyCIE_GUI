@@ -6,6 +6,7 @@ import edu.utah.bmi.nlp.sql.ColumnInfo;
 import edu.utah.bmi.nlp.uima.MyAnnotationViewerPlain;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
+import edu.utah.bmi.simple.gui.entry.TaskFX;
 import javafx.application.Platform;
 
 import javax.swing.*;
@@ -20,9 +21,11 @@ public class GUILogger extends ConsoleLogger {
     protected final ColumnInfo columnInfo = new ColumnInfo();
     protected String inputPath, descriptorPath;
     protected GUITask task;
+    private boolean enableUIMAViewer=false;
 
     public GUILogger(GUITask task, String inputPath, String descriptorPath) {
         this.task = task;
+
         columnInfo.addColumnInfo("ID", "string");
         columnInfo.addColumnInfo("TYPE", "string");
         columnInfo.addColumnInfo("BEGIN", "int");
@@ -37,10 +40,15 @@ public class GUILogger extends ConsoleLogger {
 
     }
 
+    public void setUIMAViewer(boolean enableUIMAViewer) {
+        this.enableUIMAViewer = enableUIMAViewer;
+    }
+
 
     public void reset() {
 
     }
+
     public String logItems() {
         setItem("COMMENTS", "");
         return "";
@@ -50,28 +58,24 @@ public class GUILogger extends ConsoleLogger {
     public void logCompleteTime() {
         super.logCompleteTime();
         if (task.guiEnabled)
-            Platform.runLater(new Runnable() {
-                public void run() {
-                    boolean res = true;
-                    res = TasksOverviewController.currentTasksOverviewController.showDBTable(
-                            AnnotationLogger.records.iterator(), columnInfo, "output", false);
-                    if (res)
-                        task.updateGUIMessage("String processing completed.");
-                    else
-                        task.updateGUIMessage("No annotation exported.");
+            Platform.runLater(() -> {
+                boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(
+                        AnnotationLogger.records.iterator(), columnInfo, "output", false);
+                if (res)
+                    task.updateGUIMessage("String processing completed.");
+                else
+                    task.updateGUIMessage("No annotation exported.");
 
-                    task.updateGUIProgress(1, 1);
+                task.updateGUIProgress(1, 1);
 
-                }
             });
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JFrame frame = new MyAnnotationViewerPlain(new String[]{"Pipeline Debug Viewer", inputPath, descriptorPath+".xml"});
+        if (enableUIMAViewer)
+            SwingUtilities.invokeLater(() -> {
+                JFrame frame = new MyAnnotationViewerPlain(new String[]{"Pipeline Debug Viewer", inputPath, descriptorPath + ".xml"});
                 frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
                 frame.pack();
                 frame.setVisible(true);
-            }
-        });
+            });
     }
 
 

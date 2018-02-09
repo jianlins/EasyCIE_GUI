@@ -333,12 +333,12 @@ public class RunEasyCIE extends GUITask {
             logger.finer("add engine RuSH_AE");
             if (exporttypes == null || exporttypes.indexOf("Sentence") == -1)
                 runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
-                        RuSH_AE.PARAM_INSIDE_SECTIONS,"SectionHeader,SectionBody",
+                        RuSH_AE.PARAM_INSIDE_SECTIONS,includesections,
                         RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true});
             else
                 runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
                         RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
-                        RuSH_AE.PARAM_INSIDE_SECTIONS,"SectionHeader,SectionBody",
+                        RuSH_AE.PARAM_INSIDE_SECTIONS,includesections,
                         RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
 			if (logger.isLoggable(Level.FINER))
 				runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
