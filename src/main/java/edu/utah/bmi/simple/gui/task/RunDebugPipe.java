@@ -3,6 +3,7 @@ package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.ae.FeatureInferenceAnnotator;
+import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.easycie.CoordinateNERResults_AE;
@@ -14,6 +15,7 @@ import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
 import edu.utah.bmi.nlp.uima.AdaptableUIMACPERunner;
 import edu.utah.bmi.nlp.uima.AdaptableUIMACPETaskRunner;
+import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
 import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
 import edu.utah.bmi.nlp.uima.reader.StringMetaReader;
 import edu.utah.bmi.nlp.writer.XMIWritter_AE;
@@ -186,11 +188,12 @@ public class RunDebugPipe extends RunPipe {
                 runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
                         RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,RuSH_AE.PARAM_DEBUG,true,
                         RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
-            if (rushType.length() > 0)
-                runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER,"RuSH",
+            if (rushType.length() > 0) {
+                runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER, "RuSH",
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by Rush (sentence segmenter):",
                         AnnotationLogger.PARAM_TYPE_NAMES, rushType});
+            }
         }
 
         if (fastCNERRule.length() > 0) {
@@ -203,6 +206,9 @@ public class RunDebugPipe extends RunPipe {
                         AnnotationLogger.PARAM_TYPE_NAMES, cNERType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by FastCNER (character based rule NER):"});
+                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+                        DeterminantValueSet.defaultNameSpace + "Concept",
+                        AnnotationPrinter.PARAM_INDICATION, "After being processed by FastCNER (character based rule NER):"});
             }
         }
 
@@ -216,6 +222,10 @@ public class RunDebugPipe extends RunPipe {
                         AnnotationLogger.PARAM_TYPE_NAMES, tNERType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by FastNER (token based rule NER):"});
+                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+                        DeterminantValueSet.defaultNameSpace + "Concept",
+                        AnnotationPrinter.PARAM_INDICATION, "After being processed by FastNER (token based rule NER):"});
+
             }
         }
 
@@ -235,27 +245,38 @@ public class RunDebugPipe extends RunPipe {
                         AnnotationLogger.PARAM_TYPE_NAMES, contextType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by FastContext (context detector):"});
+                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+                        DeterminantValueSet.defaultNameSpace + "Concept",
+                        AnnotationPrinter.PARAM_INDICATION, "After being processed by FastContext:"});
+
             }
         }
 
         if (featureInfRule.length() > 0) {
             runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_RULE_FILE_OR_STR, featureInfRule});
-            if (contextType.length() > 0) {
+            if (featureInfType.length() > 0) {
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                         AnnotationLogger.PARAM_INDICATION_HEADER,"FeatureInferenceAnnotator",
                         AnnotationLogger.PARAM_TYPE_NAMES, featureInfType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by FeatureInferenceAnnotator:"});
+                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+                        DeterminantValueSet.defaultNameSpace + "Concept",
+                        AnnotationPrinter.PARAM_INDICATION, "After being processed by FeatureInferenceAnnotator:"});
             }
         }
         if (docInfRule.length() > 0) {
             runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_RULE_FILE_OR_STR, docInfRule});
-            if (contextType.length() > 0) {
+            if (docInfType.length() > 0) {
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                         AnnotationLogger.PARAM_INDICATION_HEADER,"DocInferenceAnnotator",
                         AnnotationLogger.PARAM_TYPE_NAMES, docInfType,
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by DocInferenceAnnotator:"});
+                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+                        DeterminantValueSet.defaultNameSpace + "Concept",
+                        AnnotationPrinter.PARAM_INDICATION, "After being processed by DocInferenceAnnotator:"});
+
             }
         }
     }
