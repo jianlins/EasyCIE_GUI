@@ -12,6 +12,7 @@ import org.codehaus.plexus.util.cli.CommandLineUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -53,7 +54,7 @@ public class ExecuteOsCommand extends javafx.concurrent.Task {
                             int split = para.indexOf("/");
                             String taskName = para.substring(0, split).replaceAll("//", "");
                             String configKey = para.substring(split + 1);
-                            output.append(" "+tasks.getTask(taskName).getValue(configKey));
+                            output.append(" " + tasks.getTask(taskName).getValue(configKey));
                             i++;
                         } else {
                             logger.warning("'-x' parameter is supposed to follow a setting name that will read the configuration value from your EasyCIE settings.");
@@ -108,7 +109,9 @@ public class ExecuteOsCommand extends javafx.concurrent.Task {
             e.printStackTrace();
         }
         updateProgress(1, 1);
-        updateMessage("Execute Results:|Command \"" + command + "\":|" + stb.toString() + "|Execute complete.");
+        if (logger.isLoggable(Level.FINE)) {
+            updateMessage("Execute Results:|Command \"" + command + "\":|" + stb.toString() + "|Execute complete.");
+        }
         return null;
     }
 
