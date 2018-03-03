@@ -93,6 +93,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
         mDocNum = 0;
         System.out.println("Ehost annotations will be exported to: " + outputDirectory);
 
+        outputDirectory = new File(outputDirectory, annotator);
 
         xmlOutputDir = new File(outputDirectory, "saved");
         txtOutputDir = new File(outputDirectory, "corpus");

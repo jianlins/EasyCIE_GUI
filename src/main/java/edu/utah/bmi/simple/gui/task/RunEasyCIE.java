@@ -27,6 +27,7 @@ import edu.utah.bmi.nlp.easycie.writer.EhostWriter_AE;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.easycie.writer.XMIWritter_AE;
 import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;
+import edu.utah.bmi.simple.gui.controller.GUILogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
@@ -54,7 +55,7 @@ public class RunEasyCIE extends GUITask {
     public boolean ehost = false, brat = false, xmi = true;
     protected String exporttypes;
     protected String customTypeDescriptor;
-    protected UIMALogger uimaLogger;
+    protected GUILogger uimaLogger;
 
     public RunEasyCIE() {
 
@@ -196,7 +197,7 @@ public class RunEasyCIE extends GUITask {
     protected void initUIMALogger() {
         wdao = new DAO(new File(writeConfigFileName), false, false);
         uimaLogger = new NLPDBLogger(wdao, "LOG", "RUN_ID", annotator);
-
+        uimaLogger.setReportable(report);
         uimaLogger.logStartTime();
     }
 

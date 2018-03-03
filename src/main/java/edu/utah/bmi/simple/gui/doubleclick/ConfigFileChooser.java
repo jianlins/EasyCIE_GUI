@@ -41,7 +41,7 @@ public class ConfigFileChooser extends javafx.concurrent.Task {
                 if (file != null) {
                     String newValue = Main.getRelativePath(file.getAbsolutePath());
                     Main.valueChanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName(), newValue);
-                    currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick(),setting.isOpenable());
+                    currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick(),setting.getOpenClick());
                     TasksOverviewController.currentTasksOverviewController.getSettingTable().refresh();
                 }
             }

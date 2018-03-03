@@ -59,15 +59,15 @@ public class TaskFX {
 
 
     public void setValue(String key, String value, String desc, String doubleClick) {
-        setValue(key, value, desc, doubleClick, false);
+        setValue(key, value, desc, doubleClick, "");
     }
 
-    public void setValue(String key, String value, String desc, String doubleClick, boolean openable) {
+    public void setValue(String key, String value, String desc, String doubleClick, String openClick) {
         if (desc == null) {
             desc = "";
         }
-        paras.put(key, new Setting(key, value, desc, doubleClick, openable));
-        map.put(key, new Setting(key, value, desc, doubleClick, openable));
+        paras.put(key, new Setting(key, value, desc, doubleClick, openClick));
+        map.put(key, new Setting(key, value, desc, doubleClick, openClick));
     }
 
     public void setValue(String key, String value) {

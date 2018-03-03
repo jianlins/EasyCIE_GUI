@@ -24,15 +24,14 @@
 <analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
     <primitive>true</primitive>
-    <annotatorImplementationName>edu.utah.bmi.uima.SQLWriterCasConsumer</annotatorImplementationName>
+    <annotatorImplementationName>edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer</annotatorImplementationName>
     <analysisEngineMetaData>
         <name>SQL Writer CasConsumer</name>
         <description>Write annotations in structured format table</description>
         <configurationParameters>
             <configurationParameter>
                 <name>SQLFile</name>
-                <description>SQLFile path to write. For SQLite, it will be the path of SQLite file. For MySQL, it will
-                    be MySQL configuration file
+                <description>db configuration file
                 </description>
                 <type>String</type>
                 <multiValued>false</multiValued>
@@ -78,6 +77,22 @@
                 <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>
+            <configurationParameter>
+                <name>Version</name>
+                <description>
+                </description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>MinTextLength</name>
+                <description>
+                </description>
+                <type>Integer</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
         </configurationParameters>
         <configurationParameterSettings>
             <nameValuePair>
@@ -114,6 +129,18 @@
                 <name>Annotator</name>
                 <value>
                     <string></string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>Version</name>
+                <value>
+                    <string></string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>MinTextLength</name>
+                <value>
+                    <integer>0</integer>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>

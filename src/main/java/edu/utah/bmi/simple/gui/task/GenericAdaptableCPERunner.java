@@ -2,10 +2,14 @@ package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.uima.AdaptableUIMACPEDescriptorTaskRunner;
 import edu.utah.bmi.nlp.uima.DynamicTypeGenerator;
+import edu.utah.bmi.nlp.uima.SimpleStatusCallbackListenerImpl;
+import edu.utah.bmi.nlp.uima.TaskStatusCallbackListenerImpl;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
+import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
 import edu.utah.bmi.simple.gui.entry.SettingAb;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
+import org.apache.uima.UIMAException;
 import org.apache.uima.UIMAFramework;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReaderDescription;
@@ -45,7 +49,11 @@ public class GenericAdaptableCPERunner extends AdaptableUIMACPEDescriptorTaskRun
         initiate(tasks, paras);
     }
 
-    private void initiate(TasksFX tasks, String pipelineName) {
+    public void setLogger(UIMALogger logger) {
+        this.logger = logger;
+    }
+
+    protected void initiate(TasksFX tasks, String pipelineName) {
         TaskFX otherPiplinesConfig = tasks.getTask("otherPiplines");
         LinkedHashMap<String, SettingAb> customizedSettings = otherPiplinesConfig.getChildSettings(pipelineName);
         String cpeDescriptor = otherPiplinesConfig.getValue(pipelineName + "/" + ConfigKeys.cpeDescriptor);
@@ -93,11 +101,14 @@ public class GenericAdaptableCPERunner extends AdaptableUIMACPEDescriptorTaskRun
         if (new File("desc/type/" + pipelineName + ".xml").exists()) {
             dynamicTypeGenerator = new DynamicTypeGenerator("desc/type/" + pipelineName);
         } else if (customizedSettings.containsKey(ConfigKeys.customizedTypes)) {
-            for (String type : customizedSettings.get(ConfigKeys.customizedTypes).getSettingValue().split(",")) {
-                type = type.trim();
-                addConceptType(type);
+            String types=customizedSettings.get(ConfigKeys.customizedTypes).getSettingValue().trim();
+            if(types.length()>0) {
+                for (String type : customizedSettings.get(ConfigKeys.customizedTypes).getSettingValue().split(",")) {
+                    type = type.trim();
+                    addConceptType(type);
+                }
+                reInitTypeSystem("desc/type/" + pipelineName);
             }
-            reInitTypeSystem("desc/type/" + pipelineName);
         }
 
     }
@@ -142,5 +153,29 @@ public class GenericAdaptableCPERunner extends AdaptableUIMACPEDescriptorTaskRun
             }
         }
         return false;
+    }
+    public void run(){
+        try {
+            super.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected Object call() throws Exception {
+        try {
+            mCPE = null;
+            mCPE = UIMAFramework.produceCollectionProcessingEngine(currentCpeDesc);
+            SimpleStatusCallbackListenerImpl statCbL = new SimpleStatusCallbackListenerImpl(logger);
+            mCPE.addStatusCallbackListener(statCbL);
+            statCbL.setCollectionProcessingEngine(mCPE);
+
+            // start processing
+            mCPE.process();
+        } catch (UIMAException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

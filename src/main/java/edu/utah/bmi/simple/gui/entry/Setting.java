@@ -10,22 +10,22 @@ public class Setting implements SettingAb {
     protected SimpleStringProperty settingValue;
     protected SimpleStringProperty settingDesc;
     protected SimpleStringProperty doubleClick;
-    protected boolean openable = false;
+    protected SimpleStringProperty openClick;
 
     public Setting(String settingName, String settingValue, String settingDesc, String doubleClick) {
-        init(settingName, settingValue, settingDesc, doubleClick, false);
+        init(settingName, settingValue, settingDesc, doubleClick, "");
     }
 
-    public Setting(String settingName, String settingValue, String settingDesc, String doubleClick, boolean openable) {
-        init(settingName, settingValue, settingDesc, doubleClick, openable);
+    public Setting(String settingName, String settingValue, String settingDesc, String doubleClick, String openClick) {
+        init(settingName, settingValue, settingDesc, doubleClick, openClick);
     }
 
-    public void init(String settingName, String settingValue, String settingDesc, String doubleClick, boolean openable) {
+    public void init(String settingName, String settingValue, String settingDesc, String doubleClick, String openClick) {
         this.settingName = new SimpleStringProperty(settingName);
         this.settingValue = new SimpleStringProperty(settingValue);
         this.settingDesc = new SimpleStringProperty(settingDesc);
         this.doubleClick = new SimpleStringProperty(doubleClick);
-        this.openable = openable;
+        this.openClick = new SimpleStringProperty(openClick);
     }
 
     public String getSettingName() {
@@ -44,9 +44,10 @@ public class Setting implements SettingAb {
         return this.doubleClick.get();
     }
 
-    public boolean isOpenable() {
-        return openable;
+    public String getOpenClick() {
+        return this.openClick.get();
     }
+
 
     public SimpleStringProperty settingNameProperty() {
         return this.settingName;
@@ -56,16 +57,25 @@ public class Setting implements SettingAb {
         return this.settingValue;
     }
 
+    public void setSettingValue(String settingValue){
+        this.settingValue=new SimpleStringProperty(settingValue);
+    }
+
     public SimpleStringProperty settingDescProperty() {
         return this.settingDesc;
     }
 
     public SimpleStringProperty doubleClickProperty() {
-        return doubleClick;
+        return this.doubleClick;
+    }
+
+    public SimpleStringProperty openClickProperty() {
+        return this.openClick;
     }
 
     public String serialize() {
-        return this.settingName.get() + "|" + this.settingValue.get() + "|" + this.settingDesc.get() + "|" + this.doubleClick.get();
+        return this.settingName.get() + "|" + this.settingValue.get() + "|" + this.settingDesc.get()
+                + "|" + this.doubleClick.get() + "|" + this.openClick.get();
     }
 
     public String toString() {

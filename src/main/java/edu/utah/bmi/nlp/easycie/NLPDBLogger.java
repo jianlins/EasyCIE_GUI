@@ -4,6 +4,7 @@ package edu.utah.bmi.nlp.easycie;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
+import edu.utah.bmi.simple.gui.controller.GUILogger;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.HashMap;
  * @author Jianlin Shi
  * Created on 1/13/17.
  */
-public class NLPDBLogger extends ConsoleLogger {
+public class NLPDBLogger extends GUILogger {
     private final DAO dao;
     private final String tableName;
     long starttime = 0, completetime = 0;
@@ -79,8 +80,8 @@ public class NLPDBLogger extends ConsoleLogger {
     public void logCompletToDB(int numOfNotes, String comments) {
         logCompleteTime();
         recordRow.addCell("NUM_NOTES", numOfNotes);
-        recordRow.addCell("COMMENTS", comments);
-        recordRow.addCell("RUN_ID",runid);
+//        recordRow.addCell("COMMENTS", comments);
+        recordRow.addCell("RUN_ID", runid);
         dao.updateRecord("LOG", recordRow);
     }
 
@@ -119,5 +120,6 @@ public class NLPDBLogger extends ConsoleLogger {
     public void setUnit(String unit) {
         this.unit = unit;
     }
+
 
 }

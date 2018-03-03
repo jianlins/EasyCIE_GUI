@@ -11,6 +11,7 @@ import javafx.application.Platform;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * @author Jianlin Shi
@@ -21,7 +22,12 @@ public class GUILogger extends ConsoleLogger {
     protected final ColumnInfo columnInfo = new ColumnInfo();
     protected String inputPath, descriptorPath;
     protected GUITask task;
-    private boolean enableUIMAViewer=false;
+    private boolean enableUIMAViewer = false;
+    protected boolean report = false;
+
+    protected GUILogger() {
+
+    }
 
     public GUILogger(GUITask task, String inputPath, String descriptorPath) {
         this.task = task;
@@ -45,19 +51,32 @@ public class GUILogger extends ConsoleLogger {
     }
 
 
-    public void reset() {
+    public void setItem(String key, Object value) {
+        loggedItems.put(key, value);
+    }
 
+
+    public void reset() {
+        loggedItems.clear();
     }
 
     public String logItems() {
-        setItem("COMMENTS", "");
-        return "";
+        StringBuilder logs = new StringBuilder();
+        for (Map.Entry<String, Object> item : this.loggedItems.entrySet()) {
+            logs.append(item.getKey());
+            logs.append("\n");
+            logs.append(item.getValue());
+            logs.append("\n\n");
+        }
+        logString(logs.toString());
+        System.out.println(logs.toString());
+        return logs.toString();
     }
 
 
     public void logCompleteTime() {
         super.logCompleteTime();
-        if (task.guiEnabled)
+        if (task.guiEnabled) {
             Platform.runLater(() -> {
                 boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(
                         AnnotationLogger.records.iterator(), columnInfo, "output", false);
@@ -69,14 +88,41 @@ public class GUILogger extends ConsoleLogger {
                 task.updateGUIProgress(1, 1);
 
             });
-        if (enableUIMAViewer)
-            SwingUtilities.invokeLater(() -> {
-                JFrame frame = new MyAnnotationViewerPlain(new String[]{"Pipeline Debug Viewer", inputPath, descriptorPath + ".xml"});
-                frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-                frame.pack();
-                frame.setVisible(true);
-            });
+            if (enableUIMAViewer)
+                SwingUtilities.invokeLater(() -> {
+                    JFrame frame = new MyAnnotationViewerPlain(new String[]{"Pipeline Debug Viewer", inputPath, descriptorPath + ".xml"});
+                    frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                    frame.pack();
+                    frame.setVisible(true);
+                });
+        }
     }
 
+    public void logString(String msg) {
+        if (msg.startsWith("Processed")) {
+            msg = msg.substring(9);
+            int ofPos = msg.indexOf(" of ");
+            if (ofPos != -1) {
+                int processed = Integer.parseInt(msg.substring(0, ofPos).trim());
+                int max = Integer.parseInt(msg.substring(ofPos + 4).trim());
+                if (task.guiEnabled)
+                    Platform.runLater(() -> task.updateGUIProgress(processed, max));
+            }
+        } else {
+            String finalMsg = msg;
+            if (task.guiEnabled)
+                Platform.runLater(() -> task.updateGUIMessage(finalMsg));
+            else
+                System.out.println(finalMsg);
+        }
+    }
+
+    public void setReportable(boolean report) {
+        this.report = report;
+    }
+
+    public boolean reportable() {
+        return report;
+    }
 
 }

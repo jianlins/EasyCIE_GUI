@@ -46,9 +46,9 @@ public class SettingOper {
             String value = ele.getTextTrim().trim();
             String memo = ele.attributeValue("memo");
             String command = ele.attributeValue("doubleClick");
-            boolean openable = ele.attributeValue("openable") != null;
+            String openClick = ele.attributeValue("openClick");
             if (!elementName.startsWith("executes")) {
-                task.setValue(elementName, value, memo, command, openable);
+                task.setValue(elementName, value, memo, command, openClick);
                 iterateTaskElement(ele, task, elementName);
             } else {
                 for (Iterator s = ele.elementIterator(); s.hasNext(); ) {

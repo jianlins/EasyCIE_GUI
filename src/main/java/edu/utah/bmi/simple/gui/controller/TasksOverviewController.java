@@ -18,6 +18,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.*;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.TextFieldOpenableTableCell;
+import javafx.util.converter.SettingValueConverter;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -31,9 +33,9 @@ import javafx.util.Callback;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -98,7 +100,12 @@ public class TasksOverviewController {
     private FlowPane executePanel;
 
     @FXML
-    private TableColumn<Map.Entry<String, Setting>, String> settingValueColumn, settingDesColumn;
+    private TableColumn<Map.Entry<String, Setting>, Object> settingValueColumn;
+
+    @FXML
+    private TableColumn<Map.Entry<String, Setting>, String> settingDesColumn;
+
+
     @FXML
     private TableView<Map.Entry<String, SettingAb>> settingTable;
 
@@ -220,68 +227,70 @@ public class TasksOverviewController {
         settingNameColumn.setCellFactory(doubleClickableCellFactory);
 
 
-        settingNameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableMapWrapper.Entry, Object>, ObservableValue<Object>>() {
-            public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableMapWrapper.Entry, Object> param) {
-                return new SimpleObjectProperty<Object>(new Object[]{currentTask, param.getValue().getValue()});
-            }
-        });
+        settingNameColumn.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableMapWrapper.Entry, Object>, ObservableValue<Object>>)
+                param -> new SimpleObjectProperty<>(new Object[]{currentTask, param.getValue().getValue()}));
 
 
-        settingValueColumn.setCellValueFactory(p -> {
-            return p.getValue().getValue().settingValueProperty();
-        });
+//        TableColumn<Map.Entry<String, Setting>, String>
+        settingValueColumn.setCellValueFactory(p -> new SimpleObjectProperty<>(new Object[]{currentTask, p.getValue().getValue()}));
 
 
-        settingValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        Callback<TableColumn<Map.Entry<String, Setting>, Object>, TableCell<Map.Entry<String, Setting>, Object>> openClickableCellFactory =
+                p -> new TextFieldOpenableTableCell(new SettingValueConverter());
 
-        settingValueColumn.setOnEditStart(event -> {
-            Map.Entry<String, Setting> entry = event.getRowValue();
-            Setting setting = entry.getValue();
-            if (setting.isOpenable()) {
-                File file = new File(setting.getSettingValue());
-                if (file.exists()) {
-                    Thread th = new Thread(new Runnable() {
-                        public void run() {
-                            try {
-                                Desktop.getDesktop().open(file);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
 
-                        }
-                    });
-                    th.start();
-                } else {
-                    bottomViewController.setMsg("File \"" + file + "\" doesn't exist.");
-                }
-            }
-        });
+
+        settingValueColumn.setCellFactory(openClickableCellFactory);
+
+//        settingValueColumn.setOnEditStart(event -> {
+//            Map.Entry<String, Setting> entry = event.getRowValue();
+//            Setting setting = entry.getValue();
+//            String openApp = setting.getOpenClick();
+//            if (openApp.length() > 0) {
+//                File file = new File(setting.getSettingValue());
+//                javafx.concurrent.Task thisTask = null;
+//                Class<? extends javafx.concurrent.Task> c = null;
+//                try {
+//                    System.out.println(openApp);
+//                    c = Class.forName(openApp).asSubclass(javafx.concurrent.Task.class);
+//                    Constructor<? extends javafx.concurrent.Task> taskConstructor;
+//                    if (file.exists()) {
+//                        taskConstructor = c.getConstructor(TaskFX.class, Setting.class);
+//                        thisTask = taskConstructor.newInstance(currentTask, setting);
+//                        thisTask.run();
+//                    }else{
+//                        bottomViewController.setMsg("File \"" + file + "\" doesn't exist.");
+//                    }
+//                } catch (ClassNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (NoSuchMethodException e) {
+//                    e.printStackTrace();
+//                } catch (InstantiationException e) {
+//                    e.printStackTrace();
+//                } catch (IllegalAccessException e) {
+//                    e.printStackTrace();
+//                } catch (InvocationTargetException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
 
         settingValueColumn.setOnEditCommit(event -> {
-            String newValue = event.getNewValue();
+            String newValue;
+            Object value=event.getNewValue();
+            if(value instanceof String) {
+                newValue = event.getNewValue().toString();
+            }else if(value instanceof Object[]){
+                newValue=((Setting)((Object[])value)[1]).getSettingValue();
+            }else{
+                newValue="";
+            }
             Map.Entry<String, Setting> entry = event.getRowValue();
             Setting setting = entry.getValue();
-            currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick(), setting.isOpenable());
+            String openApp = setting.getOpenClick();
+            currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick(), openApp);
             Main.valueChanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName(), newValue);
             mainApp.tasks.addTask(currentTask);
-            if (setting.isOpenable()) {
-                File file = new File(setting.getSettingValue());
-                if (file.exists()) {
-                    Thread th = new Thread(new Runnable() {
-                        public void run() {
-                            try {
-                                Desktop.getDesktop().open(file);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    });
-                    th.start();
-                } else {
-                    bottomViewController.setMsg("File \"" + file + "\" doesn't exist.");
-                }
-            }
 //
         });
 

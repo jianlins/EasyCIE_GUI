@@ -24,13 +24,13 @@
 <analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
     <primitive>true</primitive>
-    <annotatorImplementationName>edu.utah.bmi.rush.uima.RuSH_AE</annotatorImplementationName>
+    <annotatorImplementationName>edu.utah.bmi.nlp.rush.uima.RuSH_AE</annotatorImplementationName>
     <analysisEngineMetaData>
-        <name>RuSH AE</name>
+        <name>RuSH_AE</name>
         <description>RuSH (Rule-based Segmentation Tool Using Hashing) analysisEngineDescriptor</description>
         <configurationParameters>
             <configurationParameter>
-                <name>RuleFile</name>
+                <name>RuleStr</name>
                 <description>The file contains sentence segmentation rules</description>
                 <type>String</type>
                 <multiValued>false</multiValued>
@@ -72,10 +72,18 @@
                 <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>
+            <configurationParameter>
+                <name>InsideSections</name>
+                <description>The table name to save the text documents.
+                </description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
         </configurationParameters>
         <configurationParameterSettings>
             <nameValuePair>
-                <name>RuleFile</name>
+                <name>RuleStr</name>
                 <value>
                     <string>conf/rush.csv</string>
                 </value>
@@ -108,6 +116,12 @@
                 <name>AutoFixGaps</name>
                 <value>
                     <boolean>true</boolean>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>InsideSections</name>
+                <value>
+                    <string></string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>

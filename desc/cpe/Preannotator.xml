@@ -7,16 +7,28 @@
             </descriptor>
             <configurationParameterSettings>
                 <nameValuePair>
-                    <name>SQLFile</name>
+                    <name>DBConfigFile</name>
                     <value>
-                        <string>data/fever.sqlite</string>
+                        <string>conf/sqliteconfig.xml</string>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>DocTableName</name>
+                    <value>
+                        <string>DOCUMENTS</string>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>DatasetId</name>
+                    <value>
+                        <string>n</string>
                     </value>
                 </nameValuePair>
             </configurationParameterSettings>
         </collectionIterator>
     </collectionReader>
     <casProcessors casPoolSize="2" processingUnitThreadCount="1">
-    <casProcessor deployment="integrated" name="RuSH AE">
+    <casProcessor deployment="integrated" name="RuSH_AE">
         <descriptor>
             <import location="../ae/RuSH_AE.xml"/>
         </descriptor>
@@ -27,6 +39,32 @@
             <timeout max="100000" default="-1"/>
         </errorHandling>
         <checkpoint batch="10000" time="1000ms"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>RuleStr</name>
+                <value>
+                    <string>conf/rush.xlsx</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>SentenceTypeName</name>
+                <value>
+                    <string>Sentence</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>AlterSentenceTypeName</name>
+                <value>
+                    <string>edu.utah.bmi.nlp.type.system.SentenceOdd</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>TokenTypeName</name>
+                <value>
+                    <string>Token</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
     </casProcessor>
     <casProcessor deployment="integrated" name="SQL Writer CasConsumer">
         <descriptor>
@@ -41,6 +79,18 @@
         </errorHandling>
         <checkpoint batch="10000"/>
         <configurationParameterSettings>
+            <nameValuePair>
+                <name>SQLFile</name>
+                <value>
+                    <string>conf/sqliteconfig.xml</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>OverWriteTable</name>
+                <value>
+                    <boolean>true</boolean>
+                </value>
+            </nameValuePair>
             <nameValuePair>
                 <name>WriteConcepts</name>
                 <value>

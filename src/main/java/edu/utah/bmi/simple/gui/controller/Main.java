@@ -23,6 +23,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -140,7 +141,7 @@ public class Main extends Application {
         String conf = "conf/config.xml";
         if (logFile.exists()) {
             try {
-                List<String> lines = FileUtils.readLines(logFile);
+                List<String> lines = FileUtils.readLines(logFile, StandardCharsets.UTF_8);
                 if (lines.size() > 0)
                     conf = lines.get(0);
                 currentTaskName = lines.size() > 1 ? lines.get(1) : "import";
@@ -193,24 +194,22 @@ public class Main extends Application {
                     (changeCount > 1 ? " changes" : " change") + " saved");
         else
             bottomViewController.setMsg("No change is made.");
-        Platform.runLater(new Runnable() {
-            public void run() {
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Choose configuration file: ");
-                File oldParentDir;
-                if (!currentConfigFile.exists())
-                    oldParentDir = new File("./");
-                else {
-                    oldParentDir = currentConfigFile.getParentFile();
-                }
-                if (oldParentDir.exists())
-                    fileChooser.setInitialDirectory(oldParentDir);
-                if (currentConfigFile.exists())
-                    fileChooser.setInitialFileName(currentConfigFile.getName());
-                File file = fileChooser.showOpenDialog(null);
-                if (file != null) {
-                    settingOper.saveConfigs(file);
-                }
+        Platform.runLater(() -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Choose configuration file: ");
+            File oldParentDir;
+            if (!currentConfigFile.exists())
+                oldParentDir = new File("./");
+            else {
+                oldParentDir = currentConfigFile.getParentFile();
+            }
+            if (oldParentDir.exists())
+                fileChooser.setInitialDirectory(oldParentDir);
+            if (currentConfigFile.exists())
+                fileChooser.setInitialFileName(currentConfigFile.getName());
+            File file = fileChooser.showSaveDialog(null);
+            if (file != null) {
+                settingOper.saveConfigs(file);
             }
         });
 

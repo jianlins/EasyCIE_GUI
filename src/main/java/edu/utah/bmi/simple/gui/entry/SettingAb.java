@@ -7,7 +7,7 @@ package edu.utah.bmi.simple.gui.entry;
 public interface SettingAb {
 
 
-    public void init(String settingName, String settingValue, String settingDesc, String doubleClick, boolean openable);
+    public void init(String settingName, String settingValue, String settingDesc, String doubleClick, String openClick);
 
     public String getSettingName();
 
@@ -17,5 +17,5 @@ public interface SettingAb {
 
     public String getDoubleClick();
 
-    public boolean isOpenable();
+    public String getOpenClick();
 }

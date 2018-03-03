@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import org.apache.uima.tools.cpm.MyCpmFrame;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Jianlin Shi
@@ -20,11 +21,11 @@ public class RunCpmFrame extends javafx.concurrent.Task {
     }
 
     @Override
-    protected Object call() throws Exception {
-        Platform.runLater(new Runnable() {
-            public void run() {
-                MyCpmFrame.main(new String[]{cpeDescriptor});
-            }
+    protected Object call() {
+        SwingUtilities.invokeLater(() -> {
+            MyCpmFrame.main(new String[]{cpeDescriptor});
+            Frame[] frames = MyCpmFrame.getFrames();
+            frames[0].setSize(800,600);
         });
         updateMessage("Open UIMA CPE Configurator");
         updateProgress(1, 1);

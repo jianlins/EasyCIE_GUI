@@ -26,40 +26,96 @@
 
 <collectionReaderDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
-    <implementationName>edu.utah.bmi.uima.SQLTextReader</implementationName>
+    <implementationName>edu.utah.bmi.nlp.easycie.reader.SQLTextReader</implementationName>
     <processingResourceMetaData>
-        <name>SQL Text Reader</name>
+        <name>SQL_Text_Reader</name>
         <description>Reads documents from the database.</description>
         <version>1.0</version>
         <vendor>BMI, UofU</vendor>
         <configurationParameters>
             <configurationParameter>
-                <name>SQLFile</name>
-                <description>SQLFile path to read. For SQLite, it will be the path of SQLite file. For MySQL, it will be MySQL configuration file</description>
+                <name>DBConfigFile</name>
+                <description>DB configuration file path </description>
                 <type>String</type>
                 <multiValued>false</multiValued>
                 <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>TableName</name>
+                <name>DocTableName</name>
                 <description>The table name to save the text documents.
                 </description>
                 <type>String</type>
                 <multiValued>false</multiValued>
                 <mandatory>true</mandatory>
             </configurationParameter>
+            <configurationParameter>
+                <name>InputQueryName</name>
+                <description>The name of querying input documents.
+                </description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>CountQueryName</name>
+                <description>The name of querying total number of input documents.
+                </description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>DocColumnName</name>
+                <description>The column name of text in DocTable.
+                </description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>DatasetId</name>
+                <description>The Id of dataset
+                </description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
         </configurationParameters>
         <configurationParameterSettings>
             <nameValuePair>
-                <name>SQLFile</name>
+                <name>DBConfigFile</name>
                 <value>
-                    <string>data/corpus.sqlite</string>
+                    <string>conf/my.sqlite</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>TableName</name>
+                <name>DocTableName</name>
                 <value>
                     <string>corpus</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>InputQueryName</name>
+                <value>
+                    <string>masterInputQuery</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>CountQueryName</name>
+                <value>
+                    <string>masterCountQuery</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>DocColumnName</name>
+                <value>
+                    <string>TEXT</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>DatasetId</name>
+                <value>
+                    <string>0</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
