@@ -84,14 +84,14 @@ public class ViewOutputDB extends GUITask {
                                 "Please check the pipeline configuration to see if the rules are configured correctly, and " +
                                         "if the dataset has been imported successfully.\n" +
                                         "EasyCIE will display all the previous outputs if there is any.");
-                    } else if (annotatorLastRunid.equals(lastLogRunId)) {
+                    } else if (!annotatorLastRunid.equals(lastLogRunId)) {
                         popDialog("Note", "There is no output in the most recent run of annotator:\"" + annotator + "\"," +
-                                        " which RUN_ID=" + lastLogRunId,
+                                        " which RUN_ID=" + annotatorLastRunid,
                                 "Please check the pipeline configuration to see if the rules are configured correctly, and " +
                                         "if the dataset has been imported successfully.\n" +
                                         "Instead, EasyCIE Will display the last run of annotator \"" + annotator + "\" that has some output, which " +
-                                        "RUN_ID=" + annotatorLastRunid);
-                        filter = "annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid;
+                                        "RUN_ID=" + lastLogRunId);
+                        filter = "annotator='" + annotator + "' AND RUN_ID=" + lastLogRunId;
                     } else {
                         filter = "annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid;
                     }
