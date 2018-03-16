@@ -310,6 +310,9 @@
                                 <chmod file="target/deploy/help.bat" perm="755"/>
                                 <chmod file="target/deploy/help" perm="755"/>
                             </target>
+                            <tasks>
+                                <mkdir dir="target/deploy/data"/>
+                            </tasks>
                         </configuration>
                         <goals>
                             <goal>run</goal>
