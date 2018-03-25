@@ -10,8 +10,8 @@
         <!--for packaging without jdk version-->
         <java.path>java</java.path>
         <java.win.path>java</java.win.path>
-        <current.version>2.0.5-SNAPSHOT</current.version>
-        <kotlin.version>1.2.20</kotlin.version>
+        <current.version>2.0.6-SNAPSHOT</current.version>
+        <kotlin.version>1.2.30</kotlin.version>
     </properties>
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
@@ -74,27 +74,27 @@
         <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
             <artifactId>nlp-core</artifactId>
-            <version>1.1</version>
+            <version>1.3.0</version>
         </dependency>
         <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
             <artifactId>rush</artifactId>
-            <version>3.0</version>
+            <version>1.3.0</version>
         </dependency>
         <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
             <artifactId>fastner</artifactId>
-            <version>1.0.2</version>
+            <version>1.3.0</version>
         </dependency>
         <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
             <artifactId>fastcontext</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>1.3.0</version>
         </dependency>
         <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
             <artifactId>section-detector-r</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.3.0</version>
         </dependency>
         <dependency>
             <groupId>edu.utah.bmi.blulab</groupId>
@@ -138,6 +138,16 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jre8</artifactId>
             <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.9.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.pojava</groupId>
+            <artifactId>org.pojava.datetime</artifactId>
+            <version>3.0.0</version>
         </dependency>
     </dependencies>
     <build>

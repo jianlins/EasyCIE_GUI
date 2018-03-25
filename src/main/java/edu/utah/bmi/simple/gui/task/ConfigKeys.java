@@ -25,10 +25,17 @@ public class ConfigKeys {
     public static final String tRuleFile = "pipeLineSetting/tRule";
     public static final String cRuleFile = "pipeLineSetting/cRule";
     public static final String includesections = "pipeLineSetting/includesections";
+    public static final String excludesections = "pipeLineSetting/excludesections";
 
     public static final String contextRule = "pipeLineSetting/contextRule";
     public static final String reportPreannotating = "pipeLineSetting/report";
     public static final String fastNerCaseSensitive = "pipeLineSetting/fastNERCaseSensitive";
+    public static final String forceAssignSection = "pipeLineSetting/forceAssignSection";
+
+    public static final String dateRule = "pipeLineSetting/dateRule";
+    public static final String dayInterval = "pipeLineSetting/dayInterval";
+    public static final String inferAllTemporal = "pipeLineSetting/inferAllTemporal";
+
     public static final String featureInfRule = "pipeLineSetting/featureInfRule";
     public static final String docInfRule = "pipeLineSetting/docInfRule";
     public static final String featureMergerRule = "pipeLineSetting/featureMergerRule";
@@ -84,8 +91,10 @@ public class ConfigKeys {
     public static final String cNERType = "log/cNERType";
     public static final String tNERType = "log/tNERType";
     public static final String contextType = "log/contextType";
+    public static final String dateType = "log/dateType";
     public static final String featureInfType = "log/featureInfType";
     public static final String docInfType = "log/docInfType";
+    public static final String metaStr = "log/metaStr";
 
 
     public static String getRelativePath(String basePath, String file) {
@@ -101,3 +110,4 @@ public class ConfigKeys {
         return getRelativePath(mainBasePath, file);
     }
 }
+

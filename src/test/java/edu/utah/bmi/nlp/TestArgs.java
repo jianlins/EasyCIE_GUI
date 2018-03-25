@@ -62,14 +62,14 @@ public class TestArgs {
 
     @Test
     public void testOSCommandParse() throws Exception {
-        String args = "edu.utah.bmi.simple.gui.task.ExecuteOsCommand -x export/ehost";
+        String args = "edu.utah.bmi.simple.gui.guitask.ExecuteOsCommand -x export/ehost";
         String[] argsArray = args.split("(\"*\\s+\"*|^\"|\"$)");
 
         for (String ele : argsArray) {
             System.out.println(ele);
         }
 
-        args = "edu.utah.bmi.simple.gui.task.ExecuteOsCommand -x \"export/ ehost\"";
+        args = "edu.utah.bmi.simple.gui.guitask.ExecuteOsCommand -x \"export/ ehost\"";
 //        String myArgs[] = Commandline.translateCommandline("-a hello -b world -c \"Hello world\"");
         String[] myArgs = CommandLineUtils.translateCommandline("-a hello -b world -c \"Hello world\"");
         argsArray = args.split("(\"*\\s+\"*|^\"|\"$)");

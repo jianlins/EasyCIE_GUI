@@ -71,7 +71,7 @@
       <docInfType memo="display types of DocInferencer output">Doc_Base</docInfType> 
     </log>  
     <executes> 
-      <RunEasyCIEDebugger memo="Debug using string input">edu.utah.bmi.simple.gui.task.RunDebugPipe</RunEasyCIEDebugger> 
+      <RunEasyCIEDebugger memo="Debug using string input">edu.utah.bmi.simple.gui.task.DebugPipe</RunEasyCIEDebugger>
     </executes> 
   </debug>  
   <export> 

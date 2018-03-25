@@ -17,10 +17,9 @@
 
 <typeSystemDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <name/>
-    <description>Derive from TestStanfordCoreNLPUIMAWrapper-typeSystemDescriptor
-        including token sentence dependency types.
+    <description>Type system for Fast Named Enity Recognition (FastNER).
     </description>
-    <version>1.0</version>
+    <version>1.3.0</version>
     <vendor/>
     <types>
         <typeDescription>
@@ -112,6 +111,13 @@
         <typeDescription>
             <name>edu.utah.bmi.nlp.type.system.PseudoConcept</name>
             <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.ConceptBASE</supertypeName>
+            <features></features>
+        </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.OutsideScopeConcept</name>
+            <description>Concept that outside the defined scope, if there is any, e.g. outside the PLAN section.
+            </description>
             <supertypeName>edu.utah.bmi.nlp.type.system.ConceptBASE</supertypeName>
             <features></features>
         </typeDescription>

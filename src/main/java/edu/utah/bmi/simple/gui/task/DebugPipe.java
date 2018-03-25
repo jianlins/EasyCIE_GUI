@@ -11,6 +11,7 @@ import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
 import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.type.system.Doc_Base;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
+import edu.utah.bmi.nlp.uima.TemporalContext_AE_General;
 import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
@@ -20,7 +21,6 @@ import edu.utah.bmi.simple.gui.controller.GUILogger;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
-import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -29,31 +29,41 @@ import java.io.IOException;
 /**
  * Created by Jianlin Shi on 9/19/16.
  */
-public class RunDBDebugPipe extends RunEasyCIE {
+public class DebugPipe extends RunEasyCIE {
 
     protected TasksFX tasks;
-    protected String sectionType, rushType, cNERType, tNERType, contextType, featureInfType, mergedType, docInfType;
+    protected String sectionType, rushType, cNERType, tNERType, contextType, dateType, featureInfType, mergedType, docInfType, metaStr;
     protected String inputStr = "";
+    protected boolean fastNerCaseSensitive;
+    public static final String exportXmiFile = "snippet_test.txt";
     public static String exportDir;
-    public GUITask task;
+    public GUITask guitask;
 
+    public DebugPipe() {
 
-    public RunDBDebugPipe(TasksFX tasks, GUITask guiTask) {
+    }
+
+    public DebugPipe(TasksFX tasks, GUITask guiTask) {
         this.tasks = tasks;
-        this.task = guiTask;
+        this.guitask = guiTask;
         readDebugConfigs(tasks);
         initiate(tasks, "db");
     }
 
 
     protected void initUIMALogger() {
-        uimaLogger = new GUILogger(this.task, "target/generated-test-sources",
+        uimaLogger = new GUILogger(guitask, "target/generated-test-sources",
                 "desc/type/pipeline_" + annotator);
         if (this.tasks.getTask("debug").getValue("log/ShowUimaViewer").toLowerCase().startsWith("t"))
-            uimaLogger.setUIMAViewer(true);
-        else
-            uimaLogger.setUIMAViewer(false);
+            ((GUILogger) uimaLogger).setUIMAViewer(true);
         uimaLogger.logStartTime();
+    }
+
+    public DebugPipe(TasksFX tasks, String paras) {
+        if (paras == null || paras.length() == 0)
+            initiate(tasks, "db");
+        readDebugConfigs(tasks);
+        initiate(tasks, paras);
     }
 
     private void readDebugConfigs(TasksFX tasks) {
@@ -63,8 +73,12 @@ public class RunDBDebugPipe extends RunEasyCIE {
         cNERType = debugConfig.getValue(ConfigKeys.cNERType).trim();
         tNERType = debugConfig.getValue(ConfigKeys.tNERType).trim();
         contextType = debugConfig.getValue(ConfigKeys.contextType).trim();
+        dateType = debugConfig.getValue(ConfigKeys.dateType).trim();
         featureInfType = debugConfig.getValue(ConfigKeys.featureInfType).trim();
         docInfType = debugConfig.getValue(ConfigKeys.docInfType).trim();
+        metaStr = debugConfig.getValue(ConfigKeys.metaStr).trim();
+        if (metaStr.trim().length() == 0)
+            metaStr = "DOC_ID,-1|DATASETID,-1|DOC_NAME,debug.dco|DATE,2108-01-01 00:00:00";
         exportDir = "target/generated-test-sources";
 
         exporttypes = rushType + (cNERType.length() > 0 ? "," + cNERType : "")
@@ -76,20 +90,6 @@ public class RunDBDebugPipe extends RunEasyCIE {
     }
 
 
-    @Override
-    protected Object call() throws Exception {
-        AnnotationLogger.reset();
-        if (guiEnabled)
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    runner.run();
-                }
-            });
-        return null;
-    }
-
-
     public void execute() {
         AnnotationLogger.reset();
         runner.run();
@@ -97,14 +97,14 @@ public class RunDBDebugPipe extends RunEasyCIE {
 
     public void addReader(String inputStr) {
         this.inputStr = inputStr;
-        addReader();
+        addReader(inputStr, "DOC_ID,-1|DATASETID,-1|DOC_NAME,debug.dco");
     }
 
-    public void addReader() {
+    public void addReader(String inputStr, String metaStr) {
         UpdateMessage("Add String reader...");
         if (!inputStr.endsWith(".xml"))
             runner.setCollectionReader(StringMetaReader.class, new Object[]{StringMetaReader.PARAM_INPUT, inputStr,
-                    StringMetaReader.PARAM_META, "DOC_ID,-1|DATASETID,-1|DOC_NAME,debug.dco"});
+                    StringMetaReader.PARAM_META, metaStr});
     }
 
 
@@ -280,7 +280,7 @@ public class RunDBDebugPipe extends RunEasyCIE {
 
         if (fastNERRule.length() > 0) {
             runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_FILE_OR_STR, fastNERRule,
-                    FastNER_AE_General.PARAM_CASE_SENSITIVE, false,
+                    FastNER_AE_General.PARAM_CASE_SENSITIVE, false, FastNER_AE_General.PARAM_CASE_SENSITIVE, fastNERCaseSensitive,
                     FastNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections,
                     FastNER_AE_General.PARAM_MARK_PSEUDO, true});
             if (tNERType.length() > 0) {
@@ -319,9 +319,31 @@ public class RunDBDebugPipe extends RunEasyCIE {
             }
         }
 
+        if (dateRule.length() > 0) {
+            logger.info("add engine TemporalContext_AE_General");
+            runner.addAnalysisEngine(TemporalContext_AE_General.class, new Object[]{
+                    TemporalContext_AE_General.PARAM_RULE_FILE_OR_STR, dateRule,
+                    TemporalContext_AE_General.PARAM_MARK_PSEUDO, false,
+                    TemporalContext_AE_General.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
+                    TemporalContext_AE_General.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
+                    TemporalContext_AE_General.PARAM_INFER_ALL, inferAllTemporal,
+                    TemporalContext_AE_General.PARAM_INTERVAL_DAYS, dayInterval,});
+            if (dateType.length() > 0) {
+                if (guiEnabled)
+                    runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
+                            AnnotationLogger.PARAM_INDICATION_HEADER, "TemporalContext_AE",
+                            AnnotationLogger.PARAM_TYPE_NAMES, dateType,
+                            AnnotationLogger.PARAM_INDICATION,
+                            "After being processed by TemporalContext_AE:"});
+                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+                        DeterminantValueSet.defaultNameSpace + "Concept",
+                        AnnotationPrinter.PARAM_INDICATION, "After TemporalContext_AE\n"});
+            }
+        }
+
         if (featureInfRule.length() > 0) {
             runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_INFERENCE_STR, featureInfRule});
-            if (contextType.length() > 0) {
+            if (featureInfType.length() > 0) {
                 if (guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                             AnnotationLogger.PARAM_INDICATION_HEADER, "FeatureInferenceAnnotator",
@@ -335,7 +357,7 @@ public class RunDBDebugPipe extends RunEasyCIE {
         }
         if (docInfRule.length() > 0) {
             runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_INFERENCE_STR, docInfRule});
-            if (contextType.length() > 0) {
+            if (docInfType.length() > 0) {
                 if (guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                             AnnotationLogger.PARAM_INDICATION_HEADER, "DocInferenceAnnotator",
@@ -350,6 +372,6 @@ public class RunDBDebugPipe extends RunEasyCIE {
     }
 
     protected void UpdateMessage(String msg) {
-        updateGUIMessage(msg);
+        uimaLogger.logString(msg);
     }
 }

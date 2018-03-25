@@ -11,25 +11,27 @@ import javafx.application.Platform;
 import java.io.File;
 
 /**
- * This task support two type of input settings,
+ * This guitask support two type of input settings,
  * <p>
  * log/docId  will take the configuration value as DOC_ID and try to find a matched document for processing
  * log/docName will take the configuration value as DOC_NAME and try to find a matched document for processing
  *
  * @author Jianlin Shi on 9/19/16.
  */
-public class RunDocDebugger extends GUITask {
+public class RunDBDebugger extends GUITask {
 
     //    protected String rushType, cNERType, tNERType, contextType, featureInfType, docInfType, inputStr;
 //    private TasksFX tasks;
-    protected String inputStr, annotator, inputTableName;
+    protected String  annotator, inputTableName;
     //    protected boolean fastNerCaseSensitive;
-    protected RunDBDebugPipe debugRunner;
+    protected DebugPipe debugRunner;
     protected DAO dao;
     protected TaskFX thisTask;
+    protected TasksFX tasks;
+    protected GUITask guiTask;
 
 
-    public RunDocDebugger(TasksFX tasks) {
+    public RunDBDebugger(TasksFX tasks) {
         initiate(tasks);
     }
 
@@ -40,13 +42,14 @@ public class RunDocDebugger extends GUITask {
         }
         updateGUIMessage("Initiate configurations..");
 
-        debugRunner = new RunDBDebugPipe(tasks, this);
+
         TaskFX settings = tasks.getTask("settings");
         String dbconfig = settings.getValue(ConfigKeys.readDBConfigFile);
         inputTableName = settings.getValue(ConfigKeys.inputTableName);
         dao = new DAO(new File(dbconfig));
         thisTask = tasks.getTask("dbdebug");
-
+        this.tasks = tasks;
+        guiTask = this;
     }
 
     @Override
@@ -55,6 +58,7 @@ public class RunDocDebugger extends GUITask {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
+
                     String input = thisTask.getValue("log/docId");
                     String type = "DOC_ID";
                     if (input.length() == 0) {
@@ -63,21 +67,24 @@ public class RunDocDebugger extends GUITask {
                     }
                     RecordRow record;
                     if (type.equals("DOC_ID")) {
-                        record = dao.queryRecord("SELECT TEXT  FROM " + inputTableName + " WHERE " + type + "=" + input + ";");
+                        record = dao.queryRecord("SELECT *  FROM " + inputTableName + " WHERE " + type + "=" + input + ";");
                     } else {
-                        record = dao.queryRecord("SELECT TEXT  FROM " + inputTableName + " WHERE " + type + "='" + input + "';");
+                        record = dao.queryRecord("SELECT *  FROM " + inputTableName + " WHERE " + type + "='" + input + "';");
                     }
                     if (record == null) {
                         System.out.println("No record found in table " + inputTableName + ", where " + type + "=" + input);
                         return;
                     }
 
-                    inputStr = record.getStrByColumnName("TEXT");
+                    String inputStr = record.getStrByColumnName("TEXT");
+                    String metaStr = record.serialize("TEXT");
+
                     if (inputStr.trim().length() > 0) {
-                        debugRunner.addReader(inputStr);
+                        debugRunner = new DebugPipe(tasks, guiTask);
+                        debugRunner.addReader(inputStr,metaStr);
 //                        initiate(tasks, "xmi");
                         updateGUIMessage("Execute pipeline...");
-                        debugRunner.run();
+                        new Thread(() -> debugRunner.run()).start();
                     } else {
                         updateGUIMessage("No string entered.");
                         updateGUIProgress(1, 1);

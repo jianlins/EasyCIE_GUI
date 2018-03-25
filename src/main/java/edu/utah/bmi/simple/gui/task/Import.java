@@ -13,9 +13,14 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.util.*;
+
+import org.apache.commons.io.comparator.NameFileComparator;
+import org.joda.time.DateTime;
+
 
 /**
  * Created by Jianlin Shi on 9/23/16.
@@ -147,7 +152,7 @@ public class Import extends GUITask {
         for (File file : files) {
             updateGUIProgress(counter, total);
             counter++;
-            String content = FileUtils.readFileToString(file);
+            String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             ArrayList<RecordRow> records = new ArrayList<>();
             records.add(new RecordRow("txt", "", content, 0, content.length(), 0, "", "", file.getName(), ""));
             dao.insertRecords(outputTable, records);
@@ -166,28 +171,52 @@ public class Import extends GUITask {
             filters = null;
         else
             filters = includeTypes.split(",");
+
         Collection<File> files = FileUtils.listFiles(inputDir, filters, true);
+        File[] fileArray = new File[files.size()];
+        files.toArray(fileArray);
+        Arrays.sort(fileArray, NameFileComparator.NAME_COMPARATOR);
         if (print)
             System.out.println("Reading files from: " + inputDir.getAbsolutePath() +
                     "\nImporting into table: " + tableName);
         int total = files.size();
         int counter = 0;
-        for (File file : files) {
+        Boolean n2c2Data = false;
+        for (File file : fileArray) {
             if (print)
                 System.out.print("Import: " + file.getName() + "\t\t");
-            String content = FileUtils.readFileToString(file);
+            String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             ArrayList<RecordRow> records = new ArrayList<>();
-            records.add(new RecordRow().addCell("DATASET_ID", datasetId)
+            RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
                     .addCell("DOC_NAME", file.getName())
-                    .addCell("TEXT", content));
+                    .addCell("TEXT", content);
+
+//          specifically deal with n2c2 data
+            if (content.startsWith("Record date:")) {
+                n2c2Data = true;
+                String date = content.substring(12, content.indexOf("\n")).trim();
+                recordRow.addCell("DATE", date + " 00:00:00");
+                recordRow.addCell("BUNCH_ID", file.getName().substring(0, file.getName().indexOf("_")));
+            }
+            records.add(recordRow);
             dao.insertRecords(tableName, records);
             if (print)
                 System.out.println("success");
             updateGUIProgress(counter, total);
             counter++;
         }
+        if (n2c2Data) {
+            try {
+                dao.stmt.execute("UPDATE SAMPLES SET REF_DATE = (SELECT MAX(\"DATE\") FROM SAMPLES T2 WHERE T2.BUNCH_ID = SAMPLES.BUNCH_ID);");
+                dao.con.commit();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
         System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
     }
+
 
     protected void importEhost(File inputDir, String datasetId, String annotator, String tableName,
                                String rush, String includeTypes, boolean overWrite) {

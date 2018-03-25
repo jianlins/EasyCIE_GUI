@@ -34,7 +34,7 @@ public class ExecuteOsCommand extends javafx.concurrent.Task {
 
     /**
      * Use argument in the format of '-x taskName/configKey', can read values from EasyCIE configurations
-     * For example: "gov.va.ehost.Ehost -x export/format/ehost" will read the configuration value of "format/ehost" from the "export" task,
+     * For example: "gov.va.ehost.Ehost -x export/format/ehost" will read the configuration value of "format/ehost" from the "export" guitask,
      * and replace the "-x export/format/ehost" with the actual value as the argument to execute "gov.va.ehost.Ehost"
      *
      * @param tasks configuration tasks
