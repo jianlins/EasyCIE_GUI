@@ -55,9 +55,10 @@ public class Import extends GUITask {
         String annotationDir = config.getValue(ConfigKeys.annotationDir);
         String includeAnnotationTypes = config.getValue(ConfigKeys.includeAnnotationTypes);
         overWriteAnnotatorName = config.getValue(ConfigKeys.overWriteAnnotatorName);
-        boolean enableSentenceSeg = config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 't'
+        String enableSentenceSegValue = config.getValue(ConfigKeys.enableSentenceSnippet);
+        boolean enableSentenceSeg = enableSentenceSegValue.length() > 0 ? (config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 't'
                 || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 'T'
-                || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == '1';
+                || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == '1') : false;
 
 
         if (importType.equals(ConfigKeys.paraTxtType)) {
