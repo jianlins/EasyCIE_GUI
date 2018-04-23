@@ -1,7 +1,6 @@
 package edu.utah.bmi.simple.gui.task;
 
 
-import com.sun.javafx.application.PlatformImpl;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
@@ -18,18 +17,20 @@ import java.io.File;
 public class ViewImportDB extends GUITask {
     protected String SQLFile, corpusTable;
     protected String importType;
+    protected TasksFX tasks;
     public ViewImportDB(TasksFX tasks, String importType) {
         initiate(tasks, importType);
     }
 
     private void initiate(TasksFX tasks, String importType) {
+        this.tasks=tasks;
         this.importType = importType;
         if (Platform.isAccessibilityActive()) {
             updateGUIMessage("Initiate configurations..");
 
         }
         TaskFX config = tasks.getTask("settings");
-        SQLFile = config.getValue(ConfigKeys.readDBConfigFile);
+        SQLFile = config.getValue(ConfigKeys.readDBConfigFileName);
         if (importType.equals("doc"))
             corpusTable = config.getValue(ConfigKeys.inputTableName);
         else
@@ -58,8 +59,15 @@ public class ViewImportDB extends GUITask {
                 }
                 if (importType.equals("doc"))
                     res = TasksOverviewController.currentTasksOverviewController.showDocTable(SQLFile, corpusTable, "", "output");
-                else
-                    res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(SQLFile, corpusTable, "", "output");
+                else {
+                    ViewOutputDB viewer=new ViewOutputDB(tasks);
+                    viewer.snippetResultTable=corpusTable;
+                    viewer.viewQueryName="Snippet";
+                    viewer.annotator="";
+                    viewer.joinDocTable=false;
+                    TasksOverviewController.currentTasksOverviewController.sqlFilter.setText("");
+                    viewer.run();
+                }
                 if (res)
                     updateGUIMessage("data loaded");
                 else

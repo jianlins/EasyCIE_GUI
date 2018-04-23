@@ -44,7 +44,7 @@ public class RunDBDebugger extends GUITask {
 
 
         TaskFX settings = tasks.getTask("settings");
-        String dbconfig = settings.getValue(ConfigKeys.readDBConfigFile);
+        String dbconfig = settings.getValue(ConfigKeys.readDBConfigFileName);
         inputTableName = settings.getValue(ConfigKeys.inputTableName);
         dao = new DAO(new File(dbconfig));
         thisTask = tasks.getTask("dbdebug");

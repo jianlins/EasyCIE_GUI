@@ -43,8 +43,8 @@ public class Export2Excel extends GUITask {
         }
         updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
-        outputDB = config.getValue(ConfigKeys.writeConfigFileName);
-        outputTable = config.getValue(ConfigKeys.outputTableName);
+        outputDB = config.getValue(ConfigKeys.writeDBConfigFileName);
+        outputTable = config.getValue(ConfigKeys.snippetResultTableName);
         config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
 

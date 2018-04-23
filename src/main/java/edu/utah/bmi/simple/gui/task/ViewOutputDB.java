@@ -17,7 +17,12 @@ import java.io.File;
  * Created on 2/13/17.
  */
 public class ViewOutputDB extends GUITask {
-    protected String outputDB, outputTable, annotator;
+    protected String outputDB, readDBConfigFileName, writeConfigFileName, viewQueryName;
+    protected String snippetResultTable, inputTable, docResultTable, bunchResultTable, annotator;
+    private DAO dao;
+    public boolean joinDocTable = true;
+    private String sourceQuery;
+    private String primeTable = "RS";
 
     protected ViewOutputDB() {
 
@@ -34,25 +39,55 @@ public class ViewOutputDB extends GUITask {
     protected void initiate(TasksFX tasks, String... paras) {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
-        outputDB = config.getValue(ConfigKeys.writeConfigFileName);
-        outputTable = config.getValue(ConfigKeys.outputTableName);
+        inputTable = config.getValue(ConfigKeys.inputTableName);
+        outputDB = config.getValue(ConfigKeys.writeDBConfigFileName);
+        snippetResultTable = config.getValue(ConfigKeys.snippetResultTableName);
+        docResultTable = config.getValue(ConfigKeys.docResultTableName);
+        bunchResultTable = config.getValue(ConfigKeys.bunchResultTableName);
+        readDBConfigFileName = config.getValue(ConfigKeys.readDBConfigFileName);
+        writeConfigFileName = config.getValue(ConfigKeys.writeDBConfigFileName);
+        if (!readDBConfigFileName.equals(writeConfigFileName))
+            joinDocTable = false;
         config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
-        if (paras != null)
-            switch (paras.length) {
-                case 1:
-                    annotator = paras[0];
-                    break;
-                case 2:
-                    outputTable = paras[0];
-                    annotator = paras[1];
-                    break;
-                case 3:
-                    outputDB = paras[0];
-                    outputTable = paras[1];
-                    annotator = paras[2];
-                    break;
+        viewQueryName = config.getValue(ConfigKeys.viewQueryName);
+        if (dao == null) {
+            dao = new DAO(new File(readDBConfigFileName));
+            dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetResultTable, false);
+            dao.initiateTableFromTemplate("ANNOTATION_TABLE", docResultTable, false);
+            dao.initiateTableFromTemplate("ANNOTATION_TABLE", bunchResultTable, false);
+        }
+
+    }
+
+    public String buildQuery(String queryName) {
+        String sourceQuery;
+        queryName = "query" + queryName + "Annos";
+        if (joinDocTable)
+            queryName = queryName + "WSource";
+        if (queryName.toLowerCase().indexOf("bunch") != -1) {
+            primeTable = "RB";
+        } else if (queryName.toLowerCase().indexOf("doc") != -1) {
+            primeTable = "RD";
+        }
+        sourceQuery = dao.queries.get(queryName);
+        sourceQuery = sourceQuery.replaceAll("\\{tableName}", snippetResultTable)
+                .replaceAll("\\{docResultTable}", docResultTable)
+                .replaceAll("\\{bunchResultTable}", bunchResultTable)
+                .replaceAll("\\{inputTable}", inputTable);
+        return sourceQuery;
+    }
+
+    public String modifyQuery(String sourceQuery, String conditions) {
+        if (conditions.length() > 0) {
+            int limitPos = conditions.toLowerCase().indexOf(" limit ");
+            if (limitPos > 0) {
+                sourceQuery = sourceQuery + " WHERE ( " + conditions.substring(0, limitPos) + " ) " + conditions.substring(limitPos);
+            } else {
+                sourceQuery = sourceQuery + " WHERE ( " + conditions + " ) ";
             }
+        }
+        return sourceQuery;
     }
 
 
@@ -68,36 +103,60 @@ public class ViewOutputDB extends GUITask {
                 // Update UI here.
                 boolean res = false;
                 String filter = "";
+                sourceQuery = buildQuery(viewQueryName);
                 if (annotator.trim().length() > 0) {
                     DAO dao = new DAO(new File(outputDB));
-                    if (!dao.checkTableExits(outputTable)) {
-                        updateMessage("Table '" + outputTable + "' does not exit.");
-                        popDialog("Note", "Table '" + outputTable + "' does not exit.",
+                    if (!dao.checkTableExits(snippetResultTable)) {
+                        updateMessage("Table '" + snippetResultTable + "' does not exit.");
+                        popDialog("Note", "Table '" + snippetResultTable + "' does not exit.",
                                 " You need to execute 'RunEasyCIE' first.");
                         updateProgress(0, 0);
                         return;
                     }
-                    String annotatorLastRunid = getLastRunIdofAnnotator(dao, outputTable, annotator);
+                    String annotatorLastRunid = getLastRunIdofAnnotator(dao, snippetResultTable, annotator);
                     String lastLogRunId = getLastLogRunId(dao, annotator);
                     if (annotatorLastRunid.equals("-1")) {
                         popDialog("Note", "There is no output in the previous runs of the annotator: \"" + annotator + "\"",
                                 "Please check the pipeline configuration to see if the rules are configured correctly, and " +
                                         "if the dataset has been imported successfully.\n" +
                                         "EasyCIE will display all the previous outputs if there is any.");
-                    } else if (!annotatorLastRunid.equals(lastLogRunId)) {
-                        popDialog("Note", "There is no output in the most recent run of annotator:\"" + annotator + "\"," +
-                                        " which RUN_ID=" + annotatorLastRunid,
-                                "Please check the pipeline configuration to see if the rules are configured correctly, and " +
-                                        "if the dataset has been imported successfully.\n" +
-                                        "Instead, EasyCIE Will display the last run of annotator \"" + annotator + "\" that has some output, which " +
-                                        "RUN_ID=" + lastLogRunId);
-                        filter = "annotator='" + annotator + "' AND RUN_ID=" + lastLogRunId;
                     } else {
-                        filter = "annotator='" + annotator + "' AND RUN_ID=" + annotatorLastRunid;
+                        String runId;
+                        if (!annotatorLastRunid.equals(lastLogRunId)) {
+                            popDialog("Note", "There is no output in the most recent run of annotator:\"" + annotator + "\"," +
+                                            " which RUN_ID=" + annotatorLastRunid,
+                                    "Please check the pipeline configuration to see if the rules are configured correctly, and " +
+                                            "if the dataset has been imported successfully.\n" +
+                                            "Instead, EasyCIE Will display the last run of annotator \"" + annotator + "\" that has some output, which " +
+                                            "RUN_ID=" + lastLogRunId);
+                            runId = lastLogRunId;
+                        } else {
+                            runId = annotatorLastRunid;
+                            filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId;
+                            switch (primeTable) {
+                                case "RB":
+                                    filter = filter + " AND RD.RUN_ID=" + runId + " AND (RS.RUN_ID=" + runId + " OR RS.RUN_ID IS NULL)";
+                                    break;
+                                case "RD":
+                                    filter = filter + " AND (RS.RUN_ID=" + annotatorLastRunid + " OR RS.RUN_ID IS NULL)";
+                                    break;
+                            }
+                        }
                     }
 
                 }
-                res = TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, outputTable, filter, ColorAnnotationCell.colorOutput);
+                String otherConditions = TasksOverviewController.currentTasksOverviewController.sqlFilter.getText().trim();
+                if (otherConditions.length() == 0) {
+                    TasksOverviewController.currentTasksOverviewController.sqlFilter.setText(filter);
+                    otherConditions = filter;
+                }
+                if (otherConditions.length() > 0) {
+                    sourceQuery = modifyQuery(sourceQuery, otherConditions);
+                }
+
+                RecordRowIterator recordIterator = dao.queryRecords(sourceQuery);
+                TasksOverviewController.currentTasksOverviewController.doctable = false;
+                res = TasksOverviewController.currentTasksOverviewController.showDBTable(recordIterator, ColorAnnotationCell.colorOutput);
                 if (res)
                     updateMessage("data loaded");
                 else
@@ -114,9 +173,9 @@ public class ViewOutputDB extends GUITask {
         if (recordRowIter.hasNext()) {
             RecordRow recordRow = recordRowIter.next();
             if (recordRow != null) {
-                Object value=recordRow.getValueByColumnId(1);
-                if(value!=null){
-                    id=value+"";
+                Object value = recordRow.getValueByColumnId(1);
+                if (value != null) {
+                    id = value + "";
                 }
             }
         }

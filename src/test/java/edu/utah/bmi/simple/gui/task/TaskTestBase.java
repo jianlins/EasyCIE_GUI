@@ -5,7 +5,6 @@ import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.simple.gui.core.SettingOper;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -27,8 +26,8 @@ public class TaskTestBase {
     public static void init() {
         SettingOper settingOper = new SettingOper("conf/demo.xml");
         tasks = settingOper.readSettings();
-        tasks.getTask("settings").setValue(ConfigKeys.readDBConfigFile, dbConfig);
-        tasks.getTask("settings").setValue(ConfigKeys.writeConfigFileName, dbConfig);
+        tasks.getTask("settings").setValue(ConfigKeys.readDBConfigFileName, dbConfig);
+        tasks.getTask("settings").setValue(ConfigKeys.writeDBConfigFileName, dbConfig);
         dao = new DAO(new File(dbConfig), true, false);
     }
 

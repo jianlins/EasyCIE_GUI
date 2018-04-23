@@ -4,20 +4,16 @@ import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.simple.gui.core.ExcelExporter;
 import edu.utah.bmi.simple.gui.core.ExcelExporter2;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 
 /**
  * @author Jianlin Shi
@@ -45,8 +41,8 @@ public class Export2Excel2 extends GUITask {
 
         updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
-        outputDB = config.getValue(ConfigKeys.writeConfigFileName);
-        outputTable = config.getValue(ConfigKeys.outputTableName);
+        outputDB = config.getValue(ConfigKeys.writeDBConfigFileName);
+        outputTable = config.getValue(ConfigKeys.snippetResultTableName);
 
         config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);

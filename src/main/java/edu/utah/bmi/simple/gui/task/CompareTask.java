@@ -59,15 +59,15 @@ public class CompareTask extends GUITask {
 
 
         TaskFX settingConfig = tasks.getTask("settings");
-        String outputDB = settingConfig.getValue(ConfigKeys.writeConfigFileName);
-        outputTable = settingConfig.getValue(ConfigKeys.outputTableName);
+        String outputDB = settingConfig.getValue(ConfigKeys.writeDBConfigFileName);
+        outputTable = settingConfig.getValue(ConfigKeys.snippetResultTableName);
         if (compareReferenceTable.trim().length() == 0)
             compareReferenceTable = outputTable;
 
         diffTable = settingConfig.getValue(ConfigKeys.compareTable).trim();
 
 
-        String importDB = settingConfig.getValue(ConfigKeys.readDBConfigFile);
+        String importDB = settingConfig.getValue(ConfigKeys.readDBConfigFileName);
         String goldReferenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
 
         wdao = new DAO(new File(outputDB));

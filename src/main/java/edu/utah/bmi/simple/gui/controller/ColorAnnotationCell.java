@@ -41,43 +41,45 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
 
     private void addText(RecordRow recordRow) {
         String sentence = (String) recordRow.getValueByColumnName("SNIPPET");
+        if (sentence != null) {
 
-        String pre, marker, post;
-        if (recordRow.getValueByColumnName("BEGIN") != null) {
-            sentence = sentence.replaceAll("\\n", " ");
-            int sentenceLength = sentence.length();
-            int begin = Integer.parseInt(recordRow.getValueByColumnName("BEGIN") + "");
-            begin = begin < 0 ? 0 : begin;
-            int end = Integer.parseInt(recordRow.getValueByColumnName("END") + "");
-            end = end < 0 ? 0 : end;
-            maxTxtWindow = (snippetLength - (end - begin)) / 2;
-            maxTxtWindow = maxTxtWindow < 0 ? 0 : maxTxtWindow;
-            hbox.setPrefWidth(snippetLength + 20);
-            int postCut = cutTail(sentence, begin, end);
-            int preCut = cutHeader(postCut, begin, end);
-            if (preCut > 3 && preCut < begin)
-                pre = "..." + sentence.substring(preCut + 3, begin);
-            else
-                pre = sentence.substring(preCut, begin);
+            String pre, marker, post;
+            if (recordRow.getValueByColumnName("TEXT") != null) {
+                sentence = sentence.replaceAll("\\n", " ");
+                int sentenceLength = sentence.length();
+                int begin = Integer.parseInt(recordRow.getValueByColumnName("BEGIN") + "");
+                begin = begin < 0 ? 0 : begin;
+                int end = Integer.parseInt(recordRow.getValueByColumnName("END") + "");
+                end = end < 0 ? 0 : end;
+                maxTxtWindow = (snippetLength - (end - begin)) / 2;
+                maxTxtWindow = maxTxtWindow < 0 ? 0 : maxTxtWindow;
+                hbox.setPrefWidth(snippetLength + 20);
+                int postCut = cutTail(sentence, begin, end);
+                int preCut = cutHeader(postCut, begin, end);
+                if (preCut > 3 && preCut < begin)
+                    pre = "..." + sentence.substring(preCut + 3, begin);
+                else
+                    pre = sentence.substring(preCut, begin);
 
-            marker = sentence.substring(begin, end);
-            if (postCut > 3 + end && postCut < sentenceLength)
-                post = sentence.substring(end, postCut - 3) + "...";
-            else
-                post = sentence.substring(end, postCut);
-        } else {
-            if (sentence.length() > snippetLength) {
-                sentence = sentence.substring(0, snippetLength) + "...";
+                marker = sentence.substring(begin, end);
+                if (postCut > 3 + end && postCut < sentenceLength)
+                    post = sentence.substring(end, postCut - 3) + "...";
+                else
+                    post = sentence.substring(end, postCut);
+            } else {
+                if (sentence.length() > snippetLength) {
+                    sentence = sentence.substring(0, snippetLength) + "...";
+                }
+                pre = sentence;
+                marker = "";
+                post = "";
             }
-            pre = sentence;
-            marker = "";
-            post = "";
+            String color = pickColor(recordRow, colorDifferential);
+            pre = pre.replaceAll("[\\s|\\n]", " ");
+            marker = marker.replaceAll("[\\s|\\n]", " ");
+            post = post.replaceAll("[\\s|\\n]", " ");
+            renderHighlighter(pre, marker, post, color);
         }
-        String color = pickColor(recordRow, colorDifferential);
-        pre = pre.replaceAll("[\\s|\\n]", " ");
-        marker = marker.replaceAll("[\\s|\\n]", " ");
-        post = post.replaceAll("[\\s|\\n]", " ");
-        renderHighlighter(pre, marker, post, color);
     }
 
     public static String pickColor(RecordRow RecordRow, String differential) {

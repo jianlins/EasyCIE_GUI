@@ -29,7 +29,7 @@ public class ViewDiffDB extends GUITask {
         annotatorCompare = config.getValue(ConfigKeys.targetAnnotator);
         annotatorAgainst = config.getValue(ConfigKeys.referenceAnnotator);
         config = tasks.getTask("settings");
-        outputDB = config.getValue(ConfigKeys.writeConfigFileName);
+        outputDB = config.getValue(ConfigKeys.writeDBConfigFileName);
         diffTable = config.getValue(ConfigKeys.compareTable).trim();
     }
 

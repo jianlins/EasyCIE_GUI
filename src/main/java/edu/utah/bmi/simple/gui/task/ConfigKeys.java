@@ -10,6 +10,14 @@ public class ConfigKeys {
 
     public static String mainBasePath = null;
     public static final String importDir = "documents/corpusDir";
+    //    import excel configs
+    public static final String importExcel = "excelData/filePath";
+    public static final String sheetName = "excelData/sheetName";
+    public static final String docNameColumn = "excelData/docNameColumnPos";
+    public static final String docTextColumn = "excelData/docTxtColumnPos";
+    public static final String docDateColumn = "excelData/docDateColumnPos";
+    public static final String startRowNum = "excelData/startRowNum";
+
 
     public static final String includeFileTypes = "documents/includeFileTypes";
 
@@ -39,6 +47,7 @@ public class ConfigKeys {
     public static final String featureInfRule = "pipeLineSetting/featureInfRule";
     public static final String docInfRule = "pipeLineSetting/docInfRule";
     public static final String featureMergerRule = "pipeLineSetting/featureMergerRule";
+    public static final String bunchInfRule = "pipeLineSetting/bunchInfRule";
 
     public static final String outputEhostDir = "format/ehost";
     public static final String outputBratDir = "format/brat";
@@ -52,6 +61,8 @@ public class ConfigKeys {
 
     public static final String maintask = "easycie";
     public static final String annotator = "annotators/current";
+
+    public static final String viewQueryName = "view/queryName";
 
     public static final String comparetask = "compare";
     public static final String targetAnnotator = "compare/targetAnnotator";
@@ -71,7 +82,7 @@ public class ConfigKeys {
     public static final String report = "report";
 
 
-    public static final String readDBConfigFile = "import/dbFile";
+    public static final String readDBConfigFileName = "import/dbFile";
     public static final String inputTableName = "import/table";
     public static final String overwrite = "import/overwrite";
     public static final String datasetId = "import/datasetId";
@@ -80,8 +91,11 @@ public class ConfigKeys {
 
     public static final String referenceTable = "reference/table";
 
-    public static final String writeConfigFileName = "output/dbFile";
-    public static final String outputTableName = "output/table";
+    public static final String writeDBConfigFileName = "output/dbFile";
+    public static final String snippetResultTableName = "output/snippetResultTable";
+    public static final String docResultTableName = "output/docResultTable";
+    public static final String bunchResultTableName = "output/bunchResultTable";
+
 
     public static final String rushRule = "nlpComponents/rush";
 

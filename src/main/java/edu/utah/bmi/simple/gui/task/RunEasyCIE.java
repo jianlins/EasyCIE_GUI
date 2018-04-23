@@ -20,7 +20,6 @@ import edu.utah.bmi.nlp.uima.ae.AnnotationFeatureMergerAnnotator;
 import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
-import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
 import edu.utah.bmi.nlp.easycie.reader.SQLTextReader;
 import edu.utah.bmi.nlp.easycie.writer.BratWritter_AE;
 import edu.utah.bmi.nlp.easycie.writer.EhostWriter_AE;
@@ -45,11 +44,11 @@ import java.util.logging.Logger;
  */
 public class RunEasyCIE extends GUITask {
     public static Logger logger = Logger.getLogger(RunEasyCIE.class.getCanonicalName());
-    protected String readDBConfigFileName, writeConfigFileName, inputTableName, outputTableName,
+    protected String readDBConfigFileName, writeConfigFileName, inputTableName, snippetResultTable, docResultTable, bunchResultTable,
             ehostDir, bratDir, xmiDir, annotator, datasetId;
     public boolean report = false, fastNERCaseSensitive = true, forceAssignSection = false;
     protected String sectionRule = "", rushRule = "", fastNERRule = "", fastCNERRule = "", includesections = "", excludesections = "", contextRule = "",
-            dateRule = "", featureInfRule = "", featureMergerRule = "", docInfRule = "";
+            dateRule = "", featureInfRule = "", featureMergerRule = "", docInfRule = "", bunchInfRule = "";
     protected int dayInterval = 0;
     public AdaptableUIMACPETaskRunner runner;
     protected DAO rdao, wdao;
@@ -75,7 +74,7 @@ public class RunEasyCIE extends GUITask {
     }
 
     public void init(GUITask task, String annotator, String rushRule, String fastNERRule, String fastCNERRule, String contextRule,
-                     String annotationInferenceRule, String docInferenceRule, boolean report, boolean fastNerCaseSensitive,
+                     String annotationInferenceRule, String docInferenceRule, String bunchInfRule, boolean report, boolean fastNerCaseSensitive,
                      String readDBConfigFile, String inputTableName, String datasetId, String writeConfigFileName,
                      String outputTableName, String ehostDir, String bratDir, String xmiDir, String exporttypes, String option) {
         this.annotator = annotator;
@@ -85,13 +84,14 @@ public class RunEasyCIE extends GUITask {
         this.contextRule = contextRule;
         this.featureInfRule = annotationInferenceRule;
         this.docInfRule = docInferenceRule;
+        this.bunchInfRule = bunchInfRule;
         this.report = report;
         this.fastNERCaseSensitive = fastNerCaseSensitive;
         this.readDBConfigFileName = readDBConfigFile;
         this.inputTableName = inputTableName;
         this.datasetId = datasetId;
         this.writeConfigFileName = writeConfigFileName;
-        this.outputTableName = outputTableName;
+        this.snippetResultTable = outputTableName;
         this.ehostDir = ehostDir;
         this.bratDir = bratDir;
         this.xmiDir = xmiDir;
@@ -152,6 +152,7 @@ public class RunEasyCIE extends GUITask {
         featureInfRule = config.getValue(ConfigKeys.featureInfRule);
         featureMergerRule = config.getValue(ConfigKeys.featureMergerRule);
         docInfRule = config.getValue(ConfigKeys.docInfRule);
+        bunchInfRule = config.getValue(ConfigKeys.bunchInfRule);
 
         rawStringValue = config.getValue(ConfigKeys.reportPreannotating);
         report = rawStringValue.length() > 0 && (rawStringValue.charAt(0) == 't' || rawStringValue.charAt(0) == 'T' || rawStringValue.charAt(0) == '1');
@@ -162,11 +163,13 @@ public class RunEasyCIE extends GUITask {
 
 
         config = tasks.getTask("settings");
-        readDBConfigFileName = config.getValue(ConfigKeys.readDBConfigFile);
+        readDBConfigFileName = config.getValue(ConfigKeys.readDBConfigFileName);
         inputTableName = config.getValue(ConfigKeys.inputTableName);
         datasetId = config.getValue(ConfigKeys.datasetId);
-        writeConfigFileName = config.getValue(ConfigKeys.writeConfigFileName);
-        outputTableName = config.getValue(ConfigKeys.outputTableName);
+        writeConfigFileName = config.getValue(ConfigKeys.writeDBConfigFileName);
+        snippetResultTable = config.getValue(ConfigKeys.snippetResultTableName);
+        docResultTable = config.getValue(ConfigKeys.docResultTableName);
+        bunchResultTable = config.getValue(ConfigKeys.bunchResultTableName);
         rushRule = config.getValue(ConfigKeys.rushRule);
 
 
@@ -319,16 +322,26 @@ public class RunEasyCIE extends GUITask {
 
         if (!(ehost || brat || xmi)) {
             SQLWriterCasConsumer.dao = wdao;
+            BunchInferencer.dao = wdao;
             if (!wdao.checkExits("checkAnnotatorExist", annotator)) {
                 wdao.insertRecord("ANNOTATORS", new RecordRow(annotator));
             }
             runner.addAnalysisEngine(SQLWriterCasConsumer.class, new Object[]{
                     SQLWriterCasConsumer.PARAM_SQLFILE, writeConfigFileName,
-                    SQLWriterCasConsumer.PARAM_TABLENAME, outputTableName,
+                    SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable,
+                    SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable,
                     SQLWriterCasConsumer.PARAM_ANNOTATOR, annotator,
                     SQLWriterCasConsumer.PARAM_VERSION, runId,
                     SQLWriterCasConsumer.PARAM_WRITE_CONCEPT, exporttypes,
                     SQLWriterCasConsumer.PARAM_OVERWRITETABLE, false, SQLWriterCasConsumer.PARAM_BATCHSIZE, 150});
+            if (bunchInfRule.length() > 0) {
+                runner.addAnalysisEngine(BunchInferencer.class, new Object[]{BunchInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                        BunchInferencer.PARAM_SQLFILE, writeConfigFileName,
+                        BunchInferencer.PARAM_RULE_FILE_OR_STR, bunchInfRule,
+                        BunchInferencer.PARAM_TABLENAME, bunchResultTable,
+                        BunchInferencer.PARAM_ANNOTATOR, annotator,
+                        SQLWriterCasConsumer.PARAM_VERSION, runId});
+            }
         }
 
     }

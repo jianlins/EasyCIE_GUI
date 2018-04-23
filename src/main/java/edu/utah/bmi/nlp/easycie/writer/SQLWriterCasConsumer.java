@@ -40,7 +40,8 @@ import java.util.Iterator;
  */
 public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
     public static final String PARAM_SQLFILE = "SQLFile";
-    public static final String PARAM_TABLENAME = "TableName";
+    public static final String PARAM_SNIPPET_TABLENAME = "SnippetTableName";
+    public static final String PARAM_DOC_TABLENAME = "DocTableName";
     public static final String PARAM_OVERWRITETABLE = "OverWriteTable";
     public static final String PARAM_WRITE_CONCEPT = "WriteConcepts";
     public static final String PARAM_BATCHSIZE = "BatchSize";
@@ -50,8 +51,8 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
 
     public static final String PARAM_USE_ANNOTATIONS_ANNOTATOR = "UserAnnotationsAnnotator";
     protected File sqlFile;
-    protected String tablename, annotator = "", version;
-    protected int mDocNum, batchSize = 15,minTextLength;
+    protected String snippetTableName, docTableName, annotator = "", version;
+    protected int mDocNum, batchSize = 15, minTextLength;
     public static DAO dao = null;
     protected boolean debug = false, overwriteTable = false, useAnnotationsAnnotator = false;
     private ArrayList<String> typeToSave = new ArrayList<>();
@@ -64,7 +65,9 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
     public void initialize(UimaContext cont) throws ResourceInitializationException {
         this.mDocNum = 0;
         this.sqlFile = new File(readConfigureString(cont, PARAM_SQLFILE, null));
-        this.tablename = readConfigureString(cont, PARAM_TABLENAME, "OUTPUT");
+        this.snippetTableName = readConfigureString(cont, PARAM_SNIPPET_TABLENAME, "RESULT_SNIPPET");
+        this.docTableName = readConfigureString(cont, PARAM_DOC_TABLENAME, "RESULT_DOC");
+
         overwriteTable = (Boolean) readConfigureObject(cont, PARAM_OVERWRITETABLE, false);
         useAnnotationsAnnotator = (Boolean) readConfigureObject(cont, PARAM_USE_ANNOTATIONS_ANNOTATOR, false);
         batchSize = (Integer) readConfigureObject(cont, PARAM_BATCHSIZE, 15);
@@ -76,13 +79,14 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
             dao = new DAO(this.sqlFile);
         }
         dao.batchsize = batchSize;
-        dao.initiateTableFromTemplate("ANNOTATION_TABLE", tablename, overwriteTable);
+        dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetTableName, overwriteTable);
+        dao.initiateTableFromTemplate("ANNOTATION_TABLE", docTableName, overwriteTable);
 
         if (!this.sqlFile.exists()) {
             this.sqlFile.mkdirs();
         }
         Object writeConceptObj = cont.getConfigParameterValue(PARAM_WRITE_CONCEPT);
-        if (writeConceptObj != null && writeConceptObj.toString().trim().length()>0) {
+        if (writeConceptObj != null && writeConceptObj.toString().trim().length() > 0) {
             for (String type : ((String) writeConceptObj).split(","))
                 typeToSave.add(DeterminantValueSet.checkNameSpace(type));
         } else {
@@ -93,7 +97,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
 
     public void process(JCas jcas) throws AnalysisEngineProcessException {
         String fileName = null;
-        if(jcas.getDocumentText().length()<minTextLength)
+        if (jcas.getDocumentText().length() < minTextLength)
             return;
 
 
@@ -119,24 +123,31 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
             sentenceTree.put(new Interval1D(thisSentence.getBegin(), thisSentence.getEnd()), sentenceList.size() - 1);
         }
 
-        readAnnotations(jcas, baseRecordRow, annotations, sentenceList, sentenceTree, fileName);
-        dao.insertRecords(tablename, annotations);
+        saveAnnotations(jcas, baseRecordRow, sentenceList, sentenceTree, fileName);
+        for (RecordRow anno : annotations) {
+            dao.insertRecord(snippetTableName, anno);
+        }
+//        dao.insertRecords(snippetResultTable, annotations);
     }
 
-    protected void readAnnotations(JCas jcas, RecordRow baseRecordRow, ArrayList<RecordRow> annotations, ArrayList<Sentence> sentenceList, IntervalST sentenceTree, String fileName) {
+    protected void saveAnnotations(JCas jcas, RecordRow baseRecordRow, ArrayList<Sentence> sentenceList, IntervalST sentenceTree, String fileName) {
         CAS cas = jcas.getCas();
         String docText = jcas.getDocumentText();
         for (String type : typeToSave)
-            saveOneTypeAnnotation(cas, docText, type, baseRecordRow, annotations, sentenceList, sentenceTree, fileName);
+            saveOneTypeAnnotation(cas, docText, type, baseRecordRow, sentenceList, sentenceTree, fileName);
     }
 
     private void saveOneTypeAnnotation(CAS cas, String docText, String annotationType,
-                                       RecordRow baseRecordRow, ArrayList<RecordRow> annotations,
+                                       RecordRow baseRecordRow,
                                        ArrayList<Sentence> sentenceList, IntervalST sentenceTree, String fileName) {
 
         Iterator<AnnotationFS> annoIter = CasUtil.iterator(cas, CasUtil.getType(cas, annotationType));
+        String tableName = snippetTableName;
         while (annoIter.hasNext()) {
             Annotation thisAnnotation = (Annotation) annoIter.next();
+            if (thisAnnotation instanceof Doc_Base) {
+                tableName = docTableName;
+            }
             RecordRow record = baseRecordRow.clone();
             record.addCell("TYPE", thisAnnotation.getType().getShortName());
             record.addCell("TEXT", thisAnnotation.getCoveredText());
@@ -228,14 +239,14 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
                 record.addCell("SNIPPET_END", sentenceBegin + sentence.length());
                 record.addCell("BEGIN", thisAnnotation.getBegin() - sentenceBegin);
                 record.addCell("END", thisAnnotation.getEnd() - sentenceBegin);
-            }else {
+            } else {
                 record.addCell("SNIPPET", thisAnnotation.getCoveredText());
                 record.addCell("SNIPPET_BEGIN", thisAnnotation.getBegin());
                 record.addCell("SNIPPET_END", thisAnnotation.getEnd());
                 record.addCell("BEGIN", 0);
                 record.addCell("END", thisAnnotation.getEnd() - thisAnnotation.getBegin());
             }
-            annotations.add(record);
+            dao.insertRecord(tableName, record);
         }
     }
 

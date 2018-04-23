@@ -1,6 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
+import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.easycie.reader.BratReader;
@@ -13,35 +14,43 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.comparator.NameFileComparator;
-import org.joda.time.DateTime;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 
 
 /**
  * Created by Jianlin Shi on 9/23/16.
  */
 public class Import extends GUITask {
-    public static final char ehost = 'e', xmi = 'x', brat = 'b', txt = 't', unknown = 'u';
+    public static Logger logger = IOUtil.getLogger(Import.class);
+    public static final char ehost = 'e', xmi = 'x', brat = 'b', txt = 't', n2c2 = 'n', unknown = 'u';
     protected DAO dao;
     protected boolean print = true;
 
-    protected String inputPath, dbConfigFile, importTable, overWriteAnnotatorName, datasetId, rushRule;
+    protected String inputPath, dbConfigFile, importTable, referenceTable, overWriteAnnotatorName, datasetId, rushRule;
     protected File inputDir;
     protected boolean overwrite = false, initSuccess = false;
     protected String includeTypes;
     protected char corpusType;
     protected RunEasyCIE runner;
 
+    protected Import() {
+
+    }
+
     public Import(TasksFX tasks, String importType) {
         initiate(tasks, importType);
     }
 
-    private void initiate(TasksFX tasks, String importType) {
+    protected void initiate(TasksFX tasks, String importType) {
         if (!Platform.isFxApplicationThread()) {
             guiEnabled = false;
         }
@@ -60,11 +69,11 @@ public class Import extends GUITask {
                 || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 'T'
                 || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == '1') : false;
 
-
+        importTable = settingConfig.getValue(ConfigKeys.inputTableName);
+        referenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
         if (importType.equals(ConfigKeys.paraTxtType)) {
             corpusType = txt;
             inputPath = documentDir;
-            importTable = settingConfig.getValue(ConfigKeys.inputTableName);
             inputDir = new File(documentDir);
             if (!checkDirExist(inputDir, documentDir, ConfigKeys.importDir))
                 return;
@@ -74,7 +83,6 @@ public class Import extends GUITask {
             inputPath = annotationDir;
             if (!checkDirExist(inputDir, annotationDir, ConfigKeys.annotationDir))
                 return;
-            importTable = settingConfig.getValue(ConfigKeys.referenceTable);
             corpusType = checkCorpusType(inputDir, includeFileTypes);
             includeTypes = includeAnnotationTypes.replaceAll("\\s+", "");
         }
@@ -84,7 +92,7 @@ public class Import extends GUITask {
         }
 
         datasetId = settingConfig.getValue(ConfigKeys.datasetId);
-        dbConfigFile = settingConfig.getValue(ConfigKeys.readDBConfigFile);
+        dbConfigFile = settingConfig.getValue(ConfigKeys.readDBConfigFileName);
         overwrite = settingConfig.getValue(ConfigKeys.overwrite).charAt(0) == 't'
                 || settingConfig.getValue(ConfigKeys.overwrite).charAt(0) == 'T'
                 || settingConfig.getValue(ConfigKeys.overwrite).charAt(0) == '1';
@@ -99,16 +107,19 @@ public class Import extends GUITask {
             case brat:
                 if (overWriteAnnotatorName.length() == 0)
                     overWriteAnnotatorName = "brat_import";
-                importBrat(inputDir, datasetId, overWriteAnnotatorName, importTable, rushRule, includeTypes, overwrite);
+                importBrat(inputDir, datasetId, overWriteAnnotatorName, referenceTable, rushRule, includeTypes, overwrite);
                 break;
             case ehost:
                 if (overWriteAnnotatorName.length() == 0)
                     overWriteAnnotatorName = "ehost_import";
-                importEhost(inputDir, datasetId, overWriteAnnotatorName, importTable, rushRule, includeTypes, overwrite);
+                importEhost(inputDir, datasetId, overWriteAnnotatorName, referenceTable, rushRule, includeTypes, overwrite);
                 break;
             case xmi:
                 popDialog("Note", "Sorry, currently import xmi corpus is not supported.", "");
                 return;
+            case n2c2:
+                importN2C2(inputDir, datasetId, importTable, referenceTable, overwrite);
+                break;
             case unknown:
                 popDialog("Note", "Sorry, which type of documents are you going to import?|",
                         "Currently, there is not any txt or text file in the import directory.\n" +
@@ -206,15 +217,6 @@ public class Import extends GUITask {
             updateGUIProgress(counter, total);
             counter++;
         }
-        if (n2c2Data) {
-            try {
-                dao.stmt.execute("UPDATE SAMPLES SET REF_DATE = (SELECT MAX(\"DATE\") FROM SAMPLES T2 WHERE T2.BUNCH_ID = SAMPLES.BUNCH_ID);");
-                dao.con.commit();
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
         System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
     }
 
@@ -228,7 +230,7 @@ public class Import extends GUITask {
 
         if (annotator.length() == 0)
             annotator = "ehost_import";
-        runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "",
+        runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "", "",
                 false, false, dbConfigFile, importTable, datasetId,
                 dbConfigFile, importTable, "", "", "", includeTypes, "db");
 
@@ -248,7 +250,7 @@ public class Import extends GUITask {
         runner = new RunEasyCIE();
         if (annotator.length() == 0)
             annotator = "ehost_import";
-        runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "",
+        runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "", "",
                 false, false, dbConfigFile, importTable, datasetId,
                 dbConfigFile, importTable, "", "", "", includeTypes, "db");
 
@@ -285,6 +287,8 @@ public class Import extends GUITask {
                     return brat;
                 if (fileName.endsWith(".knowtator.xml"))
                     return ehost;
+                if (fileName.endsWith(".xml"))
+                    return n2c2;
                 if (!containText && (fileName.endsWith(".txt") || fileName.endsWith(".text")))
                     containText = true;
             }
@@ -296,5 +300,116 @@ public class Import extends GUITask {
             return unknown;
     }
 
+
+    protected void importN2C2(File inputDir, String datasetId, String tableName, String referenceTable, boolean overWrite) {
+        dao.initiateTableFromTemplate("DOCUMENTS_TABLE", tableName, overWrite);
+        dao.initiateTableFromTemplate("ANNOTATION_TABLE", referenceTable, overWrite);
+        Collection<File> files = FileUtils.listFiles(inputDir, new String[]{"xml"}, true);
+        File[] fileArray = new File[files.size()];
+        files.toArray(fileArray);
+        Arrays.sort(fileArray, NameFileComparator.NAME_COMPARATOR);
+        if (print)
+            System.out.println("Reading files from: " + inputDir.getAbsolutePath() +
+                    "\nImporting into table: " + tableName);
+        int total = files.size();
+        int counter = 0;
+        Boolean n2c2Data = false;
+        for (File file : fileArray) {
+            ArrayList<RecordRow> annotations = new ArrayList<>();
+            String docName = file.getName().substring(0, file.getName().lastIndexOf("."));
+            String content = n2c2Parser(file, docName, annotations);
+            if (print)
+                System.out.print("Import: " + file.getName() + "\t\t");
+
+//          specifically deal with n2c2 data
+            int i = 0;
+            for (String docTxt : content.split("\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*+")) {
+                docTxt = docTxt.trim();
+                i++;
+                RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
+                        .addCell("DOC_NAME", docName + "_" + i)
+                        .addCell("TEXT", docTxt)
+                        .addCell("BUNCH_ID", docName);
+                if (docTxt.startsWith("Record date:")) {
+                    n2c2Data = true;
+                    String date = docTxt.substring(12, content.indexOf("\n")).trim();
+                    recordRow.addCell("DATE", date + " 00:00:00");
+                    dao.insertRecord(tableName, recordRow);
+                } else if (n2c2Data && docTxt.length() > 0) {
+                    recordRow.addCell("DATE", tryFindDate(docTxt));
+                    dao.insertRecord(tableName, recordRow);
+                }
+
+            }
+            dao.insertRecords(referenceTable, annotations);
+            if (print)
+                System.out.println("success");
+            updateGUIProgress(counter, total);
+            counter++;
+        }
+        if (n2c2Data) {
+            try {
+                dao.stmt.execute("UPDATE " + importTable + " SET REF_DATE = (SELECT MAX(\"DATE\") FROM " + importTable + " T2 WHERE T2.BUNCH_ID = " + importTable + ".BUNCH_ID);");
+                dao.con.commit();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
+    }
+
+    private Date tryFindDate(String docTxt) {
+        Date utilDate = null;
+        for (String line : docTxt.split("\n")) {
+            try {
+                utilDate = new org.pojava.datetime.DateTime(line.trim()).toDate();
+                logger.warning("Try parse '" + line.trim() + "' to date: "
+                        + new org.pojava.datetime.DateTime(line.trim()).toString());
+                return utilDate;
+            } catch (Exception e) {
+            }
+        }
+        return null;
+    }
+
+    private String n2c2Parser(File xmlFile, String docName, ArrayList<RecordRow> annotations) {
+        String docText = "";
+        RecordRow docRecord = new RecordRow().addCell("DOC_NAME", docName);
+        try {
+            SAXReader reader = new SAXReader();
+            Document document = reader.read(xmlFile);
+
+            Node txtNode = (Node) document.selectNodes("//TEXT").get(0);
+            docText = txtNode.getText().trim();
+
+            Node tagNode = (Node) document.selectNodes("//TAGS").get(0);
+            for (Node node : (List<Node>) tagNode.selectNodes("*")) {
+                String tagName = node.getName();
+                if (tagName.trim().length() == 0)
+                    continue;
+                String value = node.valueOf("@met");
+                String annotationType = (tagName + "_" + value)
+                        .toUpperCase().replaceAll("[ -]", "_");
+                RecordRow recordRow = docRecord.clone();
+                recordRow.addCell("ANNOTATOR", "N2C2")
+                        .addCell("TYPE", annotationType)
+                        .addCell("RUN_ID", 0)
+                        .addCell("BEGIN", 0)
+                        .addCell("END", 1)
+                        .addCell("SNIPPET_BEGIN", 0)
+                        .addCell("TEXT", docText.substring(0, 1))
+                        .addCell("SNIPPET", docText.substring(0, docText.indexOf("\n")))
+                        .addCell("FEATURES", "")
+                        .addCell("COMMENTS", "");
+                annotations.add(recordRow);
+            }
+
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        }
+        return docText;
+
+    }
 
 }

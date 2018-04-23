@@ -68,12 +68,48 @@
     <queryStatements>
         <item>
             <name>queryDocs</name>
-            <sql>SELECT DOC_ID,DOC_NAME, TEXT SNIPPET,TEXT,DATE,REF_DATE, INSERT_DTM FROM {tableName}</sql>
+            <sql>SELECT DOC_ID,DOC_NAME, BUNCH_ID,TEXT SNIPPET,TEXT,DATE,REF_DATE, INSERT_DTM FROM {tableName}</sql>
         </item>
         <item>
-            <name>queryAnnos</name>
+            <name>querySnippetAnnos</name>
+            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,SNIPPET_BEGIN,TEXT,FEATURES,COMMENTS,ANNOTATOR,RUN_ID FROM
+                {tableName} RS
+            </sql>
+        </item>
+        <item>
+            <name>queryDocSnippetAnnos</name>
+            <sql>SELECT RS.ID,RS.DOC_NAME,RD.TYPE DOC_TYPE, RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,RS.TEXT,RS.FEATURES,RS.COMMENTS,RS.ANNOTATOR,RS.RUN_ID FROM
+                {docResultTable} RD LEFT OUTER JOIN {tableName} RS ON RD.DOC_NAME=RS.DOC_NAME
+            </sql>
+        </item>
+        <item>
+            <name>queryBunchDocSnippetAnnos</name>
             <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,SNIPPET_BEGIN,TEXT,FEATURES,COMMENTS,ANNOTATOR,RUN_ID FROM
                 {tableName}
+            </sql>
+        </item>
+        <item>
+            <name>querySnippetAnnosWSource</name>
+            <sql>SELECT RS.ID,RS.DOC_NAME, RS.TYPE,RS.SNIPPET, RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,RS.TEXT,
+                RS.FEATURES,IT.DATE, IT.REF_DATE,RS.COMMENTS,RS.ANNOTATOR,RS.RUN_ID FROM
+                {tableName} RS JOIN {inputTable} IT ON RS.DOC_NAME=IT.DOC_NAME
+            </sql>
+        </item>
+        <item>
+            <name>queryDocSnippetAnnosWSource</name>
+            <sql>SELECT RD.ID,RD.DOC_NAME,RD.TYPE DOC_TYPE, RS.ID RSID, RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,RS.TEXT,
+                RS.FEATURES,IT.DATE, IT.REF_DATE,RS.COMMENTS,RD.ANNOTATOR,RD.RUN_ID
+                FROM
+                {docResultTable} RD LEFT OUTER JOIN {tableName} RS ON RD.DOC_NAME=RS.DOC_NAME JOIN {inputTable} IT ON RD.DOC_NAME=IT.DOC_NAME
+            </sql>
+        </item>
+        <item>
+            <name>queryBunchDocSnippetAnnosWSource</name>
+            <sql>SELECT RD.ID ,RD.DOC_NAME,RB.TYPE BUNCH_TYPE, RD.TYPE DOC_TYPE, RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,RS.TEXT,
+                RS.FEATURES,IT.DATE, IT.REF_DATE,RS.COMMENTS,RS.ANNOTATOR,RS.RUN_ID
+                FROM {bunchResultTable} RB JOIN {inputTable} IT ON RB.DOC_NAME=IT.BUNCH_ID
+                JOIN {docResultTable} RD ON IT.DOC_NAME=RD.DOC_NAME
+                LEFT OUTER JOIN {tableName} RS ON RD.DOC_NAME=RS.DOC_NAME
             </sql>
         </item>
         <item>
@@ -108,7 +144,7 @@
         </item>
         <item>
             <name>masterInputQuery</name>
-            <sql>SELECT DOC_ID, DATASET_ID,DOC_NAME,TEXT FROM {tableName} WHERE DATASET_ID = ?;
+            <sql>SELECT DOC_ID, DATASET_ID,BUNCH_ID,DOC_NAME,TEXT FROM {tableName} WHERE DATASET_ID = ?;
             </sql>
         </item>
         <item>

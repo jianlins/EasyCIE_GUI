@@ -41,6 +41,14 @@ public class TaskFX {
         }
     }
 
+    public String getValue(String key, String defaultValue) {
+        if (map.containsKey(key)) {
+            return map.get(key).getSettingValue();
+        } else {
+            return defaultValue;
+        }
+    }
+
     public String getDesc(String key) {
         if (map.containsKey(key)) {
             return map.get(key).getSettingDesc();

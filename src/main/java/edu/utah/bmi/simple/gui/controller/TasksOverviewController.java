@@ -6,6 +6,8 @@ import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.*;
+import edu.utah.bmi.simple.gui.task.ConfigKeys;
+import edu.utah.bmi.simple.gui.task.ViewOutputDB;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -80,7 +82,7 @@ public class TasksOverviewController {
     private Button tableRefresh;
 
     @FXML
-    private TextField sqlFilter;
+    public TextField sqlFilter;
 
 
     private TaskFX currentTask;
@@ -109,7 +111,7 @@ public class TasksOverviewController {
     @FXML
     private TableView<Map.Entry<String, SettingAb>> settingTable;
 
-    private boolean doctable = true;
+    public boolean doctable = true;
 
     private WebEngine webEngine;
 
@@ -143,7 +145,11 @@ public class TasksOverviewController {
         });
         featureValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         featureValueColumn.setCellValueFactory(p -> {
-            return new SimpleStringProperty(p.getValue()[1]);
+            String[] value = p.getValue();
+            if (value != null && value.length > 1)
+                return new SimpleStringProperty(p.getValue()[1]);
+            else
+                return new SimpleStringProperty("");
         });
 
 
@@ -192,7 +198,7 @@ public class TasksOverviewController {
                 if (doctable)
                     showDocTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
                 else
-                    showAnnoTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
+                    new ViewOutputDB(mainApp.tasks).run();
             }
         });
 
@@ -210,7 +216,8 @@ public class TasksOverviewController {
                     if (doctable)
                         showDocTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
                     else
-                        showAnnoTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
+                        new ViewOutputDB(mainApp.tasks).run();
+//                        showAnnoTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
                 }
             }
         });
@@ -237,7 +244,6 @@ public class TasksOverviewController {
 
         Callback<TableColumn<Map.Entry<String, Setting>, Object>, TableCell<Map.Entry<String, Setting>, Object>> openClickableCellFactory =
                 p -> new TextFieldOpenableTableCell(new SettingValueConverter());
-
 
 
         settingValueColumn.setCellFactory(openClickableCellFactory);
@@ -277,13 +283,13 @@ public class TasksOverviewController {
 
         settingValueColumn.setOnEditCommit(event -> {
             String newValue;
-            Object value=event.getNewValue();
-            if(value instanceof String) {
+            Object value = event.getNewValue();
+            if (value instanceof String) {
                 newValue = event.getNewValue().toString();
-            }else if(value instanceof Object[]){
-                newValue=((Setting)((Object[])value)[1]).getSettingValue();
-            }else{
-                newValue="";
+            } else if (value instanceof Object[]) {
+                newValue = ((Setting) ((Object[]) value)[1]).getSettingValue();
+            } else {
+                newValue = "";
             }
             Map.Entry<String, Setting> entry = event.getRowValue();
             Setting setting = entry.getValue();
@@ -339,6 +345,7 @@ public class TasksOverviewController {
         return showDBTable(dbName, "queryAnnos", tableName, filter, colorDifferential);
     }
 
+
     public boolean showDocTable(String dbName, String tableName, String filter, String colorDifferential) {
         if (!doctable)
             annoTableView.getColumns().clear();
@@ -374,9 +381,10 @@ public class TasksOverviewController {
             int i = 0;
             annoTableView.getColumns().clear();
             for (String columnName : columanInfo.getColumnInfo().keySet()) {
-                //We are using non property style for making dynamic table
+                //use non property style for making dynamic table
                 final int j = i;
                 TableColumn col = new TableColumn(columnName);
+                String widthStr;
                 switch (columnName.toUpperCase()) {
                     case "BEGIN":
                     case "END":
@@ -387,22 +395,35 @@ public class TasksOverviewController {
                     case "SNIPPET":
                         snippetPos = i;
                         col.setMaxWidth(dbPanel.getWidth() * 0.7);
-                        col.setPrefWidth(StaticVariables.snippetLength * 5);
+                        widthStr = mainApp.tasks.getTask("settings").getValue("viewer/width/" + columnName).trim();
+                        if (widthStr.length() > 0)
+                            col.setPrefWidth(Integer.parseInt(widthStr));
+                        else
+                            col.setPrefWidth(StaticVariables.snippetLength * 5);
                         col.setCellFactory(colorCellFactory);
                         col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
                             public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
                                 Object record = param.getValue().get(j);
-                                return new SimpleObjectProperty<Object>(record);
+                                if (record != null)
+                                    return new SimpleObjectProperty<>(record);
+                                else
+                                    return new SimpleObjectProperty<>("");
                             }
                         });
                         break;
-                    case "TYPE":
-                        col.setPrefWidth(125);
                     default:
+
+                    case "TYPE":
+                        widthStr = mainApp.tasks.getTask("settings").getValue("viewer/width/" + columnName).trim();
+                        if (widthStr.length() > 0)
+                            col.setPrefWidth(Integer.parseInt(widthStr));
                         col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
                             public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
                                 Object record = param.getValue().get(j);
-                                return new SimpleObjectProperty<Object>(record);
+                                if (record != null)
+                                    return new SimpleObjectProperty<>(record);
+                                else
+                                    return new SimpleObjectProperty<>("");
                             }
                         });
                         if (col.getPrefWidth() == 80)
@@ -432,9 +453,14 @@ public class TasksOverviewController {
                 if (annoTableView.getColumns() != null && annoTableView.getColumns().size() > 1) {
                     TableColumn col = (TableColumn) annoTableView.getColumns().get(snippetPos);
 //                    System.out.println("reset the width of column " + snippetPos);
-                    col.setMaxWidth((int) newValue.doubleValue() * 0.9);
-                    col.setPrefWidth((int) newValue.doubleValue() * 0.38);
-                    htmlViewer.setPrefWidth(newValue.doubleValue() * 0.15);
+                    String widthStr = mainApp.tasks.getTask("settings").getValue("viewer/width/" + col.getText()).trim();
+                    if (widthStr.length() > 0)
+                        col.setPrefWidth(Integer.parseInt(widthStr));
+                    else {
+                        col.setMaxWidth((int) newValue.doubleValue() * 0.9);
+                        col.setPrefWidth((int) newValue.doubleValue() * 0.38);
+                    }
+                    htmlViewer.setPrefWidth(newValue.doubleValue() * 0.11);
                 }
             }
         });
@@ -445,6 +471,9 @@ public class TasksOverviewController {
             RecordRow record = (RecordRow) rs.next();
             for (String columnName : columanInfo.getColumnInfo().keySet()) {
                 TableColumn col = new TableColumn(columnName);
+                if (record.getValueByColumnName(columnName) == null) {
+                    record.addCell(columnName, "");
+                }
                 switch (columnName.toUpperCase()) {
                     case "BEGIN":
                     case "END":
@@ -456,7 +485,11 @@ public class TasksOverviewController {
                         row.add(record);
                         break;
                     default:
-                        row.add(record.getValueByColumnName(columnName));
+                        Object value = record.getValueByColumnName(columnName);
+                        if (value == null)
+                            row.add("");
+                        else
+                            row.add(record.getValueByColumnName(columnName));
                         break;
                 }
             }

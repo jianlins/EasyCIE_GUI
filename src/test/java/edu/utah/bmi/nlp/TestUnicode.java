@@ -3,6 +3,7 @@ package edu.utah.bmi.nlp;
 
 import edu.utah.bmi.nlp.easycie.reader.EhostReader;
 import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -38,7 +39,9 @@ public class TestUnicode {
     }
 
     @Test
-    public void testCh(){
+    public void testCh() {
+
         System.out.println(Character.isAlphabetic('1'));
+        System.out.println("a- b-".replaceAll("-", "_"));
     }
 }

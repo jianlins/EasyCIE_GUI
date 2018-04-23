@@ -33,8 +33,8 @@ class TaskTestBaseK {
         fun init() {
             val settingOper = SettingOper("conf/demo.xml")
             tasks = settingOper.readSettings()
-            tasks!!.getTask("settings")!!.setValue(ConfigKeys.readDBConfigFile, dbConfig)
-            tasks!!.getTask("settings")!!.setValue(ConfigKeys.writeConfigFileName, dbConfig)
+            tasks!!.getTask("settings")!!.setValue(ConfigKeys.readDBConfigFileName, dbConfig)
+            tasks!!.getTask("settings")!!.setValue(ConfigKeys.writeDBConfigFileName, dbConfig)
             dao = DAO(File(dbConfig), true, false)
         }
 
