@@ -4,6 +4,7 @@ import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
+import edu.utah.bmi.simple.gui.controller.CellFactories;
 import edu.utah.bmi.simple.gui.controller.ColorAnnotationCell;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -39,6 +40,8 @@ public class ViewOutputDB extends GUITask {
     protected void initiate(TasksFX tasks, String... paras) {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
+        TasksOverviewController.currentTasksOverviewController.currentGUITask = this;
+
         inputTable = config.getValue(ConfigKeys.inputTableName);
         outputDB = config.getValue(ConfigKeys.writeDBConfigFileName);
         snippetResultTable = config.getValue(ConfigKeys.snippetResultTableName);
@@ -61,7 +64,7 @@ public class ViewOutputDB extends GUITask {
 
     }
 
-    public static String[] buildQuery(DAO dao, String queryName,  String annotator,
+    public static String[] buildQuery(DAO dao, String queryName, String annotator,
                                       String snippetResultTable, String docResultTable, String bunchResultTable,
                                       String inputTable) {
         String sourceQuery, primeTable = "RS";

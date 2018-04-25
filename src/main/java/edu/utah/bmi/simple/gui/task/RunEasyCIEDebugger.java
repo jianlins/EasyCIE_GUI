@@ -70,7 +70,7 @@ public class RunEasyCIEDebugger extends GUITask {
 
                 if (entered.trim().length() > 0) {
                     debugRunner = new DebugPipe(tasks, guiTask);
-                    debugRunner.addReader(inputStr,metaStr);
+                    debugRunner.addReader(inputStr, metaStr);
 //                        initiate(tasks, "xmi");
                     updateGUIMessage("Execute pipeline...");
                     new Thread(() -> debugRunner.run()).start();

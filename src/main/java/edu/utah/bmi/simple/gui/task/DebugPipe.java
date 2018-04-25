@@ -62,6 +62,7 @@ public class DebugPipe extends RunEasyCIE {
     public DebugPipe(TasksFX tasks, String paras) {
         if (paras == null || paras.length() == 0)
             initiate(tasks, "db");
+        this.tasks = tasks;
         readDebugConfigs(tasks);
         initiate(tasks, paras);
     }

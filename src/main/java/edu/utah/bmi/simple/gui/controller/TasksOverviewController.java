@@ -1,11 +1,13 @@
 package edu.utah.bmi.simple.gui.controller;
 
 import com.sun.javafx.collections.ObservableMapWrapper;
+import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.ColumnInfo;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.*;
+import edu.utah.bmi.simple.gui.task.DebugPipe;
 import edu.utah.bmi.simple.gui.task.ViewOutputDB;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -21,6 +23,7 @@ import javafx.scene.control.cell.TextFieldOpenableTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -28,8 +31,15 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.util.Callback;
 import javafx.util.converter.SettingValueConverter;
+import org.w3c.dom.Document;
 
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
@@ -114,6 +124,8 @@ public class TasksOverviewController {
     private int limitRecords = 300;
     private DAO dao;
 
+    public GUITask currentGUITask;
+
     public TasksOverviewController() {
     }
 
@@ -177,6 +189,9 @@ public class TasksOverviewController {
 //      Enable autoresize of htmleditor
 //        GridPane gridPane = (GridPane) htmlViewer.getChildrenUnmodifiable().get(0);
         webEngine = htmlViewer.getEngine();
+        htmlViewer.setContextMenuEnabled(false);
+        createContextMenu(htmlViewer);
+
 
 //        RowConstraints row1 = new RowConstraints();
 //        row1.setVgrow(Priority.NEVER);
@@ -434,18 +449,20 @@ public class TasksOverviewController {
                 i++;
             }
             ObservableList columns = annoTableView.getColumns();
-            TableColumn docNameColumn = (TableColumn) columns.get(docNamePos);
+            if(docNamePos>0) {
+                TableColumn docNameColumn = (TableColumn) columns.get(docNamePos);
 //            System.out.println(docNameColumn);
-            final int staticSnippetPos = snippetPos;
-            final int staticDocNamePos = docNamePos;
-            docNameColumn.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>) param -> {
-                Object record = param.getValue().get(staticSnippetPos);
-                if (record != null && record instanceof RecordRow) {
-                    RecordRow newRecordRow = ((RecordRow) record).clone();
-                    return new SimpleObjectProperty<>(newRecordRow);
-                } else
-                    return new SimpleObjectProperty<>(param.getValue().get(staticDocNamePos));
-            });
+                final int staticSnippetPos = snippetPos;
+                final int staticDocNamePos = docNamePos;
+                docNameColumn.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>) param -> {
+                    Object record = param.getValue().get(staticSnippetPos);
+                    if (record != null && record instanceof RecordRow) {
+                        RecordRow newRecordRow = ((RecordRow) record).clone();
+                        return new SimpleObjectProperty<>(newRecordRow);
+                    } else
+                        return new SimpleObjectProperty<>(param.getValue().get(staticDocNamePos));
+                });
+            }
         }
         dbPanel.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -743,5 +760,59 @@ public class TasksOverviewController {
 
     public TableView<Map.Entry<String, SettingAb>> getSettingTable() {
         return settingTable;
+    }
+
+
+    private void createContextMenu(WebView webView) {
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem reload = new MenuItem("Reload");
+        reload.setOnAction(e -> webView.getEngine().reload());
+        MenuItem savePage = new MenuItem("Debug");
+        savePage.setOnAction(e -> {
+            Document doc = webView.getEngine().getDocument();
+            String content;
+//            String content = doc.getDocumentElement().getTextContent();
+//
+//            System.out.println(content);
+            StringWriter sw = new StringWriter();
+            try {
+                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+                transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+                transformer.transform(new DOMSource(doc.getDocumentElement()),
+                        new StreamResult(sw));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            content = sw.toString();
+            content = content.replaceAll("<BR/>", "\n")
+                    .replaceAll("<SPAN style=[^>]+>", "")
+                    .replaceAll("</SPAN>", "")
+                    .replaceAll("</DIV>", "")
+                    .replaceAll("</DIV>", "")
+                    .replaceAll("<DIV[^>]+>", "")
+                    .replaceAll("<BODY[^>]+>", "")
+                    .replaceAll("</BODY>", "")
+                    .replaceAll("</HTML>", "")
+                    .replaceAll("<HEAD/>", "")
+                    .replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?><HTML xmlns=\"http://www.w3.org/1999/xhtml\">", "");
+
+//            System.out.println(content.trim());
+//            DebugPipe debugRunner = new DebugPipe(mainApp.tasks, currentGUITask);
+            System.out.println(this.annoTableView.getSelectionModel().getSelectedItem());
+        });
+        contextMenu.getItems().addAll(reload, savePage);
+
+        webView.setOnMousePressed(e -> {
+            if (e.getButton() == MouseButton.SECONDARY) {
+                contextMenu.show(webView, e.getScreenX(), e.getScreenY());
+            } else {
+                contextMenu.hide();
+            }
+        });
     }
 }
