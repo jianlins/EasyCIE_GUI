@@ -135,6 +135,8 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
         ArrayList<ConceptBASE> targetConcepts = new ArrayList<>();
         DateTime referenceDate = readReferenceDate(jcas, referenceDateColumnName);
         DateTime recordDate = readReferenceDate(jcas, recordDateColumnName);
+        if (recordDate==null)
+            recordDate=referenceDate;
         referenceDate = referenceDate.minusDays(intervalDaysBeforeReferenceDate);
         FSIndex annoIndex = jcas.getAnnotationIndex(targetConceptId);
         Iterator annoIter = annoIndex.iterator();
@@ -168,6 +170,8 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
             recordRow.deserialize(serializedString);
         }
         String dateString = (String) recordRow.getValueByColumnName(referenceDateColumnName);
+        if(dateString==null)
+            return null;
         return parseDateString(dateString);
     }
 

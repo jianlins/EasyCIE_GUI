@@ -802,7 +802,7 @@ public class TasksOverviewController {
                     .replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?><HTML xmlns=\"http://www.w3.org/1999/xhtml\">", "");
 
 //            System.out.println(content.trim());
-//            DebugPipe debugRunner = new DebugPipe(mainApp.tasks, currentGUITask);
+//            DebugPipe fastDebugPipe = new DebugPipe(mainApp.tasks, currentGUITask);
             System.out.println(this.annoTableView.getSelectionModel().getSelectedItem());
         });
         contextMenu.getItems().addAll(reload, savePage);

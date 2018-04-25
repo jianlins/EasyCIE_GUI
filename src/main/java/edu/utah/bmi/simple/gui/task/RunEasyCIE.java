@@ -50,7 +50,7 @@ public class RunEasyCIE extends GUITask {
     protected String sectionRule = "", rushRule = "", fastNERRule = "", fastCNERRule = "", includesections = "", excludesections = "", contextRule = "",
             dateRule = "", featureInfRule = "", featureMergerRule = "", docInfRule = "", bunchInfRule = "";
     protected int dayInterval = 0;
-    public AdaptableUIMACPETaskRunner runner;
+    public AdaptableUIMACPETaskJCasRunner runner;
     protected DAO rdao, wdao;
     protected boolean inferAllTemporal = false;
     public boolean ehost = false, brat = false, xmi = true;
@@ -131,7 +131,11 @@ public class RunEasyCIE extends GUITask {
         }
         try {
             LogManager.getLogManager().readConfiguration();
-        } catch (IOException e) {
+        } catch (IOException e) {{{
+            System.setProperty("java.util.logging.config.file", "logging.properties");
+        }
+            System.setProperty("java.util.logging.config.file", "logging.properties");
+        }
             e.printStackTrace();
         }
         updateGUIMessage("Initiate configurations..");
@@ -197,7 +201,6 @@ public class RunEasyCIE extends GUITask {
 
         initUIMALogger();
         initPipe(this);
-
     }
 
     @Override
@@ -224,9 +227,9 @@ public class RunEasyCIE extends GUITask {
         customTypeDescriptor = "desc/type/pipeline_" + annotator;
 
         if (new File(customTypeDescriptor + ".xml").exists())
-            runner = new AdaptableUIMACPETaskRunner(customTypeDescriptor, "./classes/");
+            runner = new AdaptableUIMACPETaskJCasRunner(customTypeDescriptor, "./classes/");
         else
-            runner = new AdaptableUIMACPETaskRunner(defaultTypeDescriptor, "./classes/");
+            runner = new AdaptableUIMACPETaskJCasRunner(defaultTypeDescriptor, "./classes/");
         runner.setLogger(uimaLogger);
         runner.setTask(task);
 

@@ -4,6 +4,7 @@ import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.DebugPipe;
+import edu.utah.bmi.simple.gui.task.FastDebugPipe;
 import edu.utah.bmi.simple.gui.task.RunEasyCIEDebugger;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
@@ -33,14 +34,8 @@ public class CellFactories {
         return contextMenu;
     }
 
-    public static DebugPipe debugRunner;
+    public static FastDebugPipe debugRunner;
 
-    public static DebugPipe initDebugRunner(TasksFX tasks, GUITask guiTask) {
-        if (debugRunner == null) {
-            debugRunner = new DebugPipe(tasks, guiTask);
-        }
-        return debugRunner;
-    }
 
     public static Callback<TableColumn, TableCell> colorCellFactory =
             p -> {
@@ -58,22 +53,15 @@ public class CellFactories {
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
                         System.out.println("Start debugging...");
-                        if ( cell.getItem() instanceof RecordRow) {
-                            debugRunner=new DebugPipe(TasksOverviewController.currentTasksOverviewController.mainApp.tasks,TasksOverviewController.currentTasksOverviewController.currentGUITask);
+                        if (cell.getItem() instanceof RecordRow) {
+                            debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks, TasksOverviewController.currentTasksOverviewController.currentGUITask);
                             debugRunner.guitask.updateGUIMessage("Start debugging...");
                             RecordRow recordRow = (RecordRow) cell.getItem();
-                            RecordRow metaRow = new RecordRow();
-                            metaRow.deserialize(recordRow.serialize("FEATURES", "COMMENTS", "ANNOTATOR", "TEXT",
-                                    "DOC_TEXT", "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN"));
-                            StringBuilder sb = new StringBuilder();
-                            for (Map.Entry<String, Object> entry : metaRow.getColumnNameValues().entrySet()) {
-                                sb.append(entry.getKey() + "," + entry.getValue());
-                                sb.append("|");
-                            }
-                            debugRunner.addReader(recordRow.getStrByColumnName("SNIPPET"), sb.substring(0, sb.length() - 1));
                             debugRunner.guitask.updateGUIMessage("Execute pipeline...");
-                            debugRunner.runner.run();
-//                            new Thread(() -> debugRunner.run()).start();
+                            debugRunner.process(recordRow, "SNIPPET", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT",
+                                    "DOC_TEXT", "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
+                            debugRunner.showResults();
+//                            new Thread(() -> fastDebugPipe.run()).start();
                         }
 
                     }
