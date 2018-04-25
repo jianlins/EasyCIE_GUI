@@ -1,43 +1,39 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
+import edu.utah.bmi.nlp.easycie.NLPDBLogger;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.nlp.easycie.NLPDBLogger;
 import edu.utah.bmi.simple.gui.core.Compare;
 import edu.utah.bmi.simple.gui.core.EvalCounter;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
 
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * Compare annotations against gold standard (based on SQLite, differentiate different annotators by "annotator")
+ * Deal with bunch, document, and snippet annotations.
  *
  * @author Jianlin Shi
- * @see edu.utah.bmi.simple.gui.task.CompareBDSTask
  * Created on 7/18/16.
  */
-@Deprecated
-public class CompareTask extends GUITask {
+public class CompareBDSTask extends GUITask {
     protected Compare comparior;
-    protected HashSet<String> types = new HashSet();
-    private String diffTable, outputTable, compareReferenceTable, goldReferenceTable,
+    //    protected TreeSet<String> types = new TreeSet();
+    private String diffTable, snippetResultTable, documentResultTable, bunchResultTable, compareReferenceTable, goldReferenceTable,
             targetAnnotator, referenceAnnotator, typeFilter, targetRunId, referenceRunId;
     private DAO wdao, rdao;
     protected NLPDBLogger logger;
     private boolean strictCompare = false;
     public static int lastRunId = -1;
+    //  To record which type is snippet level, document level, or bunch level, based on from which table read the annotations of that type.
+    private TreeMap<String, String> typeCategories = new TreeMap<>();
 
-
-    public CompareTask(TasksFX tasks) {
+    public CompareBDSTask(TasksFX tasks) {
         initiate(tasks);
     }
 
@@ -62,9 +58,12 @@ public class CompareTask extends GUITask {
 
         TaskFX settingConfig = tasks.getTask("settings");
         String outputDB = settingConfig.getValue(ConfigKeys.writeDBConfigFileName);
-        outputTable = settingConfig.getValue(ConfigKeys.snippetResultTableName);
+        snippetResultTable = settingConfig.getValue(ConfigKeys.snippetResultTableName);
+        documentResultTable = settingConfig.getValue(ConfigKeys.docResultTableName);
+        bunchResultTable = settingConfig.getValue(ConfigKeys.bunchResultTableName);
+
         if (compareReferenceTable.trim().length() == 0)
-            compareReferenceTable = outputTable;
+            compareReferenceTable = snippetResultTable;
 
         diffTable = settingConfig.getValue(ConfigKeys.compareTable).trim();
 
@@ -92,12 +91,12 @@ public class CompareTask extends GUITask {
     protected Object call() throws Exception {
         HashMap<String, HashMap<String, ArrayList<RecordRow>>> targetAnnotations = new HashMap<>();
         HashMap<String, HashMap<String, ArrayList<RecordRow>>> referenceAnnotations = new HashMap<>();
-        types.clear();
+        typeCategories.clear();
         logger = new NLPDBLogger(wdao, "LOG", "RUN_ID", targetAnnotator + "_vs_" + referenceAnnotator);
         logger.logStartTime();
-        if (!wdao.checkTableExits(outputTable)) {
-            updateGUIMessage("Table '" + outputTable + "' does not exit.");
-            popDialog("Note", "Table '" + outputTable + "' does not exit.",
+        if (!wdao.checkTableExits(snippetResultTable)) {
+            updateGUIMessage("Table '" + snippetResultTable + "' does not exit.");
+            popDialog("Note", "Table '" + snippetResultTable + "' does not exit.",
                     " You need to execute 'RunEasyCIE' first.");
             updateGUIProgress(0, 0);
             return null;
@@ -110,11 +109,14 @@ public class CompareTask extends GUITask {
             return null;
         }
 
-        readAnnotations(wdao, targetAnnotations, targetAnnotator, outputTable, typeFilter, targetRunId);
+        readAnnotations(wdao, targetAnnotations, targetAnnotator, snippetResultTable, typeFilter, targetRunId);
+        readAnnotations(wdao, targetAnnotations, targetAnnotator, documentResultTable, typeFilter, targetRunId);
+        readAnnotations(wdao, targetAnnotations, targetAnnotator, bunchResultTable, typeFilter, targetRunId);
+
         readAnnotations(rdao, referenceAnnotations, referenceAnnotator, compareReferenceTable, typeFilter, referenceRunId);
         updateGUIMessage("Start comparing...");
         updateGUIProgress(0, 1);
-        HashMap<String, EvalCounter> evalCounters = comparior.eval(targetAnnotations, referenceAnnotations, types, strictCompare);
+        HashMap<String, EvalCounter> evalCounters = comparior.eval(targetAnnotations, referenceAnnotations, typeCategories.keySet(), strictCompare);
         updateGUIProgress(1, 1);
         updateGUIMessage("Compare complete.");
         popDialog("Note", "Report: ", comparior.getScores(evalCounters));
@@ -164,8 +166,13 @@ public class CompareTask extends GUITask {
             int end = (int) record.getValueByColumnName("END") + (int) record.getValueByColumnName("SNIPPET_BEGIN");
             record.addCell("AEND", end);
 
+            if (annotatorTable.equals(snippetResultTable))
+                typeCategories.put(type, "SNIPPET");
+            else if (annotatorTable.equals(documentResultTable))
+                typeCategories.put(type, "DOCUMENT");
+            else
+                typeCategories.put(type, "BUNCH");
 
-            types.add(type);
             if (!annotations.containsKey(type)) {
                 annotations.put(type, new HashMap<>());
             }
@@ -183,7 +190,7 @@ public class CompareTask extends GUITask {
     public static int countQueryRecords(DAO dao, String tableName, String[] conditions) {
         int count = 0;
         StringBuilder sql = new StringBuilder();
-        sql.append(dao.queries.get("queryCount").replaceAll("\\{tableName}",tableName));
+        sql.append(dao.queries.get("queryCount").replaceAll("\\{tableName}", tableName));
         if (conditions != null && conditions.length > 0) {
             sql.append(" WHERE");
             for (int i = 0; i < conditions.length; i++) {

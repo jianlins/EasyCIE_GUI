@@ -320,13 +320,18 @@ public class Import extends GUITask {
             String content = n2c2Parser(file, docName, annotations);
             if (print)
                 System.out.print("Import: " + file.getName() + "\t\t");
+            RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
+                    .addCell("DOC_NAME", docName )
+                    .addCell("TEXT",content.trim())
+                    .addCell("BUNCH_ID", docName);
+            dao.insertRecord(tableName, recordRow);
 
 //          specifically deal with n2c2 data
             int i = 0;
             for (String docTxt : content.split("\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*+")) {
                 docTxt = docTxt.trim();
                 i++;
-                RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
+                recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
                         .addCell("DOC_NAME", docName + "_" + i)
                         .addCell("TEXT", docTxt)
                         .addCell("BUNCH_ID", docName);

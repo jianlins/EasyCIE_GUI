@@ -6,7 +6,6 @@ import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.*;
-import edu.utah.bmi.simple.gui.task.ConfigKeys;
 import edu.utah.bmi.simple.gui.task.ViewOutputDB;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,11 +16,8 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.*;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldOpenableTableCell;
-import javafx.util.converter.SettingValueConverter;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -31,15 +27,15 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.util.Callback;
+import javafx.util.converter.SettingValueConverter;
 
-import java.awt.*;
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.Map;
+
+import static edu.utah.bmi.simple.gui.controller.CellFactories.*;
 
 /**
  * Created by Jianlin on 5/19/15.
@@ -92,7 +88,7 @@ public class TasksOverviewController {
     private boolean enableRefresh = true;
 
 
-    private Main mainApp;
+    public Main mainApp;
 
 
     @FXML
@@ -115,7 +111,8 @@ public class TasksOverviewController {
 
     private WebEngine webEngine;
 
-    private int snippetPos = 1, limitRecords = 300;
+    private int limitRecords = 300;
+    private DAO dao;
 
     public TasksOverviewController() {
     }
@@ -368,18 +365,13 @@ public class TasksOverviewController {
         int numOfColumns = columanInfo.getColumnInfo().size();
         if (columanInfo.getColumnInfo().containsKey("BEGIN"))
             numOfColumns -= 2;
-        Callback<TableColumn, TableCell> colorCellFactory =
-                new Callback<TableColumn, TableCell>() {
-                    @Override
-                    public TableCell call(TableColumn p) {
-                        return new ColorAnnotationCell();
-                    }
-                };
+
 //        System.out.println("annoTableView.getColumns().size=" + annoTableView.getColumns().size());
 //        System.out.println("columanInfo size=" + columanInfo.getColumnInfo().size());
         if (annoTableView.getColumns().size() == 0 || annoTableView.getColumns().size() != columanInfo.getColumnInfo().size() - 4) {
             int i = 0;
             annoTableView.getColumns().clear();
+            int docNamePos = -1, snippetPos = -1;
             for (String columnName : columanInfo.getColumnInfo().keySet()) {
                 //use non property style for making dynamic table
                 final int j = i;
@@ -389,9 +381,17 @@ public class TasksOverviewController {
                     case "BEGIN":
                     case "END":
                     case "TEXT":
+                    case "DOC_TEXT":
                     case "FEATURES":
                     case "SNIPPET_BEGIN":
                         continue;
+                    case "DOC_NAME":
+                        docNamePos = i;
+                        widthStr = mainApp.tasks.getTask("settings").getValue("viewer/width/" + columnName).trim();
+                        if (widthStr.length() > 0)
+                            col.setPrefWidth(Integer.parseInt(widthStr));
+                        col.setCellFactory(colorCellHidenFactory);
+                        break;
                     case "SNIPPET":
                         snippetPos = i;
                         col.setMaxWidth(dbPanel.getWidth() * 0.7);
@@ -401,65 +401,65 @@ public class TasksOverviewController {
                         else
                             col.setPrefWidth(StaticVariables.snippetLength * 5);
                         col.setCellFactory(colorCellFactory);
-                        col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
-                            public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
-                                Object record = param.getValue().get(j);
-                                if (record != null)
-                                    return new SimpleObjectProperty<>(record);
-                                else
-                                    return new SimpleObjectProperty<>("");
-                            }
+                        col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>) param -> {
+                            Object record = param.getValue().get(j);
+                            if (record != null && record instanceof RecordRow && !((RecordRow) record).getStrByColumnName("SNIPPET").equals("") && !((RecordRow) record).getStrByColumnName("SNIPPET").equals("null"))
+                                return new SimpleObjectProperty<>(record);
+                            else
+                                return new SimpleObjectProperty<>("");
                         });
                         break;
                     default:
-
-                    case "TYPE":
+//                    case "TYPE":
                         widthStr = mainApp.tasks.getTask("settings").getValue("viewer/width/" + columnName).trim();
                         if (widthStr.length() > 0)
                             col.setPrefWidth(Integer.parseInt(widthStr));
-                        col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>() {
-                            public ObservableValue<Object> call(TableColumn.CellDataFeatures<ObservableList, Object> param) {
+                        col.setCellFactory(textCellFactory);
+                        if (columnName.equals("DOC_NAME")) {
+
+                        } else {
+                            col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>) param -> {
                                 Object record = param.getValue().get(j);
                                 if (record != null)
                                     return new SimpleObjectProperty<>(record);
                                 else
                                     return new SimpleObjectProperty<>("");
-                            }
-                        });
+                            });
+                        }
                         if (col.getPrefWidth() == 80)
                             col.setPrefWidth(90);
                 }
                 annoTableView.getColumns().addAll(col);
+
                 i++;
             }
-            annoTableView.setRowFactory(tv -> {
-                TableRow<ObservableList> row = new TableRow<>();
-                row.focusedProperty().addListener(new ChangeListener<Boolean>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                        if (newValue && !row.isEmpty()) {
-                            ObservableList clickedRow = row.getItem();
-                            if (clickedRow.get(snippetPos) instanceof RecordRow)
-                                updateHTMLEditor((RecordRow) clickedRow.get(snippetPos));
-                        }
-                    }
-                });
-                return row;
+            ObservableList columns = annoTableView.getColumns();
+            TableColumn docNameColumn = (TableColumn) columns.get(docNamePos);
+//            System.out.println(docNameColumn);
+            final int staticSnippetPos = snippetPos;
+            final int staticDocNamePos = docNamePos;
+            docNameColumn.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>) param -> {
+                Object record = param.getValue().get(staticSnippetPos);
+                if (record != null && record instanceof RecordRow) {
+                    RecordRow newRecordRow = ((RecordRow) record).clone();
+                    return new SimpleObjectProperty<>(newRecordRow);
+                } else
+                    return new SimpleObjectProperty<>(param.getValue().get(staticDocNamePos));
             });
         }
         dbPanel.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 if (annoTableView.getColumns() != null && annoTableView.getColumns().size() > 1) {
-                    TableColumn col = (TableColumn) annoTableView.getColumns().get(snippetPos);
-//                    System.out.println("reset the width of column " + snippetPos);
-                    String widthStr = mainApp.tasks.getTask("settings").getValue("viewer/width/" + col.getText()).trim();
-                    if (widthStr.length() > 0)
-                        col.setPrefWidth(Integer.parseInt(widthStr));
-                    else {
-                        col.setMaxWidth((int) newValue.doubleValue() * 0.9);
-                        col.setPrefWidth((int) newValue.doubleValue() * 0.38);
-                    }
+//                    TableColumn col = (TableColumn) annoTableView.getColumns().get(3);
+////                    System.out.println("reset the width of column " + snippetPos);
+//                    String widthStr = mainApp.tasks.getTask("settings").getValue("viewer/width/" + col.getText()).trim();
+//                    if (widthStr.length() > 0)
+//                        col.setPrefWidth(Integer.parseInt(widthStr));
+//                    else {
+//                        col.setMaxWidth((int) newValue.doubleValue() * 0.9);
+//                        col.setPrefWidth((int) newValue.doubleValue() * 0.38);
+//                    }
                     htmlViewer.setPrefWidth(newValue.doubleValue() * 0.11);
                 }
             }
@@ -478,6 +478,7 @@ public class TasksOverviewController {
                     case "BEGIN":
                     case "END":
                     case "TEXT":
+                    case "DOC_TEXT":
                     case "FEATURES":
                     case "SNIPPET_BEGIN":
                         continue;
@@ -516,8 +517,8 @@ public class TasksOverviewController {
             return true;
         }
 
+        dao = new DAO(new File(dbName));
 
-        DAO dao = new DAO(new File(dbName));
         String condition = filter;
         String lowerCasedCondition = condition.toLowerCase();
         if (filter.length() > 7) {
@@ -572,6 +573,37 @@ public class TasksOverviewController {
         return recordIterator;
     }
 
+
+    public void updateHTMLEditor(Object cellContent) {
+        if (cellContent instanceof RecordRow) {
+            updateHTMLEditor((RecordRow) cellContent);
+        } else {
+            updateHTMLEditor(cellContent + "");
+        }
+
+    }
+
+    private void updateHTMLEditor(String text) {
+        text = text.replaceAll("\\n", "<br>");
+//        htmlEditor.setHtmlText(text);
+        webEngine.loadContent(text);
+        annoDetails.setBottom(null);
+    }
+
+    public void updateHTMLEditor(String html, Object item) {
+        webEngine.loadContent(html);
+        if (item instanceof RecordRow) {
+            RecordRow record = (RecordRow) item;
+            if (record.getStrByColumnName("FEATURES") != null && record.getStrByColumnName("FEATURES").length() > 0) {
+                annoDetails.setBottom(featureTable);
+                updateFeatureTable(record.getStrByColumnName("FEATURES"));
+            } else {
+                annoDetails.setBottom(null);
+            }
+        } else {
+            annoDetails.setBottom(null);
+        }
+    }
 
     private void updateHTMLEditor(RecordRow record) {
         String text;

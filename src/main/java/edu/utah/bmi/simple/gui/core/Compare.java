@@ -208,7 +208,7 @@ public class Compare {
 
     public HashMap<String, EvalCounter> eval(HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations1,
                                              HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations2,
-                                             HashSet<String> types, boolean strictCompare) {
+                                             Set<String> types, boolean strictCompare) {
         LinkedHashMap<String, EvalCounter> evalCounters = new LinkedHashMap<>();
         for (String type : types) {
             if (!evalCounters.containsKey(total))
@@ -403,7 +403,6 @@ public class Compare {
         }
     }
 
-
     public RecordRowIterator queryRecords(DAO dao, String tableName, String[] conditions) {
         StringBuilder sql = new StringBuilder();
         sql.append(dao.queries.get("queryAnnos").replaceAll("\\{tableName}", tableName));
@@ -419,9 +418,12 @@ public class Compare {
                     sql.append(" AND");
             }
         }
+        sql.append(" ORDER BY DOC_NAME ");
         sql.append(";");
 
         RecordRowIterator recordIterator = dao.queryRecords(sql.toString());
         return recordIterator;
     }
+
+
 }

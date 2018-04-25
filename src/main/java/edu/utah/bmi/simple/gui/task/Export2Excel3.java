@@ -5,6 +5,7 @@ import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.core.ExcelExporter2;
+import edu.utah.bmi.simple.gui.core.ExcelExporter3;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
@@ -19,19 +20,18 @@ import java.util.Date;
  * @author Jianlin Shi
  * Created on 2/13/17.
  */
-@Deprecated
-//because the outputs have been split to multiple tables. this won't work in new table structure.
-public class Export2Excel2 extends GUITask {
-    protected String outputDB, annotator, outputTable;
+public class Export2Excel3 extends GUITask {
+    protected String outputDB, annotator, snippetResultTable, documentResultTable, bunchResultTable, inputTable, viewQueryName;
     private File exportDir;
     private String sql, count;
     private int sampleSize = 0;
+    private boolean exportTxtDocs = false;
 
-    protected Export2Excel2() {
+    protected Export2Excel3() {
 
     }
 
-    public Export2Excel2(TasksFX tasks) {
+    public Export2Excel3(TasksFX tasks) {
         initiate(tasks);
     }
 
@@ -44,19 +44,28 @@ public class Export2Excel2 extends GUITask {
         updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
         outputDB = config.getValue(ConfigKeys.writeDBConfigFileName);
-        outputTable = config.getValue(ConfigKeys.snippetResultTableName);
+        inputTable = config.getValue(ConfigKeys.inputTableName);
+        snippetResultTable = config.getValue(ConfigKeys.snippetResultTableName);
+        documentResultTable = config.getValue(ConfigKeys.docResultTableName);
+        bunchResultTable = config.getValue(ConfigKeys.bunchResultTableName);
 
         config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
+        viewQueryName = config.getValue(ConfigKeys.viewQueryName);
 
         config = tasks.getTask("export");
-        String configString = config.getValue(ConfigKeys.excelDir);
+
         sql = config.getValue("excel/sql");
+        String configString = config.getValue(ConfigKeys.exportTxtDocs);
+        exportTxtDocs = configString.length() > 0 && configString.toLowerCase().charAt(0) == 't';
+
+
         String value = config.getValue("excel/sampleSize").trim();
         sampleSize = value.length() > 0 ? Integer.parseInt(value) : sampleSize;
 
 
 //        count = config.getValue("excel/count");
+        configString = config.getValue(ConfigKeys.excelDir);
         exportDir = new File(configString);
         if (!exportDir.exists()) {
             try {
@@ -79,15 +88,27 @@ public class Export2Excel2 extends GUITask {
         // Update UI here.
         boolean res = false;
         DAO dao = new DAO(new File(outputDB));
-
-        if (sql.toLowerCase().indexOf("where") == -1) {
-            sql += " WHERE RUN_ID=" + getLastRunIdofAnnotator(dao, outputTable, annotator);
+        dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetResultTable, false);
+        dao.initiateTableFromTemplate("ANNOTATION_TABLE", documentResultTable, false);
+        dao.initiateTableFromTemplate("ANNOTATION_TABLE", bunchResultTable, false);
+        String[] values = ViewOutputDB.buildQuery(dao, viewQueryName, annotator, snippetResultTable, documentResultTable, bunchResultTable, inputTable);
+        String sourceQuery = values[0];
+        String filter = values[1];
+        String annotatorLastRunid = values[2];
+        String lastLogRunId = values[3];
+//
+//        if (sql.toLowerCase().indexOf("where") == -1) {
+//            sql += " WHERE RUN_ID=" + getLastRunIdofAnnotator(dao, snippetResultTable, annotator);
+//        }
+        if (sql.trim().length() == 0) {
+            sql = sourceQuery;
+            if (filter.trim().length() > 0) {
+                sql = sql + " WHERE ( " + filter + " ) ";
+            }
         }
 
         String tmp = sql.toLowerCase();
-        count = "SELECT COUNT(*) " + sql.substring(tmp.indexOf(" from ")) + " AND TYPE LIKE '%_Doc'";
-
-
+        count = "SELECT COUNT(*) " + sql.substring(tmp.indexOf(" from "));
 
 
         RecordRow recordRow = dao.queryRecord(count);
@@ -100,35 +121,12 @@ public class Export2Excel2 extends GUITask {
                 + "_" + new SimpleDateFormat("yyyy_MM_dd_HH_mm").format(new Date()) + ".xlsx");
 
 
-        ExcelExporter2 excelExporter = new ExcelExporter2(dao, sql, total, task);
+        ExcelExporter3 excelExporter = new ExcelExporter3(dao, sql, total, task, exportTxtDocs, inputTable);
         excelExporter.export(excel);
 
 
         updateGUIProgress(1, 1);
         return null;
-    }
-
-    public int getLastRunIdofAnnotator(DAO dao, String outputTable, String annotator) {
-        int id = -1;
-        RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", outputTable, annotator);
-        if (recordRowIter.hasNext()) {
-            RecordRow recordRow = recordRowIter.next();
-            if (recordRow != null && recordRow.getValueByColumnId(1) != null)
-                id = (int) recordRow.getValueByColumnId(1);
-
-        }
-        return id;
-    }
-
-    public int getLastLogRunId(DAO dao, String annotator) {
-        int id = -1;
-        RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("lastLogRunID", annotator);
-        if (recordRowIter.hasNext()) {
-            RecordRow recordRow = recordRowIter.next();
-            if (recordRow != null)
-                id = (int) recordRow.getValueByColumnId(1);
-        }
-        return id;
     }
 
 

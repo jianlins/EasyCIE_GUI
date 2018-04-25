@@ -15,45 +15,43 @@ import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class ExcelExporter2 {
+public class ExcelExporter3 {
     private DAO dao;
     private String sql;
     private static HashMap<String, Font> typeFonts = new HashMap<>();
-    private static HashMap<String, Integer> coreColumnPositions = new HashMap<>();
-    private LinkedHashSet<String> docLevelColumns = new LinkedHashSet<>();
+    private static HashMap<String, Integer> columnPositions = new HashMap<>();
     private HashSet<String> exportedDocs = new HashSet<>();
     private GUITask task;
     private int total = -1;
     private boolean exportText = false;
     private File rptDir;
+    private ArrayList<String> extraColumns = new ArrayList<>();
+    private String inputTable;
 
-    public ExcelExporter2(DAO dao, String sql) {
-        init(dao, sql, -1, null, false);
+    public ExcelExporter3(DAO dao, String sql) {
+        init(dao, sql, -1, null, false, null);
     }
 
-    public ExcelExporter2(DAO dao, String sql, int total, GUITask task) {
-        init(dao, sql, total, task, true);
+    public ExcelExporter3(DAO dao, String sql, int total, GUITask task) {
+        init(dao, sql, total, task, false, null);
     }
 
-    public ExcelExporter2(DAO dao, String sql, int total, GUITask task, boolean exportText) {
-        init(dao, sql, total, task, exportText);
+    public ExcelExporter3(DAO dao, String sql, int total, GUITask task, boolean exportText, String inputTable) {
+        init(dao, sql, total, task, exportText, inputTable);
     }
 
 
-    private void init(DAO dao, String sql, int total, GUITask task, boolean exportText) {
+    private void init(DAO dao, String sql, int total, GUITask task, boolean exportText, String inputTable) {
         this.dao = dao;
         this.sql = sql;
         this.task = task;
         this.total = total;
         this.exportText = exportText;
-        docLevelColumns.add("Comments");
-        docLevelColumns.add("Agree/Disagree");
-        docLevelColumns.add("DOC_CONCLUSION");
-        docLevelColumns.add("PAT_ID");
-        docLevelColumns.add("DOC_NAME");
+        this.inputTable = inputTable;
+        extraColumns.add("Comments");
+        extraColumns.add("Agree/Disagree");
     }
 
     public void setExportText(boolean exportText) {
@@ -80,6 +78,8 @@ public class ExcelExporter2 {
         XSSFSheet sheet = createTitleRow(workbook, columnInfo);
 
         writeDataRows(workbook, sheet, recordIter, columnInfo);
+        if (exportText)
+            exportRpts();
         if (total > -1)
             task.updateGUIMessage("Write to disk...");
         try {            //Write the workbook in file system
@@ -95,6 +95,7 @@ public class ExcelExporter2 {
 
     }
 
+
     private XSSFSheet createTitleRow(XSSFWorkbook workbook, LinkedHashMap<String, String> columnInfo) {
         XSSFSheet sheet = workbook.createSheet("Sheet1");
         XSSFRow titleRow = sheet.createRow(1);
@@ -105,29 +106,28 @@ public class ExcelExporter2 {
         cs.setFont(f);
         titleRow.setRowStyle(cs);
         XSSFCell cell;
-        for (String docLevelColumn : docLevelColumns) {
-            coreColumnPositions.put(docLevelColumn, cellNum);
-            cell = titleRow.createCell(cellNum++);
-            cell.setCellValue(docLevelColumn);
-
+        for (String columnName : extraColumns) {
+            if (!columnPositions.containsKey(columnName))
+                columnPositions.put(columnName, columnPositions.size());
+            cell = titleRow.createCell(columnPositions.get(columnName));
+            cell.setCellValue(columnName.toUpperCase());
         }
 
         for (String columnName : columnInfo.keySet()) {
-            if (!coreColumnPositions.containsKey(columnName))
-                coreColumnPositions.put(columnName, coreColumnPositions.size());
+            if (!columnPositions.containsKey(columnName))
+                columnPositions.put(columnName, columnPositions.size());
             String upperCaseColumnName = columnName.toUpperCase();
             switch (upperCaseColumnName) {
                 case "BEGIN":
                 case "END":
+                case "TEXT":
+                case "SNIPPET_BEGIN":
                     break;
                 case "SNIPPET":
-                    sheet.setColumnWidth(coreColumnPositions.get(columnName), 60 * 256);
+                    sheet.setColumnWidth(columnPositions.get(columnName), 60 * 256);
                 default:
-
-                    if (!docLevelColumns.contains(columnName)) {
-                        cell = titleRow.createCell(coreColumnPositions.get(columnName));
-                        cell.setCellValue(upperCaseColumnName);
-                    }
+                    cell = titleRow.createCell(columnPositions.get(columnName));
+                    cell.setCellValue(upperCaseColumnName);
                     break;
             }
         }
@@ -143,30 +143,20 @@ public class ExcelExporter2 {
 //        skip title row
         int rowNum = 2;
         int progress = 0;
-        HashMap<String, ArrayList<RecordRow>> snippets = new HashMap<>();
-        LinkedHashMap<String, ArrayList<RecordRow>> docConclusions = new LinkedHashMap<>();
+        LinkedHashMap<String, ArrayList<RecordRow>> snippets = new LinkedHashMap<>();
         while (recordIter.hasNext()) {
             RecordRow recordRow = recordIter.next();
-            String type = recordRow.getStrByColumnName("TYPE");
             String docName = recordRow.getStrByColumnName("DOC_NAME");
 
-            if (!docConclusions.containsKey(docName)) {
-                docConclusions.put(docName, new ArrayList<>());
-                snippets.put(docName, new ArrayList<>());
-                if (total > -1) {
-                    task.updateGUIProgress(progress++, total);
-                    if (progress > total)
-                        break;
-                }
+
+            if (total > -1) {
+                task.updateGUIProgress(progress++, total);
+                if (progress > total)
+                    break;
             }
-
-            if (type.toUpperCase().endsWith("_DOC")) {
-                recordRow.addCell("DOC_CONCLUSION", type);
-                recordRow.addCell("Agree/Disagree", 'y');
-                docConclusions.get(docName).add(recordRow);
-            } else
-                snippets.get(docName).add(recordRow);
-
+            if (!snippets.containsKey(docName))
+                snippets.put(docName, new ArrayList<>());
+            snippets.get(docName).add(recordRow);
 
         }
 
@@ -181,49 +171,23 @@ public class ExcelExporter2 {
 
 //        System.out.println(docConclusions.size());
 
-        for (Map.Entry<String, ArrayList<RecordRow>> entry : docConclusions.entrySet()) {
+        for (Map.Entry<String, ArrayList<RecordRow>> entry : snippets.entrySet()) {
 //        write doc conclusion row
 
             String docName = entry.getKey();
-            if (exportText) {
-                link = (XSSFHyperlink) createHelper
-                        .createHyperlink(HyperlinkType.URL);
-                link.setAddress("./docs/" + docName + ".txt");
 
-            }
-            for (RecordRow docRow : entry.getValue()) {
-                createEmptyRow(dataRow);
-
-                for (String docColumn : docLevelColumns) {
-                    if (docRow.getStrByColumnName(docColumn) != null) {
-                        int pos = coreColumnPositions.get(docColumn);
-//                        System.out.println(pos);
-                        XSSFCell cell = dataRow.getCell(pos);
-                        cell.setCellValue(docRow.getStrByColumnName(docColumn));
-                        cell.setCellStyle(style);
-                        if (exportText && docColumn.equals("DOC_NAME")) {
-                            cell.setHyperlink(link);
-                            exportRpt(docName, docRow.getStrByColumnName("TEXT"));
-                        }
-                    }
-                }
-            }
-
-
-            if (snippets.get(docName).size() == 0) {
-                dataRow = sheet.createRow(rowNum++);
-                createEmptyRow(dataRow);
-                continue;
-            }
-
+            createEmptyRow(dataRow);
 
             for (RecordRow snippetRecord : snippets.get(docName)) {
                 String type = "";
+                if (exportText) {
+                    exportedDocs.add(docName);
+                }
                 for (String columnName : columnInfo.keySet()) {
                     switch (columnName) {
                         case "BEGIN":
                         case "END":
-                            break;
+                        case "SNIPPET_BEGIN":
                         case "TEXT":
                             break;
                         case "SNIPPET":
@@ -231,26 +195,32 @@ public class ExcelExporter2 {
                             int end = Integer.parseInt(snippetRecord.getStrByColumnName("END"));
                             Font colorFont = getFont(workbook, type);
                             String snippet = snippetRecord.getStrByColumnName("SNIPPET");
-                            if (snippet==null || snippet.equals("null"))
+                            if (snippet == null || snippet.equals("null"))
                                 break;
                             snippet = snippet.replaceAll("[^\\.,\\-;\\(\\)'/\\w]", " ");
                             XSSFRichTextString string = new XSSFRichTextString(snippet);
                             string.applyFont(begin, end, colorFont);
-                            XSSFCell cell = dataRow.getCell(coreColumnPositions.get(columnName));
+                            XSSFCell cell = dataRow.getCell(columnPositions.get(columnName));
                             cell.setCellValue(string);
                             break;
-                        case "TYPE":
-                            type = snippetRecord.getStrByColumnName(columnName);
                         default:
-                            if (!docLevelColumns.contains(columnName)) {
-                                String value = snippetRecord.getStrByColumnName(columnName);
-                                cell = dataRow.getCell(coreColumnPositions.get(columnName));
-                                if (cell != null)
-                                    cell.setCellValue(value.trim());
-                                else
-                                    System.out.println(columnName);
-
+                            String value = snippetRecord.getStrByColumnName(columnName);
+                            if (value == null || value.equals("null"))
+                                value = "";
+                            cell = dataRow.getCell(columnPositions.get(columnName));
+                            if (cell != null)
+                                cell.setCellValue(value.trim());
+                            else
+                                System.out.println(columnName);
+                            if (exportText) {
+                                link = (XSSFHyperlink) createHelper
+                                        .createHyperlink(HyperlinkType.URL);
+                                link.setAddress("./docs/" + docName + ".txt");
+                                if (columnName.equals("DOC_NAME") || columnName.equals("DOC_ID")) {
+                                    cell.setHyperlink(link);
+                                }
                             }
+
                             break;
                     }
                 }
@@ -277,7 +247,7 @@ public class ExcelExporter2 {
     }
 
     private void createEmptyRow(XSSFRow dataRow) {
-        for (int i = 0; i < coreColumnPositions.size(); i++)
+        for (int i = 0; i < columnPositions.size(); i++)
             dataRow.createCell(i + 1);
     }
 
@@ -286,6 +256,17 @@ public class ExcelExporter2 {
             FileUtils.writeStringToFile(new File(rptDir, rptId + ".txt"), text, "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void exportRpts() {
+        dao.initiateTableFromTemplate("DOCUMENTS_TABLE", inputTable, false);
+        for (String docName : exportedDocs) {
+            RecordRowIterator iter = dao.queryRecordsFromPstmt(inputTable, docName);
+            if (iter.hasNext()) {
+                RecordRow recordRow = iter.next();
+                exportRpt(docName, recordRow.getStrByColumnName("TEXT"));
+            }
         }
     }
 

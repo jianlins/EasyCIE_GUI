@@ -54,6 +54,7 @@ public class ConfigKeys {
     public static final String outputXMIDir = "format/uima";
     public static final String exportTypes = "format/exportTypes";
     public static final String excelDir = "excel/directory";
+    public static final String exportTxtDocs = "excel/exportTxtDocs";
     public static final String sampleSize = "excel/sampleSize";
     public static final String mentionTypes = "excel/includeMentionTypes";
     public static final String sampleOnColumn = "excel/sampleOnColumn";

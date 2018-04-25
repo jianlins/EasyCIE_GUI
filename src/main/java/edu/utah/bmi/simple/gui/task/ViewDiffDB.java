@@ -71,11 +71,12 @@ public class ViewDiffDB extends GUITask {
                             return;
                         }
                         int lastRunId = (int) recordRow.getValueByColumnId(1);
-                        if (CompareTask.lastRunId != -1 && lastRunId < CompareTask.lastRunId) {
+                        if (CompareBDSTask.lastRunId != -1 && lastRunId < CompareBDSTask.lastRunId) {
                             popDialog("Note", "No difference saved in the most recent comparison. ",
                                     "The last comparison of \"" + annotator + "\" has no difference saved in table \"" + diffTable + "\".\n" +
                                             "Here displays the previous comparison that has some difference saved.");
                         }
+                        dao.close();
                         TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, diffTable,
                                 " WHERE annotator='" + annotator + "' AND RUN_ID=" + lastRunId, ColorAnnotationCell.colorCompare);
                         updateMessage("data loaded");

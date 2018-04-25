@@ -22,6 +22,7 @@ import java.util.HashSet;
  * @author Jianlin Shi
  * Created on 2/13/17.
  */
+@Deprecated
 public class Export2Excel extends GUITask {
     protected String outputDB, outputTable, annotator, sampleOnColumn;
     private File exportDir;

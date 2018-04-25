@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TableCell;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -19,8 +20,8 @@ import static edu.utah.bmi.simple.gui.entry.StaticVariables.snippetLength;
  * Created on 2/13/17.
  */
 public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
-    HBox hbox;
-    private int maxTxtWindow;
+    protected HBox hbox;
+    protected int maxTxtWindow;
     public static String colorDifferential;
     public final static String colorOutput = "output";
     public final static String colorCompare = "diff";
@@ -29,22 +30,32 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
     public ColorAnnotationCell() {
     }
 
+    protected void superUpdateItem(Object item, boolean empty) {
+        super.updateItem(item, empty);
+    }
 
     protected void updateItem(Object item, boolean empty) {
 //        System.out.println(">>" + item + "<<");
-        super.updateItem(item, empty);
+        superUpdateItem(item, empty);
         if (!empty) {
             hbox = new HBox();
-            addText((RecordRow) item);
+            if (item instanceof RecordRow)
+                addText((RecordRow) item);
+            else
+                addText(item + "");
         }
     }
 
-    private void addText(RecordRow recordRow) {
+    protected void addText(String text) {
+        renderHighlighter("", "", text, "000000", Background.EMPTY);
+    }
+
+    protected void addText(RecordRow recordRow) {
         String sentence = (String) recordRow.getValueByColumnName("SNIPPET");
         if (sentence != null) {
 
             String pre, marker, post;
-            if (recordRow.getValueByColumnName("TEXT") != null) {
+            if (recordRow.getValueByColumnName("BEGIN") != null) {
                 sentence = sentence.replaceAll("\\n", " ");
                 int sentenceLength = sentence.length();
                 int begin = Integer.parseInt(recordRow.getValueByColumnName("BEGIN") + "");
@@ -78,7 +89,7 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
             pre = pre.replaceAll("[\\s|\\n]", " ");
             marker = marker.replaceAll("[\\s|\\n]", " ");
             post = post.replaceAll("[\\s|\\n]", " ");
-            renderHighlighter(pre, marker, post, color);
+            renderHighlighter(pre, marker, post, color, Background.EMPTY);
         }
     }
 
@@ -97,11 +108,12 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         return color;
     }
 
-    private void renderHighlighter(String pre, String marker, String post, String color) {
+    protected void renderHighlighter(String pre, String marker, String post, String color, Background background) {
         pre = pre.replaceAll("\\n", " ");
         marker = marker.replaceAll("\\n", " ");
         post = post.replaceAll("\\n", " ");
         hbox.setAlignment(Pos.CENTER_LEFT);
+        hbox.setBackground(background);
         hbox.getChildren().clear();
         Label preLabel = new Label(pre);
         preLabel.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
@@ -113,12 +125,11 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         hbox.setHgrow(preLabel, Priority.NEVER);
         hbox.setHgrow(highlighter, Priority.NEVER);
         hbox.setHgrow(postLabel, Priority.ALWAYS);
-
         setGraphic(hbox);
     }
 
 
-    private int cutTail(String snippet, int begin, int end) {
+    protected int cutTail(String snippet, int begin, int end) {
         int postLength = snippet.length() - end;
         if (snippet.length() < StaticVariables.snippetLength) {
             return snippet.length();
@@ -134,7 +145,7 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         return end + postLength;
     }
 
-    private int cutHeader(int postCut, int begin, int end) {
+    protected int cutHeader(int postCut, int begin, int end) {
         if (postCut < StaticVariables.snippetLength) {
             return 0;
         }
@@ -159,6 +170,33 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         String post = text.substring(end);
         html = StaticVariables.preTag + pre + StaticVariables.htmlMarker0.toLowerCase().replaceAll("ffffff", color) + txt + StaticVariables.htmlMarker1 + post + StaticVariables.postTag;
         return html;
+    }
+
+    public String generateHTML() {
+        String html;
+        Object value = this.itemProperty().getValue();
+        if (value instanceof RecordRow) {
+            RecordRow recordRow = (RecordRow) value;
+            if (recordRow.getValueByColumnName("BEGIN") == null) {
+                if(recordRow.getValueByColumnName("SNIPPET") == null)
+                    html = recordRow.getStrByColumnName("TEXT");
+                else
+                    html = recordRow.getStrByColumnName("SNIPPET");
+                html = html.replaceAll("\\n", "<br>");
+            } else {
+                html = recordRow.getStrByColumnName("SNIPPET");
+                String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
+                html = ColorAnnotationCell.generateHTML(html,
+                        (int) recordRow.getValueByColumnName("BEGIN"),
+                        (int) recordRow.getValueByColumnName("END"),
+                        color);
+            }
+        } else {
+            html = value + "";
+            html = html.replaceAll("\\n", "<br>");
+        }
+        return html;
+
     }
 
 

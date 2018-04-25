@@ -21,8 +21,8 @@ public class ViewOutputDB extends GUITask {
     protected String snippetResultTable, inputTable, docResultTable, bunchResultTable, annotator;
     private DAO dao;
     public boolean joinDocTable = true;
-    private String sourceQuery;
-    private String primeTable = "RS";
+    public static String sourceQuery;
+
 
     protected ViewOutputDB() {
 
@@ -50,9 +50,10 @@ public class ViewOutputDB extends GUITask {
             joinDocTable = false;
         config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
+        TasksOverviewController.currentTasksOverviewController.sqlFilter.setText("");
         viewQueryName = config.getValue(ConfigKeys.viewQueryName);
         if (dao == null) {
-            dao = new DAO(new File(readDBConfigFileName));
+            dao = new DAO(new File(outputDB));
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetResultTable, false);
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", docResultTable, false);
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", bunchResultTable, false);
@@ -60,11 +61,13 @@ public class ViewOutputDB extends GUITask {
 
     }
 
-    public String buildQuery(String queryName) {
-        String sourceQuery;
+    public static String[] buildQuery(DAO dao, String queryName,  String annotator,
+                                      String snippetResultTable, String docResultTable, String bunchResultTable,
+                                      String inputTable) {
+        String sourceQuery, primeTable = "RS";
+//       match to querySnippetAnnos, queryDocSnippetAnnos, queryBunchDocSnippetAnnos
+//        or querySnippetAnnosWSource,queryDocSnippetAnnosWSource,queryBunchDocSnippetAnnosWSource
         queryName = "query" + queryName + "Annos";
-        if (joinDocTable)
-            queryName = queryName + "WSource";
         if (queryName.toLowerCase().indexOf("bunch") != -1) {
             primeTable = "RB";
         } else if (queryName.toLowerCase().indexOf("doc") != -1) {
@@ -75,7 +78,37 @@ public class ViewOutputDB extends GUITask {
                 .replaceAll("\\{docResultTable}", docResultTable)
                 .replaceAll("\\{bunchResultTable}", bunchResultTable)
                 .replaceAll("\\{inputTable}", inputTable);
-        return sourceQuery;
+        String filter = "", annotatorLastRunid = "", lastLogRunId = "";
+        if (annotator.trim().length() > 0) {
+            if (!dao.checkTableExits(snippetResultTable)) {
+                return null;
+            }
+            annotatorLastRunid = getLastRunIdofAnnotator(dao, snippetResultTable, annotator);
+            lastLogRunId = getLastLogRunId(dao, annotator);
+            String runId;
+            if (!annotatorLastRunid.equals("-1")) {
+                if (!annotatorLastRunid.equals(lastLogRunId)) {
+                    runId = lastLogRunId;
+                } else {
+                    runId = annotatorLastRunid;
+                }
+            } else {
+                runId = lastLogRunId;
+            }
+            if (!runId.equals("-1")) {
+                filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId;
+                switch (primeTable) {
+                    case "RB":
+                        filter = filter + " AND RD.RUN_ID=" + runId + " AND (RS.RUN_ID=" + runId + " OR RS.RUN_ID IS NULL)";
+                        break;
+                    case "RD":
+                        filter = filter + " AND (RS.RUN_ID=" + annotatorLastRunid + " OR RS.RUN_ID IS NULL)";
+                        break;
+                }
+            }
+
+        }
+        return new String[]{sourceQuery, filter, annotatorLastRunid, lastLogRunId};
     }
 
     public String modifyQuery(String sourceQuery, String conditions) {
@@ -102,49 +135,32 @@ public class ViewOutputDB extends GUITask {
                 }
                 // Update UI here.
                 boolean res = false;
-                String filter = "";
-                sourceQuery = buildQuery(viewQueryName);
-                if (annotator.trim().length() > 0) {
-                    DAO dao = new DAO(new File(outputDB));
-                    if (!dao.checkTableExits(snippetResultTable)) {
-                        updateMessage("Table '" + snippetResultTable + "' does not exit.");
-                        popDialog("Note", "Table '" + snippetResultTable + "' does not exit.",
-                                " You need to execute 'RunEasyCIE' first.");
-                        updateProgress(0, 0);
-                        return;
-                    }
-                    String annotatorLastRunid = getLastRunIdofAnnotator(dao, snippetResultTable, annotator);
-                    String lastLogRunId = getLastLogRunId(dao, annotator);
-                    if (annotatorLastRunid.equals("-1")) {
-                        popDialog("Note", "There is no output in the previous runs of the annotator: \"" + annotator + "\"",
-                                "Please check the pipeline configuration to see if the rules are configured correctly, and " +
-                                        "if the dataset has been imported successfully.\n" +
-                                        "EasyCIE will display all the previous outputs if there is any.");
-                    } else {
-                        String runId;
-                        if (!annotatorLastRunid.equals(lastLogRunId)) {
-                            popDialog("Note", "There is no output in the most recent run of annotator:\"" + annotator + "\"," +
-                                            " which RUN_ID=" + annotatorLastRunid,
-                                    "Please check the pipeline configuration to see if the rules are configured correctly, and " +
-                                            "if the dataset has been imported successfully.\n" +
-                                            "Instead, EasyCIE Will display the last run of annotator \"" + annotator + "\" that has some output, which " +
-                                            "RUN_ID=" + lastLogRunId);
-                            runId = lastLogRunId;
-                        } else {
-                            runId = annotatorLastRunid;
-                            filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId;
-                            switch (primeTable) {
-                                case "RB":
-                                    filter = filter + " AND RD.RUN_ID=" + runId + " AND (RS.RUN_ID=" + runId + " OR RS.RUN_ID IS NULL)";
-                                    break;
-                                case "RD":
-                                    filter = filter + " AND (RS.RUN_ID=" + annotatorLastRunid + " OR RS.RUN_ID IS NULL)";
-                                    break;
-                            }
-                        }
-                    }
 
+                String[] values = buildQuery(dao, viewQueryName, annotator, snippetResultTable, docResultTable, bunchResultTable, inputTable);
+                sourceQuery = values[0];
+                String filter = values[1];
+                String annotatorLastRunid = values[2];
+                String lastLogRunId = values[3];
+                if (values == null) {
+                    updateMessage("Table '" + snippetResultTable + "' does not exit.");
+                    popDialog("Note", "Table '" + snippetResultTable + "' does not exit.",
+                            " You need to execute 'RunEasyCIE' first.");
+                    updateProgress(0, 0);
+                } else if (annotatorLastRunid.equals("-1")) {
+                    popDialog("Note", "There is no output in the previous runs of the annotator: \"" + annotator + "\"",
+                            "Please check the pipeline configuration to see if the rules are configured correctly, and " +
+                                    "if the dataset has been imported successfully.\n" +
+                                    "EasyCIE will display all the previous outputs if there is any.");
+                } else if (!annotatorLastRunid.equals(lastLogRunId)) {
+                    popDialog("Note", "There is no output in the most recent run of annotator:\"" + annotator + "\"," +
+                                    " which RUN_ID=" + annotatorLastRunid,
+                            "Please check the pipeline configuration to see if the rules are configured correctly, and " +
+                                    "if the dataset has been imported successfully.\n" +
+                                    "Instead, EasyCIE Will display the last run of annotator \"" + annotator + "\" that has some output, which " +
+                                    "RUN_ID=" + lastLogRunId);
                 }
+
+
                 String otherConditions = TasksOverviewController.currentTasksOverviewController.sqlFilter.getText().trim();
                 if (otherConditions.length() == 0) {
                     TasksOverviewController.currentTasksOverviewController.sqlFilter.setText(filter);
@@ -157,6 +173,7 @@ public class ViewOutputDB extends GUITask {
                 RecordRowIterator recordIterator = dao.queryRecords(sourceQuery);
                 TasksOverviewController.currentTasksOverviewController.doctable = false;
                 res = TasksOverviewController.currentTasksOverviewController.showDBTable(recordIterator, ColorAnnotationCell.colorOutput);
+                dao.close();
                 if (res)
                     updateMessage("data loaded");
                 else
@@ -167,7 +184,7 @@ public class ViewOutputDB extends GUITask {
         return null;
     }
 
-    public String getLastRunIdofAnnotator(DAO dao, String outputTable, String annotator) {
+    public static String getLastRunIdofAnnotator(DAO dao, String outputTable, String annotator) {
         String id = "-1";
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", outputTable, annotator);
         if (recordRowIter.hasNext()) {
@@ -182,7 +199,7 @@ public class ViewOutputDB extends GUITask {
         return id;
     }
 
-    public String getLastLogRunId(DAO dao, String annotator) {
+    public static String getLastLogRunId(DAO dao, String annotator) {
         String id = "-1";
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("lastLogRunID", annotator);
         if (recordRowIter.hasNext()) {
