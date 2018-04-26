@@ -4,7 +4,6 @@ import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.simple.gui.controller.CellFactories;
 import edu.utah.bmi.simple.gui.controller.ColorAnnotationCell;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -18,11 +17,12 @@ import java.io.File;
  * Created on 2/13/17.
  */
 public class ViewOutputDB extends GUITask {
-    protected String outputDB, readDBConfigFileName, writeConfigFileName, viewQueryName;
-    protected String snippetResultTable, inputTable, docResultTable, bunchResultTable, annotator;
+    protected String outputDB, readDBConfigFileName, writeConfigFileName, viewQueryName,referenceTable;
+    protected String snippetResultTable, inputTable, docResultTable, bunchResultTable, annotator,referenceAnnotator;
     private DAO dao;
     public boolean joinDocTable = true;
     public static String sourceQuery;
+    public boolean viewReference=false;
 
 
     protected ViewOutputDB() {
@@ -30,14 +30,17 @@ public class ViewOutputDB extends GUITask {
     }
 
     public ViewOutputDB(TasksFX tasks) {
-        initiate(tasks);
+        initiate(tasks,"");
     }
 
-    public ViewOutputDB(TasksFX tasks, String... paras) {
+    public ViewOutputDB(TasksFX tasks, String paras) {
         initiate(tasks, paras);
     }
 
-    protected void initiate(TasksFX tasks, String... paras) {
+    protected void initiate(TasksFX tasks, String paras) {
+        if(paras!=null && paras.length()>0){
+            viewReference=paras.toLowerCase().startsWith("r");
+        }
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
         TasksOverviewController.currentTasksOverviewController.currentGUITask = this;
@@ -49,17 +52,17 @@ public class ViewOutputDB extends GUITask {
         bunchResultTable = config.getValue(ConfigKeys.bunchResultTableName);
         readDBConfigFileName = config.getValue(ConfigKeys.readDBConfigFileName);
         writeConfigFileName = config.getValue(ConfigKeys.writeDBConfigFileName);
+        referenceTable=config.getValue(ConfigKeys.referenceTable);
+
         if (!readDBConfigFileName.equals(writeConfigFileName))
             joinDocTable = false;
         config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
-        TasksOverviewController.currentTasksOverviewController.sqlFilter.setText("");
+        referenceAnnotator=config.getValue(ConfigKeys.referenceAnnotator);
+        TasksOverviewController.currentTasksOverviewController.annoSqlFilter.setText("");
         viewQueryName = config.getValue(ConfigKeys.viewQueryName);
         if (dao == null) {
             dao = new DAO(new File(outputDB));
-            dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetResultTable, false);
-            dao.initiateTableFromTemplate("ANNOTATION_TABLE", docResultTable, false);
-            dao.initiateTableFromTemplate("ANNOTATION_TABLE", bunchResultTable, false);
         }
 
     }
@@ -77,6 +80,7 @@ public class ViewOutputDB extends GUITask {
             primeTable = "RD";
         }
         sourceQuery = dao.queries.get(queryName);
+
         sourceQuery = sourceQuery.replaceAll("\\{tableName}", snippetResultTable)
                 .replaceAll("\\{docResultTable}", docResultTable)
                 .replaceAll("\\{bunchResultTable}", bunchResultTable)
@@ -114,7 +118,7 @@ public class ViewOutputDB extends GUITask {
         return new String[]{sourceQuery, filter, annotatorLastRunid, lastLogRunId};
     }
 
-    public String modifyQuery(String sourceQuery, String conditions) {
+    public static String modifyQuery(String sourceQuery, String conditions) {
         if (conditions.length() > 0) {
             int limitPos = conditions.toLowerCase().indexOf(" limit ");
             if (limitPos > 0) {
@@ -138,15 +142,23 @@ public class ViewOutputDB extends GUITask {
                 }
                 // Update UI here.
                 boolean res = false;
-
-                String[] values = buildQuery(dao, viewQueryName, annotator, snippetResultTable, docResultTable, bunchResultTable, inputTable);
+                String[] values;
+                String snippetTable=snippetResultTable;
+                String viewAnnotator=annotator;
+                String currentViewQueryName=viewQueryName;
+                if(viewReference) {
+                    snippetTable = referenceTable;
+                    viewAnnotator=referenceAnnotator;
+                    currentViewQueryName="";
+                }
+                values = buildQuery(dao, currentViewQueryName, viewAnnotator, snippetTable, docResultTable, bunchResultTable, inputTable);
                 sourceQuery = values[0];
                 String filter = values[1];
                 String annotatorLastRunid = values[2];
                 String lastLogRunId = values[3];
                 if (values == null) {
-                    updateMessage("Table '" + snippetResultTable + "' does not exit.");
-                    popDialog("Note", "Table '" + snippetResultTable + "' does not exit.",
+                    updateMessage("Table '" + snippetTable + "' does not exit.");
+                    popDialog("Note", "Table '" + snippetTable + "' does not exit.",
                             " You need to execute 'RunEasyCIE' first.");
                     updateProgress(0, 0);
                 } else if (annotatorLastRunid.equals("-1")) {
@@ -164,18 +176,16 @@ public class ViewOutputDB extends GUITask {
                 }
 
 
-                String otherConditions = TasksOverviewController.currentTasksOverviewController.sqlFilter.getText().trim();
+                String otherConditions = TasksOverviewController.currentTasksOverviewController.annoSqlFilter.getText().trim();
                 if (otherConditions.length() == 0) {
-                    TasksOverviewController.currentTasksOverviewController.sqlFilter.setText(filter);
+                    TasksOverviewController.currentTasksOverviewController.annoSqlFilter.setText(filter);
                     otherConditions = filter;
                 }
                 if (otherConditions.length() > 0) {
                     sourceQuery = modifyQuery(sourceQuery, otherConditions);
                 }
 
-                RecordRowIterator recordIterator = dao.queryRecords(sourceQuery);
-                TasksOverviewController.currentTasksOverviewController.doctable = false;
-                res = TasksOverviewController.currentTasksOverviewController.showDBTable(recordIterator, ColorAnnotationCell.colorOutput);
+                res = TasksOverviewController.currentTasksOverviewController.showDBTable(dao.queryRecordsNMeta(sourceQuery), ColorAnnotationCell.colorOutput,TasksOverviewController.AnnoView);
                 dao.close();
                 if (res)
                     updateMessage("data loaded");

@@ -1,13 +1,13 @@
 package edu.utah.bmi.simple.gui.controller;
 
 import com.sun.javafx.collections.ObservableMapWrapper;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.ColumnInfo;
 import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.*;
-import edu.utah.bmi.simple.gui.task.DebugPipe;
 import edu.utah.bmi.simple.gui.task.ViewOutputDB;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -18,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldOpenableTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -25,6 +26,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.web.WebEngine;
@@ -42,6 +44,8 @@ import java.io.File;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -51,6 +55,8 @@ import static edu.utah.bmi.simple.gui.controller.CellFactories.*;
  * Created by Jianlin on 5/19/15.
  */
 public class TasksOverviewController {
+
+    public static final String DocView = "DocView", AnnoView = "AnnoView", DebugView = "DebugView";
 
     public static TasksOverviewController currentTasksOverviewController;
 
@@ -67,12 +73,18 @@ public class TasksOverviewController {
 
     private BottomViewController bottomViewController;
 
+    @FXML
+    private AnchorPane contentPanel;
+
 
     @FXML
     private SplitPane dbPanel;
 
     @FXML
-    private TableView annoTableView;
+    private TableView annoTableView, docTableView, debugTableView;
+
+    @FXML
+    private TabPane tabPane;
 
 
     @FXML
@@ -85,17 +97,15 @@ public class TasksOverviewController {
 
 
     @FXML
-    private Button tableRefresh;
+    private Button annoTableRefresh, docTableRefresh;
 
     @FXML
-    public TextField sqlFilter;
+    public TextField annoSqlFilter, docSqlFilter;
 
 
     private TaskFX currentTask;
 
     private String currentTableName = "", currentDBName = "", currentFilter = "";
-
-    private boolean enableRefresh = true;
 
 
     public Main mainApp;
@@ -117,7 +127,6 @@ public class TasksOverviewController {
     @FXML
     private TableView<Map.Entry<String, SettingAb>> settingTable;
 
-    public boolean doctable = true;
 
     private WebEngine webEngine;
 
@@ -125,6 +134,12 @@ public class TasksOverviewController {
     private DAO dao;
 
     public GUITask currentGUITask;
+
+    private HashMap<Object, Tab> tabLocator = new HashMap<>();
+    //    save the current sqls displayed in Tabviews
+    private HashMap<String, String> currentSQLs = new HashMap<>();
+    //    save the current db used displayed in Tabviews
+    private HashMap<String, String> currentDBFileName = new HashMap<>();
 
     public TasksOverviewController() {
     }
@@ -189,6 +204,7 @@ public class TasksOverviewController {
 //      Enable autoresize of htmleditor
 //        GridPane gridPane = (GridPane) htmlViewer.getChildrenUnmodifiable().get(0);
         webEngine = htmlViewer.getEngine();
+        webEngine.setJavaScriptEnabled(true);
         htmlViewer.setContextMenuEnabled(false);
         createContextMenu(htmlViewer);
 
@@ -202,34 +218,34 @@ public class TasksOverviewController {
 //        gridPane.getRowConstraints().addAll(row1, row2, row3);
 
 
-        tableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
+        annoTableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                enableRefresh = true;
-                String condition = sqlFilter.getText().trim();
-                if (doctable)
-                    showDocTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
-                else
-                    new ViewOutputDB(mainApp.tasks).run();
+                refreshTableView(AnnoView, annoSqlFilter);
             }
         });
 
-        sqlFilter.setOnKeyPressed(new EventHandler<KeyEvent>() {
+        annoSqlFilter.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent ke) {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
-                    enableRefresh = true;
-                    String condition = sqlFilter.getText().trim();
-                    if (condition.length() > 0) {
-                        if (!condition.startsWith("WHERE") || !condition.startsWith("where")) {
-                            condition = " WHERE " + condition;
-                        }
-                    }
-                    if (doctable)
-                        showDocTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
-                    else
-                        new ViewOutputDB(mainApp.tasks).run();
-//                        showAnnoTable(currentDBName, currentTableName, condition, ColorAnnotationCell.colorDifferential);
+                    refreshTableView(AnnoView, annoSqlFilter);
+                }
+            }
+        });
+
+        docTableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                refreshTableView(DocView, docSqlFilter);
+            }
+        });
+
+        docTableRefresh.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent ke) {
+                if (ke.getCode().equals(KeyCode.ENTER)) {
+                    refreshTableView(DocView, docSqlFilter);
                 }
             }
         });
@@ -330,6 +346,19 @@ public class TasksOverviewController {
     }
 
 
+    private void refreshTableView(String viewName, TextField sqlFilter) {
+        String condition = sqlFilter.getText().trim();
+        String conditionLower = condition.toLowerCase();
+        if (condition.length() > 0) {
+            if (!conditionLower.startsWith("where") && !conditionLower.startsWith("limit")) {
+                condition = " WHERE " + condition;
+            }
+        }
+        String sql = currentSQLs.get(viewName) + condition;
+        showDBTable(sql, currentDBFileName.get(viewName), ColorAnnotationCell.colorDifferential, viewName);
+
+    }
+
     private void readViewerSettings() {
         StaticVariables.preTag = mainApp.tasks.getTask("settings").getValue("viewer/preTag");
         StaticVariables.postTag = mainApp.tasks.getTask("settings").getValue("viewer/postTag");
@@ -350,42 +379,159 @@ public class TasksOverviewController {
     }
 
 
-    public boolean showAnnoTable(String dbName, String tableName, String filter, String colorDifferential) {
-        if (doctable)
-            annoTableView.getColumns().clear();
-        doctable = false;
-        return showDBTable(dbName, "queryAnnos", tableName, filter, colorDifferential);
+//    public boolean showAnnoTable(String dbName, String tableName, String filter, String colorDifferential) {
+//        if (doctable)
+//            annoTableView.getColumns().clear();
+//        doctable = false;
+//        return showDBTable(dbName, "queryAnnos", tableName, filter, colorDifferential);
+//    }
+//
+//
+//    public boolean showDocTable(String dbName, String tableName, String filter, String colorDifferential) {
+//        if (!doctable)
+//            annoTableView.getColumns().clear();
+//        doctable = true;
+//        return showDBTable(dbName, "queryDocs", tableName, filter, colorDifferential);
+//    }
+
+//    public boolean showDBTable(RecordRowIterator rs, String colorDifferential) {
+//        ColumnInfo columanInfo = rs.getColumninfo();
+//        return showDBTable(rs, columanInfo, colorDifferential, annoTableView);
+//    }
+
+    private Tab findTab(Object tabContentRegion) {
+        if (tabLocator.containsKey(tabContentRegion)) {
+            return tabLocator.get(tabContentRegion);
+        } else {
+            for (Tab t : tabPane.getTabs()) {
+                tabLocator.put(t.getContent().getParent(), t);
+            }
+            if (tabLocator.containsKey(tabContentRegion)) {
+                return tabLocator.get(tabContentRegion);
+            } else {
+                return null;
+            }
+        }
     }
 
-
-    public boolean showDocTable(String dbName, String tableName, String filter, String colorDifferential) {
-        if (!doctable)
-            annoTableView.getColumns().clear();
-        doctable = true;
-        return showDBTable(dbName, "queryDocs", tableName, filter, colorDifferential);
+    public boolean showDBTable(String sql, String dbName, String colorDifferential, String tableViewName, Object... values) {
+        if (sql == null || sql.length() == 0 || sql.equals("null"))
+            return false;
+        dao = new DAO(new File(dbName));
+        RecordRowIterator recordRowIter;
+        ColumnInfo columnInfo;
+        Object[] res;
+        if (sql.toLowerCase().startsWith("select ")) {
+            res = dao.queryRecordsNMeta(sql);
+        } else {
+            res = dao.queryRecordsNMetaFromPstmt(sql, values);
+        }
+        recordRowIter = (RecordRowIterator) res[0];
+        columnInfo = (ColumnInfo) res[1];
+        TableView tableView = null;
+        String[] splitCondition = splitCondition(sql);
+        String core = splitCondition[0];
+        String filter = splitCondition[1];
+        switch (tableViewName) {
+            case DocView:
+                tableView = docTableView;
+                currentSQLs.put(DocView, core);
+                docSqlFilter.setText(filter);
+                currentDBFileName.put(DocView, dbName);
+                break;
+            case AnnoView:
+                tableView = annoTableView;
+                currentSQLs.put(AnnoView, core);
+                annoSqlFilter.setText(filter);
+                currentDBFileName.put(AnnoView, dbName);
+                break;
+            case DebugView:
+                tableView = debugTableView;
+                currentSQLs.put(DebugView, core);
+                currentDBFileName.put(DebugView, dbName);
+                break;
+        }
+        return showDBTable(recordRowIter, columnInfo, colorDifferential, tableView);
     }
 
-    public boolean showDBTable(RecordRowIterator rs, String colorDifferential) {
-        ColumnInfo columanInfo = rs.getColumninfo();
-        return showDBTable(rs, columanInfo, colorDifferential, doctable);
+    private String[] splitCondition(String sql) {
+        String sqlLower = sql.toLowerCase();
+        String filter = "";
+        String core = sql;
+        int pos = sqlLower.indexOf("where");
+        if (pos != -1) {
+            filter = sql.substring(pos + 6);
+            core = sql.substring(0, pos);
+        } else {
+            pos = sqlLower.indexOf("limit");
+            if (pos != -1) {
+                filter = sql.substring(pos);
+                core = sql.substring(0, pos);
+            }
+        }
+        return new String[]{core, filter};
     }
 
+    public boolean showDBTable(Object[] queryOutputs, String colorDifferential, String tableViewName, String... filterColumnNames) {
+        if (filterColumnNames == null || filterColumnNames.length == 0) {
+            return showDBTable((Iterator) queryOutputs[0], (ColumnInfo) queryOutputs[1], colorDifferential, tableViewName);
+        } else {
+            HashSet<String> excludeColumns = new HashSet<>(Arrays.asList(filterColumnNames));
+            ColumnInfo columnInfo = (ColumnInfo) queryOutputs[1];
+            ColumnInfo filteredColumnInfo = new ColumnInfo();
+            for (Map.Entry<String, String> col : columnInfo.getColumnInfo().entrySet()) {
+                String columnName = col.getKey();
+                String columnType = col.getValue();
+                if (!excludeColumns.contains(columnName))
+                    filteredColumnInfo.addColumnInfo(columnName, columnType);
+            }
+            return showDBTable((Iterator) queryOutputs[0], filteredColumnInfo, colorDifferential, tableViewName);
+        }
 
-    public boolean showDBTable(Iterator rs, ColumnInfo columanInfo, String colorDifferential, boolean doctable) {
+    }
+
+    public boolean showDBTable(Iterator rs, ColumnInfo columanInfo, String colorDifferential, String tableViewName) {
+        TableView tableView = null;
+        switch (tableViewName) {
+            case DocView:
+                tableView = docTableView;
+                break;
+            case AnnoView:
+                tableView = annoTableView;
+                break;
+            case DebugView:
+                tableView = debugTableView;
+                break;
+        }
+        return showDBTable(rs, columanInfo, colorDifferential, tableView);
+    }
+
+    public boolean showDBTable(Iterator rs, ColumnInfo columanInfo, String colorDifferential, TableView tableView) {
         dbPanel.setVisible(true);
-        annoTableView.setVisible(true);
-        this.doctable = doctable;
+//      magic: tabPane won't show without following line
+        tabPane.setPrefSize(600, 500);
+
+        tableView.setVisible(true);
+        Object tabContentRegion = tableView.getParent().getParent();
+        Tab tab = findTab(tabContentRegion);
+
+        if (tab != null) {
+            SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+            selectionModel.select(tab);
+
+        }
+        tabPane.setVisible(true);
+
         ObservableList<ObservableList> data = FXCollections.observableArrayList();
         ColorAnnotationCell.colorDifferential = colorDifferential;
         int numOfColumns = columanInfo.getColumnInfo().size();
         if (columanInfo.getColumnInfo().containsKey("BEGIN"))
             numOfColumns -= 2;
-
 //        System.out.println("annoTableView.getColumns().size=" + annoTableView.getColumns().size());
 //        System.out.println("columanInfo size=" + columanInfo.getColumnInfo().size());
-        if (annoTableView.getColumns().size() == 0 || annoTableView.getColumns().size() != columanInfo.getColumnInfo().size() - 4) {
+        if (tableView.getColumns().size() == 0 || tableView.getColumns().size() != columanInfo.getColumnInfo().size() - 4) {
             int i = 0;
-            annoTableView.getColumns().clear();
+            tableView.getColumns().clear();
             int docNamePos = -1, snippetPos = -1;
             for (String columnName : columanInfo.getColumnInfo().keySet()) {
                 //use non property style for making dynamic table
@@ -444,18 +590,20 @@ public class TasksOverviewController {
                         if (col.getPrefWidth() == 80)
                             col.setPrefWidth(90);
                 }
-                annoTableView.getColumns().addAll(col);
+                tableView.getColumns().addAll(col);
 
                 i++;
             }
-            ObservableList columns = annoTableView.getColumns();
-            if(docNamePos>0) {
+            ObservableList columns = tableView.getColumns();
+            if (docNamePos > 0) {
                 TableColumn docNameColumn = (TableColumn) columns.get(docNamePos);
 //            System.out.println(docNameColumn);
                 final int staticSnippetPos = snippetPos;
                 final int staticDocNamePos = docNamePos;
                 docNameColumn.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>) param -> {
-                    Object record = param.getValue().get(staticSnippetPos);
+                    Object record = param.getValue();
+                    if (staticSnippetPos != -1)
+                        param.getValue().get(staticSnippetPos);
                     if (record != null && record instanceof RecordRow) {
                         RecordRow newRecordRow = ((RecordRow) record).clone();
                         return new SimpleObjectProperty<>(newRecordRow);
@@ -467,16 +615,7 @@ public class TasksOverviewController {
         dbPanel.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                if (annoTableView.getColumns() != null && annoTableView.getColumns().size() > 1) {
-//                    TableColumn col = (TableColumn) annoTableView.getColumns().get(3);
-////                    System.out.println("reset the width of column " + snippetPos);
-//                    String widthStr = mainApp.tasks.getTask("settings").getValue("viewer/width/" + col.getText()).trim();
-//                    if (widthStr.length() > 0)
-//                        col.setPrefWidth(Integer.parseInt(widthStr));
-//                    else {
-//                        col.setMaxWidth((int) newValue.doubleValue() * 0.9);
-//                        col.setPrefWidth((int) newValue.doubleValue() * 0.38);
-//                    }
+                if (tableView.getColumns() != null && tableView.getColumns().size() > 1) {
                     htmlViewer.setPrefWidth(newValue.doubleValue() * 0.11);
                 }
             }
@@ -499,6 +638,9 @@ public class TasksOverviewController {
                     case "FEATURES":
                     case "SNIPPET_BEGIN":
                         continue;
+                    case "DOC_NAME":
+                        row.add(record);
+                        break;
                     case "SNIPPET":
                         row.add(record);
                         break;
@@ -514,98 +656,13 @@ public class TasksOverviewController {
             data.add(row);
             haveRead = true;
         }
-        annoTableView.setItems(data);
-        annoTableView.refresh();
+        tableView.setItems(data);
+        tableView.refresh();
+        if (dao != null)
+            dao.close();
         return haveRead;
     }
 
-    public boolean showDBTable(String dbName, String queryName,
-                               String tableName, String filter, String colorDifferential) {
-//        settingPanel.settingPanel.setVisible(false);
-
-        if (!currentTableName.equals(tableName) || !currentDBName.equals(dbName) || !currentFilter.equals(filter) || enableRefresh) {
-            currentTableName = tableName;
-            currentDBName = dbName;
-            currentFilter = filter;
-            enableRefresh = false;
-        } else {
-            dbPanel.setVisible(true);
-            annoTableView.setVisible(true);
-            return true;
-        }
-
-        dao = new DAO(new File(dbName));
-
-        String condition = filter;
-        String lowerCasedCondition = condition.toLowerCase();
-        if (filter.length() > 7) {
-            if (lowerCasedCondition.indexOf("where") != -1) {
-                filter = filter.substring(lowerCasedCondition.indexOf("where") + 5);
-                condition = filter;
-            }
-        }
-        String limitSyntacs = dao.configReader.getValue("syntax/limit/sql").toString();
-        String limitSyntacsLowerCase = limitSyntacs.toLowerCase();
-        if (!lowerCasedCondition.trim().startsWith(limitSyntacsLowerCase + " ") &&
-                lowerCasedCondition.indexOf(" " + limitSyntacsLowerCase + " ") == -1) {
-            if (lowerCasedCondition.endsWith(";")) {
-                condition = condition.substring(0, condition.length() - 1) + " " + limitSyntacs + " " + limitRecords + ";";
-                filter = filter.substring(0, filter.length() - 1) + " " + limitSyntacs + " " + limitRecords + ";";
-            } else {
-                condition = condition + " " + limitSyntacs + " " + limitRecords + "";
-                filter = filter + " " + limitSyntacs + " " + limitRecords + "";
-            }
-        }
-        if (!filter.trim().toLowerCase().startsWith(limitSyntacsLowerCase)) {
-            filter = " where " + filter;
-        }
-
-        sqlFilter.setText(condition);
-
-        RecordRowIterator rs = queryRecords(dao, queryName, tableName, filter);
-
-
-        boolean haveRead = showDBTable(rs, colorDifferential);
-        dao.close();
-        return haveRead;
-    }
-
-
-    public RecordRowIterator queryRecords(DAO dao, String queryName, String tableName, String condition) {
-        if (!dao.checkTableExits(tableName)) {
-            System.out.println(tableName + " doesn't exist");
-            return null;
-        }
-
-        StringBuilder sql = new StringBuilder();
-        sql.append(dao.queries.get(queryName).replaceAll("\\{tableName}", tableName));
-        if (condition != null && condition.length() > 0) {
-            sql.append(" ");
-            sql.append(condition);
-        }
-        if (sql.charAt(sql.length() - 1) != ';')
-            sql.append(";");
-
-        RecordRowIterator recordIterator = dao.queryRecords(sql.toString());
-        return recordIterator;
-    }
-
-
-    public void updateHTMLEditor(Object cellContent) {
-        if (cellContent instanceof RecordRow) {
-            updateHTMLEditor((RecordRow) cellContent);
-        } else {
-            updateHTMLEditor(cellContent + "");
-        }
-
-    }
-
-    private void updateHTMLEditor(String text) {
-        text = text.replaceAll("\\n", "<br>");
-//        htmlEditor.setHtmlText(text);
-        webEngine.loadContent(text);
-        annoDetails.setBottom(null);
-    }
 
     public void updateHTMLEditor(String html, Object item) {
         webEngine.loadContent(html);
@@ -622,31 +679,27 @@ public class TasksOverviewController {
         }
     }
 
-    private void updateHTMLEditor(RecordRow record) {
-        String text;
-        if (doctable)
-            text = record.getStrByColumnName("TEXT");
-        else
-            text = record.getStrByColumnName("SNIPPET");
-        String color = ColorAnnotationCell.pickColor(record, ColorAnnotationCell.colorDifferential);
-        if (text == null || text.length() == 0) {
-            text = record.getStrByColumnName("TEXT");
-        } else if (!doctable) {
-            text = ColorAnnotationCell.generateHTML(text,
-                    (int) record.getValueByColumnName("BEGIN"),
-                    (int) record.getValueByColumnName("END"),
-                    color);
-        }
+    public void updateHTMLEditor(String text) {
         text = text.replaceAll("\\n", "<br>");
 //        htmlEditor.setHtmlText(text);
-        webEngine.loadContent(text);
-        if (record.getStrByColumnName("FEATURES") != null && record.getStrByColumnName("FEATURES").length() > 0) {
-            annoDetails.setBottom(featureTable);
-            updateFeatureTable(record.getStrByColumnName("FEATURES"));
-        } else {
-            annoDetails.setBottom(null);
-        }
+        updateHTMLEditor(text,"");
     }
+
+
+
+    public static StringBuilder scrollWebView(int xPos, int yPos) {
+        StringBuilder script = new StringBuilder().append("<html>");
+        script.append("<head>");
+        script.append("   <script language=\"javascript\" type=\"text/javascript\">");
+        script.append("       function toBottom(){");
+        script.append("           window.scrollTo(" + xPos + ", " + yPos + ");");
+        script.append("       }");
+        script.append("   </script>");
+        script.append("</head>");
+        script.append("<body onload='toBottom()'>");
+        return script;
+    }
+
 
     private void updateFeatureTable(String features) {
         if (features.startsWith("Note:") && features.substring(5, features.indexOf("\n")).indexOf(":") > 0) {
@@ -745,7 +798,7 @@ public class TasksOverviewController {
                 thisTask = taskConstructor.newInstance(mainApp.tasks);
             }
             if (thisTask instanceof GUITask)
-                currentGUITask= (GUITask) thisTask;
+                currentGUITask = (GUITask) thisTask;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -805,7 +858,7 @@ public class TasksOverviewController {
 
 //            System.out.println(content.trim());
 //            DebugPipe fastDebugPipe = new DebugPipe(mainApp.tasks, currentGUITask);
-            System.out.println(this.annoTableView.getSelectionModel().getSelectedItem());
+//            System.out.println(this.annoTableView.getSelectionModel().getSelectedItem());
         });
         contextMenu.getItems().addAll(reload, savePage);
 

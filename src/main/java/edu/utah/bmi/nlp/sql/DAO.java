@@ -32,7 +32,7 @@ public class DAO {
     @Deprecated
     public boolean debug = false;
 
-    private  String server, username, password, driver;
+    private String server, username, password, driver;
     private boolean concurUpdatable;
     public Connection con = null;
     public Statement stmt = null;
@@ -86,7 +86,7 @@ public class DAO {
         if (configReader.getValue("concurUpdatable") != null) {
             concurUpdatable = ((String) configReader.getValue("concurUpdatable")).startsWith("t");
         }
-        this.concurUpdatable=concurUpdatable;
+        this.concurUpdatable = concurUpdatable;
 
         createTableSQLs = new LinkedHashMap<>();
         createTableTemplates = new LinkedHashMap<>();
@@ -201,7 +201,7 @@ public class DAO {
     }
 
 
-    public void reConnect(){
+    public void reConnect() {
         try {
             Class.forName(driver);
             con = DriverManager.getConnection(server, username, password);
@@ -217,6 +217,7 @@ public class DAO {
         }
 
     }
+
     //  need to initiate this statement before create tables.
     private void initCheckTableStatment(String queryStatements, HashMap<String, PreparedStatement> queryPreparedStatements) {
         if (configReader.getValue("queryStatements") != null) {
@@ -482,24 +483,31 @@ public class DAO {
     }
 
 
-    public RecordRowIterator queryRecords(String sql) {
+    public Object[] queryRecordsNMeta(String sql) {
         RecordRowIterator recordIterator = null;
+        ColumnInfo metaData = null;
         try {
 //            System.out.println(sql);
             sql = fillVariables(sql);
             ResultSet rs = stmt.executeQuery(sql);
-            ColumnInfo metaData = getResultSetMetaData(rs);
+            metaData = getResultSetMetaData(rs);
             if (!con.getAutoCommit())
                 con.commit();
             recordIterator = new RecordRowIterator(rs, metaData);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return recordIterator;
+        return new Object[]{recordIterator, metaData};
     }
 
-    public RecordRowIterator queryRecordsFromPstmt(String queryName, Object... values) {
+
+    public RecordRowIterator queryRecords(String sql) {
+        return (RecordRowIterator) queryRecordsNMeta(sql)[0];
+    }
+
+    public Object[] queryRecordsNMetaFromPstmt(String queryName, Object... values) {
         RecordRowIterator recordIterator = null;
+        ColumnInfo metaData = null;
         try {
 //            System.out.println(sql);
             if (queryPreparedStatements.containsKey(queryName)) {
@@ -507,7 +515,7 @@ public class DAO {
                 setPstmtValues(queryStmt, values);
 
                 ResultSet rs = queryStmt.executeQuery();
-                ColumnInfo metaData = getResultSetMetaData(rs);
+                metaData = getResultSetMetaData(rs);
                 if (!con.getAutoCommit())
                     con.commit();
                 recordIterator = new RecordRowIterator(rs, metaData);
@@ -516,7 +524,7 @@ public class DAO {
                 PreparedStatement queryStmt = queryPreparedStatements.get(queryName + "_" + values[0]);
                 setPstmtValues(queryStmt, Arrays.copyOfRange(values, 1, values.length));
                 ResultSet rs = queryStmt.executeQuery();
-                ColumnInfo metaData = getResultSetMetaData(rs);
+                metaData = getResultSetMetaData(rs);
                 if (!con.getAutoCommit())
                     con.commit();
                 recordIterator = new RecordRowIterator(rs, metaData);
@@ -530,7 +538,7 @@ public class DAO {
                     if (values.length > 1)
                         setPstmtValues(pstms, Arrays.copyOfRange(values, 1, values.length));
                     ResultSet rs = pstms.executeQuery();
-                    ColumnInfo metaData = getResultSetMetaData(rs);
+                    metaData = getResultSetMetaData(rs);
                     if (!con.getAutoCommit())
                         con.commit();
                     recordIterator = new RecordRowIterator(rs, metaData);
@@ -543,7 +551,11 @@ public class DAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return recordIterator;
+        return new Object[]{recordIterator, metaData};
+    }
+
+    public RecordRowIterator queryRecordsFromPstmt(String queryName, Object... values) {
+        return (RecordRowIterator) queryRecordsNMetaFromPstmt(queryName, values)[0];
     }
 
     public RecordRow queryRecord(String sql) {
@@ -781,11 +793,13 @@ public class DAO {
             return;
         }
         try {
-            for (PreparedStatement stat : insertPreparedStatements.values()) {
-                stat.close();
+            if (!con.isClosed()) {
+                for (PreparedStatement stat : insertPreparedStatements.values()) {
+                    stat.close();
+                }
+                stmt.close();
+                con.close();
             }
-            stmt.close();
-            con.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -889,11 +903,11 @@ public class DAO {
         return tableName;
     }
 
-    public boolean connected(){
-        boolean connected=false;
+    public boolean connected() {
+        boolean connected = false;
         try {
-            if(con.isClosed()){
-                connected=true;
+            if (con.isClosed()) {
+                connected = true;
             }
         } catch (SQLException e) {
             e.printStackTrace();

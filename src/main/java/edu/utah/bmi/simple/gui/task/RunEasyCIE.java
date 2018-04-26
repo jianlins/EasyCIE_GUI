@@ -452,7 +452,7 @@ public class RunEasyCIE extends GUITask {
         }
 
         if (featureMergerRule.length() > 0) {
-            updateGUIMessage("add engine FeatureInferenceAnnotator");
+            updateGUIMessage("add engine FeatureMergeAnnotator");
 
             runner.addAnalysisEngine(AnnotationFeatureMergerAnnotator.class, new Object[]{
                     AnnotationFeatureMergerAnnotator.PARAM_INFERENCE_STR, featureMergerRule,

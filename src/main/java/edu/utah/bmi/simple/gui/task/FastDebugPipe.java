@@ -79,9 +79,12 @@ public class FastDebugPipe extends RunEasyCIE {
 
 
     public void refreshPipe() {
+
         readDebugConfigs(tasks);
         initiate(tasks, "db");
         fastDebugPipe = this;
+        UpdateMessage("Debug pipeline refreshed.");
+        guitask.updateGUIProgress(1,1);
     }
 
 
@@ -104,7 +107,7 @@ public class FastDebugPipe extends RunEasyCIE {
         initTypes(customTypeDescriptor);
 
         addAnalysisEngines();
-        updateGUIMessage("Compile pipeline...");
+        UpdateMessage("Compile pipeline...");
         aggregateAE = runner.genAEs();
         jCas = runner.initJCas();
 
@@ -116,11 +119,12 @@ public class FastDebugPipe extends RunEasyCIE {
                 "desc/type/pipeline_" + annotator);
         if (this.tasks.getTask("debug").getValue("log/ShowUimaViewer").toLowerCase().startsWith("t"))
             ((GUILogger) uimaLogger).setUIMAViewer(true);
+        uimaLogger.setTabViewName(TasksOverviewController.DebugView);
         uimaLogger.logStartTime();
     }
 
     private void readDebugConfigs(TasksFX tasks) {
-        updateGUIMessage("read pipeline configurations...");
+        UpdateMessage("Initiating debug pipeline...");
         TaskFX debugConfig = tasks.getTask("debug");
         sectionType = debugConfig.getValue(ConfigKeys.sectionType).trim();
         rushType = debugConfig.getValue(ConfigKeys.rushType).trim();
@@ -166,6 +170,7 @@ public class FastDebugPipe extends RunEasyCIE {
         } catch (AnalysisEngineProcessException e) {
             e.printStackTrace();
         }
+        UpdateMessage("Text processed.");
     }
 
 
@@ -203,7 +208,7 @@ public class FastDebugPipe extends RunEasyCIE {
     protected void addAnalysisEngines() {
         UpdateMessage("Add pipeline components...");
         if (sectionRule.length() > 0) {
-            updateGUIMessage("add engine SectionDetectorR_AE");
+            UpdateMessage("add engine SectionDetectorR_AE");
             runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_FILE_OR_STR, sectionRule});
             if (sectionType.length() > 0 && guiEnabled)
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER, "SectionDetector",
@@ -212,7 +217,7 @@ public class FastDebugPipe extends RunEasyCIE {
                         AnnotationLogger.PARAM_TYPE_NAMES, sectionType});
         }
         if (rushRule.length() > 0) {
-            updateGUIMessage("Add sentence splitter...");
+            UpdateMessage("Add sentence splitter...");
             if (rushType.indexOf("Sentence") == -1)
                 runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
                         RuSH_AE.PARAM_INSIDE_SECTIONS, includesections,
@@ -230,7 +235,7 @@ public class FastDebugPipe extends RunEasyCIE {
         }
 
         if (fastCNERRule.length() > 0) {
-            updateGUIMessage("Add fastcner...");
+            UpdateMessage("Add fastcner...");
             runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, fastCNERRule,
                     FastCNER_AE_General.PARAM_MARK_PSEUDO, false,
                     FastCNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections
@@ -249,7 +254,7 @@ public class FastDebugPipe extends RunEasyCIE {
         }
 
         if (fastNERRule.length() > 0) {
-            updateGUIMessage("Add fastner...");
+            UpdateMessage("Add fastner...");
             runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_FILE_OR_STR, fastNERRule,
                     FastNER_AE_General.PARAM_CASE_SENSITIVE, false, FastNER_AE_General.PARAM_CASE_SENSITIVE, fastNERCaseSensitive,
                     FastNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections,
@@ -272,7 +277,7 @@ public class FastDebugPipe extends RunEasyCIE {
 
 //        System.out.println("Read Context rules from " + contextRule);
         if (contextRule.length() > 0) {
-            updateGUIMessage("Add FastContext...");
+            UpdateMessage("Add FastContext...");
             runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule,
                     FastContext_General_AE.PARAM_AUTO_EXPAND_SCOPE, false,
                     FastContext_General_AE.PARAM_MARK_CLUE, true,
@@ -292,7 +297,7 @@ public class FastDebugPipe extends RunEasyCIE {
         }
 
         if (dateRule.length() > 0) {
-            updateGUIMessage("add Temporal Context detector...");
+            UpdateMessage("add Temporal Context detector...");
             runner.addAnalysisEngine(TemporalContext_AE_General.class, new Object[]{
                     TemporalContext_AE_General.PARAM_RULE_FILE_OR_STR, dateRule,
                     TemporalContext_AE_General.PARAM_MARK_PSEUDO, false,
@@ -314,7 +319,7 @@ public class FastDebugPipe extends RunEasyCIE {
         }
 
         if (featureInfRule.length() > 0) {
-            updateGUIMessage("Add feature inferencer...");
+            UpdateMessage("Add feature inferencer...");
             runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_INFERENCE_STR, featureInfRule});
             if (featureInfType.length() > 0) {
                 if (guiEnabled)
@@ -329,7 +334,7 @@ public class FastDebugPipe extends RunEasyCIE {
             }
         }
         if (docInfRule.length() > 0) {
-            updateGUIMessage("Add feature inferencer...");
+            UpdateMessage("Add feature inferencer...");
             runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_INFERENCE_STR, docInfRule});
             if (docInfType.length() > 0) {
                 if (guiEnabled)
@@ -346,6 +351,6 @@ public class FastDebugPipe extends RunEasyCIE {
     }
 
     protected void UpdateMessage(String msg) {
-        uimaLogger.logString(msg);
+        TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage(msg);
     }
 }

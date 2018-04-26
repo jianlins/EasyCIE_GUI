@@ -24,9 +24,14 @@ public class GUILogger extends ConsoleLogger {
     protected GUITask task;
     private boolean enableUIMAViewer = false;
     protected boolean report = false;
+    protected String tabViewName=TasksOverviewController.AnnoView;
 
     protected GUILogger() {
 
+    }
+
+    public void setTabViewName(String tabViewName) {
+        this.tabViewName = tabViewName;
     }
 
     public GUILogger(GUITask task, String inputPath, String descriptorPath) {
@@ -79,7 +84,7 @@ public class GUILogger extends ConsoleLogger {
         if (task.guiEnabled) {
             Platform.runLater(() -> {
                 boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(
-                        AnnotationLogger.records.iterator(), columnInfo, "output", false);
+                        AnnotationLogger.records.iterator(), columnInfo, "output", tabViewName);
                 if (res)
                     task.updateGUIMessage("String processing completed.");
                 else

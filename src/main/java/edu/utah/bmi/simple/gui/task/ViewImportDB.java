@@ -3,6 +3,7 @@ package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.simple.gui.controller.ColorAnnotationCell;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -16,27 +17,23 @@ import java.io.File;
  */
 public class ViewImportDB extends GUITask {
     protected String SQLFile, corpusTable;
-    protected String importType;
     protected TasksFX tasks;
     protected String datasetID;
-    public ViewImportDB(TasksFX tasks, String importType) {
-        initiate(tasks, importType);
+
+    public ViewImportDB(TasksFX tasks) {
+        initiate(tasks);
     }
 
-    private void initiate(TasksFX tasks, String importType) {
-        this.tasks=tasks;
-        this.importType = importType;
+    private void initiate(TasksFX tasks) {
+        this.tasks = tasks;
         if (Platform.isAccessibilityActive()) {
             updateGUIMessage("Initiate configurations..");
 
         }
         TaskFX config = tasks.getTask("settings");
-        datasetID=config.getValue(ConfigKeys.datasetId);
+        datasetID = config.getValue(ConfigKeys.datasetId);
         SQLFile = config.getValue(ConfigKeys.readDBConfigFileName);
-        if (importType.equals("doc"))
-            corpusTable = config.getValue(ConfigKeys.inputTableName);
-        else
-            corpusTable = config.getValue(ConfigKeys.referenceTable);
+        corpusTable = config.getValue(ConfigKeys.inputTableName);
     }
 
 
@@ -59,17 +56,10 @@ public class ViewImportDB extends GUITask {
                     updateGUIProgress(0, 0);
                     return;
                 }
-                if (importType.equals("doc"))
-                    res = TasksOverviewController.currentTasksOverviewController.showDocTable(SQLFile, corpusTable, " DATASET_ID='"+datasetID+"'", "output");
-                else {
-                    ViewOutputDB viewer=new ViewOutputDB(tasks);
-                    viewer.snippetResultTable=corpusTable;
-                    viewer.viewQueryName="Snippet";
-                    viewer.annotator="";
-                    viewer.joinDocTable=false;
-                    TasksOverviewController.currentTasksOverviewController.sqlFilter.setText("");
-                    viewer.run();
-                }
+
+                String sql = dao.queries.get("queryDocs").replaceAll("\\{tableName}", corpusTable);
+                sql += " WHERE  DATASET_ID='" + datasetID + "'";
+                res = TasksOverviewController.currentTasksOverviewController.showDBTable(sql, SQLFile, ColorAnnotationCell.colorOutput, TasksOverviewController.DocView);
                 if (res)
                     updateGUIMessage("data loaded");
                 else

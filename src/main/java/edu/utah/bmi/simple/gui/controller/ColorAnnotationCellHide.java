@@ -65,7 +65,6 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
                     recordRow.getValueByColumnName("SNIPPET") == null ||
                     recordRow.getValueByColumnName("SNIPPET").equals("")) {
                 html = recordRow.getStrByColumnName("DOC_TEXT");
-                html = html.replaceAll("\\n", "<br>");
             } else {
                 html = recordRow.getStrByColumnName("DOC_TEXT");
                 String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
@@ -75,6 +74,7 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
                         begin, end,
                         color);
             }
+            html = html.replaceAll("\\n", "<br>");
         } else if (value instanceof RecordRow) {
             RecordRow recordRow = (RecordRow) value;
             Object docName = recordRow.getValueByColumnName("DOC_NAME");
@@ -110,7 +110,20 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
             html = value + "";
             html = html.replaceAll("\\n", "<br>");
         }
+        html=addJs(html);
         return html;
+    }
 
+    public String addJs(String html){
+        String lower=html.toLowerCase();
+        if(lower.indexOf("<html")==-1){
+            html="<html><head><script>\n" +
+                    "function scrollToId() {\n" +
+                    "    var elmnt = document.getElementById(\"highlighter\");\n" +
+                    "    elmnt.scrollIntoView();\n" +
+                    "}\n" +
+                    "</script></head><body onload='scrollToId()'>"+html+"</body></html>";
+        }
+        return html;
     }
 }

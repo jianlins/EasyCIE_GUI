@@ -56,7 +56,7 @@ public class ViewDebugOutput extends GUITask {
         if (guiEnabled)
             Platform.runLater(() -> {
                 boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(
-                        AnnotationLogger.records.iterator(), columnInfo, "output", false);
+                        AnnotationLogger.records.iterator(), columnInfo, "output", TasksOverviewController.DebugView);
             });
         return null;
     }

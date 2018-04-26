@@ -121,7 +121,7 @@ public class CellFactories {
                         cell.setText(item + "");
                         Color color = Color.LIGHTGREY;
                         cell.setBackground(new Background(new BackgroundFill(color, null, null)));
-                        TasksOverviewController.currentTasksOverviewController.updateHTMLEditor(item);
+                        TasksOverviewController.currentTasksOverviewController.updateHTMLEditor(item.toString());
                     }
                 });
                 cell.setOnMouseExited(e -> {

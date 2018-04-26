@@ -3,20 +3,18 @@
 <?import java.net.URL?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-
-<?import javafx.scene.web.HTMLEditor?>
-
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.web.WebView?>
-<?import javafx.scene.control.ScrollPane?>
-<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.112"
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="edu.utah.bmi.simple.gui.controller.TasksOverviewController">
     <stylesheets>
@@ -40,17 +38,16 @@
                 </children>
             </AnchorPane>
             <AnchorPane fx:id="contentPanel">
-                <SplitPane xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1"
-                           dividerPositions="0.75" orientation="VERTICAL" prefHeight="598.0"
-                           prefWidth="625.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <SplitPane dividerPositions="0.75" orientation="VERTICAL" prefHeight="598.0" prefWidth="625.0"
+                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                           AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.112"
+                           xmlns:fx="http://javafx.com/fxml/1">
                     <items>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                        <AnchorPane>
                             <children>
                                 <TableView fx:id="settingTable" editable="true" prefHeight="598.0" prefWidth="625.0"
-                                           AnchorPane.bottomAnchor="0.0"
-                                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                           AnchorPane.topAnchor="0.0">
+                                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <columns>
                                         <TableColumn fx:id="settingNameColumn" maxWidth="400.0" minWidth="110.0"
                                                      prefWidth="200.0" sortable="false" text="Parameter"/>
@@ -70,8 +67,8 @@
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
                                     <children>
                                         <FlowPane fx:id="executePanel" AnchorPane.bottomAnchor="0.0"
-                                                  AnchorPane.leftAnchor="0.0"
-                                                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                                  AnchorPane.topAnchor="0.0"/>
                                     </children>
                                 </AnchorPane>
                             </content>
@@ -79,39 +76,86 @@
                     </items>
                 </SplitPane>
                 <SplitPane fx:id="dbPanel" dividerPositions="0.78" orientation="HORIZONTAL"
-                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <BorderPane>
-                        <center>
-                            <TableView fx:id="annoTableView" editable="false">
-                            </TableView>
-                        </center>
-                        <top>
-                            <BorderPane prefHeight="30.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-                                <center>
-                                    <TextField fx:id="sqlFilter"
-                                               promptText="input sql conditions to filter results (don't need to include 'WHERE')"
-                                               BorderPane.alignment="CENTER"/>
-                                </center>
-                                <right>
-                                    <Button fx:id="tableRefresh" mnemonicParsing="false" text="Refresh"
-                                            BorderPane.alignment="CENTER"/>
-                                </right>
-                            </BorderPane>
-                        </top>
-                    </BorderPane>
+                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                           AnchorPane.topAnchor="0.0">
+                    <AnchorPane>
+                        <children>
+                            <TabPane fx:id="tabPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                     AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <tabs>
+                                    <Tab closable="false" text="DocView">
+                                        <content>
+                                            <BorderPane>
+                                                <center>
+                                                    <TableView fx:id="docTableView" editable="false">
+                                                    </TableView>
+                                                </center>
+                                                <top>
+                                                    <BorderPane prefHeight="30.0" prefWidth="200.0"
+                                                                BorderPane.alignment="CENTER">
+                                                        <center>
+                                                            <TextField fx:id="docSqlFilter"
+                                                                       promptText="input sql conditions to filter results (don't need to include 'WHERE')"
+                                                                       BorderPane.alignment="CENTER"/>
+                                                        </center>
+                                                        <right>
+                                                            <Button fx:id="docTableRefresh" mnemonicParsing="false"
+                                                                    text="Refresh" BorderPane.alignment="CENTER"/>
+                                                        </right>
+                                                    </BorderPane>
+                                                </top>
+                                            </BorderPane>
+                                        </content>
+                                    </Tab>
+                                    <Tab closable="false" text="AnnoView">
+                                        <content>
+                                            <BorderPane>
+                                                <center>
+                                                    <TableView fx:id="annoTableView" editable="false">
+                                                    </TableView>
+                                                </center>
+                                                <top>
+                                                    <BorderPane prefHeight="30.0" prefWidth="200.0"
+                                                                BorderPane.alignment="CENTER">
+                                                        <center>
+                                                            <TextField fx:id="annoSqlFilter"
+                                                                       promptText="input sql conditions to filter results (don't need to include 'WHERE')"
+                                                                       BorderPane.alignment="CENTER"/>
+                                                        </center>
+                                                        <right>
+                                                            <Button fx:id="annoTableRefresh" mnemonicParsing="false"
+                                                                    text="Refresh" BorderPane.alignment="CENTER"/>
+                                                        </right>
+                                                    </BorderPane>
+                                                </top>
+                                            </BorderPane>
+                                        </content>
+                                    </Tab>
+                                    <Tab closable="false" text="DebugView">
+                                        <content>
+                                            <BorderPane>
+                                                <center>
+                                                    <TableView fx:id="debugTableView" editable="false">
+                                                    </TableView>
+                                                </center>
+                                            </BorderPane>
+                                        </content>
+                                    </Tab>
+                                </tabs>
+                            </TabPane>
+                        </children>
+                    </AnchorPane>
                     <BorderPane fx:id="annoDetails">
                         <center>
-                            <WebView fx:id="htmlViewer" AnchorPane.bottomAnchor="0.0" prefHeight="200">
+                            <WebView fx:id="htmlViewer" prefHeight="200" AnchorPane.bottomAnchor="0.0">
 
                             </WebView>
                         </center>
                         <bottom>
                             <TableView fx:id="featureTable" editable="true">
                                 <columns>
-                                    <TableColumn fx:id="featureNameColumn" maxWidth="300.0" minWidth="100.0"
-                                                 editable="false" prefWidth="120.0" sortable="false"
-                                                 text="Feature"/>
+                                    <TableColumn fx:id="featureNameColumn" editable="false" maxWidth="300.0"
+                                                 minWidth="100.0" prefWidth="120.0" sortable="false" text="Feature"/>
                                     <TableColumn fx:id="featureValueColumn" minWidth="100.0" prefWidth="120.0"
                                                  sortable="false" text="Value"/>
                                 </columns>

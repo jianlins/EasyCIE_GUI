@@ -17,6 +17,7 @@ public class RefreshDebugPipe extends GUITask {
     protected Object call() throws Exception {
         if (guiEnabled)
             FastDebugPipe.getInstance(tasks, guiTask).refreshPipe();
+
         return null;
     }
 }
