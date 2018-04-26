@@ -89,8 +89,11 @@ public class CellFactories {
                             debugRunner.guitask.updateGUIMessage("Start debugging...");
                             RecordRow recordRow = (RecordRow) cell.getItem();
                             debugRunner.guitask.updateGUIMessage("Execute pipeline...");
-                            debugRunner.process(recordRow, "SNIPPET", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT",
-                                    "DOC_TEXT", "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
+                            if (recordRow.getValueByColumnName("DOC_TEXT") == null) {
+                                recordRow.addCell("DOC_TEXT", cell.queryDocContent(recordRow.getStrByColumnName("DOC_NAME")));
+                            }
+                            debugRunner.process(recordRow, "DOC_TEXT", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT", "DOC_TEXT",
+                                    "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
                             debugRunner.showResults();
 //                            new Thread(() -> fastDebugPipe.run()).start();
                         }

@@ -139,7 +139,7 @@ public class TasksOverviewController {
     //    save the current sqls displayed in Tabviews
     private HashMap<String, String> currentSQLs = new HashMap<>();
     //    save the current db used displayed in Tabviews
-    private HashMap<String, String> currentDBFileName = new HashMap<>();
+    public HashMap<String, String> currentDBFileName = new HashMap<>();
 
     public TasksOverviewController() {
     }

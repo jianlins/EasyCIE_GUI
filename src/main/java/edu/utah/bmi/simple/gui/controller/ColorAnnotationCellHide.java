@@ -31,7 +31,7 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
             new Background(new BackgroundFill(colors[1], null, null))};
     protected static String previousValue = "";
     protected static int backgroundId = 0;
-    private static String previousHTML="";
+    private static String previousHTML = "";
 
 
     protected void updateItem(Object item, boolean empty) {
@@ -79,17 +79,7 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
             RecordRow recordRow = (RecordRow) value;
             Object docName = recordRow.getValueByColumnName("DOC_NAME");
             if (!docName.equals(previousValue)) {
-                html = "";
-                TaskFX task = TasksOverviewController.currentTasksOverviewController.mainApp.tasks.getTask("settings");
-                String inputDB = task.getValue(ConfigKeys.readDBConfigFileName);
-                DAO dao = new DAO(new File(inputDB));
-                String docTableName = task.getValue(ConfigKeys.inputTableName);
-                dao.initiateTableFromTemplate("DOCUMENTS_TABLE", docTableName, false);
-                RecordRowIterator records = dao.queryRecordsFromPstmt(docTableName, docName);
-                if (records.hasNext()) {
-                    html = records.next().getStrByColumnName("TEXT");
-                }
-                dao.close();
+                html = queryDocContent(docName.toString());
                 if (html.length() > 0 && recordRow.getValueByColumnName("SNIPPET_BEGIN") != null) {
                     String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
                     int begin = (int) recordRow.getValueByColumnName("SNIPPET_BEGIN");
@@ -101,29 +91,32 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
                     html = docName + "";
                 }
                 html = html.replaceAll("\\n", "<br>");
-                previousHTML=html;
-                previousValue=docName+"";
-            }else{
-                html=previousHTML;
+                previousHTML = html;
+                previousValue = docName + "";
+            } else {
+                html = previousHTML;
             }
         } else {
             html = value + "";
             html = html.replaceAll("\\n", "<br>");
         }
-        html=addJs(html);
         return html;
     }
 
-    public String addJs(String html){
-        String lower=html.toLowerCase();
-        if(lower.indexOf("<html")==-1){
-            html="<html><head><script>\n" +
-                    "function scrollToId() {\n" +
-                    "    var elmnt = document.getElementById(\"highlighter\");\n" +
-                    "    elmnt.scrollIntoView();\n" +
-                    "}\n" +
-                    "</script></head><body onload='scrollToId()'>"+html+"</body></html>";
+    public String queryDocContent(String docName) {
+        String text = "";
+        TaskFX task = TasksOverviewController.currentTasksOverviewController.mainApp.tasks.getTask("settings");
+        String inputDB = task.getValue(ConfigKeys.readDBConfigFileName);
+        DAO dao = new DAO(new File(inputDB));
+        String docTableName = task.getValue(ConfigKeys.inputTableName);
+        dao.initiateTableFromTemplate("DOCUMENTS_TABLE", docTableName, false);
+        RecordRowIterator records = dao.queryRecordsFromPstmt(docTableName, docName);
+        if (records.hasNext()) {
+            text = records.next().getStrByColumnName("TEXT");
         }
-        return html;
+        dao.close();
+        return text;
     }
+
+
 }
