@@ -137,7 +137,12 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
         DateTime recordDate = readReferenceDate(jcas, recordDateColumnName);
         if (recordDate==null)
             recordDate=referenceDate;
+        if (referenceDate==null){
+            logger.info("No value in Reference date column: '"+referenceDateColumnName+"'. Skip the TemporalConTextDetector.");
+            return;
+        }
         referenceDate = referenceDate.minusDays(intervalDaysBeforeReferenceDate);
+
         FSIndex annoIndex = jcas.getAnnotationIndex(targetConceptId);
         Iterator annoIter = annoIndex.iterator();
         while (annoIter.hasNext()) {

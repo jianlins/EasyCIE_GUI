@@ -84,6 +84,7 @@ public class FastDebugPipe extends RunEasyCIE {
         fastDebugPipe = this;
     }
 
+
     protected void initPipe(GUITask task) {
 
         String runId = uimaLogger.getRunid() + "";

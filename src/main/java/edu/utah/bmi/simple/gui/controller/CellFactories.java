@@ -1,11 +1,7 @@
 package edu.utah.bmi.simple.gui.controller;
 
-import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.simple.gui.entry.TasksFX;
-import edu.utah.bmi.simple.gui.task.DebugPipe;
 import edu.utah.bmi.simple.gui.task.FastDebugPipe;
-import edu.utah.bmi.simple.gui.task.RunEasyCIEDebugger;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -16,8 +12,6 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-
-import java.util.Map;
 
 public class CellFactories {
 
@@ -88,12 +82,27 @@ public class CellFactories {
 //                                updateHTMLEditor((RecordRow) item);
                         // do something with id...
                     }
+                    if (e.getButton().equals(MouseButton.SECONDARY)) {
+                        System.out.println("Start debugging...");
+                        if (cell.getItem() instanceof RecordRow) {
+                            debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks, TasksOverviewController.currentTasksOverviewController.currentGUITask);
+                            debugRunner.guitask.updateGUIMessage("Start debugging...");
+                            RecordRow recordRow = (RecordRow) cell.getItem();
+                            debugRunner.guitask.updateGUIMessage("Execute pipeline...");
+                            debugRunner.process(recordRow, "SNIPPET", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT",
+                                    "DOC_TEXT", "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
+                            debugRunner.showResults();
+//                            new Thread(() -> fastDebugPipe.run()).start();
+                        }
+
+                    }
                 });
                 cell.setOnMouseExited(e -> {
                     if (!cell.isEmpty()) {
                         cell.setBackground(new Background(new BackgroundFill[]{}));
                     }
                 });
+
                 return cell;
             };
 

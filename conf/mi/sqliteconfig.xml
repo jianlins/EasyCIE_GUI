@@ -132,7 +132,7 @@
         </item>
         <item>
             <name>masterInputQuery</name>
-            <sql>SELECT DOC_ID, DATASET_ID,BUNCH_ID,DOC_NAME,TEXT FROM {tableName} WHERE DATASET_ID = ?;
+            <sql>SELECT DOC_ID, DATASET_ID,BUNCH_ID,DOC_NAME,TEXT,DATE,REF_DATE FROM {tableName} WHERE DATASET_ID = ?;
             </sql>
         </item>
         <item>
