@@ -18,6 +18,7 @@ public class ViewImportDB extends GUITask {
     protected String SQLFile, corpusTable;
     protected String importType;
     protected TasksFX tasks;
+    protected String datasetID;
     public ViewImportDB(TasksFX tasks, String importType) {
         initiate(tasks, importType);
     }
@@ -30,6 +31,7 @@ public class ViewImportDB extends GUITask {
 
         }
         TaskFX config = tasks.getTask("settings");
+        datasetID=config.getValue(ConfigKeys.datasetId);
         SQLFile = config.getValue(ConfigKeys.readDBConfigFileName);
         if (importType.equals("doc"))
             corpusTable = config.getValue(ConfigKeys.inputTableName);
@@ -58,7 +60,7 @@ public class ViewImportDB extends GUITask {
                     return;
                 }
                 if (importType.equals("doc"))
-                    res = TasksOverviewController.currentTasksOverviewController.showDocTable(SQLFile, corpusTable, "", "output");
+                    res = TasksOverviewController.currentTasksOverviewController.showDocTable(SQLFile, corpusTable, " DATASET_ID='"+datasetID+"'", "output");
                 else {
                     ViewOutputDB viewer=new ViewOutputDB(tasks);
                     viewer.snippetResultTable=corpusTable;

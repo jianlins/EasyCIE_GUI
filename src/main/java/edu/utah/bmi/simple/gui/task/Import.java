@@ -303,6 +303,7 @@ public class Import extends GUITask {
 
     protected void importN2C2(File inputDir, String datasetId, String tableName, String referenceTable, boolean overWrite) {
         dao.initiateTableFromTemplate("DOCUMENTS_TABLE", tableName, overWrite);
+        dao.initiateTableFromTemplate("DOCUMENTS_TABLE", tableName, overWrite);
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", referenceTable, overWrite);
         Collection<File> files = FileUtils.listFiles(inputDir, new String[]{"xml"}, true);
         File[] fileArray = new File[files.size()];
@@ -312,7 +313,8 @@ public class Import extends GUITask {
             System.out.println("Reading files from: " + inputDir.getAbsolutePath() +
                     "\nImporting into table: " + tableName);
         int total = files.size();
-        int counter = 0;
+        int fileCounter = 0, noteCounter=0;
+
         Boolean n2c2Data = false;
         for (File file : fileArray) {
             ArrayList<RecordRow> annotations = new ArrayList<>();
@@ -320,9 +322,9 @@ public class Import extends GUITask {
             String content = n2c2Parser(file, docName, annotations);
             if (print)
                 System.out.print("Import: " + file.getName() + "\t\t");
-            RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
-                    .addCell("DOC_NAME", docName )
-                    .addCell("TEXT",content.trim())
+            RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId+"_ORIG")
+                    .addCell("DOC_NAME", docName)
+                    .addCell("TEXT", content.trim())
                     .addCell("BUNCH_ID", docName);
             dao.insertRecord(tableName, recordRow);
 
@@ -344,13 +346,14 @@ public class Import extends GUITask {
                     recordRow.addCell("DATE", tryFindDate(docTxt));
                     dao.insertRecord(tableName, recordRow);
                 }
+                noteCounter++;
 
             }
             dao.insertRecords(referenceTable, annotations);
             if (print)
                 System.out.println("success");
-            updateGUIProgress(counter, total);
-            counter++;
+            updateGUIProgress(fileCounter, total);
+            fileCounter++;
         }
         if (n2c2Data) {
             try {
@@ -361,7 +364,10 @@ public class Import extends GUITask {
                 e.printStackTrace();
             }
         }
-        System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
+        System.out.println("Totally " + fileCounter + (fileCounter > 1 ? " documents have" : " document has") + " been imported successfully ("+noteCounter+" notes).");
+        popDialog("Message","Import success","Totally " + fileCounter + (fileCounter > 1 ? " documents have" : " document has")
+                + " been imported successfully("+noteCounter+" notes). \n\nThe original documents are imported directly to DATASET_ID: '"+datasetId
+                +"_ORIG'.\n\nEach document was split into individual notes with DATASET_ID: '"+datasetId+"'.");
     }
 
     private Date tryFindDate(String docTxt) {

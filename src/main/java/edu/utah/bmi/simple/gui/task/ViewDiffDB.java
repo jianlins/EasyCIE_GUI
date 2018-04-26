@@ -77,8 +77,10 @@ public class ViewDiffDB extends GUITask {
                                             "Here displays the previous comparison that has some difference saved.");
                         }
                         dao.close();
+                        String filter="annotator='" + annotator + "' AND RUN_ID=" + lastRunId;
                         TasksOverviewController.currentTasksOverviewController.showAnnoTable(outputDB, diffTable,
-                                " WHERE annotator='" + annotator + "' AND RUN_ID=" + lastRunId, ColorAnnotationCell.colorCompare);
+                                " WHERE "+filter, ColorAnnotationCell.colorCompare);
+                        TasksOverviewController.currentTasksOverviewController.sqlFilter.setText(filter);
                         updateMessage("data loaded");
                     } else {
                         updateMessage("no record loaded");

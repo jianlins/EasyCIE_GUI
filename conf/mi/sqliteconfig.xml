@@ -68,7 +68,7 @@
     <queryStatements>
         <item>
             <name>queryDocs</name>
-            <sql>SELECT DOC_ID,DOC_NAME, BUNCH_ID, TEXT SNIPPET,TEXT DOC_TEXT, DATE,REF_DATE, INSERT_DTM FROM {tableName}</sql>
+            <sql>SELECT DOC_ID,DATASET_ID, DOC_NAME, BUNCH_ID, TEXT SNIPPET,TEXT DOC_TEXT, DATE,REF_DATE, INSERT_DTM FROM {tableName}</sql>
         </item>
         <item>
             <name>queryAnnos</name>
@@ -94,7 +94,7 @@
         <item>
             <name>queryBunchDocSnippetAnnos</name>
             <sql>SELECT RD.ID ,RD.DOC_NAME,RB.TYPE BUNCH_TYPE, RD.TYPE DOC_TYPE, RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,
-                RS.FEATURES,IT.DATE, IT.REF_DATE,RS.COMMENTS,RS.ANNOTATOR,RS.RUN_ID
+                RS.FEATURES,IT.DATE, IT.REF_DATE,RS.COMMENTS,RS.ANNOTATOR,RB.RUN_ID
                 FROM {bunchResultTable} RB JOIN {inputTable} IT ON RB.DOC_NAME=IT.BUNCH_ID
                 JOIN {docResultTable} RD ON IT.DOC_NAME=RD.DOC_NAME
                 LEFT OUTER JOIN {tableName} RS ON RD.DOC_NAME=RS.DOC_NAME

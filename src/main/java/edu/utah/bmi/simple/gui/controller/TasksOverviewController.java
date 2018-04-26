@@ -744,6 +744,8 @@ public class TasksOverviewController {
                 taskConstructor = c.getConstructor(TasksFX.class);
                 thisTask = taskConstructor.newInstance(mainApp.tasks);
             }
+            if (thisTask instanceof GUITask)
+                currentGUITask= (GUITask) thisTask;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
