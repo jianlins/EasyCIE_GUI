@@ -14,50 +14,37 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.web.WebView?>
 
-<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.121"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="edu.utah.bmi.simple.gui.controller.TasksOverviewController">
+<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.utah.bmi.simple.gui.controller.TasksOverviewController">
     <stylesheets>
-        <URL value="@panel.css"/>
+        <URL value="@panel.css" />
     </stylesheets>
-    <SplitPane dividerPositions="0.15" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <SplitPane dividerPositions="0.15" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
             <AnchorPane maxWidth="400.0">
                 <children>
-                    <TableView fx:id="tasklist" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <TableView fx:id="tasklist" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <columns>
-                            <TableColumn fx:id="taskNameColumn" editable="false" prefWidth="75.0" sortable="false"
-                                         text="Tasks"/>
+                            <TableColumn fx:id="taskNameColumn" editable="false" prefWidth="75.0" sortable="false" text="Tasks" />
                         </columns>
                         <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                         </columnResizePolicy>
                     </TableView>
                 </children>
             </AnchorPane>
             <AnchorPane fx:id="contentPanel">
-                <SplitPane dividerPositions="0.75" orientation="VERTICAL" prefHeight="598.0" prefWidth="625.0"
-                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                           AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.112"
-                           xmlns:fx="http://javafx.com/fxml/1">
+                <SplitPane dividerPositions="0.75" orientation="VERTICAL" prefHeight="598.0" prefWidth="625.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1">
                     <items>
                         <AnchorPane>
                             <children>
-                                <TableView fx:id="settingTable" editable="true" prefHeight="598.0" prefWidth="625.0"
-                                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <TableView fx:id="settingTable" editable="true" prefHeight="598.0" prefWidth="625.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <columns>
-                                        <TableColumn fx:id="settingNameColumn" maxWidth="400.0" minWidth="110.0"
-                                                     prefWidth="200.0" sortable="false" text="Parameter"/>
-                                        <TableColumn fx:id="settingValueColumn" minWidth="80.0" prefWidth="120.0"
-                                                     sortable="false" text="Value"/>
-                                        <TableColumn fx:id="settingDesColumn" minWidth="200.0" sortable="false"
-                                                     text="Description"/>
+                                        <TableColumn fx:id="settingNameColumn" maxWidth="400.0" minWidth="110.0" prefWidth="200.0" sortable="false" text="Parameter" />
+                                        <TableColumn fx:id="settingValueColumn" minWidth="80.0" prefWidth="120.0" sortable="false" text="Value" />
+                                        <TableColumn fx:id="settingDesColumn" minWidth="200.0" sortable="false" text="Description" />
                                     </columns>
                                     <columnResizePolicy>
-                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                                     </columnResizePolicy>
                                 </TableView>
                             </children>
@@ -66,22 +53,17 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
                                     <children>
-                                        <FlowPane fx:id="executePanel" AnchorPane.bottomAnchor="0.0"
-                                                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                                  AnchorPane.topAnchor="0.0"/>
+                                        <FlowPane fx:id="executePanel" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                     </children>
                                 </AnchorPane>
                             </content>
                         </TitledPane>
                     </items>
                 </SplitPane>
-                <SplitPane fx:id="dbPanel" dividerPositions="0.78" orientation="HORIZONTAL"
-                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                           AnchorPane.topAnchor="0.0">
+                <SplitPane fx:id="dbPanel" dividerPositions="0.78" orientation="HORIZONTAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <AnchorPane>
                         <children>
-                            <TabPane fx:id="tabPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                     AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <TabPane fx:id="tabPane" tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <tabs>
                                     <Tab closable="false" text="DocView">
                                         <content>
@@ -91,16 +73,12 @@
                                                     </TableView>
                                                 </center>
                                                 <top>
-                                                    <BorderPane prefHeight="30.0" prefWidth="200.0"
-                                                                BorderPane.alignment="CENTER">
+                                                    <BorderPane prefHeight="30.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                                         <center>
-                                                            <TextField fx:id="docSqlFilter"
-                                                                       promptText="input sql conditions to filter results (don't need to include 'WHERE')"
-                                                                       BorderPane.alignment="CENTER"/>
+                                                            <TextField fx:id="docSqlFilter" promptText="input sql conditions to filter results (don't need to include 'WHERE')" BorderPane.alignment="CENTER" />
                                                         </center>
                                                         <right>
-                                                            <Button fx:id="docTableRefresh" mnemonicParsing="false"
-                                                                    text="Refresh" BorderPane.alignment="CENTER"/>
+                                                            <Button fx:id="docTableRefresh" mnemonicParsing="false" text="Refresh" BorderPane.alignment="CENTER" />
                                                         </right>
                                                     </BorderPane>
                                                 </top>
@@ -115,16 +93,12 @@
                                                     </TableView>
                                                 </center>
                                                 <top>
-                                                    <BorderPane prefHeight="30.0" prefWidth="200.0"
-                                                                BorderPane.alignment="CENTER">
+                                                    <BorderPane prefHeight="30.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                                         <center>
-                                                            <TextField fx:id="annoSqlFilter"
-                                                                       promptText="input sql conditions to filter results (don't need to include 'WHERE')"
-                                                                       BorderPane.alignment="CENTER"/>
+                                                            <TextField fx:id="annoSqlFilter" promptText="input sql conditions to filter results (don't need to include 'WHERE')" BorderPane.alignment="CENTER" />
                                                         </center>
                                                         <right>
-                                                            <Button fx:id="annoTableRefresh" mnemonicParsing="false"
-                                                                    text="Refresh" BorderPane.alignment="CENTER"/>
+                                                            <Button fx:id="annoTableRefresh" mnemonicParsing="false" text="Refresh" BorderPane.alignment="CENTER" />
                                                         </right>
                                                     </BorderPane>
                                                 </top>
@@ -154,13 +128,11 @@
                         <bottom>
                             <TableView fx:id="featureTable" editable="true">
                                 <columns>
-                                    <TableColumn fx:id="featureNameColumn" editable="false" maxWidth="300.0"
-                                                 minWidth="100.0" prefWidth="120.0" sortable="false" text="Feature"/>
-                                    <TableColumn fx:id="featureValueColumn" minWidth="100.0" prefWidth="120.0"
-                                                 sortable="false" text="Value"/>
+                                    <TableColumn fx:id="featureNameColumn" editable="false" maxWidth="300.0" minWidth="100.0" prefWidth="120.0" sortable="false" text="Feature" />
+                                    <TableColumn fx:id="featureValueColumn" minWidth="100.0" prefWidth="120.0" sortable="false" text="Value" />
                                 </columns>
                                 <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                                 </columnResizePolicy>
                             </TableView>
                         </bottom>

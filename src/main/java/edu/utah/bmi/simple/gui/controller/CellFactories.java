@@ -47,6 +47,7 @@ public class CellFactories {
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
                         System.out.println("Start debugging...");
+                        TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                         if (cell.getItem() instanceof RecordRow) {
                             debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks, TasksOverviewController.currentTasksOverviewController.currentGUITask);
                             debugRunner.guitask.updateGUIMessage("Start debugging...");
@@ -84,6 +85,7 @@ public class CellFactories {
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
                         System.out.println("Start debugging...");
+                        TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                         if (cell.getItem() instanceof RecordRow) {
                             debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks, TasksOverviewController.currentTasksOverviewController.currentGUITask);
                             debugRunner.guitask.updateGUIMessage("Start debugging...");
