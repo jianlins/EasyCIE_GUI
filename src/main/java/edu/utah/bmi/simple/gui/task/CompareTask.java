@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.nlp.easycie.NLPDBLogger;
@@ -31,7 +31,7 @@ public class CompareTask extends GUITask {
     protected HashSet<String> types = new HashSet();
     private String diffTable, outputTable, compareReferenceTable, goldReferenceTable,
             targetAnnotator, referenceAnnotator, typeFilter, targetRunId, referenceRunId;
-    private DAO wdao, rdao;
+    private EDAO wdao, rdao;
     protected NLPDBLogger logger;
     private boolean strictCompare = false;
     public static int lastRunId = -1;
@@ -72,10 +72,10 @@ public class CompareTask extends GUITask {
         String importDB = settingConfig.getValue(ConfigKeys.readDBConfigFileName);
         String goldReferenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
 
-        wdao = new DAO(new File(outputDB));
+        wdao = new EDAO(new File(outputDB));
         if (goldReferenceTable.equals(compareReferenceTable) && !importDB.equals(outputDB)) {
 //            if compare with gold standard
-            rdao = new DAO(new File(importDB));
+            rdao = new EDAO(new File(importDB));
         } else {
 //            if compare with different runs
             rdao = wdao;
@@ -129,7 +129,7 @@ public class CompareTask extends GUITask {
     }
 
 
-    public void readAnnotations(DAO dao, HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations,
+    public void readAnnotations(EDAO dao, HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations,
                                 String annotator, String annotatorTable, String typeFilter, String runId) {
         updateGUIMessage("Read the annotations of \"" + annotator + "\" from table \"" + annotatorTable + "\"....");
         ArrayList<String> conditions = new ArrayList<>();
@@ -180,7 +180,7 @@ public class CompareTask extends GUITask {
     }
 
 
-    public static int countQueryRecords(DAO dao, String tableName, String[] conditions) {
+    public static int countQueryRecords(EDAO dao, String tableName, String[] conditions) {
         int count = 0;
         StringBuilder sql = new StringBuilder();
         sql.append(dao.queries.get("queryCount").replaceAll("\\{tableName}",tableName));

@@ -1,9 +1,8 @@
 package edu.utah.bmi.nlp.easycie.reader;
 
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.simple.gui.task.RunEasyCIE;
 import org.apache.uima.UIMA_IllegalArgumentException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
@@ -36,7 +35,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     public static final String PARAM_DATASET_ID = "DatasetId";
     protected File dbConfigFile;
     protected String querySqlName, countSqlName, docColumnName, docTableName;
-    public static DAO dao = null;
+    public static EDAO dao = null;
     protected int mCurrentIndex, totalDocs;
     protected RecordRowIterator recordIterator;
     @Deprecated
@@ -62,7 +61,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
         }
         dbConfigFile = new File(readConfigureString(PARAM_DB_CONFIG_FILE, null));
         if (dao == null)
-            dao = new DAO(this.dbConfigFile);
+            dao = new EDAO(this.dbConfigFile);
         querySqlName = readConfigureString(PARAM_QUERY_SQL_NAME, "masterInputQuery");
         countSqlName = readConfigureString(PARAM_COUNT_SQL_NAME, "masterCountQuery");
         docColumnName = readConfigureString(PARAM_DOC_COLUMN_NAME, "TEXT");

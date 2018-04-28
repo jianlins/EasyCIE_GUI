@@ -2,7 +2,7 @@ package edu.utah.bmi.nlp.uima;
 
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
@@ -32,7 +32,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
 
 
     public static String resultTableName, bunchColumnName;
-    public static DAO dao = null;
+    public static EDAO dao = null;
     //                          topic   rules
     protected LinkedHashMap<String, ArrayList<ArrayList<Object>>> inferenceMap = new LinkedHashMap<>();
     protected HashMap<String, String> defaultBunchType = new HashMap<>();
@@ -75,7 +75,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
         else
             runId = -2;
         if (dao == null) {
-            dao = new DAO(new File(configFile));
+            dao = new EDAO(new File(configFile));
         }
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", resultTableName, false);
         parseRuleStr(inferenceStr);

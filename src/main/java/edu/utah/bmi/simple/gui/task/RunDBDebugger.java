@@ -2,7 +2,7 @@ package edu.utah.bmi.simple.gui.task;
 
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -25,7 +25,7 @@ public class RunDBDebugger extends GUITask {
     protected String  annotator, inputTableName;
     //    protected boolean fastNerCaseSensitive;
     protected DebugPipe debugRunner;
-    protected DAO dao;
+    protected EDAO dao;
     protected TaskFX thisTask;
     protected TasksFX tasks;
     protected GUITask guiTask;
@@ -46,7 +46,7 @@ public class RunDBDebugger extends GUITask {
         TaskFX settings = tasks.getTask("settings");
         String dbconfig = settings.getValue(ConfigKeys.readDBConfigFileName);
         inputTableName = settings.getValue(ConfigKeys.inputTableName);
-        dao = new DAO(new File(dbconfig));
+        dao = new EDAO(new File(dbconfig));
         thisTask = tasks.getTask("dbdebug");
         this.tasks = tasks;
         guiTask = this;

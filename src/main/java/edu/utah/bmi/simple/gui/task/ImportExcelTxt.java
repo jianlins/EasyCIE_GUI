@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.IOUtil;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.simple.gui.core.CommonFunc;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -63,7 +63,7 @@ public class ImportExcelTxt extends Import {
             initSuccess = false;
             return;
         }
-        dao = new DAO(dbconfig, true, false);
+        dao = new EDAO(dbconfig, true, false);
         initSuccess = true;
     }
 

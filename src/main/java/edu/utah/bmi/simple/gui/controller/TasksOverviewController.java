@@ -4,7 +4,7 @@ import com.sun.javafx.collections.ObservableMapWrapper;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.ColumnInfo;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.*;
@@ -130,7 +130,7 @@ public class TasksOverviewController {
     private WebEngine webEngine;
 
     private int limitRecords = 300;
-    private DAO dao;
+    private EDAO dao;
 
     public GUITask currentGUITask;
 
@@ -464,7 +464,7 @@ public class TasksOverviewController {
     public boolean showDBTable(String sql, String dbName, String colorDifferential, String tableViewName, Object... values) {
         if (sql == null || sql.length() == 0 || sql.equals("null"))
             return false;
-        dao = new DAO(new File(dbName));
+        dao = new EDAO(new File(dbName));
         RecordRowIterator recordRowIter;
         ColumnInfo columnInfo;
         Object[] res;

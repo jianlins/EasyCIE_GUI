@@ -1,10 +1,8 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.simple.gui.core.ExcelExporter2;
 import edu.utah.bmi.simple.gui.core.ExcelExporter3;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -87,7 +85,7 @@ public class Export2Excel3 extends GUITask {
         }
         // Update UI here.
         boolean res = false;
-        DAO dao = new DAO(new File(outputDB));
+        EDAO dao = new EDAO(new File(outputDB));
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetResultTable, false);
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", documentResultTable, false);
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", bunchResultTable, false);

@@ -2,7 +2,7 @@ package edu.utah.bmi.simple.gui.task;
 
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.simple.gui.controller.ColorAnnotationCell;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -49,7 +49,7 @@ public class ViewImportDB extends GUITask {
                 }
                 // Update UI here.
                 boolean res = false;
-                DAO dao = new DAO(new File(SQLFile), true, false);
+                EDAO dao = new EDAO(new File(SQLFile), true, false);
                 if (!dao.checkTableExits(corpusTable)) {
                     popDialog("Note", "Table '" + corpusTable + "' does not exit.",
                             " You need to import documents first.");

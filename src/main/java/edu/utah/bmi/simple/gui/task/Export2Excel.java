@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.core.ExcelExporter;
@@ -92,7 +92,7 @@ public class Export2Excel extends GUITask {
         // Update UI here.
         boolean res = false;
         if (annotator.trim().length() > 0) {
-            DAO dao = new DAO(new File(outputDB));
+            EDAO dao = new EDAO(new File(outputDB));
             if (!dao.checkExists(outputTable)) {
                 updateGUIMessage("Table '" + outputTable + "' does not exit.");
                 popDialog("Note", "Table '" + outputTable + "' does not exit.",
@@ -141,7 +141,7 @@ public class Export2Excel extends GUITask {
         return null;
     }
 
-    public int getLastRunIdofAnnotator(DAO dao, String outputTable, String annotator) {
+    public int getLastRunIdofAnnotator(EDAO dao, String outputTable, String annotator) {
         int id = -1;
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", outputTable, annotator);
         if (recordRowIter.hasNext()) {
@@ -153,7 +153,7 @@ public class Export2Excel extends GUITask {
         return id;
     }
 
-    public int getLastLogRunId(DAO dao, String annotator) {
+    public int getLastLogRunId(EDAO dao, String annotator) {
         int id = -1;
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("lastLogRunID", annotator);
         if (recordRowIter.hasNext()) {

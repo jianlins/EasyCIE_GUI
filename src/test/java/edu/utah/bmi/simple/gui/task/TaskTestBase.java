@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.simple.gui.core.SettingOper;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 public class TaskTestBase {
     private static TasksFX tasks;
-    private static DAO dao;
+    private static EDAO dao;
     private static String sqliteConfig = "conf/sqliteconfig.xml";
     private static String mysqlConfig = "conf/sqliteconfig.xml";
     private static String dbConfig = sqliteConfig;
@@ -28,7 +28,7 @@ public class TaskTestBase {
         tasks = settingOper.readSettings();
         tasks.getTask("settings").setValue(ConfigKeys.readDBConfigFileName, dbConfig);
         tasks.getTask("settings").setValue(ConfigKeys.writeDBConfigFileName, dbConfig);
-        dao = new DAO(new File(dbConfig), true, false);
+        dao = new EDAO(new File(dbConfig), true, false);
     }
 
 

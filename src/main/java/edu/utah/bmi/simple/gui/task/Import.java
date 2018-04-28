@@ -2,7 +2,7 @@ package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.easycie.reader.BratReader;
 import edu.utah.bmi.nlp.easycie.reader.EhostReader;
@@ -32,7 +32,7 @@ import org.dom4j.io.SAXReader;
 public class Import extends GUITask {
     public static Logger logger = IOUtil.getLogger(Import.class);
     public static final char ehost = 'e', xmi = 'x', brat = 'b', txt = 't', n2c2 = 'n', unknown = 'u';
-    protected DAO dao;
+    protected EDAO dao;
     protected boolean print = true;
 
     protected String inputPath, dbConfigFile, importTable, referenceTable, overWriteAnnotatorName, datasetId, rushRule;
@@ -102,7 +102,7 @@ public class Import extends GUITask {
             initSuccess = false;
             return;
         }
-        dao = new DAO(dbconfig, true, false);
+        dao = new EDAO(dbconfig, true, false);
         switch (corpusType) {
             case brat:
                 if (overWriteAnnotatorName.length() == 0)
@@ -154,7 +154,7 @@ public class Import extends GUITask {
 
     protected void run(String inputDir, String outputTable, String SQLFile, boolean overWrite, String[] filters) throws IOException {
         updateGUIMessage("Start import....");
-        DAO dao = new DAO(new File(SQLFile));
+        EDAO dao = new EDAO(new File(SQLFile));
         dao.initiateTable(outputTable, overWrite);
         if (filters.length == 0 || filters[0].trim().length() == 0)
             filters = null;

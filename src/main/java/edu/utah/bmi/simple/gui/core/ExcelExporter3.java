@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.core;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.StaticVariables;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class ExcelExporter3 {
-    private DAO dao;
+    private EDAO dao;
     private String sql;
     private static HashMap<String, Font> typeFonts = new HashMap<>();
     private static HashMap<String, Integer> columnPositions = new HashMap<>();
@@ -30,20 +30,20 @@ public class ExcelExporter3 {
     private ArrayList<String> extraColumns = new ArrayList<>();
     private String inputTable;
 
-    public ExcelExporter3(DAO dao, String sql) {
+    public ExcelExporter3(EDAO dao, String sql) {
         init(dao, sql, -1, null, false, null);
     }
 
-    public ExcelExporter3(DAO dao, String sql, int total, GUITask task) {
+    public ExcelExporter3(EDAO dao, String sql, int total, GUITask task) {
         init(dao, sql, total, task, false, null);
     }
 
-    public ExcelExporter3(DAO dao, String sql, int total, GUITask task, boolean exportText, String inputTable) {
+    public ExcelExporter3(EDAO dao, String sql, int total, GUITask task, boolean exportText, String inputTable) {
         init(dao, sql, total, task, exportText, inputTable);
     }
 
 
-    private void init(DAO dao, String sql, int total, GUITask task, boolean exportText, String inputTable) {
+    private void init(EDAO dao, String sql, int total, GUITask task, boolean exportText, String inputTable) {
         this.dao = dao;
         this.sql = sql;
         this.task = task;

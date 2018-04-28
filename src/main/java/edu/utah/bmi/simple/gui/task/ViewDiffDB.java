@@ -1,9 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
-import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.sql.RecordRowIterator;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.simple.gui.controller.ColorAnnotationCell;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -47,7 +45,7 @@ public class ViewDiffDB extends GUITask {
 //                // Update UI here.
 //                if (annotatorCompare.trim().length() > 0 && annotatorAgainst.trim().length() > 0) {
 //                    String annotator = annotatorCompare + "_vs_" + annotatorAgainst;
-//                    DAO dao = new DAO(new File(outputDB));
+//                    EDAO dao = new EDAO(new File(outputDB));
 //                    dao.initiateTableFromTemplate("ANNOTATION_TABLE", diffTable, false);
 //                    if (!dao.checkExists(diffTable)) {
 //                        updateMessage("Table '" + diffTable + "' does not exit.");
@@ -95,7 +93,7 @@ public class ViewDiffDB extends GUITask {
                 boolean res = false;
                 if (annotatorCompare.trim().length() > 0 && annotatorAgainst.trim().length() > 0) {
                     String annotator = annotatorCompare + "_vs_" + annotatorAgainst;
-                    DAO dao = new DAO(new File(outputDB));
+                    EDAO dao = new EDAO(new File(outputDB));
                     dao.initiateTableFromTemplate("ANNOTATION_TABLE", diffTable, false);
                     String[] values = buildQuery(dao, annotator, diffTable, inputTable);
                     String sourceQuery = values[0];
@@ -140,7 +138,7 @@ public class ViewDiffDB extends GUITask {
         return null;
     }
 
-    public static String[] buildQuery(DAO dao, String annotator,
+    public static String[] buildQuery(EDAO dao, String annotator,
                                       String snippetResultTable, String inputTable) {
         String sourceQuery, primeTable = "RS";
 //       match to querySnippetAnnos, queryDocSnippetAnnos, queryBunchDocSnippetAnnos
@@ -167,7 +165,7 @@ public class ViewDiffDB extends GUITask {
                 runId = lastLogRunId;
             }
             if (!runId.equals("-1")) {
-                filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId;
+                filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId +" ORDER BY COMMENTS,"+primeTable+".DOC_NAME";
             }
         }
         return new String[]{sourceQuery, filter, annotatorLastRunid, lastLogRunId};

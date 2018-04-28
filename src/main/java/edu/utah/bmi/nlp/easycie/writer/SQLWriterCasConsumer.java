@@ -3,7 +3,7 @@ package edu.utah.bmi.nlp.easycie.writer;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.Interval1D;
 import edu.utah.bmi.nlp.core.IntervalST;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Concept;
 import edu.utah.bmi.nlp.type.system.ConceptBASE;
@@ -53,7 +53,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
     protected File sqlFile;
     protected String snippetTableName, docTableName, annotator = "", version;
     protected int mDocNum, batchSize = 15, minTextLength;
-    public static DAO dao = null;
+    public static EDAO dao = null;
     protected boolean debug = false, overwriteTable = false, useAnnotationsAnnotator = false;
     private ArrayList<String> typeToSave = new ArrayList<>();
 
@@ -76,7 +76,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
         version = readConfigureString(cont, PARAM_VERSION, null);
 
         if (dao == null) {
-            dao = new DAO(this.sqlFile);
+            dao = new EDAO(this.sqlFile);
         }
         dao.batchsize = batchSize;
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetTableName, overwriteTable);

@@ -10,7 +10,7 @@ import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
 import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
 import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
 import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Doc_Base;
 import edu.utah.bmi.nlp.type.system.SectionHeader;
@@ -51,7 +51,7 @@ public class RunEasyCIE extends GUITask {
             dateRule = "", featureInfRule = "", featureMergerRule = "", docInfRule = "", bunchInfRule = "";
     protected int dayInterval = 0;
     public AdaptableUIMACPETaskJCasRunner runner;
-    protected DAO rdao, wdao;
+    protected EDAO rdao, wdao;
     protected boolean inferAllTemporal = false,saveDateAnnotation=false;
     public boolean ehost = false, brat = false, xmi = true;
     protected String exporttypes;
@@ -213,7 +213,7 @@ public class RunEasyCIE extends GUITask {
     }
 
     protected void initUIMALogger() {
-        wdao = new DAO(new File(writeConfigFileName), false, false);
+        wdao = new EDAO(new File(writeConfigFileName), false, false);
         uimaLogger = new NLPDBLogger(wdao, "LOG", "RUN_ID", annotator);
         uimaLogger.setReportable(report);
         uimaLogger.logStartTime();

@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.task
 
 import edu.utah.bmi.nlp.core.GUITask
-import edu.utah.bmi.nlp.sql.DAO
+import edu.utah.bmi.nlp.sql.EDAO
 import edu.utah.bmi.simple.gui.core.SettingOper
 import edu.utah.bmi.simple.gui.entry.StaticVariables
 import edu.utah.bmi.simple.gui.entry.TasksFX
@@ -22,7 +22,7 @@ import org.junit.runners.MethodSorters
 class TaskTestBaseK {
     companion object {
         private var tasks: TasksFX? = null
-        private var dao: DAO? = null
+        private var dao: EDAO? = null
         private val sqliteConfig = "conf/sqliteconfig.xml"
         private val mysqlConfig = "conf/sqliteconfig.xml"
         private val dbConfig = sqliteConfig
@@ -35,7 +35,7 @@ class TaskTestBaseK {
             tasks = settingOper.readSettings()
             tasks!!.getTask("settings")!!.setValue(ConfigKeys.readDBConfigFileName, dbConfig)
             tasks!!.getTask("settings")!!.setValue(ConfigKeys.writeDBConfigFileName, dbConfig)
-            dao = DAO(File(dbConfig), true, false)
+            dao = EDAO(File(dbConfig), true, false)
         }
 
     }

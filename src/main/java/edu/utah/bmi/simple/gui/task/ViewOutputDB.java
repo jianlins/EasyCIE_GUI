@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.controller.ColorAnnotationCell;
@@ -17,12 +17,12 @@ import java.io.File;
  * Created on 2/13/17.
  */
 public class ViewOutputDB extends GUITask {
-    protected String outputDB, readDBConfigFileName, writeConfigFileName, viewQueryName,referenceTable;
-    protected String snippetResultTable, inputTable, docResultTable, bunchResultTable, annotator,referenceAnnotator;
-    private DAO dao;
+    protected String outputDB, readDBConfigFileName, writeConfigFileName, viewQueryName, referenceTable;
+    protected String snippetResultTable, inputTable, docResultTable, bunchResultTable, annotator, referenceAnnotator;
+    private EDAO dao;
     public boolean joinDocTable = true;
     public static String sourceQuery;
-    public boolean viewReference=false;
+    public boolean viewReference = false;
 
 
     protected ViewOutputDB() {
@@ -30,7 +30,7 @@ public class ViewOutputDB extends GUITask {
     }
 
     public ViewOutputDB(TasksFX tasks) {
-        initiate(tasks,"");
+        initiate(tasks, "");
     }
 
     public ViewOutputDB(TasksFX tasks, String paras) {
@@ -38,8 +38,8 @@ public class ViewOutputDB extends GUITask {
     }
 
     protected void initiate(TasksFX tasks, String paras) {
-        if(paras!=null && paras.length()>0){
-            viewReference=paras.toLowerCase().startsWith("r");
+        if (paras != null && paras.length() > 0) {
+            viewReference = paras.toLowerCase().startsWith("r");
         }
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("settings");
@@ -52,22 +52,22 @@ public class ViewOutputDB extends GUITask {
         bunchResultTable = config.getValue(ConfigKeys.bunchResultTableName);
         readDBConfigFileName = config.getValue(ConfigKeys.readDBConfigFileName);
         writeConfigFileName = config.getValue(ConfigKeys.writeDBConfigFileName);
-        referenceTable=config.getValue(ConfigKeys.referenceTable);
+        referenceTable = config.getValue(ConfigKeys.referenceTable);
 
         if (!readDBConfigFileName.equals(writeConfigFileName))
             joinDocTable = false;
         config = tasks.getTask(ConfigKeys.maintask);
         annotator = config.getValue(ConfigKeys.annotator);
-        referenceAnnotator=config.getValue(ConfigKeys.referenceAnnotator);
+        referenceAnnotator = config.getValue(ConfigKeys.referenceAnnotator);
         TasksOverviewController.currentTasksOverviewController.annoSqlFilter.setText("");
         viewQueryName = config.getValue(ConfigKeys.viewQueryName);
         if (dao == null) {
-            dao = new DAO(new File(outputDB));
+            dao = new EDAO(new File(outputDB));
         }
 
     }
 
-    public static String[] buildQuery(DAO dao, String queryName, String annotator,
+    public static String[] buildQuery(EDAO dao, String queryName, String annotator,
                                       String snippetResultTable, String docResultTable, String bunchResultTable,
                                       String inputTable) {
         String sourceQuery, primeTable = "RS";
@@ -121,7 +121,10 @@ public class ViewOutputDB extends GUITask {
     public static String modifyQuery(String sourceQuery, String conditions) {
         if (conditions.length() > 0) {
             int limitPos = conditions.toLowerCase().indexOf(" limit ");
-            if (limitPos > 0) {
+            int orderPos = conditions.toLowerCase().indexOf(" order ");
+            if (orderPos > 0) {
+                sourceQuery = sourceQuery + " WHERE ( " + conditions.substring(0, orderPos) + " ) " + conditions.substring(orderPos);
+            } else if (limitPos > 0) {
                 sourceQuery = sourceQuery + " WHERE ( " + conditions.substring(0, limitPos) + " ) " + conditions.substring(limitPos);
             } else {
                 sourceQuery = sourceQuery + " WHERE ( " + conditions + " ) ";
@@ -143,13 +146,13 @@ public class ViewOutputDB extends GUITask {
                 // Update UI here.
                 boolean res = false;
                 String[] values;
-                String snippetTable=snippetResultTable;
-                String viewAnnotator=annotator;
-                String currentViewQueryName=viewQueryName;
-                if(viewReference) {
+                String snippetTable = snippetResultTable;
+                String viewAnnotator = annotator;
+                String currentViewQueryName = viewQueryName;
+                if (viewReference) {
                     snippetTable = referenceTable;
-                    viewAnnotator=referenceAnnotator;
-                    currentViewQueryName="";
+                    viewAnnotator = referenceAnnotator;
+                    currentViewQueryName = "";
                 }
                 values = buildQuery(dao, currentViewQueryName, viewAnnotator, snippetTable, docResultTable, bunchResultTable, inputTable);
                 sourceQuery = values[0];
@@ -185,7 +188,7 @@ public class ViewOutputDB extends GUITask {
                     sourceQuery = modifyQuery(sourceQuery, otherConditions);
                 }
                 dao.close();
-                res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery,outputDB , ColorAnnotationCell.colorOutput,TasksOverviewController.AnnoView);
+                res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, outputDB, ColorAnnotationCell.colorOutput, TasksOverviewController.AnnoView);
 
                 if (res)
                     updateMessage("data loaded");
@@ -197,7 +200,7 @@ public class ViewOutputDB extends GUITask {
         return null;
     }
 
-    public static String getLastRunIdofAnnotator(DAO dao, String outputTable, String annotator) {
+    public static String getLastRunIdofAnnotator(EDAO dao, String outputTable, String annotator) {
         String id = "-1";
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", outputTable, annotator);
         if (recordRowIter.hasNext()) {
@@ -212,7 +215,7 @@ public class ViewOutputDB extends GUITask {
         return id;
     }
 
-    public static String getLastLogRunId(DAO dao, String annotator) {
+    public static String getLastLogRunId(EDAO dao, String annotator) {
         String id = "-1";
         RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("lastLogRunID", annotator);
         if (recordRowIter.hasNext()) {

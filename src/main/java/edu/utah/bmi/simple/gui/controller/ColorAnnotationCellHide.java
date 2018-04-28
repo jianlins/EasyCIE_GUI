@@ -1,24 +1,14 @@
 package edu.utah.bmi.simple.gui.controller;
 
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.simple.gui.entry.StaticVariables;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
-import edu.utah.bmi.simple.gui.task.ViewOutputDB;
-import javafx.collections.ObservableList;
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.control.OverrunStyle;
-import javafx.scene.control.TableCell;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
 import java.io.File;
-import java.sql.SQLException;
-
-import static edu.utah.bmi.simple.gui.entry.StaticVariables.snippetLength;
 
 
 /**
@@ -108,7 +98,7 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
         String text = "";
         TaskFX task = TasksOverviewController.currentTasksOverviewController.mainApp.tasks.getTask("settings");
         String inputDB = task.getValue(ConfigKeys.readDBConfigFileName);
-        DAO dao = new DAO(new File(inputDB));
+        EDAO dao = new EDAO(new File(inputDB));
         String docTableName = task.getValue(ConfigKeys.inputTableName);
         dao.initiateTableFromTemplate("DOCUMENTS_TABLE", docTableName, false);
         RecordRowIterator records = dao.queryRecordsFromPstmt(docTableName, docName);

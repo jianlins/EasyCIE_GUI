@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.core;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.StaticVariables;
@@ -9,28 +9,27 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.*;
 
-import java.awt.*;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.*;
 
 public class ExcelExporter {
-    private DAO dao;
+    private EDAO dao;
     private String sql;
     private static HashMap<String, Font> typeFonts = new HashMap<>();
     private static HashMap<String, String> coreColumns = new HashMap<>();
     private GUITask task;
     private int total = -1;
 
-    public ExcelExporter(DAO dao, String sql) {
+    public ExcelExporter(EDAO dao, String sql) {
         this.dao = dao;
         this.sql = sql;
         this.task = null;
         this.total = -1;
     }
 
-    public ExcelExporter(DAO dao, String sql, int total, GUITask task) {
+    public ExcelExporter(EDAO dao, String sql, int total, GUITask task) {
         this.dao = dao;
         this.sql = sql;
         this.task = task;

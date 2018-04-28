@@ -3,7 +3,7 @@ package edu.utah.bmi.simple.gui.core;
 
 import edu.utah.bmi.nlp.core.Interval1D;
 import edu.utah.bmi.nlp.core.IntervalST;
-import edu.utah.bmi.nlp.sql.DAO;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.nlp.easycie.NLPDBLogger;
@@ -25,7 +25,7 @@ import static edu.utah.bmi.simple.gui.core.CommonFunc.getCmdValue;
  * Created on 7/18/16.
  */
 public class Compare {
-    protected DAO dao1, daor;
+    protected EDAO dao1, daor;
     protected NLPDBLogger logger;
     protected HashSet<String> types = new HashSet<>();
     protected Boolean strictCompare = false;
@@ -64,12 +64,12 @@ public class Compare {
         strictCompare = cmd.hasOption("-s");
 
 
-        dao1 = new DAO(new File(writeConfigFileName));
+        dao1 = new EDAO(new File(writeConfigFileName));
         dao1.batchsize = 1000;
         if (referConfigFileName == null) {
             daor = dao1;
         } else
-            daor = new DAO(new File(referConfigFileName));
+            daor = new EDAO(new File(referConfigFileName));
 
         logger = new NLPDBLogger(dao1, "LOG", "RUN_ID", annotator + "_vs_" + referenceAnnotator);
         logger.logStartTime();
@@ -77,7 +77,7 @@ public class Compare {
     }
 
 
-    public String getMaxRunId(DAO dao, String tableName, String annotator) {
+    public String getMaxRunId(EDAO dao, String tableName, String annotator) {
         String runId = null;
         RecordRowIterator records = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", tableName, annotator);
         if (records.hasNext()) {
@@ -148,7 +148,7 @@ public class Compare {
         }
     }
 
-    public void logDiff(DAO dao, NLPDBLogger logger, boolean strictCompare, EvalCounter evalCounter, String annotator, String annotator2, String diffTable) {
+    public void logDiff(EDAO dao, NLPDBLogger logger, boolean strictCompare, EvalCounter evalCounter, String annotator, String annotator2, String diffTable) {
         String compareName = annotator + "_vs_" + annotator2;
         System.out.println("\n" + compareName + " comparision finished. Saving the difference to SQLite...");
         logAnnoDifferenceWSentence(dao, logger, compareName, "fn", evalCounter.fns, diffTable);
@@ -158,7 +158,7 @@ public class Compare {
         dao.close();
     }
 
-    protected void logAnnoDifferenceWSentence(DAO dao, NLPDBLogger logger, String annotator, String note, ArrayList<RecordRow> fpannos, String diffTable) {
+    protected void logAnnoDifferenceWSentence(EDAO dao, NLPDBLogger logger, String annotator, String note, ArrayList<RecordRow> fpannos, String diffTable) {
         ArrayList<RecordRow> records = new ArrayList<>();
         for (RecordRow anno : fpannos) {
             anno.addCell("ANNOTATOR", annotator);
@@ -358,7 +358,7 @@ public class Compare {
         return sortedAnnos;
     }
 
-    public void readAnnotations(DAO dao, HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations,
+    public void readAnnotations(EDAO dao, HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations,
                                 String annotator, String annotatorTable, String typeFilter, String runId) {
 
         ArrayList<String> conditions = new ArrayList<>();
@@ -403,7 +403,7 @@ public class Compare {
         }
     }
 
-    public RecordRowIterator queryRecords(DAO dao, String tableName, String[] conditions) {
+    public RecordRowIterator queryRecords(EDAO dao, String tableName, String[] conditions) {
         StringBuilder sql = new StringBuilder();
         sql.append(dao.queries.get("queryAnnos").replaceAll("\\{tableName}", tableName));
 //        sql.append("SELECT * FROM ");
