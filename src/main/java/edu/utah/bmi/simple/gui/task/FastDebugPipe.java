@@ -60,9 +60,9 @@ public class FastDebugPipe extends RunEasyCIE {
     private AnalysisEngine aggregateAE;
 
 
-    public static FastDebugPipe getInstance(TasksFX tasks, GUITask guiTask) {
+    public static FastDebugPipe getInstance(TasksFX tasks) {
         if (fastDebugPipe == null) {
-            fastDebugPipe = new FastDebugPipe(tasks, guiTask);
+            fastDebugPipe = new FastDebugPipe(tasks);
         }
         return fastDebugPipe;
     }
@@ -71,27 +71,25 @@ public class FastDebugPipe extends RunEasyCIE {
 
     }
 
-    public FastDebugPipe(TasksFX tasks, GUITask guiTask) {
+    public FastDebugPipe(TasksFX tasks) {
         this.tasks = tasks;
-        this.guitask = guiTask;
         refreshPipe();
     }
 
 
     public void refreshPipe() {
-
+        guitask = TasksOverviewController.currentTasksOverviewController.currentGUITask;
         readDebugConfigs(tasks);
         initiate(tasks, "db");
         fastDebugPipe = this;
-        UpdateMessage("Debug pipeline refreshed.");
-        guitask.updateGUIProgress(1,1);
+        guitask.updateGUIMessage("Debug pipeline refreshed.");
+        guitask.updateGUIProgress(1, 1);
     }
 
 
     protected void initPipe(GUITask task) {
 
         String runId = uimaLogger.getRunid() + "";
-
 
         String defaultTypeDescriptor = "desc/type/All_Types";
 //        JXTransformer jxTransformer;
@@ -105,7 +103,7 @@ public class FastDebugPipe extends RunEasyCIE {
         runner.setTask(task);
 
         initTypes(customTypeDescriptor);
-
+        runner.getAEDesriptors().clear();
         addAnalysisEngines();
         UpdateMessage("Compile pipeline...");
         aggregateAE = runner.genAEs();
@@ -210,7 +208,7 @@ public class FastDebugPipe extends RunEasyCIE {
         if (sectionRule.length() > 0) {
             UpdateMessage("add engine SectionDetectorR_AE");
             runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_FILE_OR_STR, sectionRule});
-            if (sectionType.length() > 0 && guiEnabled)
+            if (sectionType.length() > 0 && guitask.guiEnabled)
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER, "SectionDetector",
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by Setion Detector:",
@@ -227,7 +225,7 @@ public class FastDebugPipe extends RunEasyCIE {
                         RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
                         RuSH_AE.PARAM_INSIDE_SECTIONS, includesections,
                         RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
-            if (rushType.length() > 0 && guiEnabled)
+            if (rushType.length() > 0 && guitask.guiEnabled)
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER, "RuSH",
                         AnnotationLogger.PARAM_INDICATION,
                         "After being processed by Rush (sentence segmenter):",
@@ -241,15 +239,15 @@ public class FastDebugPipe extends RunEasyCIE {
                     FastCNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections
             });
             if (cNERType.length() > 0) {
-                if (guiEnabled)
+                if (guitask.guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                             AnnotationLogger.PARAM_INDICATION_HEADER, "FastCNER",
                             AnnotationLogger.PARAM_TYPE_NAMES, cNERType,
                             AnnotationLogger.PARAM_INDICATION,
                             "After being processed by FastCNER (character based rule NER):"});
-                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
-                        DeterminantValueSet.defaultNameSpace + "Concept",
-                        AnnotationPrinter.PARAM_INDICATION, "After FastCNER\n"});
+//                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+//                            DeterminantValueSet.defaultNameSpace + "Concept",
+//                        AnnotationPrinter.PARAM_INDICATION, "After FastCNER\n"});
             }
         }
 
@@ -260,15 +258,15 @@ public class FastDebugPipe extends RunEasyCIE {
                     FastNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections,
                     FastNER_AE_General.PARAM_MARK_PSEUDO, true});
             if (tNERType.length() > 0) {
-                if (guiEnabled)
+                if (guitask.guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                             AnnotationLogger.PARAM_INDICATION_HEADER, "FastNER",
                             AnnotationLogger.PARAM_TYPE_NAMES, tNERType,
                             AnnotationLogger.PARAM_INDICATION,
                             "After being processed by FastNER (token based rule NER):"});
-                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
-                        DeterminantValueSet.defaultNameSpace + "Concept",
-                        AnnotationPrinter.PARAM_INDICATION, "After FastNER\n"});
+//                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+//                        DeterminantValueSet.defaultNameSpace + "Concept",
+//                        AnnotationPrinter.PARAM_INDICATION, "After FastNER\n"});
             }
         }
 
@@ -284,15 +282,15 @@ public class FastDebugPipe extends RunEasyCIE {
                     FastContext_General_AE.PARAM_DEBUG, true
             });
             if (contextType.length() > 0) {
-                if (guiEnabled)
+                if (guitask.guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                             AnnotationLogger.PARAM_INDICATION_HEADER, "FastContext",
                             AnnotationLogger.PARAM_TYPE_NAMES, contextType,
                             AnnotationLogger.PARAM_INDICATION,
                             "After being processed by FastContext (context detector):"});
-                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
-                        DeterminantValueSet.defaultNameSpace + "Concept",
-                        AnnotationPrinter.PARAM_INDICATION, "After FastContext_General_AE\n"});
+//                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+//                        DeterminantValueSet.defaultNameSpace + "Concept",
+//                        AnnotationPrinter.PARAM_INDICATION, "After FastContext_General_AE\n"});
             }
         }
 
@@ -304,17 +302,19 @@ public class FastDebugPipe extends RunEasyCIE {
                     TemporalContext_AE_General.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
                     TemporalContext_AE_General.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
                     TemporalContext_AE_General.PARAM_INFER_ALL, inferAllTemporal,
-                    TemporalContext_AE_General.PARAM_INTERVAL_DAYS, dayInterval,});
+                    TemporalContext_AE_General.PARAM_INTERVAL_DAYS, dayInterval,
+                    TemporalContext_AE_General.PARAM_SAVE_DATE_ANNO, true,
+                    TemporalContext_AE_General.PARAM_LOG_RULE_INFO, true});
             if (dateType.length() > 0) {
-                if (guiEnabled)
+                if (guitask.guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                             AnnotationLogger.PARAM_INDICATION_HEADER, "TemporalContext_AE",
                             AnnotationLogger.PARAM_TYPE_NAMES, dateType,
                             AnnotationLogger.PARAM_INDICATION,
                             "After being processed by TemporalContext_AE:"});
-                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
-                        DeterminantValueSet.defaultNameSpace + "Concept",
-                        AnnotationPrinter.PARAM_INDICATION, "After TemporalContext_AE\n"});
+//                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+//                        DeterminantValueSet.defaultNameSpace + "Concept",
+//                        AnnotationPrinter.PARAM_INDICATION, "After TemporalContext_AE\n"});
             }
         }
 
@@ -322,30 +322,30 @@ public class FastDebugPipe extends RunEasyCIE {
             UpdateMessage("Add feature inferencer...");
             runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_INFERENCE_STR, featureInfRule});
             if (featureInfType.length() > 0) {
-                if (guiEnabled)
+                if (guitask.guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                             AnnotationLogger.PARAM_INDICATION_HEADER, "FeatureInferenceAnnotator",
                             AnnotationLogger.PARAM_TYPE_NAMES, featureInfType,
                             AnnotationLogger.PARAM_INDICATION,
                             "After being processed by FeatureInferenceAnnotator:"});
-                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
-                        DeterminantValueSet.defaultNameSpace + "Concept",
-                        AnnotationPrinter.PARAM_INDICATION, "After FeatureInferenceAnnotator\n"});
+//                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+//                        DeterminantValueSet.defaultNameSpace + "Concept",
+//                        AnnotationPrinter.PARAM_INDICATION, "After FeatureInferenceAnnotator\n"});
             }
         }
         if (docInfRule.length() > 0) {
             UpdateMessage("Add feature inferencer...");
             runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_INFERENCE_STR, docInfRule});
             if (docInfType.length() > 0) {
-                if (guiEnabled)
+                if (guitask.guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
                             AnnotationLogger.PARAM_INDICATION_HEADER, "DocInferenceAnnotator",
                             AnnotationLogger.PARAM_TYPE_NAMES, docInfType,
                             AnnotationLogger.PARAM_INDICATION,
                             "After being processed by DocInferenceAnnotator:"});
-                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
-                        Doc_Base.class.getCanonicalName(),
-                        AnnotationPrinter.PARAM_INDICATION, "After DocInferenceAnnotator\n"});
+//                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+//                        Doc_Base.class.getCanonicalName(),
+//                        AnnotationPrinter.PARAM_INDICATION, "After DocInferenceAnnotator\n"});
             }
         }
     }

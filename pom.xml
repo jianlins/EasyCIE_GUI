@@ -145,9 +145,9 @@
             <version>2.9.7</version>
         </dependency>
         <dependency>
-            <groupId>org.pojava</groupId>
-            <artifactId>org.pojava.datetime</artifactId>
-            <version>3.0.0</version>
+            <groupId>edu.utah.bmi.pojava</groupId>
+            <artifactId>pojava</artifactId>
+            <version>3.0.5</version>
         </dependency>
     </dependencies>
     <build>

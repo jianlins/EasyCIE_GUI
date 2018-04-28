@@ -20,7 +20,9 @@ package edu.utah.bmi.nlp.uima;
 import edu.utah.bmi.nlp.core.*;
 import edu.utah.bmi.nlp.fastcner.FastCNER;
 import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
+import edu.utah.bmi.nlp.fastner.FastNER;
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.type.system.Concept;
 import edu.utah.bmi.nlp.type.system.ConceptBASE;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UimaContext;
@@ -31,7 +33,10 @@ import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.joda.time.DateTime;
+import org.pojava.datetime.DateTimeConfig;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -56,6 +61,7 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
     //  read from record table, specify which column is the reference datetime, usually is set to admission datetime.
     public static final String PARAM_REFERENCE_DATE_COLUMN_NAME = "referenceDateColumnName";
     public static final String PARAM_RECORD_DATE_COLUMN_NAME = "recordDateColumnName";
+    public static final String PARAM_SAVE_DATE_ANNO = "SaveDateAnnotations";
 
     private String referenceDateColumnName, recordDateColumnName;
 
@@ -65,12 +71,16 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
     // number of days before admission that still will be considered as current
     public static final String PARAM_INTERVAL_DAYS = "intervalDaysBeforeReferenceDate";
     private int intervalDaysBeforeReferenceDate;
-    protected boolean inferAll = false;
+    protected boolean inferAll = false, saveDateAnnotations = false;
 
+
+    private HashMap<String, IntervalST<Span>> dateAnnos = new HashMap();
 
     protected HashMap<String, Integer> numberMap = new HashMap<>();
 
     private Pattern[] patterns = new Pattern[5];
+
+    private DateTime referenceDate;
 
     public void initialize(UimaContext cont) {
         super.initialize(cont);
@@ -111,6 +121,9 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
         obj = cont.getConfigParameterValue(PARAM_INFER_ALL);
         if (obj != null && obj instanceof Boolean && (Boolean) obj == true)
             inferAll = true;
+        obj = cont.getConfigParameterValue(PARAM_SAVE_DATE_ANNO);
+        if (obj != null && obj instanceof Boolean && (Boolean) obj == true)
+            saveDateAnnotations = true;
     }
 
     public void initPatterns() {
@@ -133,12 +146,13 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
     public void process(JCas jcas) throws AnalysisEngineProcessException {
         ArrayList<Annotation> sentences = new ArrayList<>();
         ArrayList<ConceptBASE> targetConcepts = new ArrayList<>();
-        DateTime referenceDate = readReferenceDate(jcas, referenceDateColumnName);
+        referenceDate = readReferenceDate(jcas, referenceDateColumnName);
         DateTime recordDate = readReferenceDate(jcas, recordDateColumnName);
-        if (recordDate==null)
-            recordDate=referenceDate;
-        if (referenceDate==null){
-            logger.info("No value in Reference date column: '"+referenceDateColumnName+"'. Skip the TemporalConTextDetector.");
+        dateAnnos.clear();
+        if (recordDate == null)
+            recordDate = referenceDate;
+        if (referenceDate == null) {
+            logger.info("No value in Reference date column: '" + referenceDateColumnName + "'. Skip the TemporalConTextDetector.");
             return;
         }
         referenceDate = referenceDate.minusDays(intervalDaysBeforeReferenceDate);
@@ -175,28 +189,40 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
             recordRow.deserialize(serializedString);
         }
         String dateString = (String) recordRow.getValueByColumnName(referenceDateColumnName);
-        if(dateString==null)
+        if (dateString == null)
             return null;
         return parseDateString(dateString);
     }
 
 
     private DateTime parseDateString(String dateString) {
-        Date utilDate = new Date(System.currentTimeMillis());
+        Date utilDate = null;
         try {
-            utilDate = new org.pojava.datetime.DateTime(dateString).toDate();
+            utilDate = new org.pojava.datetime.DateTime(dateString, DateTimeConfig.getDateTimeConfig(referenceDate==null?null:referenceDate.toDate())).toDate();
         } catch (Exception e) {
             logger.fine("Illegal date string: " + dateString);
-            return null;
-
+            logger.fine(e.getMessage());
         }
+//        try {
+//            if (utilDate == null) {
+//                utilDate = new org.pojava.datetime.DateTime(dateString).toDate();
+//                System.out.println(referenceDate.getYear());
+//                utilDate.setYear(referenceDate.getYear());
+//            }
+//        } catch (Exception e) {
+//            logger.fine("Illegal date string: " + dateString);
+//        }
+
+
         DateTime date = new DateTime(utilDate);
         return date;
     }
 
+
     private void processCase(JCas jcas, ConceptBASE concept, Annotation sentence,
                              DateTime recordDate, DateTime referenceDate) {
         HashMap<String, ArrayList<Span>> dates = ((FastCNER) fastNER).processAnnotation(sentence);
+
         String temporalStatus = inferTemporalStatus(jcas, dates, recordDate, referenceDate);
         if (temporalStatus.length() > 0)
             concept.setTemporality(temporalStatus);
@@ -237,44 +263,48 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
                         if (dt == null) {
                             dt = handleAmbiguousCase(dateMention, recordDate);
                         }
+                        logger.info("Parse '" + dateMention + "' as: '" + dt.toString() + "'");
                         temporalStatus = updateTemporalStatus(dt, referenceDate, temporalStatus);
+                        saveDateConcept(jcas, ConceptTypeConstructors, typeOfDate,span, temporalStatus, "ParsedDate:\t" + dt.toString(), getRuleInfo(span));
                     }
                     break;
                 case "Yeard":
-                    temporalStatus = inferTemporalStatusFromRelativeNumericTime(text, entry.getValue(), referenceDate, recordDate, temporalStatus, 365);
+                    temporalStatus = inferTemporalStatusFromRelativeNumericTime(jcas,typeOfDate, text, entry.getValue(), referenceDate, recordDate, temporalStatus, 365);
                     break;
                 case "Monthd":
-                    temporalStatus = inferTemporalStatusFromRelativeNumericTime(text, entry.getValue(), referenceDate, recordDate, temporalStatus, 30);
+                    temporalStatus = inferTemporalStatusFromRelativeNumericTime(jcas,typeOfDate, text, entry.getValue(), referenceDate, recordDate, temporalStatus, 30);
                     break;
                 case "Weekd":
-                    temporalStatus = inferTemporalStatusFromRelativeNumericTime(text, entry.getValue(), referenceDate, recordDate, temporalStatus, 7);
+                    temporalStatus = inferTemporalStatusFromRelativeNumericTime(jcas,typeOfDate, text, entry.getValue(), referenceDate, recordDate, temporalStatus, 7);
                     break;
                 case "Dayd":
-                    temporalStatus = inferTemporalStatusFromRelativeNumericTime(text, entry.getValue(), referenceDate, recordDate, temporalStatus, 1);
+                    temporalStatus = inferTemporalStatusFromRelativeNumericTime(jcas,typeOfDate, text, entry.getValue(), referenceDate, recordDate, temporalStatus, 1);
                     break;
                 case "Yearw":
-                    temporalStatus = inferTemporalStatusFromRelativeLiteralTime(text, entry.getValue(), referenceDate, recordDate, temporalStatus, 365);
+                    temporalStatus = inferTemporalStatusFromRelativeLiteralTime(jcas,typeOfDate, text, entry.getValue(), referenceDate, recordDate, temporalStatus, 365);
                     break;
                 case "Monthw":
-                    temporalStatus = inferTemporalStatusFromRelativeLiteralTime(text, entry.getValue(), referenceDate, recordDate, temporalStatus, 30);
+                    temporalStatus = inferTemporalStatusFromRelativeLiteralTime(jcas,typeOfDate, text, entry.getValue(), referenceDate, recordDate, temporalStatus, 30);
                     break;
                 case "Weekw":
-                    temporalStatus = inferTemporalStatusFromRelativeLiteralTime(text, entry.getValue(), referenceDate, recordDate, temporalStatus, 7);
+                    temporalStatus = inferTemporalStatusFromRelativeLiteralTime(jcas,typeOfDate, text, entry.getValue(), referenceDate, recordDate, temporalStatus, 7);
                     break;
                 case "Dayw":
-                    temporalStatus = inferTemporalStatusFromRelativeLiteralTime(text, entry.getValue(), referenceDate, recordDate, temporalStatus, 1);
+                    temporalStatus = inferTemporalStatusFromRelativeLiteralTime(jcas,typeOfDate, text, entry.getValue(), referenceDate, recordDate, temporalStatus, 1);
                     break;
             }
         }
         return temporalStatus;
     }
 
-    private String inferTemporalStatusFromRelativeNumericTime(String text, ArrayList<Span> spans, DateTime referenceDate, DateTime recordDate, String temporalStatus, int unit) {
+    private String inferTemporalStatusFromRelativeNumericTime(JCas jcas,String typeName,String text, ArrayList<Span> spans,
+                                                              DateTime referenceDate, DateTime recordDate, String temporalStatus, int unit) {
         for (Span span : spans) {
             try {
                 int interval = Integer.parseInt(text.substring(span.begin, span.end).trim());
                 DateTime dt = recordDate.minusDays(interval * unit);
                 temporalStatus = updateTemporalStatus(dt, referenceDate, temporalStatus);
+                saveDateConcept(jcas, ConceptTypeConstructors, typeName,span, temporalStatus, "ParsedDate:\t" + dt.toString(), getRuleInfo(span));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -282,7 +312,8 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
         return temporalStatus;
     }
 
-    private String inferTemporalStatusFromRelativeLiteralTime(String text, ArrayList<Span> spans, DateTime referenceDate, DateTime recordDate, String temporalStatus, int unit) {
+    private String inferTemporalStatusFromRelativeLiteralTime(JCas jcas,String typeName, String text, ArrayList<Span> spans,
+                                                              DateTime referenceDate, DateTime recordDate, String temporalStatus, int unit) {
         for (Span span : spans) {
             try {
                 String numWord = text.substring(span.begin, span.end).trim().toLowerCase();
@@ -290,6 +321,9 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
                     int interval = numberMap.get(numWord);
                     DateTime dt = recordDate.minusDays(interval * unit);
                     temporalStatus = updateTemporalStatus(dt, referenceDate, temporalStatus);
+                    saveDateConcept(jcas, ConceptTypeConstructors, typeName,span, temporalStatus, "ParsedDate:\t" + dt.toString(),  getRuleInfo(span));
+
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -360,5 +394,46 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
     protected DeterminantValueSet.Determinants getSpanType(Span span) {
         return fastNER.getMatchedNEType(span);
     }
+
+    public static LinkedHashMap<String, TypeDefinition> getTypeDefinitions(String ruleFile, boolean caseSenstive) {
+        return new FastNER(ruleFile, caseSenstive, false).getTypeDefinitions();
+    }
+
+
+    protected void saveDateConcept(JCas jcas, HashMap<String, Constructor<? extends Concept>> ConceptTypeConstructors,
+                                   String typeName, Span span, String comments, String... rule) {
+        if (!saveDateAnnotations || getSpanType(span) != DeterminantValueSet.Determinants.ACTUAL) {
+            return;
+        }
+        Annotation anno = null;
+        if (!dateAnnos.containsKey(typeName)) {
+            dateAnnos.put(typeName, new IntervalST<>());
+        }
+        IntervalST<Span> intervalST = dateAnnos.get(typeName);
+        Interval1D interval1D = new Interval1D(span.begin, span.end);
+        if (intervalST.contains(interval1D)) {
+            return;
+        } else {
+            intervalST.put(interval1D, span);
+        }
+        try {
+            anno = ConceptTypeConstructors.get(typeName).newInstance(jcas, span.begin, span.end);
+            if (anno instanceof ConceptBASE) {
+                if (comments != null)
+                    ((ConceptBASE) anno).setCategory(comments);
+                if (rule.length > 0) {
+                    ((ConceptBASE) anno).setNote(String.join("\n", rule));
+                }
+            }
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        anno.addToIndexes();
+    }
+
 
 }

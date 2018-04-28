@@ -52,7 +52,7 @@ public class RunEasyCIE extends GUITask {
     protected int dayInterval = 0;
     public AdaptableUIMACPETaskJCasRunner runner;
     protected DAO rdao, wdao;
-    protected boolean inferAllTemporal = false;
+    protected boolean inferAllTemporal = false,saveDateAnnotation=false;
     public boolean ehost = false, brat = false, xmi = true;
     protected String exporttypes;
     protected String customTypeDescriptor;
@@ -153,6 +153,9 @@ public class RunEasyCIE extends GUITask {
         dayInterval = Integer.parseInt(config.getValue(ConfigKeys.dayInterval).trim());
         String rawStringValue = config.getValue(ConfigKeys.inferAllTemporal);
         inferAllTemporal = rawStringValue.length() > 0 && (rawStringValue.charAt(0) == 't' || rawStringValue.charAt(0) == 'T' || rawStringValue.charAt(0) == '1');
+        rawStringValue = config.getValue(ConfigKeys.saveDateAnnotation);
+        saveDateAnnotation = rawStringValue.length() > 0 && (rawStringValue.charAt(0) == 't' || rawStringValue.charAt(0) == 'T' || rawStringValue.charAt(0) == '1');
+
         featureInfRule = config.getValue(ConfigKeys.featureInfRule);
         featureMergerRule = config.getValue(ConfigKeys.featureMergerRule);
         docInfRule = config.getValue(ConfigKeys.docInfRule);
@@ -262,7 +265,7 @@ public class RunEasyCIE extends GUITask {
             runner.addConceptTypes(FastContext_General_AE.getTypeDefinitions(contextRule, false).values());
 
         if (dateRule.length() > 0)
-            runner.addConceptTypes(FastCNER_AE_General.getTypeDefinitions(dateRule, true).values());
+            runner.addConceptTypes(TemporalContext_AE_General.getTypeDefinitions(dateRule, true).values());
 
         if (featureInfRule.length() > 0)
             runner.addConceptTypes(FeatureInferenceAnnotator.getTypeDefinitions(featureInfRule).values());
@@ -430,7 +433,8 @@ public class RunEasyCIE extends GUITask {
                     TemporalContext_AE_General.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
                     TemporalContext_AE_General.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
                     TemporalContext_AE_General.PARAM_INFER_ALL, inferAllTemporal,
-                    TemporalContext_AE_General.PARAM_INTERVAL_DAYS, dayInterval,});
+                    TemporalContext_AE_General.PARAM_INTERVAL_DAYS, dayInterval,
+                    TemporalContext_AE_General.PARAM_SAVE_DATE_ANNO,saveDateAnnotation});
             if (logger.isLoggable(Level.FINE)) {
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         DeterminantValueSet.defaultNameSpace + "Concept",

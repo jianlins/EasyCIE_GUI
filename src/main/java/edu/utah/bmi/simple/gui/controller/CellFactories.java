@@ -49,7 +49,7 @@ public class CellFactories {
                         System.out.println("Start debugging...");
                         TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                         if (cell.getItem() instanceof RecordRow) {
-                            debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks, TasksOverviewController.currentTasksOverviewController.currentGUITask);
+                            debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks);
                             debugRunner.guitask.updateGUIMessage("Start debugging...");
                             RecordRow recordRow = (RecordRow) cell.getItem();
                             debugRunner.guitask.updateGUIMessage("Execute pipeline...");
@@ -87,7 +87,7 @@ public class CellFactories {
                         System.out.println("Start debugging...");
                         TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                         if (cell.getItem() instanceof RecordRow) {
-                            debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks, TasksOverviewController.currentTasksOverviewController.currentGUITask);
+                            debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks);
                             debugRunner.guitask.updateGUIMessage("Start debugging...");
                             RecordRow recordRow = (RecordRow) cell.getItem();
                             debugRunner.guitask.updateGUIMessage("Execute pipeline...");

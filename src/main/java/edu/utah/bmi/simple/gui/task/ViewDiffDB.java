@@ -122,12 +122,12 @@ public class ViewDiffDB extends GUITask {
                     }
 
 
-                    TasksOverviewController.currentTasksOverviewController.annoSqlFilter.setText(filter);
+                    TasksOverviewController.currentTasksOverviewController.compareSqlFilter.setText(filter);
                     if (filter.length() > 0) {
                         sourceQuery = ViewOutputDB.modifyQuery(sourceQuery, filter);
                     }
 
-                    res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery,outputDB, ColorAnnotationCell.colorOutput, TasksOverviewController.AnnoView);
+                    res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery,outputDB, ColorAnnotationCell.colorOutput, TasksOverviewController.CompareView);
                     dao.close();
                     if (res)
                         updateMessage("data loaded");

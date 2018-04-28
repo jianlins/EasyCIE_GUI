@@ -43,6 +43,7 @@ public class ConfigKeys {
     public static final String dateRule = "pipeLineSetting/dateRule";
     public static final String dayInterval = "pipeLineSetting/dayInterval";
     public static final String inferAllTemporal = "pipeLineSetting/inferAllTemporal";
+    public static final String saveDateAnnotation = "pipeLineSetting/saveDateAnnotation";
 
     public static final String featureInfRule = "pipeLineSetting/featureInfRule";
     public static final String docInfRule = "pipeLineSetting/docInfRule";

@@ -39,7 +39,7 @@ public class RunFastDebugger extends GUITask {
         TaskFX settings = tasks.getTask("debug");
         metaStr = settings.getValue("log/metaStr");
 //      use singleton to speed up initialization
-        fastDebugPipe = FastDebugPipe.getInstance(tasks, this);
+        fastDebugPipe = FastDebugPipe.getInstance(tasks);
 //      if need update configurations, use manual refresh instead.
 
     }

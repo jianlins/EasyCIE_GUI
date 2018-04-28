@@ -16,7 +16,7 @@ public class RefreshDebugPipe extends GUITask {
     @Override
     protected Object call() throws Exception {
         if (guiEnabled)
-            FastDebugPipe.getInstance(tasks, guiTask).refreshPipe();
+            FastDebugPipe.getInstance(tasks).refreshPipe();
 
         return null;
     }

@@ -103,7 +103,7 @@ public class ViewOutputDB extends GUITask {
                 runId = lastLogRunId;
             }
             if (!runId.equals("-1")) {
-                filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId;
+                filter = primeTable + ".RUN_ID=" + runId;
                 switch (primeTable) {
                     case "RB":
                         filter = filter + " AND RD.RUN_ID=" + runId + " AND (RS.RUN_ID=" + runId + " OR RS.RUN_ID IS NULL)";

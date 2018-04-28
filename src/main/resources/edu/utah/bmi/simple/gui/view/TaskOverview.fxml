@@ -63,7 +63,7 @@
                 <SplitPane fx:id="dbPanel" dividerPositions="0.78" orientation="HORIZONTAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <AnchorPane>
                         <children>
-                            <TabPane fx:id="tabPane" tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <TabPane fx:id="tabPane" tabMinWidth="130.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <tabs>
                                     <Tab closable="false" text="DocView">
                                         <content>
@@ -99,6 +99,26 @@
                                                         </center>
                                                         <right>
                                                             <Button fx:id="annoTableRefresh" mnemonicParsing="false" text="Refresh" BorderPane.alignment="CENTER" />
+                                                        </right>
+                                                    </BorderPane>
+                                                </top>
+                                            </BorderPane>
+                                        </content>
+                                    </Tab>
+                                    <Tab closable="false" text="CompareView">
+                                        <content>
+                                            <BorderPane>
+                                                <center>
+                                                    <TableView fx:id="compareTableView" editable="false">
+                                                    </TableView>
+                                                </center>
+                                                <top>
+                                                    <BorderPane prefHeight="30.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                                        <center>
+                                                            <TextField fx:id="compareSqlFilter" promptText="input sql conditions to filter results (don't need to include 'WHERE')" BorderPane.alignment="CENTER" />
+                                                        </center>
+                                                        <right>
+                                                            <Button fx:id="compareTableRefresh" mnemonicParsing="false" text="Refresh" BorderPane.alignment="CENTER" />
                                                         </right>
                                                     </BorderPane>
                                                 </top>

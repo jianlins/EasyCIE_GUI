@@ -8,7 +8,7 @@ import edu.utah.bmi.nlp.sql.DAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.entry.*;
-import edu.utah.bmi.simple.gui.task.ViewOutputDB;
+import edu.utah.bmi.simple.gui.task.FastDebugPipe;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -18,7 +18,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldOpenableTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -56,7 +55,7 @@ import static edu.utah.bmi.simple.gui.controller.CellFactories.*;
  */
 public class TasksOverviewController {
 
-    public static final String DocView = "DocView", AnnoView = "AnnoView", DebugView = "DebugView";
+    public static final String DocView = "DocView", AnnoView = "AnnoView", DebugView = "DebugView", CompareView = "CompareView";
 
     public static TasksOverviewController currentTasksOverviewController;
 
@@ -81,7 +80,7 @@ public class TasksOverviewController {
     private SplitPane dbPanel;
 
     @FXML
-    private TableView annoTableView, docTableView, debugTableView;
+    private TableView annoTableView, docTableView, compareTableView, debugTableView;
 
     @FXML
     private TabPane tabPane;
@@ -97,10 +96,10 @@ public class TasksOverviewController {
 
 
     @FXML
-    private Button annoTableRefresh, docTableRefresh;
+    private Button annoTableRefresh, docTableRefresh, compareTableRefresh;
 
     @FXML
-    public TextField annoSqlFilter, docSqlFilter;
+    public TextField annoSqlFilter, docSqlFilter, compareSqlFilter;
 
 
     private TaskFX currentTask;
@@ -218,6 +217,21 @@ public class TasksOverviewController {
 //        gridPane.getRowConstraints().addAll(row1, row2, row3);
 
 
+        docTableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                refreshTableView(DocView, docSqlFilter);
+            }
+        });
+
+        docSqlFilter.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent ke) {
+                if (ke.getCode().equals(KeyCode.ENTER)) {
+                    refreshTableView(DocView, docSqlFilter);
+                }
+            }
+        });
         annoTableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -233,20 +247,50 @@ public class TasksOverviewController {
                 }
             }
         });
-
-        docTableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
+        compareTableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                refreshTableView(DocView, docSqlFilter);
+                refreshTableView(CompareView, compareSqlFilter);
             }
         });
 
-        docTableRefresh.setOnKeyPressed(new EventHandler<KeyEvent>() {
+        compareSqlFilter.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent ke) {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
-                    refreshTableView(DocView, docSqlFilter);
+                    refreshTableView(CompareView, compareSqlFilter);
                 }
+            }
+        });
+
+        tabPane.getSelectionModel().selectedItemProperty().addListener((ov, oldTab, newTab) -> {
+            String tabName = newTab.getText();
+            switch (tabName) {
+                case DocView:
+                    if (currentSQLs.containsKey(DocView)) {
+                        refreshTableView(DocView, docSqlFilter);
+                    } else {
+                        executeTaskClass("edu.utah.bmi.simple.gui.task.ViewImportDB");
+                    }
+                    break;
+                case AnnoView:
+                    if (currentSQLs.containsKey(AnnoView)) {
+                        refreshTableView(AnnoView, annoSqlFilter);
+                    } else {
+                        executeTaskClass("edu.utah.bmi.simple.gui.task.ViewOutputDB");
+                    }
+                    break;
+                case CompareView:
+                    if (currentSQLs.containsKey(CompareView)) {
+                        refreshTableView(CompareView, compareSqlFilter);
+                    } else {
+                        executeTaskClass("edu.utah.bmi.simple.gui.task.ViewDiffDB");
+                    }
+                    break;
+                case DebugView:
+                    refreshDebugView();
+                    break;
+
             }
         });
 
@@ -356,7 +400,10 @@ public class TasksOverviewController {
         }
         String sql = currentSQLs.get(viewName) + condition;
         showDBTable(sql, currentDBFileName.get(viewName), ColorAnnotationCell.colorDifferential, viewName);
+    }
 
+    private void refreshDebugView() {
+        FastDebugPipe.getInstance(mainApp.tasks).showResults();
     }
 
     private void readViewerSettings() {
@@ -445,6 +492,11 @@ public class TasksOverviewController {
                 annoSqlFilter.setText(filter);
                 currentDBFileName.put(AnnoView, dbName);
                 break;
+            case CompareView:
+                tableView = compareTableView;
+                compareSqlFilter.setText(filter);
+                currentDBFileName.put(CompareView, dbName);
+                break;
             case DebugView:
                 tableView = debugTableView;
                 currentSQLs.put(DebugView, core);
@@ -498,6 +550,9 @@ public class TasksOverviewController {
                 break;
             case AnnoView:
                 tableView = annoTableView;
+                break;
+            case CompareView:
+                tableView = compareTableView;
                 break;
             case DebugView:
                 tableView = debugTableView;
@@ -682,9 +737,8 @@ public class TasksOverviewController {
     public void updateHTMLEditor(String text) {
         text = text.replaceAll("\\n", "<br>");
 //        htmlEditor.setHtmlText(text);
-        updateHTMLEditor(text,"");
+        updateHTMLEditor(text, "");
     }
-
 
 
     public static StringBuilder scrollWebView(int xPos, int yPos) {
@@ -759,20 +813,25 @@ public class TasksOverviewController {
             if (setting.getSettingDesc().length() > 0)
                 button.setTooltip(new Tooltip(setting.getSettingDesc()));
             button.setOnAction(event -> {
-                javafx.concurrent.Task thisTask = getTaskFromString(setting.getSettingValue().trim());
-                mainApp.bottomViewController.progressBar.progressProperty().bind(thisTask.progressProperty());
-                mainApp.bottomViewController.msg.textProperty().bind(thisTask.messageProperty());
-                Thread thisThread = new Thread(thisTask);
-                thisThread.start();
-                mainApp.bottomViewController.cancelButton.setOnAction((cancel) -> {
-                    thisThread.interrupt();
-//                        bottomViewController.progressBar.progressProperty().unbind();
-//                        bottomViewController.msg.setText("Task cancelled.");
-                });
+                executeTaskClass(setting.getSettingValue().trim());
+
             });
             executePanel.getChildren().add(button);
         }
+    }
 
+    private Thread executeTaskClass(String taskClassName) {
+        javafx.concurrent.Task thisTask = getTaskFromString(taskClassName);
+        if (thisTask instanceof GUITask)
+            currentGUITask = (GUITask) thisTask;
+        mainApp.bottomViewController.progressBar.progressProperty().bind(thisTask.progressProperty());
+        mainApp.bottomViewController.msg.textProperty().bind(thisTask.messageProperty());
+        Thread thisThread = new Thread(thisTask);
+        thisThread.start();
+        mainApp.bottomViewController.cancelButton.setOnAction((cancel) -> {
+            thisThread.interrupt();
+        });
+        return thisThread;
     }
 
     public javafx.concurrent.Task getTaskFromString(String taskString) {
