@@ -182,7 +182,6 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
                     html = recordRow.getStrByColumnName("TEXT");
                 else
                     html = recordRow.getStrByColumnName("SNIPPET");
-                html = html.replaceAll("\\n", "<br>");
             } else {
                 html = recordRow.getStrByColumnName("SNIPPET");
                 String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
@@ -191,6 +190,7 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
                         (int) recordRow.getValueByColumnName("END"),
                         color);
             }
+            html = html.replaceAll("\\n", "<br>");
         } else {
             html = value + "";
             html = html.replaceAll("\\n", "<br>");

@@ -30,7 +30,7 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
     protected Background[] backgrounds = new Background[]{new Background(new BackgroundFill(colors[0], null, null)),
             new Background(new BackgroundFill(colors[1], null, null))};
     protected static String previousValue = "";
-    protected static int backgroundId = 0;
+    protected static int backgroundId = 0, previousSnippetBegin=-1;
     private static String previousHTML = "";
 
 
@@ -78,11 +78,12 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
         } else if (value instanceof RecordRow) {
             RecordRow recordRow = (RecordRow) value;
             Object docName = recordRow.getValueByColumnName("DOC_NAME");
-            if (!docName.equals(previousValue)) {
+            if (!docName.equals(previousValue) || (recordRow.getValueByColumnName("SNIPPET_BEGIN") != null && (int)recordRow.getValueByColumnName("SNIPPET_BEGIN") != previousSnippetBegin)) {
                 html = queryDocContent(docName.toString());
                 if (html.length() > 0 && recordRow.getValueByColumnName("SNIPPET_BEGIN") != null) {
                     String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
                     int begin = (int) recordRow.getValueByColumnName("SNIPPET_BEGIN");
+                    previousSnippetBegin=begin;
                     int end = begin + recordRow.getStrByColumnName("SNIPPET").length();
                     html = ColorAnnotationCell.generateHTML(html,
                             begin, end,

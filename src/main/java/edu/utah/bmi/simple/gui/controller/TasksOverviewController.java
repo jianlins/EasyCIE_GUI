@@ -494,6 +494,7 @@ public class TasksOverviewController {
                 break;
             case CompareView:
                 tableView = compareTableView;
+                currentSQLs.put(CompareView, core);
                 compareSqlFilter.setText(filter);
                 currentDBFileName.put(CompareView, dbName);
                 break;
