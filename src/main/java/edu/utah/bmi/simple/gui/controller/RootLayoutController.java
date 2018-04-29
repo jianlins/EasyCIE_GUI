@@ -2,6 +2,7 @@ package edu.utah.bmi.simple.gui.controller;
 
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
+import edu.utah.bmi.simple.gui.task.FastDebugPipe;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -40,10 +41,11 @@ public class RootLayoutController {
     }
 
     @FXML
-    private void saveas(){
+    private void saveas() {
         mainApp.saveAsSetting();
 
     }
+
 
     @FXML
     private void openHelpURL() {
@@ -326,4 +328,7 @@ public class RootLayoutController {
     }
 
 
+    public void refreshDebug(ActionEvent actionEvent) {
+        FastDebugPipe.getInstance(mainApp.tasks).refreshPipe();
+    }
 }

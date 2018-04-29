@@ -208,6 +208,7 @@ public class RunEasyCIE extends GUITask {
 
     @Override
     protected Object call() throws Exception {
+        updateGUIMessage("Compile pipeline...");
         runner.run();
         return null;
     }
