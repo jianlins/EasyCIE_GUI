@@ -2,6 +2,7 @@ package edu.utah.bmi.simple.gui.task;
 
 
 import edu.utah.bmi.nlp.core.GUITask;
+import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.easycie.CoordinateNERResults_AE;
 import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
 import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
@@ -29,11 +30,15 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * Created by Jianlin Shi on 9/19/16.
  */
 public class FastDebugPipe extends RunEasyCIE {
+
 
     protected static FastDebugPipe fastDebugPipe = null;
     protected TasksFX tasks;
@@ -49,6 +54,8 @@ public class FastDebugPipe extends RunEasyCIE {
 
 
     public static FastDebugPipe getInstance(TasksFX tasks) {
+        Logger rootLogger = LogManager.getLogManager().getLogger("");
+        rootLogger.setLevel(Level.FINEST);
         if (fastDebugPipe == null) {
             fastDebugPipe = new FastDebugPipe(tasks);
         }
