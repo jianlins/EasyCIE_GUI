@@ -11,7 +11,9 @@ jdkbase=$base/../../../Downloads/jdks
 
 cd target/deploy
 sed -i 's/jdk1.8\/bin\/java/java/g' run_gui
+chmod +x run_gui
 sed -i 's/jdk1.8\\bin\\java/java/g' run_gui.bat
+chmod +x run_gui.bat
 zip -r "../release/EasyCIE_${version}_wo_jdk.zip" "./"
 sed -i 's/java/jdk1.8\/bin\/java/g' run_gui
 sed -i 's/java/jdk1.8\\bin\\java/g' run_gui.bat

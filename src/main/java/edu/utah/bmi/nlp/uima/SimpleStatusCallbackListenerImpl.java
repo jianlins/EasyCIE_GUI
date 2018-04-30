@@ -128,7 +128,6 @@ public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener 
             if (this.isProcessing) {
                 this.notify();
                 if (this.logger != null) {
-                    this.logger.logCompleteTime();
                     long mCompleteTime = this.logger.getCompletetime();
                     long mStartTime = this.logger.getStarttime();
                     long initTime = this.mInitCompleteTime - mStartTime;
@@ -170,6 +169,7 @@ public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener 
                     else
                         this.logger.setItem("COMMENTS", "");
                     this.logger.logItems();
+                    this.logger.logCompleteTime();
                 }
             }
 

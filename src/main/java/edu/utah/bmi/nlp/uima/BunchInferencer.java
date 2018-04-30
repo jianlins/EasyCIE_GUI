@@ -75,7 +75,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
             runId = Integer.parseInt((String) parameterObject);
         else
             runId = -2;
-        if (dao == null) {
+        if (dao == null || dao.isClosed()) {
             dao = new EDAO(new File(configFile));
         }
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", resultTableName, false);

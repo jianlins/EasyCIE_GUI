@@ -74,6 +74,8 @@ public class NLPDBLogger extends GUILogger {
 //        recordRow = dao.queryRecord(logQuery + runid);
         completetime = System.currentTimeMillis();
         setItem("END_DTM", new Date(completetime));
+        dao.updateRecord(tableName, recordRow);
+        dao.close();
     }
 
     public void logCompletToDB(int numOfNotes, String comments) {
@@ -89,8 +91,6 @@ public class NLPDBLogger extends GUILogger {
         if (!idcells.get(idcells.size()).getClass().getSimpleName().equals("Integer") || idcells.get(idcells.size()) != runid) {
             setItem("RUN_ID", runid);
         }
-        dao.updateRecord(tableName, recordRow);
-        dao.close();
         return recordRow.serialize();
     }
 

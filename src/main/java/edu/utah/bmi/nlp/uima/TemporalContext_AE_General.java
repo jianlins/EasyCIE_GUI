@@ -263,7 +263,7 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
                         if (dt == null) {
                             dt = handleAmbiguousCase(dateMention, recordDate);
                         }
-                        logger.info("Parse '" + dateMention + "' as: '" + dt.toString() + "'");
+                        logger.finest("Parse '" + dateMention + "' as: '" + dt.toString() + "'");
                         temporalStatus = updateTemporalStatus(dt, referenceDate, temporalStatus);
                         saveDateConcept(jcas, ConceptTypeConstructors, typeOfDate,span, temporalStatus, "ParsedDate:\t" + dt.toString(), getRuleInfo(span));
                     }
