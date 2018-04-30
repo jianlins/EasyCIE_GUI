@@ -25,6 +25,9 @@ public class ViewDiffDB extends GUITask {
         updateMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("compare");
         annotatorCompare = config.getValue(ConfigKeys.targetAnnotator);
+        if(annotatorCompare.trim().length()==0){
+            annotatorCompare = tasks.getTask(ConfigKeys.maintask).getValue(ConfigKeys.annotator);
+        }
         annotatorAgainst = config.getValue(ConfigKeys.referenceAnnotator);
         config = tasks.getTask("settings");
         outputDB = config.getValue(ConfigKeys.writeDBConfigFileName);
@@ -165,7 +168,7 @@ public class ViewDiffDB extends GUITask {
                 runId = lastLogRunId;
             }
             if (!runId.equals("-1")) {
-                filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId +" ORDER BY COMMENTS,"+primeTable+".DOC_NAME";
+                filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId +" ORDER BY TYPE, COMMENTS,"+primeTable+".DOC_NAME";
             }
         }
         return new String[]{sourceQuery, filter, annotatorLastRunid, lastLogRunId};

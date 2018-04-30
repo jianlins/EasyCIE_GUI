@@ -45,6 +45,9 @@ public class CompareBDSTask extends GUITask {
         TaskFX config = tasks.getTask(ConfigKeys.comparetask);
 
         targetAnnotator = config.getValue(ConfigKeys.targetAnnotator);
+        if(targetAnnotator.trim().length()==0){
+            targetAnnotator = tasks.getTask(ConfigKeys.maintask).getValue(ConfigKeys.annotator);
+        }
         targetRunId = config.getValue(ConfigKeys.targetRunId);
 
         referenceAnnotator = config.getValue(ConfigKeys.referenceAnnotator);

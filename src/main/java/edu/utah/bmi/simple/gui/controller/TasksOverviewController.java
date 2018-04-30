@@ -849,7 +849,6 @@ public class TasksOverviewController {
         try {
             c = Class.forName(taskClassName).asSubclass(javafx.concurrent.Task.class);
             Constructor<? extends Task> taskConstructor;
-
             if (para.length() > 0) {
                 taskConstructor = c.getConstructor(TasksFX.class, String.class);
                 thisTask = taskConstructor.newInstance(mainApp.tasks, para);

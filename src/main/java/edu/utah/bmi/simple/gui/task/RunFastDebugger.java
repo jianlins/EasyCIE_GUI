@@ -2,6 +2,7 @@ package edu.utah.bmi.simple.gui.task;
 
 
 import edu.utah.bmi.nlp.core.GUITask;
+import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -32,6 +33,9 @@ public class RunFastDebugger extends GUITask {
     protected void initiate(TasksFX tasks) {
         if (!Platform.isFxApplicationThread()) {
             guiEnabled = false;
+        }
+        if (TasksOverviewController.currentTasksOverviewController.currentGUITask == null) {
+            TasksOverviewController.currentTasksOverviewController.currentGUITask = this;
         }
         updateGUIMessage("Initiate configurations..");
         this.tasks = tasks;

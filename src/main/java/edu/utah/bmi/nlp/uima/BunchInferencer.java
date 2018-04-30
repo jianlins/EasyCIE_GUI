@@ -4,6 +4,7 @@ import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
@@ -155,7 +156,8 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
             serializedString = e.getUri();
             recordRow.deserialize(serializedString);
         }
-        int currentBunchId = Integer.parseInt(recordRow.getStrByColumnName(bunchColumnName));
+        Object value=recordRow.getValueByColumnName(bunchColumnName);
+        int currentBunchId = value==null?0:Integer.parseInt(value.toString());
         if (previousBunchId == -1) {
             previousBunchId = currentBunchId;
             previousRecordRow = recordRow;
@@ -224,7 +226,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
 
     private void addVisitConclusion(RecordRow previousRecordRow, List<Object> rule) {
         String typeName = (String) rule.get(1);
-        if (previousRecordRow.getValueByColumnName("RUN_ID") != null)
+        if (runId==-2 && previousRecordRow.getValueByColumnName("RUN_ID") != null)
             runId = Integer.parseInt(previousRecordRow.getStrByColumnName("RUN_ID"));
         RecordRow recordRow = new RecordRow()
                 .addCell("RUN_ID", runId)
@@ -240,6 +242,8 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
 //        String visitConclusion = (String) rule.get(1);
         if (runId > -1)
             dao.insertRecord(resultTableName, recordRow);
+        else
+            AnnotationLogger.records.add(recordRow);
     }
 
     /**
@@ -278,7 +282,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
         return true;
     }
 
-    public void collectionProcessComplete() throws AnalysisEngineProcessException {
+    public void collectionProcessComplete() {
         if (previousBunchId != -1 && previousRecordRow != null) {
             evaluateVisitCounts(previousRecordRow);
         }

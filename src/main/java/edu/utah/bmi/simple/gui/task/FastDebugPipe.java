@@ -1,47 +1,34 @@
 package edu.utah.bmi.simple.gui.task;
 
 
-import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.easycie.CoordinateNERResults_AE;
-import edu.utah.bmi.nlp.easycie.writer.XMIWritter_AE;
 import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
 import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
 import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
 import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.type.system.Doc_Base;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
-import edu.utah.bmi.nlp.uima.AdaptableUIMACPERunner;
 import edu.utah.bmi.nlp.uima.AdaptableUIMACPETaskJCasRunner;
-import edu.utah.bmi.nlp.uima.MyAnnotationViewerPlain;
+import edu.utah.bmi.nlp.uima.BunchInferencer;
 import edu.utah.bmi.nlp.uima.TemporalContext_AE_General;
-import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
-import edu.utah.bmi.nlp.uima.reader.StringMetaReader;
 import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;
 import edu.utah.bmi.simple.gui.controller.GUILogger;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
-import javafx.application.Platform;
-import org.apache.commons.io.FileUtils;
 import org.apache.uima.analysis_engine.AnalysisEngine;
-import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.jcas.JCas;
 
-import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.logging.LogManager;
 
 /**
  * Created by Jianlin Shi on 9/19/16.
@@ -58,6 +45,7 @@ public class FastDebugPipe extends RunEasyCIE {
     public GUITask guitask;
     private JCas jCas;
     private AnalysisEngine aggregateAE;
+    private String runId;
 
 
     public static FastDebugPipe getInstance(TasksFX tasks) {
@@ -89,7 +77,7 @@ public class FastDebugPipe extends RunEasyCIE {
 
     protected void initPipe(GUITask task) {
 
-        String runId = uimaLogger.getRunid() + "";
+        runId = uimaLogger.getRunid() + "";
 
         String defaultTypeDescriptor = "desc/type/All_Types";
 //        JXTransformer jxTransformer;
@@ -193,6 +181,7 @@ public class FastDebugPipe extends RunEasyCIE {
         srcDocInfo.addToIndexes();
         try {
             aggregateAE.process(jCas);
+            aggregateAE.collectionProcessComplete();
         } catch (AnalysisEngineProcessException e) {
             e.printStackTrace();
         }
@@ -347,6 +336,15 @@ public class FastDebugPipe extends RunEasyCIE {
 //                        Doc_Base.class.getCanonicalName(),
 //                        AnnotationPrinter.PARAM_INDICATION, "After DocInferenceAnnotator\n"});
             }
+        }
+
+        if (bunchInfRule.length() > 0) {
+            runner.addAnalysisEngine(BunchInferencer.class, new Object[]{BunchInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                    BunchInferencer.PARAM_SQLFILE, writeConfigFileName,
+                    BunchInferencer.PARAM_RULE_FILE_OR_STR, bunchInfRule,
+                    BunchInferencer.PARAM_TABLENAME, bunchResultTable,
+                    BunchInferencer.PARAM_ANNOTATOR, annotator,
+                    BunchInferencer.PARAM_VERSION, "-1"});
         }
     }
 

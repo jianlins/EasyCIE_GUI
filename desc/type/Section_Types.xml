@@ -59,5 +59,10 @@
                 </featureDescription>
             </features>
         </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.DefaultSection</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.SectionBody</supertypeName>
+        </typeDescription>
     </types>
 </typeSystemDescription>
