@@ -54,8 +54,6 @@ public class FastDebugPipe extends RunEasyCIE {
 
 
     public static FastDebugPipe getInstance(TasksFX tasks) {
-        Logger rootLogger = LogManager.getLogManager().getLogger("");
-        rootLogger.setLevel(Level.FINEST);
         if (fastDebugPipe == null) {
             fastDebugPipe = new FastDebugPipe(tasks);
         }
@@ -274,8 +272,7 @@ public class FastDebugPipe extends RunEasyCIE {
             UpdateMessage("Add FastContext...");
             runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule,
                     FastContext_General_AE.PARAM_AUTO_EXPAND_SCOPE, false,
-                    FastContext_General_AE.PARAM_MARK_CLUE, true,
-                    FastContext_General_AE.PARAM_DEBUG, true
+                    FastContext_General_AE.PARAM_MARK_CLUE, true
             });
             if (contextType.length() > 0) {
                 if (guitask.guiEnabled)

@@ -154,7 +154,6 @@ public class Compare {
         logAnnoDifferenceWSentence(dao, logger, compareName, "fn", evalCounter.fns, diffTable);
         logAnnoDifferenceWSentence(dao, logger, compareName, "fp", evalCounter.fps, diffTable);
         logger.logCompletToDB(evalCounter.total(), strictCompare ? "strict compare" : "relax compare");
-        dao.endBatchInsert();
         dao.close();
     }
 

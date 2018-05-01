@@ -79,11 +79,11 @@ public class NLPDBLogger extends GUILogger {
     }
 
     public void logCompletToDB(int numOfNotes, String comments) {
-        logCompleteTime();
         recordRow.addCell("NUM_NOTES", numOfNotes);
 //        recordRow.addCell("COMMENTS", comments);
         recordRow.addCell("RUN_ID", runid);
         dao.updateRecord("LOG", recordRow);
+        logCompleteTime();
     }
 
     public String logItems() {
