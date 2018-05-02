@@ -36,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -157,7 +158,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
     protected void writeEhostXML(JCas jcas, Collection<Annotation> annotations,
                                  File sourceFile, File outputXml) throws IOException, XMLStreamException {
         try {
-            FileUtils.writeStringToFile(sourceFile, jcas.getDocumentText());
+            FileUtils.write(sourceFile, jcas.getDocumentText().replace((char)13,' '),StandardCharsets.UTF_8);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -166,11 +167,13 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
         XMLStreamWriter xtw = initiateWritter(outputXmlStream, sourceFile);
         elementId = 0;
         for (Annotation annotation : annotations) {
+
             if (annotation instanceof SourceDocumentInformation || annotation instanceof DocumentAnnotation)
                 continue;
             if (typeMethods.size() == 0)
                 writeEhostAnnotation(xtw, annotation);
             else if (typeMethods.containsKey(annotation.getClass())) {
+                System.out.println(annotation.getCoveredText());
                 writeEhostAnnotation(xtw, annotation);
             }
         }

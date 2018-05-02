@@ -3,10 +3,7 @@ package edu.utah.bmi.simple.gui.controller;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.simple.gui.task.FastDebugPipe;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -46,17 +43,22 @@ public class CellFactories {
                         // do something with id...
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
-                        System.out.println("Start debugging...");
-                        TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
-                        if (cell.getItem() instanceof RecordRow) {
-                            debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks);
-                            debugRunner.guitask.updateGUIMessage("Start debugging...");
-                            RecordRow recordRow = (RecordRow) cell.getItem();
-                            debugRunner.guitask.updateGUIMessage("Execute pipeline...");
-                            debugRunner.process(recordRow, "SNIPPET", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT",
-                                    "DOC_TEXT", "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
-                            debugRunner.showResults();
+                        TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
+                        TabPane tabPane = tasksOverviewController.tabPane;
+                        SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
+                        if (selectModel.isSelected(1))  {
+                            System.out.println("Start debugging...");
+                            TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
+                            if (cell.getItem() instanceof RecordRow) {
+                                debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks);
+                                debugRunner.guitask.updateGUIMessage("Start debugging...");
+                                RecordRow recordRow = (RecordRow) cell.getItem();
+                                debugRunner.guitask.updateGUIMessage("Execute pipeline...");
+                                debugRunner.process(recordRow, "SNIPPET", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT",
+                                        "DOC_TEXT", "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
+                                debugRunner.showResults();
 //                            new Thread(() -> fastDebugPipe.run()).start();
+                            }
                         }
 
                     }
@@ -85,19 +87,31 @@ public class CellFactories {
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
                         System.out.println("Start debugging...");
-                        TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
-                        if (cell.getItem() instanceof RecordRow) {
-                            debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks);
-                            debugRunner.guitask.updateGUIMessage("Start debugging...");
+                        TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
+                        TabPane tabPane = tasksOverviewController.tabPane;
+                        SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
+                        if (selectModel.isSelected(2)) {
                             RecordRow recordRow = (RecordRow) cell.getItem();
-                            debugRunner.guitask.updateGUIMessage("Execute pipeline...");
-                            if (recordRow.getValueByColumnName("DOC_TEXT") == null) {
-                                recordRow.addCell("DOC_TEXT", cell.queryDocContent(recordRow.getStrByColumnName("DOC_NAME")));
-                            }
-                            debugRunner.process(recordRow, "DOC_TEXT", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT", "DOC_TEXT",
-                                    "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
-                            debugRunner.showResults();
+                            String bunchId = recordRow.getStrByColumnName("DOC_NAME");
+                            selectModel.select(1);
+                            int rowNum=tasksOverviewController.docIdRowPosMap.get(1).get(bunchId);
+                            tasksOverviewController.annoTableView.scrollTo(rowNum);
+
+                        } else {
+                            TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
+                            if (cell.getItem() instanceof RecordRow) {
+                                debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks);
+                                debugRunner.guitask.updateGUIMessage("Start debugging...");
+                                RecordRow recordRow = (RecordRow) cell.getItem();
+                                debugRunner.guitask.updateGUIMessage("Execute pipeline...");
+                                if (recordRow.getValueByColumnName("DOC_TEXT") == null) {
+                                    recordRow.addCell("DOC_TEXT", cell.queryDocContent(recordRow.getStrByColumnName("DOC_NAME")));
+                                }
+                                debugRunner.process(recordRow, "DOC_TEXT", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT", "DOC_TEXT",
+                                        "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
+                                debugRunner.showResults();
 //                            new Thread(() -> fastDebugPipe.run()).start();
+                            }
                         }
 
                     }

@@ -80,10 +80,13 @@ public class TasksOverviewController {
     private SplitPane dbPanel;
 
     @FXML
-    private TableView annoTableView, docTableView, compareTableView, debugTableView;
+    private TableView docTableView, compareTableView, debugTableView;
 
     @FXML
-    private TabPane tabPane;
+    public TableView annoTableView;
+
+    @FXML
+    public TabPane tabPane;
 
 
     @FXML
@@ -139,6 +142,8 @@ public class TasksOverviewController {
     private HashMap<String, String> currentSQLs = new HashMap<>();
     //    save the current db used displayed in Tabviews
     public HashMap<String, String> currentDBFileName = new HashMap<>();
+
+    public HashMap<Integer, HashMap<String, Integer>> docIdRowPosMap = new HashMap<>();
 
     public TasksOverviewController() {
     }
@@ -570,9 +575,9 @@ public class TasksOverviewController {
         tableView.setVisible(true);
         Object tabContentRegion = tableView.getParent().getParent();
         Tab tab = findTab(tabContentRegion);
-
+        SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
         if (tab != null) {
-            SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+
             selectionModel.select(tab);
 
         }
@@ -676,6 +681,9 @@ public class TasksOverviewController {
                 }
             }
         });
+        int tabIdx = selectionModel.getSelectedIndex();
+        docIdRowPosMap.put(tabIdx, new HashMap<>());
+        HashMap<String, Integer> thisTabRowsMap = docIdRowPosMap.get(tabIdx);
         boolean haveRead = false;
         while (rs != null && rs.hasNext()) {
             //Iterate Row
@@ -708,6 +716,11 @@ public class TasksOverviewController {
                             row.add(record.getValueByColumnName(columnName));
                         break;
                 }
+            }
+            String bunchId = record.getStrByColumnName("BUNCH_ID");
+            if (bunchId != null) {
+                if (!thisTabRowsMap.containsKey(bunchId))
+                    thisTabRowsMap.put(bunchId, data.size());
             }
             data.add(row);
             haveRead = true;
