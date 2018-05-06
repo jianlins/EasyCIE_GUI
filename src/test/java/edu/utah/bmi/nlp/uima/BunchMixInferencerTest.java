@@ -20,7 +20,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.logging.Level;
 
-public class BunchInferencerTest {
+public class BunchMixInferencerTest {
     static AdaptableUIMACPERunner runner;
     static JCas jCas;
     static CAS cas;
@@ -33,14 +33,15 @@ public class BunchInferencerTest {
             typeDescriptor = "desc/type/All_Types";
         }
         AdaptableUIMACPERunner runner = new AdaptableUIMACPERunner(typeDescriptor, "target/generated-test-sources/");
-        runner.addConceptType("MI_6MOS_MET", "EntityBASE");
-        runner.addConceptType("MI_6MOS_NOT_MET", "EntityBASE");
+        runner.addConceptType("ASP_FOR_MI_MET", "EntityBASE");
+        runner.addConceptType("ASP_FOR_MI_NOT_MET", "EntityBASE");
         runner.addConceptType("MI_DOC", "Doc_Base");
         runner.addConceptType("Neg_MI_DOC", "Doc_Base");
+        runner.addConceptType("ASP_DOC", "Doc_Base");
         runner.reInitTypeSystem("target/generated-test-sources/customized");
         jCas = runner.initJCas();
 
-        EDAO.logger.setLevel(Level.FINE);
+        EDAO.logger.setLevel(Level.FINEST);
 
     }
 
@@ -52,10 +53,8 @@ public class BunchInferencerTest {
 //        runner.addAnalysisEngine(AnnotationEvaluator.class, new Object[]{AnnotationEvaluator.PARAM_TYPE_NAME, "Concept",
 //                AnnotationEvaluator.PARAM_ANNO_IND, 0, AnnotationEvaluator.PARAM_FEATURE_NAME, "Negation", AnnotationEvaluator.PARAM_FEATURE_VALUE, "negated"});
         AnalysisEngine evaluator = AnalysisEngineFactory.createEngine(AnnotationEvaluator.class,
-                AnnotationEvaluator.PARAM_TYPE_NAME, "Concept",
-                AnnotationEvaluator.PARAM_ANNO_IND, 0,
-                AnnotationEvaluator.PARAM_FEATURE_NAME, "Negation",
-                AnnotationEvaluator.PARAM_FEATURE_VALUE, "negated");
+                AnnotationEvaluator.PARAM_TYPE_NAME, "ASP_FOR_MI_MET",
+                AnnotationEvaluator.PARAM_ANNO_IND, 0);
         evaluator.process(jCas);
         System.out.println(AnnotationEvaluator.pass);
     }
@@ -71,17 +70,45 @@ public class BunchInferencerTest {
 
     @Test
     public void process() throws AnalysisEngineProcessException, ClassNotFoundException, ResourceInitializationException {
-        bunchInferer = AnalysisEngineFactory.createEngine(BunchInferencer.class,
-                BunchInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                BunchInferencer.PARAM_RULE_FILE_OR_STR, "conf/mi/mi_PatInf.xlsx");
-
+        String ruleStr = "&DefaultBunchConclusion\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
+                "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC";
+        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferencer.class, BunchMixInferencer.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
+                BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                BunchMixInferencer.PARAM_RULE_FILE_OR_STR, ruleStr);
+        BunchMixInferencer.dao=new TDAO();
         processDoc(jCas, 11, "MI_DOC");
-        processDoc(jCas, 11, "MI_DOC");
-        processDoc(jCas, 11, "MI_DOC");
-        processDoc(jCas, 11, "Neg_MI_DOC");
+        processDoc(jCas, 11, "ASP_DOC");
         processDoc(jCas, 11, "Neg_MI_DOC");
         processDoc(jCas, 12, "Neg_MI_DOC");
     }
+
+    @Test
+    public void process2() throws AnalysisEngineProcessException, ClassNotFoundException, ResourceInitializationException {
+        String ruleStr = "&DefaultBunchConclusion\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
+                "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC,Neg_MI_DOC";
+        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferencer.class, BunchMixInferencer.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
+                BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                BunchMixInferencer.PARAM_RULE_FILE_OR_STR, ruleStr);
+        BunchMixInferencer.dao=new TDAO();
+        processDoc(jCas, 11, "MI_DOC");
+        processDoc(jCas, 11, "ASP_DOC");
+        processDoc(jCas, 11, "Neg_MI_DOC");
+        processDoc(jCas, 12, "Neg_MI_DOC");
+    }
+
+    @Test
+    public void process3() throws AnalysisEngineProcessException, ClassNotFoundException, ResourceInitializationException {
+        String ruleStr = "&DefaultBunchConclusion\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
+                "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC";
+        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferencer.class, BunchMixInferencer.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
+                BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                BunchMixInferencer.PARAM_RULE_FILE_OR_STR, ruleStr);
+        BunchMixInferencer.dao=new TDAO();
+        processDoc(jCas, 11, "MI_DOC");
+        processDoc(jCas, 11, "Neg_MI_DOC");
+        processDoc(jCas, 12, "Neg_MI_DOC");
+    }
+
 
     private void processDoc(JCas jCas, int bunchId, String docType) throws AnalysisEngineProcessException, ClassNotFoundException {
         String input = "test document";

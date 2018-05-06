@@ -58,6 +58,10 @@ public class EDAO {
     public int batchsize = 200, batchCounter = 0;
     public String databaseName = "";
 
+    protected EDAO(){
+
+    }
+
     public EDAO(File configFile) {
         initConnection(configFile, false, false, true);
     }

@@ -329,7 +329,7 @@ public class RunEasyCIE extends GUITask {
 
         if (!(ehost || brat || xmi)) {
             SQLWriterCasConsumer.dao = wdao;
-            BunchInferencer.dao = wdao;
+            BunchMixInferencer.dao = wdao;
             if (!wdao.checkExits("checkAnnotatorExist", annotator)) {
                 wdao.insertRecord("ANNOTATORS", new RecordRow(annotator));
             }
@@ -342,12 +342,12 @@ public class RunEasyCIE extends GUITask {
                     SQLWriterCasConsumer.PARAM_WRITE_CONCEPT, exporttypes,
                     SQLWriterCasConsumer.PARAM_OVERWRITETABLE, false, SQLWriterCasConsumer.PARAM_BATCHSIZE, 150});
             if (bunchInfRule.length() > 0) {
-                runner.addAnalysisEngine(BunchInferencer.class, new Object[]{BunchInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                        BunchInferencer.PARAM_SQLFILE, writeConfigFileName,
-                        BunchInferencer.PARAM_RULE_FILE_OR_STR, bunchInfRule,
-                        BunchInferencer.PARAM_TABLENAME, bunchResultTable,
-                        BunchInferencer.PARAM_ANNOTATOR, annotator,
-                        SQLWriterCasConsumer.PARAM_VERSION, runId});
+                runner.addAnalysisEngine(BunchMixInferencer.class, new Object[]{BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                        BunchMixInferencer.PARAM_SQLFILE, writeConfigFileName,
+                        BunchMixInferencer.PARAM_RULE_FILE_OR_STR, bunchInfRule,
+                        BunchMixInferencer.PARAM_TABLENAME, bunchResultTable,
+                        BunchMixInferencer.PARAM_ANNOTATOR, annotator,
+                        BunchMixInferencer.PARAM_VERSION, runId});
             }
         }
 

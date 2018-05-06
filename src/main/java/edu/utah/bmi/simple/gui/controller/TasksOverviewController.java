@@ -395,7 +395,7 @@ public class TasksOverviewController {
     }
 
 
-    private void refreshTableView(String viewName, TextField sqlFilter) {
+    public void refreshTableView(String viewName, TextField sqlFilter) {
         String condition = sqlFilter.getText().trim();
         String conditionLower = condition.toLowerCase();
         if (condition.length() > 0) {
