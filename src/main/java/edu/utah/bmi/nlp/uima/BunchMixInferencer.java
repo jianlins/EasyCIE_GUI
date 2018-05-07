@@ -177,6 +177,7 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase {
             boolean matched = true;
             for (ArrayList<Object> rule : rules) {
                 HashMap<String, Integer> evidencesMap = (HashMap<String, Integer>) rule.get(2);
+                matched = true;
                 for (String typeName: evidencesMap.keySet()){
                     if(!typeCounter.containsKey(typeName) || typeCounter.get(typeName)<evidencesMap.get(typeName))
                         matched=false;
