@@ -3,6 +3,7 @@ package edu.utah.bmi.nlp.uima;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.sql.TDAO;
 import edu.utah.bmi.nlp.type.system.Concept;
 import edu.utah.bmi.nlp.uima.ae.AnnotationEvaluator;
 import org.apache.uima.analysis_engine.AnalysisEngine;
