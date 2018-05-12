@@ -344,7 +344,7 @@ public class RunEasyCIE extends GUITask {
             if (bunchInfRule.length() > 0) {
                 runner.addAnalysisEngine(BunchMixInferencer.class, new Object[]{BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
                         BunchMixInferencer.PARAM_SQLFILE, writeConfigFileName,
-                        BunchMixInferencer.PARAM_RULE_FILE_OR_STR, bunchInfRule,
+                        BunchMixInferencer.PARAM_RULE_STR, bunchInfRule,
                         BunchMixInferencer.PARAM_TABLENAME, bunchResultTable,
                         BunchMixInferencer.PARAM_ANNOTATOR, annotator,
                         BunchMixInferencer.PARAM_VERSION, runId});
@@ -356,7 +356,7 @@ public class RunEasyCIE extends GUITask {
     protected void addAnalysisEngines() {
         if (sectionRule.length() > 0) {
             updateGUIMessage("add engine SectionDetectorR_AE");
-            runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_FILE_OR_STR, sectionRule});
+            runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_STR, sectionRule});
             if (logger.isLoggable(Level.FINE))
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         SectionHeader.class.getCanonicalName(), AnnotationPrinter.PARAM_INDICATION, "After sectiondetector"});
@@ -381,7 +381,7 @@ public class RunEasyCIE extends GUITask {
 
         if (fastCNERRule.length() > 0) {
             updateGUIMessage("add engine FastCNER_AE_General");
-            runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, fastCNERRule,
+            runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_STR, fastCNERRule,
                     FastCNER_AE_General.PARAM_MARK_PSEUDO, false,
                     FastCNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections,
                     FastCNER_AE_General.PARAM_INCLUDE_SECTIONS, excludesections,
@@ -396,7 +396,7 @@ public class RunEasyCIE extends GUITask {
 
         if (fastNERRule.length() > 0) {
             updateGUIMessage("add engine FastNER_AE_General");
-            runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_FILE_OR_STR, fastNERRule,
+            runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_STR, fastNERRule,
                     FastNER_AE_General.PARAM_MARK_PSEUDO, true, FastNER_AE_General.PARAM_CASE_SENSITIVE, fastNERCaseSensitive,
                     FastNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections,
                     FastNER_AE_General.PARAM_INCLUDE_SECTIONS, excludesections,
@@ -416,7 +416,7 @@ public class RunEasyCIE extends GUITask {
 //        System.out.println("Read Context rules from " + contextRule);
         if (contextRule.length() > 0) {
             updateGUIMessage("add engine FastContext_General_AE ");
-            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule,
+            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_RULE_STR, contextRule,
                     FastContext_General_AE.PARAM_AUTO_EXPAND_SCOPE, false,});
             if (logger.isLoggable(Level.FINE)) {
                 logger.finer("print final Concepts");
@@ -429,7 +429,7 @@ public class RunEasyCIE extends GUITask {
         if (dateRule.length() > 0) {
             logger.info("add engine TemporalContext_AE_General");
             runner.addAnalysisEngine(TemporalContext_AE_General.class, new Object[]{
-                    TemporalContext_AE_General.PARAM_RULE_FILE_OR_STR, dateRule,
+                    TemporalContext_AE_General.PARAM_RULE_STR, dateRule,
                     TemporalContext_AE_General.PARAM_MARK_PSEUDO, false,
                     TemporalContext_AE_General.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
                     TemporalContext_AE_General.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
@@ -447,7 +447,7 @@ public class RunEasyCIE extends GUITask {
             updateGUIMessage("add engine FeatureInferenceAnnotator");
 
             runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{
-                    FeatureInferenceAnnotator.PARAM_INFERENCE_STR, featureInfRule});
+                    FeatureInferenceAnnotator.PARAM_RULE_STR, featureInfRule});
             if (logger.isLoggable(Level.FINE)) {
                 logger.finer("print annotation inferenced Concepts");
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
@@ -460,7 +460,7 @@ public class RunEasyCIE extends GUITask {
             updateGUIMessage("add engine FeatureMergeAnnotator");
 
             runner.addAnalysisEngine(AnnotationFeatureMergerAnnotator.class, new Object[]{
-                    AnnotationFeatureMergerAnnotator.PARAM_INFERENCE_STR, featureMergerRule,
+                    AnnotationFeatureMergerAnnotator.PARAM_RULE_STR, featureMergerRule,
                     AnnotationFeatureMergerAnnotator.PARAM_IN_SITU, false});
             if (logger.isLoggable(Level.FINE)) {
                 logger.finer("print annotation inferenced Concepts");
@@ -472,7 +472,7 @@ public class RunEasyCIE extends GUITask {
 
         if (docInfRule.length() > 0) {
             updateGUIMessage("add engine DocInferenceAnnotator");
-            runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_INFERENCE_STR, docInfRule});
+            runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_RULE_STR, docInfRule});
         }
         if (logger.isLoggable(Level.FINE)) {
             logger.finer("print final Doc Concepts");

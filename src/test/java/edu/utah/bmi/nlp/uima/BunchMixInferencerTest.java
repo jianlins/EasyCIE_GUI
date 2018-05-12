@@ -75,7 +75,7 @@ public class BunchMixInferencerTest {
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC";
         bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferencer.class, BunchMixInferencer.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
                 BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                BunchMixInferencer.PARAM_RULE_FILE_OR_STR, ruleStr);
+                BunchMixInferencer.PARAM_RULE_STR, ruleStr);
         BunchMixInferencer.dao=new TDAO();
         processDoc(jCas, 11, "MI_DOC");
         processDoc(jCas, 11, "ASP_DOC");
@@ -89,7 +89,7 @@ public class BunchMixInferencerTest {
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC,Neg_MI_DOC";
         bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferencer.class, BunchMixInferencer.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
                 BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                BunchMixInferencer.PARAM_RULE_FILE_OR_STR, ruleStr);
+                BunchMixInferencer.PARAM_RULE_STR, ruleStr);
         BunchMixInferencer.dao=new TDAO();
         processDoc(jCas, 11, "MI_DOC");
         processDoc(jCas, 11, "ASP_DOC");
@@ -103,7 +103,7 @@ public class BunchMixInferencerTest {
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC";
         bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferencer.class, BunchMixInferencer.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
                 BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                BunchMixInferencer.PARAM_RULE_FILE_OR_STR, ruleStr);
+                BunchMixInferencer.PARAM_RULE_STR, ruleStr);
         BunchMixInferencer.dao=new TDAO();
         processDoc(jCas, 11, "MI_DOC");
         processDoc(jCas, 11, "Neg_MI_DOC");

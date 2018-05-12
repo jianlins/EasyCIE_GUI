@@ -28,77 +28,111 @@
         </collectionIterator>
     </collectionReader>
     <casProcessors casPoolSize="2" processingUnitThreadCount="1">
-    <casProcessor deployment="integrated" name="RuSH_AE">
-        <descriptor>
-            <import location="../ae/RuSH_AE.xml"/>
-        </descriptor>
+        <casProcessor deployment="integrated" name="RuSH_AE">
+            <descriptor>
+                <import location="../ae/RuSH_AE.xml"/>
+            </descriptor>
             <deploymentParameters/>
-        <errorHandling>
-            <errorRateThreshold action="terminate" value="0/1000"/>
-            <maxConsecutiveRestarts action="terminate" value="30"/>
-            <timeout max="100000" default="-1"/>
-        </errorHandling>
-        <checkpoint batch="10000" time="1000ms"/>
-        <configurationParameterSettings>
-            <nameValuePair>
-                <name>RuleStr</name>
-                <value>
-                    <string>conf/rush.xlsx</string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>SentenceTypeName</name>
-                <value>
-                    <string>Sentence</string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>AlterSentenceTypeName</name>
-                <value>
-                    <string>edu.utah.bmi.nlp.type.system.SentenceOdd</string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>TokenTypeName</name>
-                <value>
-                    <string>Token</string>
-                </value>
-            </nameValuePair>
-        </configurationParameterSettings>
-    </casProcessor>
-    <casProcessor deployment="integrated" name="SQL Writer CasConsumer">
-        <descriptor>
-            <import location="../ae/SQLWriterCasConsumer.xml"/>
-        </descriptor>
+            <errorHandling>
+                <errorRateThreshold action="terminate" value="0/1000"/>
+                <maxConsecutiveRestarts action="terminate" value="30"/>
+                <timeout max="100000" default="-1"/>
+            </errorHandling>
+            <checkpoint batch="10000" time="1000ms"/>
+            <configurationParameterSettings>
+                <nameValuePair>
+                    <name>RuleStr</name>
+                    <value/>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>SentenceTypeName</name>
+                    <value>
+                        <string>Sentence</string>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>AlterSentenceTypeName</name>
+                    <value>
+                        <string>edu.utah.bmi.nlp.type.system.SentenceOdd</string>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>TokenTypeName</name>
+                    <value>
+                        <string>Token</string>
+                    </value>
+                </nameValuePair>
+            </configurationParameterSettings>
+        </casProcessor>
+        <casProcessor deployment="integrated" name="FastNER">
+            <descriptor>
+                <import location="../ae/FastNER_aeDescriptor.xml"/>
+            </descriptor>
+            <deploymentParameters/>
+            <errorHandling>
+                <errorRateThreshold action="terminate" value="0/1000"/>
+                <maxConsecutiveRestarts action="terminate" value="30"/>
+                <timeout max="100000" default="-1"/>
+            </errorHandling>
+            <checkpoint batch="10000" time="1000ms"/>
+            <configurationParameterSettings>
+                <nameValuePair>
+                    <name>RuleStr</name>
+                    <value/>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>IncludeSections</name>
+                    <value>
+                        <string></string>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>ExcludeSections</name>
+                    <value>
+                        <string></string>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>LogRuleInfo</name>
+                    <value>
+                        <boolean>true</boolean>
+                    </value>
+                </nameValuePair>
+            </configurationParameterSettings>
+        </casProcessor>
+        <casProcessor deployment="integrated" name="SQLWriterCasConsumer">
+            <descriptor>
+                <import location="../ae/SQLWriterCasConsumer.xml"/>
+            </descriptor>
             <deploymentParameters/>
             <filter/>
-        <errorHandling>
-            <errorRateThreshold action="terminate" value="100/1000"/>
-            <maxConsecutiveRestarts action="terminate" value="30"/>
-            <timeout max="100000"/>
-        </errorHandling>
-        <checkpoint batch="10000"/>
-        <configurationParameterSettings>
-            <nameValuePair>
-                <name>SQLFile</name>
-                <value>
-                    <string>conf/sqliteconfig.xml</string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>OverWriteTable</name>
-                <value>
-                    <boolean>true</boolean>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>WriteConcepts</name>
-                <value>
-                    <string>Sentence</string>
-                </value>
-            </nameValuePair>
-        </configurationParameterSettings>
-    </casProcessor>
+            <errorHandling>
+                <errorRateThreshold action="terminate" value="100/1000"/>
+                <maxConsecutiveRestarts action="terminate" value="30"/>
+                <timeout max="100000"/>
+            </errorHandling>
+            <checkpoint batch="10000"/>
+            <configurationParameterSettings>
+                <nameValuePair>
+                    <name>SQLFile</name>
+                    <value>
+                        <string>conf/sqliteconfig.xml</string>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>OverWriteTable</name>
+                    <value>
+                        <boolean>true</boolean>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>WriteConcepts</name>
+                    <value>
+                        <string>Sentence</string>
+                    </value>
+                </nameValuePair>
+            </configurationParameterSettings>
+        </casProcessor>
     </casProcessors>
     <cpeConfig>
         <numToProcess>-1</numToProcess>

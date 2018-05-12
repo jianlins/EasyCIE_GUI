@@ -131,7 +131,7 @@ public class JavaFXDynTable extends Application {
 
         btnNew.setOnAction(btnNewHandler);
 
-        //init table
+        //initTypeGenerator table
         //Un-editable column of "id"
         TableColumn col_id = new TableColumn("ID");
         tableView.getColumns().add(col_id);

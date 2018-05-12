@@ -132,7 +132,7 @@ public class DebugPipe extends RunEasyCIE {
 //
 //        if (sectionRule.length() > 0) {
 //            logger.finer("add engine SectionDetectorR_AE");
-//            runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_FILE_OR_STR, sectionRule});
+//            runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_STR, sectionRule});
 //            if (sectionType.length()>0)
 //                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
 //                        SectionHeader.class.getCanonicalName(),AnnotationPrinter.PARAM_INDICATION,"After sectiondetector"});
@@ -158,7 +158,7 @@ public class DebugPipe extends RunEasyCIE {
 //
 //        if (fastCNERRule.length() > 0) {
 //            logger.finer("add engine FastCNER_AE_General");
-//            runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, fastCNERRule,
+//            runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_STR, fastCNERRule,
 //                    FastCNER_AE_General.PARAM_MARK_PSEUDO, false});
 //            if (cNERType.length() > 0) {
 //                runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
@@ -171,7 +171,7 @@ public class DebugPipe extends RunEasyCIE {
 //
 //        if (fastNERRule.length() > 0) {
 //            logger.finer("add engine FastNER_AE_General");
-//            runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_FILE_OR_STR, fastNERRule,
+//            runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_STR, fastNERRule,
 //                    FastNER_AE_General.PARAM_MARK_PSEUDO, true, FastNER_AE_General.PARAM_CASE_SENSITIVE, fastNERCaseSensitive,
 //                    FastNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections});
 //            if (tNERType.length() > 0) {
@@ -203,7 +203,7 @@ public class DebugPipe extends RunEasyCIE {
 //            logger.finer("add engine FeatureInferenceAnnotator");
 //
 //            runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{
-//                    FeatureInferenceAnnotator.PARAM_INFERENCE_STR, featureInfRule});
+//                    FeatureInferenceAnnotator.PARAM_RULE_STR, featureInfRule});
 //            if (logger.isLoggable(Level.FINER)) {
 //                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
 //                        DeterminantValueSet.defaultNameSpace + "Concept",
@@ -215,7 +215,7 @@ public class DebugPipe extends RunEasyCIE {
 //            logger.finer("add engine FeatureInferenceAnnotator");
 //
 //            runner.addAnalysisEngine(AnnotationFeatureMergerAnnotator.class, new Object[]{
-//                    AnnotationFeatureMergerAnnotator.PARAM_INFERENCE_STR, featureMergerRule,
+//                    AnnotationFeatureMergerAnnotator.PARAM_RULE_STR, featureMergerRule,
 //                    AnnotationFeatureMergerAnnotator.PARAM_IN_SITU, false});
 //            if (logger.isLoggable(Level.FINER)) {
 //                runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
@@ -226,7 +226,7 @@ public class DebugPipe extends RunEasyCIE {
 //
 //        if (docInfRule.length() > 0) {
 //            logger.finer("add engine DocInferenceAnnotator");
-//            runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_INFERENCE_STR, docInfRule});
+//            runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_RULE_STR, docInfRule});
 //        }
 //        if (logger.isLoggable(Level.FINER)) {
 //            runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME, Doc_Base.class.getCanonicalName(),
@@ -237,7 +237,7 @@ public class DebugPipe extends RunEasyCIE {
         UpdateMessage("Add pipeline components...");
         if (sectionRule.length() > 0) {
             logger.finer("add engine SectionDetectorR_AE");
-            runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_FILE_OR_STR, sectionRule});
+            runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_STR, sectionRule});
             if (sectionType.length() > 0 && guiEnabled)
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER, "SectionDetector",
                         AnnotationLogger.PARAM_INDICATION,
@@ -262,7 +262,7 @@ public class DebugPipe extends RunEasyCIE {
         }
 
         if (fastCNERRule.length() > 0) {
-            runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, fastCNERRule,
+            runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_STR, fastCNERRule,
                     FastCNER_AE_General.PARAM_MARK_PSEUDO, false,
                     FastCNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections
             });
@@ -280,7 +280,7 @@ public class DebugPipe extends RunEasyCIE {
         }
 
         if (fastNERRule.length() > 0) {
-            runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_FILE_OR_STR, fastNERRule,
+            runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_STR, fastNERRule,
                     FastNER_AE_General.PARAM_CASE_SENSITIVE, false, FastNER_AE_General.PARAM_CASE_SENSITIVE, fastNERCaseSensitive,
                     FastNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections,
                     FastNER_AE_General.PARAM_MARK_PSEUDO, true});
@@ -302,7 +302,7 @@ public class DebugPipe extends RunEasyCIE {
 
 //        System.out.println("Read Context rules from " + contextRule);
         if (contextRule.length() > 0) {
-            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule,
+            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_RULE_STR, contextRule,
                     FastContext_General_AE.PARAM_AUTO_EXPAND_SCOPE, false,
                     FastContext_General_AE.PARAM_MARK_CLUE, true,
                     FastContext_General_AE.PARAM_DEBUG, true
@@ -323,7 +323,7 @@ public class DebugPipe extends RunEasyCIE {
         if (dateRule.length() > 0) {
             logger.info("add engine TemporalContext_AE_General");
             runner.addAnalysisEngine(TemporalContext_AE_General.class, new Object[]{
-                    TemporalContext_AE_General.PARAM_RULE_FILE_OR_STR, dateRule,
+                    TemporalContext_AE_General.PARAM_RULE_STR, dateRule,
                     TemporalContext_AE_General.PARAM_MARK_PSEUDO, false,
                     TemporalContext_AE_General.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
                     TemporalContext_AE_General.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
@@ -343,7 +343,7 @@ public class DebugPipe extends RunEasyCIE {
         }
 
         if (featureInfRule.length() > 0) {
-            runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_INFERENCE_STR, featureInfRule});
+            runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_RULE_STR, featureInfRule});
             if (featureInfType.length() > 0) {
                 if (guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
@@ -357,7 +357,7 @@ public class DebugPipe extends RunEasyCIE {
             }
         }
         if (docInfRule.length() > 0) {
-            runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_INFERENCE_STR, docInfRule});
+            runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_RULE_STR, docInfRule});
             if (docInfType.length() > 0) {
                 if (guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{

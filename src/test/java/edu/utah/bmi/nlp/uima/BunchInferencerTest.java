@@ -73,7 +73,7 @@ public class BunchInferencerTest {
     public void process() throws AnalysisEngineProcessException, ClassNotFoundException, ResourceInitializationException {
         bunchInferer = AnalysisEngineFactory.createEngine(BunchInferencer.class,
                 BunchInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                BunchInferencer.PARAM_RULE_FILE_OR_STR, "conf/mi/mi_PatInf.xlsx");
+                BunchInferencer.PARAM_RULE_STR, "conf/mi/mi_PatInf.xlsx");
 
         processDoc(jCas, 11, "MI_DOC");
         processDoc(jCas, 11, "MI_DOC");

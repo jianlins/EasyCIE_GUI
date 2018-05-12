@@ -26,7 +26,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
     public static final String PARAM_SQLFILE = "DBConfigFile";
     public static final String PARAM_TABLENAME = "ResultTableName";
     public static final String PARAM_AUTO_ID_ENABLED = "AutoIdEnabled";
-    public static final String PARAM_RULE_FILE_OR_STR = "RuleFileOrStr";
+    public static final String PARAM_RULE_STR = "RuleFileOrStr";
     public static final String PARAM_BUNCH_COLUMN_NAME = "BUNCH_COLUMN_NAME";
     public static final String PARAM_ANNOTATOR = "Annotator";
     public static final String PARAM_VERSION = "Version";
@@ -64,7 +64,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
         parameterObject = cont.getConfigParameterValue(PARAM_AUTO_ID_ENABLED);
         if (parameterObject != null && parameterObject instanceof Boolean && (Boolean) parameterObject != true)
             autoIdEnabled = false;
-        String inferenceStr = (String) cont.getConfigParameterValue(PARAM_RULE_FILE_OR_STR);
+        String inferenceStr = (String) cont.getConfigParameterValue(PARAM_RULE_STR);
         parameterObject = cont.getConfigParameterValue(PARAM_ANNOTATOR);
         if (parameterObject != null && parameterObject instanceof String)
             annotator = (String) parameterObject;

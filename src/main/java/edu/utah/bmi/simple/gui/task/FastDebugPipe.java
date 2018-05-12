@@ -203,7 +203,7 @@ public class FastDebugPipe extends RunEasyCIE {
         UpdateMessage("Add pipeline components...");
         if (sectionRule.length() > 0) {
             UpdateMessage("add engine SectionDetectorR_AE");
-            runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_FILE_OR_STR, sectionRule});
+            runner.addAnalysisEngine(SectionDetectorR_AE.class, new Object[]{SectionDetectorR_AE.PARAM_RULE_STR, sectionRule});
             if (sectionType.length() > 0 && guitask.guiEnabled)
                 runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{AnnotationLogger.PARAM_INDICATION_HEADER, "SectionDetector",
                         AnnotationLogger.PARAM_INDICATION,
@@ -230,7 +230,7 @@ public class FastDebugPipe extends RunEasyCIE {
 
         if (fastCNERRule.length() > 0) {
             UpdateMessage("Add fastcner...");
-            runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, fastCNERRule,
+            runner.addAnalysisEngine(FastCNER_AE_General.class, new Object[]{FastCNER_AE_General.PARAM_RULE_STR, fastCNERRule,
                     FastCNER_AE_General.PARAM_MARK_PSEUDO, false,
                     FastCNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections
             });
@@ -249,7 +249,7 @@ public class FastDebugPipe extends RunEasyCIE {
 
         if (fastNERRule.length() > 0) {
             UpdateMessage("Add fastner...");
-            runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_FILE_OR_STR, fastNERRule,
+            runner.addAnalysisEngine(FastNER_AE_General.class, new Object[]{FastNER_AE_General.PARAM_RULE_STR, fastNERRule,
                     FastNER_AE_General.PARAM_CASE_SENSITIVE, false, FastNER_AE_General.PARAM_CASE_SENSITIVE, fastNERCaseSensitive,
                     FastNER_AE_General.PARAM_INCLUDE_SECTIONS, includesections,
                     FastNER_AE_General.PARAM_MARK_PSEUDO, true});
@@ -272,7 +272,7 @@ public class FastDebugPipe extends RunEasyCIE {
 //        System.out.println("Read Context rules from " + contextRule);
         if (contextRule.length() > 0) {
             UpdateMessage("Add FastContext...");
-            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_CONTEXT_RULES_STR, contextRule,
+            runner.addAnalysisEngine(FastContext_General_AE.class, new Object[]{FastContext_General_AE.PARAM_RULE_STR, contextRule,
                     FastContext_General_AE.PARAM_AUTO_EXPAND_SCOPE, false,
                     FastContext_General_AE.PARAM_MARK_CLUE, true
             });
@@ -292,7 +292,7 @@ public class FastDebugPipe extends RunEasyCIE {
         if (dateRule.length() > 0) {
             UpdateMessage("add Temporal Context detector...");
             runner.addAnalysisEngine(TemporalContext_AE_General.class, new Object[]{
-                    TemporalContext_AE_General.PARAM_RULE_FILE_OR_STR, dateRule,
+                    TemporalContext_AE_General.PARAM_RULE_STR, dateRule,
                     TemporalContext_AE_General.PARAM_MARK_PSEUDO, false,
                     TemporalContext_AE_General.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
                     TemporalContext_AE_General.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
@@ -315,7 +315,7 @@ public class FastDebugPipe extends RunEasyCIE {
 
         if (featureInfRule.length() > 0) {
             UpdateMessage("Add feature inferencer...");
-            runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_INFERENCE_STR, featureInfRule});
+            runner.addAnalysisEngine(FeatureInferenceAnnotator.class, new Object[]{FeatureInferenceAnnotator.PARAM_RULE_STR, featureInfRule});
             if (featureInfType.length() > 0) {
                 if (guitask.guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
@@ -330,7 +330,7 @@ public class FastDebugPipe extends RunEasyCIE {
         }
         if (docInfRule.length() > 0) {
             UpdateMessage("Add feature inferencer...");
-            runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_INFERENCE_STR, docInfRule});
+            runner.addAnalysisEngine(DocInferenceAnnotator.class, new Object[]{DocInferenceAnnotator.PARAM_RULE_STR, docInfRule});
             if (docInfType.length() > 0) {
                 if (guitask.guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
@@ -347,7 +347,7 @@ public class FastDebugPipe extends RunEasyCIE {
         if (bunchInfRule.length() > 0) {
             runner.addAnalysisEngine(BunchMixInferencer.class, new Object[]{BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
                     BunchMixInferencer.PARAM_SQLFILE, writeConfigFileName,
-                    BunchMixInferencer.PARAM_RULE_FILE_OR_STR, bunchInfRule,
+                    BunchMixInferencer.PARAM_RULE_STR, bunchInfRule,
                     BunchMixInferencer.PARAM_TABLENAME, bunchResultTable,
                     BunchMixInferencer.PARAM_ANNOTATOR, annotator,
                     BunchMixInferencer.PARAM_VERSION, "-1"});

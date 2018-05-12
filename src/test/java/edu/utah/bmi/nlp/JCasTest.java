@@ -79,9 +79,9 @@ public class JCasTest {
                 RuSH_AE.PARAM_INCLUDE_PUNCTUATION,true,
                 RuSH_AE.PARAM_FIX_GAPS, true);
         FastCNERae = AnalysisEngineFactory.createEngine(
-                FastCNER_AE_General.class, FastCNER_AE_General.PARAM_RULE_FILE_OR_STR, "conf/fever_crule.csv", FastCNER_AE_General.PARAM_MARK_PSEUDO, true);
+                FastCNER_AE_General.class, FastCNER_AE_General.PARAM_RULE_STR, "conf/fever_crule.csv", FastCNER_AE_General.PARAM_MARK_PSEUDO, true);
         FastNERae = AnalysisEngineFactory.createEngine(
-                FastNER_AE_General.class, FastNER_AE_General.PARAM_RULE_FILE_OR_STR, "conf/fever_rule.csv", FastNER_AE_General.PARAM_MARK_PSEUDO, true);
+                FastNER_AE_General.class, FastNER_AE_General.PARAM_RULE_STR, "conf/fever_rule.csv", FastNER_AE_General.PARAM_MARK_PSEUDO, true);
         FastContext_Generalae = AnalysisEngineFactory.createEngine(
                 FastContext_General_AE.class, "RuleFile", "conf/context.csv",
                 "Windowsize", 8,
