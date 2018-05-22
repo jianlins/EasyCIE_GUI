@@ -6,6 +6,11 @@ import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.easycie.CoordinateNERResults_AE;
 import edu.utah.bmi.nlp.easycie.NLPDBLogger;
+import edu.utah.bmi.nlp.easycie.reader.SQLTextReader;
+import edu.utah.bmi.nlp.easycie.writer.BratWritter_AE;
+import edu.utah.bmi.nlp.easycie.writer.EhostWriter_AE;
+import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
+import edu.utah.bmi.nlp.easycie.writer.XMIWritter_AE;
 import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
 import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
 import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
@@ -20,11 +25,6 @@ import edu.utah.bmi.nlp.uima.ae.AnnotationFeatureMergerAnnotator;
 import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
-import edu.utah.bmi.nlp.easycie.reader.SQLTextReader;
-import edu.utah.bmi.nlp.easycie.writer.BratWritter_AE;
-import edu.utah.bmi.nlp.easycie.writer.EhostWriter_AE;
-import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
-import edu.utah.bmi.nlp.easycie.writer.XMIWritter_AE;
 import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;
 import edu.utah.bmi.simple.gui.controller.GUILogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -42,12 +42,12 @@ import java.util.logging.Logger;
 /**
  * Created by Jianlin Shi on 9/19/16.
  */
-public class RunEasyCIE extends GUITask {
-	public static Logger logger = Logger.getLogger(RunEasyCIE.class.getCanonicalName());
+public class RunEasyCIESampleSize extends GUITask {
+	public static Logger logger = Logger.getLogger(RunEasyCIESampleSize.class.getCanonicalName());
 	protected String readDBConfigFileName, writeConfigFileName, inputTableName, snippetResultTable, docResultTable, bunchResultTable,
 			ehostDir, bratDir, xmiDir, annotator, datasetId;
 	public boolean report = false, fastNERCaseSensitive = true, forceAssignSection = false;
-	protected String sectionRule = "", rushRule = "", fastNERRule = "", fastCNERRule = "", includesections = "", excludesections = "", contextRule = "",
+	protected String sectionRule = "", fastNERRule = "", fastCNERRule = "", includesections = "", excludesections = "", contextRule = "",
 			dateRule = "", featureInfRule = "", featureMergerRule = "", docInfRule = "", bunchInfRule = "";
 	protected int dayInterval = 0;
 	public AdaptableUIMACPETaskJCasRunner runner;
@@ -58,27 +58,26 @@ public class RunEasyCIE extends GUITask {
 	protected String customTypeDescriptor;
 	protected GUILogger uimaLogger;
 
-	public RunEasyCIE() {
+	public RunEasyCIESampleSize() {
 
 	}
 
 
-	public RunEasyCIE(TasksFX tasks) {
+	public RunEasyCIESampleSize(TasksFX tasks) {
 		initiate(tasks, "db");
 	}
 
-	public RunEasyCIE(TasksFX tasks, String paras) {
+	public RunEasyCIESampleSize(TasksFX tasks, String paras) {
 		if (paras == null || paras.length() == 0)
 			initiate(tasks, "db");
 		initiate(tasks, paras);
 	}
 
-	public void init(GUITask task, String annotator, String rushRule, String fastNERRule, String fastCNERRule, String contextRule,
+	public void init(GUITask task, String annotator, String fastNERRule, String fastCNERRule, String contextRule,
 					 String annotationInferenceRule, String docInferenceRule, String bunchInfRule, boolean report, boolean fastNerCaseSensitive,
 					 String readDBConfigFile, String inputTableName, String datasetId, String writeConfigFileName,
 					 String outputTableName, String ehostDir, String bratDir, String xmiDir, String exporttypes, String option) {
 		this.annotator = annotator;
-		this.rushRule = rushRule;
 		this.fastNERRule = fastNERRule;
 		this.fastCNERRule = fastCNERRule;
 		this.contextRule = contextRule;
@@ -179,7 +178,6 @@ public class RunEasyCIE extends GUITask {
 		snippetResultTable = config.getValue(ConfigKeys.snippetResultTableName);
 		docResultTable = config.getValue(ConfigKeys.docResultTableName);
 		bunchResultTable = config.getValue(ConfigKeys.bunchResultTableName);
-		rushRule = config.getValue(ConfigKeys.rushRule);
 
 
 		TaskFX exportConfig = tasks.getTask("export");
@@ -343,11 +341,11 @@ public class RunEasyCIE extends GUITask {
 					SQLWriterCasConsumer.PARAM_VERSION, runId,
 					SQLWriterCasConsumer.PARAM_WRITE_CONCEPT, exporttypes,
 					SQLWriterCasConsumer.PARAM_OVERWRITETABLE, false, SQLWriterCasConsumer.PARAM_BATCHSIZE, 150});
-//			NumberWriter.dao = wdao;
-//			runner.addAnalysisEngine(NumberWriter.class, new Object[]{NumberWriter.PARAM_OUTPUT_TYPE, "SAMPLE_SIZE",
-//					NumberWriter.PARAM_SQLFILE, writeConfigFileName, NumberWriter.PARAM_TABLENAME, "NUMBERS",
-//					NumberWriter.PARAM_ANNOTATOR, annotator,
-//					NumberWriter.PARMA_ADD_OUTPUT_TYPE, "GROUP_SIZE"});
+			NumberWriter.dao = wdao;
+			runner.addAnalysisEngine(NumberWriter.class, new Object[]{NumberWriter.PARAM_OUTPUT_TYPE, "SAMPLE_SIZE",
+					NumberWriter.PARAM_SQLFILE, writeConfigFileName, NumberWriter.PARAM_TABLENAME, "NUMBERS",
+					NumberWriter.PARAM_ANNOTATOR, annotator,
+					NumberWriter.PARMA_ADD_OUTPUT_TYPE, "GROUP_SIZE"});
 			if (bunchInfRule.length() > 0) {
 				runner.addAnalysisEngine(BunchMixInferencer.class, new Object[]{BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
 						BunchMixInferencer.PARAM_SQLFILE, writeConfigFileName,
@@ -369,21 +367,18 @@ public class RunEasyCIE extends GUITask {
 						SectionHeader.class.getCanonicalName(), AnnotationPrinter.PARAM_INDICATION, "After sectiondetector"});
 		}
 
-		if (rushRule.length() > 0) {
-			updateGUIMessage("add engine RuSH_AE");
-			if (exporttypes == null || exporttypes.indexOf("Sentence") == -1)
-				runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
+
+		updateGUIMessage("add engine openNLP sentence detector");
+		if (exporttypes == null || exporttypes.indexOf("Sentence") == -1)
+			runner.addAnalysisEngine(OpenNLPSentDetector.class, new Object[]{OpenNLPSentDetector.PARAM_INCLUDE_PUNCTUATION, true});
+		else
+			runner.addAnalysisEngine(RuSH_AE.class, new Object[]{
+					RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
 //                        RuSH_AE.PARAM_INSIDE_SECTIONS, includesections,
-						RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true});
-			else
-				runner.addAnalysisEngine(RuSH_AE.class, new Object[]{RuSH_AE.PARAM_RULE_STR, rushRule,
-						RuSH_AE.PARAM_INCLUDE_PUNCTUATION, true,
-//                        RuSH_AE.PARAM_INSIDE_SECTIONS, includesections,
-						RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
-			if (logger.isLoggable(Level.FINER))
-				runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
-						DeterminantValueSet.defaultNameSpace + "Sentence"});
-		}
+					RuSH_AE.PARAM_ALTER_SENTENCE_TYPE_NAME, SentenceOdd.class.getCanonicalName()});
+		if (logger.isLoggable(Level.FINER))
+			runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
+					DeterminantValueSet.defaultNameSpace + "Sentence"});
 
 
 		if (fastCNERRule.length() > 0) {

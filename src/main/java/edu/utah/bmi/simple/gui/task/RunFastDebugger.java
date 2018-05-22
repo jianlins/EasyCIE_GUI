@@ -20,7 +20,7 @@ public class RunFastDebugger extends GUITask {
 
     private TasksFX tasks;
     protected boolean fastNerCaseSensitive;
-    protected FastDebugPipe fastDebugPipe;
+    protected FastDebugPipeSampleSize fastDebugPipe;
     protected GUITask guiTask;
     private String inputStr, metaStr;
 
@@ -43,7 +43,7 @@ public class RunFastDebugger extends GUITask {
         TaskFX settings = tasks.getTask("debug");
         metaStr = settings.getValue("log/metaStr");
 //      use singleton to speed up initialization
-        fastDebugPipe = FastDebugPipe.getInstance(tasks);
+        fastDebugPipe = FastDebugPipeSampleSize.getInstance(tasks);
 //      if need update configurations, use manual refresh instead.
 
     }

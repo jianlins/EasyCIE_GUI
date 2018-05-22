@@ -129,7 +129,6 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase {
         if (typeMap.size() == 0) {
             initMaps(cas);
         }
-
         String serializedString;
         RecordRow recordRow = new RecordRow();
         FSIterator it = jCas.getAnnotationIndex(SourceDocumentInformation.type).iterator();

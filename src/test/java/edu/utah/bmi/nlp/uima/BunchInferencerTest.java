@@ -5,6 +5,7 @@ import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Concept;
 import edu.utah.bmi.nlp.uima.ae.AnnotationEvaluator;
+import opennlp.uima.sentdetect.SentenceDetector;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CAS;
@@ -93,5 +94,10 @@ public class BunchInferencerTest {
                 Class.forName(DeterminantValueSet.checkNameSpace(docType)).asSubclass(Annotation.class));
         annotation.addToIndexes();
         bunchInferer.process(jCas);
+    }
+
+    @Test
+    public void testOpenNLP(){
+        SentenceDetector sentenceDetector=new SentenceDetector();
     }
 }
