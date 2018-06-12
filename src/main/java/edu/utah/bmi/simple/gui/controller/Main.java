@@ -71,7 +71,7 @@ public class Main extends Application {
     }
 
 
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         basePath = System.getProperty("user.dir");
         this.primaryStage = primaryStage;
 

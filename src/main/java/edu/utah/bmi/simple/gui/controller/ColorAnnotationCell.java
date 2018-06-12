@@ -122,9 +122,9 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         highlighter.setMinWidth(Region.USE_PREF_SIZE);
         Label postLabel = new Label(post);
         hbox.getChildren().addAll(preLabel, highlighter, postLabel);
-        hbox.setHgrow(preLabel, Priority.NEVER);
-        hbox.setHgrow(highlighter, Priority.NEVER);
-        hbox.setHgrow(postLabel, Priority.ALWAYS);
+        HBox.setHgrow(preLabel, Priority.NEVER);
+        HBox.setHgrow(highlighter, Priority.NEVER);
+        HBox.setHgrow(postLabel, Priority.ALWAYS);
         setGraphic(hbox);
     }
 

@@ -28,7 +28,7 @@ public class JCasTest {
     JCas jCas;
 
     @Before
-    public void init() throws ResourceInitializationException, AnalysisEngineProcessException {
+    public void init() throws ResourceInitializationException {
         String typeDescriptorURI = "desc/type/customized";
         dynamicTypeGenerator = new DynamicTypeGenerator(typeDescriptorURI);
         jCas = initJCas();

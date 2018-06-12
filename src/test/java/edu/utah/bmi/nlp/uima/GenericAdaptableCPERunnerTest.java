@@ -12,8 +12,8 @@ import org.junit.Test;
  */
 public class GenericAdaptableCPERunnerTest {
     @Test
-    public void test() throws Exception {
-        SettingOper settingOper = new SettingOper("conf/config.xml");
+    public void test() {
+        SettingOper settingOper = new SettingOper("conf/sqliteconfig.xml");
         TasksFX tasksFX = settingOper.readSettings();
         GenericAdaptableCPERunner runner = new GenericAdaptableCPERunner(tasksFX, "testPipeline");
         runner.run();

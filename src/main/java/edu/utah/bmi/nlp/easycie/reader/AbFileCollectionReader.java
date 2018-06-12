@@ -152,7 +152,7 @@ public class AbFileCollectionReader extends CollectionReader_ImplBase {
         }
 
         // open input stream to file
-        File file = (File) mFiles.get(mCurrentIndex++);
+        File file = mFiles.get(mCurrentIndex++);
         String text = FileUtils.file2String(file, mEncoding);
         // put document in CAS
         jcas.setDocumentText(text);

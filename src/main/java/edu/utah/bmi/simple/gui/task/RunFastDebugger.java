@@ -74,8 +74,7 @@ public class RunFastDebugger extends GUITask {
                 inputStr = entered;
 
                 if (entered.trim().length() > 0) {
-                    ;
-//                        initiate(tasks, "xmi");
+                    //                        initiate(tasks, "xmi");
                     updateGUIMessage("Execute pipeline...");
                     new Thread(() -> {
                         fastDebugPipe.process(inputStr, metaStr);

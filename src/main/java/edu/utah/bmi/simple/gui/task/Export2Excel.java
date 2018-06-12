@@ -92,7 +92,7 @@ public class Export2Excel extends GUITask {
         // Update UI here.
         boolean res = false;
         if (annotator.trim().length() > 0) {
-            EDAO dao = new EDAO(new File(outputDB));
+            EDAO dao = EDAO.getInstance(new File(outputDB));
             if (!dao.checkExists(outputTable)) {
                 updateGUIMessage("Table '" + outputTable + "' does not exit.");
                 popDialog("Note", "Table '" + outputTable + "' does not exit.",

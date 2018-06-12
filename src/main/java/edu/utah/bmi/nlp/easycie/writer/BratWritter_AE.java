@@ -35,7 +35,7 @@ public class BratWritter_AE extends XMIWritter_AE {
     }
 
     @Override
-    public void process(JCas jCas) throws AnalysisEngineProcessException {
+    public void process(JCas jCas) {
 
         String fileName = readFileIDName(jCas);
         ArrayList<String> bratAnnotations = new ArrayList<>();
@@ -94,7 +94,7 @@ public class BratWritter_AE extends XMIWritter_AE {
         attributeToValues.get(attribute).add(value);
     }
 
-    public void collectionProcessComplete() throws AnalysisEngineProcessException {
+    public void collectionProcessComplete() {
         // no default behavior
         File configFile = new File(outputDirectory, "annotation.conf");
         StringBuilder config = new StringBuilder();

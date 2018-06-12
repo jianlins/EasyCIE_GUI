@@ -30,7 +30,7 @@
         <description>RuSH (Rule-based Segmentation Tool Using Hashing) analysisEngineDescriptor</description>
         <configurationParameters>
             <configurationParameter>
-                <name>RuleStr</name>
+                <name>RuleFileOrStr</name>
                 <description>The file contains sentence segmentation rules</description>
                 <type>String</type>
                 <multiValued>false</multiValued>
@@ -83,7 +83,7 @@
         </configurationParameters>
         <configurationParameterSettings>
             <nameValuePair>
-                <name>RuleStr</name>
+                <name>RuleFileOrStr</name>
                 <value>
                     <string>conf/rush.csv</string>
                 </value>
@@ -91,19 +91,19 @@
             <nameValuePair>
                 <name>SentenceTypeName</name>
                 <value>
-                    <string>edu.utah.bmi.type.system.Sentence</string>
+                    <string>edu.utah.bmi.nlp.type.system.Sentence</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
                 <name>AlterSentenceTypeName</name>
                 <value>
-                    <string>edu.utah.bmi.type.system.SentenceOdd</string>
+                    <string>edu.utah.bmi.nlp.type.system.SentenceOdd</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
                 <name>TokenTypeName</name>
                 <value>
-                    <string>edu.utah.bmi.type.system.Token</string>
+                    <string>edu.utah.bmi.nlp.type.system.Token</string>
                 </value>
             </nameValuePair>
             <nameValuePair>

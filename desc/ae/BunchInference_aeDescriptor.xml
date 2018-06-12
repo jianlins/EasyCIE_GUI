@@ -18,11 +18,11 @@
 <analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
     <primitive>true</primitive>
-    <annotatorImplementationName>edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General</annotatorImplementationName>
+    <annotatorImplementationName>edu.utah.bmi.nlp.uima.BunchMixInferencer</annotatorImplementationName>
     <analysisEngineMetaData>
-        <name>FastNER_AE</name>
+        <name>BunchInference_AE</name>
         <description/>
-        <version>1.0</version>
+        <version>1.3</version>
         <vendor/>
         <configurationParameters>
             <configurationParameter>
@@ -32,118 +32,83 @@
                 <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>SentenceTypeName</name>
+                <name>DBConfigFile</name>
                 <type>String</type>
                 <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
+                <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>TokenTypeName</name>
+                <name>ResultTableName</name>
                 <type>String</type>
                 <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
+                <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>IncludeSections</name>
-                <type>String</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>ExcludeSections</name>
-                <type>String</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>MarkPseudo</name>
+                <name>AutoIdEnabled</name>
                 <type>Boolean</type>
-                <mandatory>false</mandatory>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>LogRuleInfo</name>
-                <type>Boolean</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>CaseSensitive</name>
-                <type>Boolean</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>SpanCompareMethod</name>
-                <description>The way of comparing the priority of matched spans: score, scorewidth, widthscore or width
-                    (default is scorewidth)
-                </description>
+                <name>BunchColumnName</name>
                 <type>String</type>
-                <mandatory>false</mandatory>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>WidthCompareMethod</name>
-                <description>The way of comparing the width priority of matched rules, either ruleLength or strWidth
-                    (default is ruleLength)
-                </description>
+                <name>Annotator</name>
                 <type>String</type>
-                <mandatory>false</mandatory>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>Version</name>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
             </configurationParameter>
         </configurationParameters>
         <configurationParameterSettings>
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>conf/fastner_rule.csv</string>
+                    <string>conf/featureInference_rule.csv</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>SentenceTypeName</name>
-                <value>
-                    <string>edu.utah.bmi.nlp.type.system.Sentence</string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>TokenTypeName</name>
-                <value>
-                    <string>edu.utah.bmi.nlp.type.system.Token</string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>IncludeSections</name>
+                <name>DBConfigFile</name>
                 <value>
                     <string></string>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>ExcludeSections</name>
+                <name>ResultTableName</name>
                 <value>
-                    <string></string>
+                    <string>RESULT_BUNCH</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>MarkPseudo</name>
+                <name>AutoIdEnabled</name>
                 <value>
-                    <boolean>false</boolean>
+                    <boolean>true</boolean>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>LogRuleInfo</name>
+                <name>BunchColumnName</name>
                 <value>
-                    <boolean>false</boolean>
+                    <string>BUNCH_ID</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>CaseSensitive</name>
+                <name>Annotator</name>
                 <value>
-                    <boolean>false</boolean>
+                    <string>uima</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>SpanCompareMethod</name>
+                <name>Version</name>
                 <value>
-                    <string>scorewidth</string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>WidthCompareMethod</name>
-                <value>
-                    <string>ruleLength</string>
+                    <string>0</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>

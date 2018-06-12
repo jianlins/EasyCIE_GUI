@@ -28,7 +28,7 @@ public class TaskTestBase {
         tasks = settingOper.readSettings();
         tasks.getTask("settings").setValue(ConfigKeys.readDBConfigFileName, dbConfig);
         tasks.getTask("settings").setValue(ConfigKeys.writeDBConfigFileName, dbConfig);
-        dao = new EDAO(new File(dbConfig), true, false);
+        dao = EDAO.getInstance(new File(dbConfig), true, false);
     }
 
 
@@ -53,7 +53,7 @@ public class TaskTestBase {
 
 
     @Test
-    public void testImport() throws InterruptedException {
+    public void testImport() {
         final Import runImport = new Import(tasks, "txt");
         testTask(runImport);
         RecordRow recordRow = dao.queryRecord("SELECT COUNT(*) FROM DOCUMENTS;");
@@ -61,7 +61,7 @@ public class TaskTestBase {
     }
 
     @Test
-    public void testRun() throws InterruptedException {
+    public void testRun() {
         final RunEasyCIE task = new RunEasyCIE(tasks);
         testTask(task);
         RecordRow recordRow = dao.queryRecord("SELECT COUNT(*) FROM OUTPUT;");

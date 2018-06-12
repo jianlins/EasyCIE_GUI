@@ -72,14 +72,14 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 		annotator = (String) parameterObject;
 
 		if (dao == null || dao.isClosed()) {
-			dao = new EDAO(new File(configFile));
+			dao = EDAO.getInstance(new File(configFile));
 		}
 		dao.initiateTableFromTemplate("NUMBERS_TABLE", resultTableName, false);
 
 	}
 
 	@Override
-	public void process(JCas jCas) throws AnalysisEngineProcessException {
+	public void process(JCas jCas) {
 		RecordRow recordRow = new RecordRow();
 		FSIterator it = jCas.getAnnotationIndex(SourceDocumentInformation.type).iterator();
 		SourceDocumentInformation e;

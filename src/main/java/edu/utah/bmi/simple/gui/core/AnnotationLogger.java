@@ -60,7 +60,7 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 
     }
 
-    public void process(JCas jCas) throws AnalysisEngineProcessException {
+    public void process(JCas jCas) {
 
         IntervalST sentenceTree = new IntervalST();
         ArrayList<Sentence> sentenceList = new ArrayList<>();

@@ -18,11 +18,11 @@
 <analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
     <primitive>true</primitive>
-    <annotatorImplementationName>edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General</annotatorImplementationName>
+    <annotatorImplementationName>edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE</annotatorImplementationName>
     <analysisEngineMetaData>
-        <name>FastNER_AE</name>
+        <name>FastContext_AE</name>
         <description/>
-        <version>1.0</version>
+        <version>1.3</version>
         <vendor/>
         <configurationParameters>
             <configurationParameter>
@@ -44,44 +44,21 @@
                 <mandatory>false</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>IncludeSections</name>
-                <type>String</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>ExcludeSections</name>
-                <type>String</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>MarkPseudo</name>
-                <type>Boolean</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>LogRuleInfo</name>
-                <type>Boolean</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
                 <name>CaseSensitive</name>
+                <description>If context rules are case sensitive.</description>
                 <type>Boolean</type>
                 <mandatory>false</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>SpanCompareMethod</name>
-                <description>The way of comparing the priority of matched spans: score, scorewidth, widthscore or width
-                    (default is scorewidth)
-                </description>
-                <type>String</type>
+                <name>MarkClues</name>
+                <description>If add context clue annotations.</description>
+                <type>Boolean</type>
                 <mandatory>false</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>WidthCompareMethod</name>
-                <description>The way of comparing the width priority of matched rules, either ruleLength or strWidth
-                    (default is ruleLength)
-                </description>
-                <type>String</type>
+                <name>AutoExpanScope</name>
+                <description>If sentence boundary is too small, expand the context to the adjacent sentences.</description>
+                <type>Boolean</type>
                 <mandatory>false</mandatory>
             </configurationParameter>
         </configurationParameters>
@@ -89,7 +66,7 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>conf/fastner_rule.csv</string>
+                    <string>conf/context_rule.csv</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
@@ -105,51 +82,27 @@
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>IncludeSections</name>
-                <value>
-                    <string></string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>ExcludeSections</name>
-                <value>
-                    <string></string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>MarkPseudo</name>
-                <value>
-                    <boolean>false</boolean>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>LogRuleInfo</name>
-                <value>
-                    <boolean>false</boolean>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
                 <name>CaseSensitive</name>
                 <value>
                     <boolean>false</boolean>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>SpanCompareMethod</name>
+                <name>MarkClues</name>
                 <value>
-                    <string>scorewidth</string>
+                    <boolean>true</boolean>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>WidthCompareMethod</name>
+                <name>AutoExpanScope</name>
                 <value>
-                    <string>ruleLength</string>
+                    <boolean>true</boolean>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
         <typeSystemDescription>
             <imports>
-                <import location="../type/All_Types.xml"/>
+                <import location="../type/FastContext_Types.xml"/>
             </imports>
         </typeSystemDescription>
         <typePriorities/>

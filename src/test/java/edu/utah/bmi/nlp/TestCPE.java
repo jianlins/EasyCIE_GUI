@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class TestCPE {
 
-    public static void main(String[]args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public static void main(String[]args) {
 
 //        org.apache.uima.tools.cpm.CpmFrame.main(args);
         try {

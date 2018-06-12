@@ -43,7 +43,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     private String datasetId;
 
 
-    public void initialize() throws ResourceInitializationException {
+    public void initialize() {
         readConfigurations();
         this.mCurrentIndex = 0;
         addDocs();
@@ -61,7 +61,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
         }
         dbConfigFile = new File(readConfigureString(PARAM_DB_CONFIG_FILE, null));
         if (dao == null)
-            dao = new EDAO(this.dbConfigFile);
+            dao = EDAO.getInstance(this.dbConfigFile);
         querySqlName = readConfigureString(PARAM_QUERY_SQL_NAME, "masterInputQuery");
         countSqlName = readConfigureString(PARAM_COUNT_SQL_NAME, "masterCountQuery");
         docColumnName = readConfigureString(PARAM_DOC_COLUMN_NAME, "TEXT");
@@ -89,10 +89,11 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     }
 
     public boolean hasNext() {
+
         return recordIterator != null && recordIterator.hasNext();
     }
 
-    public void getNext(CAS aCAS) throws IOException, CollectionException {
+    public void getNext(CAS aCAS) throws CollectionException {
 
         RecordRow currentRecord = recordIterator.next();
         String metaInfor = currentRecord.serialize(docColumnName);
@@ -118,7 +119,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     }
 
 
-    public void close() throws IOException {
+    public void close() {
         dao.close();
     }
 

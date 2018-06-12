@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public class TestUnicode {
 
     @Test
-    public void test() throws IOException {
+    public void test() {
         EhostReader er = new EhostReader();
         String content = er.readTextAsEhost(new File("/media/brokenjade/Data/Dropbox/JLS_HF_AnnotationTask/JLS_Ann_Training/Training_1/corpus/HBP Intro UTDOL.txt"));
         StringBuffer sb = removeUTFCharacters(content);

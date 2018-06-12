@@ -17,7 +17,7 @@ import edu.utah.bmi.nlp.uima.TemporalContext_AE_General;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
 import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;
-import edu.utah.bmi.simple.gui.controller.GUILogger;
+import edu.utah.bmi.nlp.uima.loggers.GUILogger;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -107,7 +107,7 @@ public class FastDebugPipeSampleSize extends RunEasyCIE {
         uimaLogger = new GUILogger(guitask, "target/generated-test-sources",
                 "desc/type/pipeline_" + annotator);
         if (this.tasks.getTask("debug").getValue("log/ShowUimaViewer").toLowerCase().startsWith("t"))
-            ((GUILogger) uimaLogger).setUIMAViewer(true);
+            uimaLogger.setUIMAViewer(true);
         uimaLogger.setTabViewName(TasksOverviewController.DebugView);
         uimaLogger.logStartTime();
     }

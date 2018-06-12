@@ -28,7 +28,7 @@ public class BunchInferencerTest {
     static AnalysisEngine bunchInferer;
 
     @BeforeClass
-    public static void init() throws ResourceInitializationException {
+    public static void init() {
         String typeDescriptor = "desc/type/customized";
         if (!new File(typeDescriptor + ".xml").exists()) {
             typeDescriptor = "desc/type/All_Types";

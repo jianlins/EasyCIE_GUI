@@ -5,7 +5,7 @@ import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.easycie.CoordinateNERResults_AE;
-import edu.utah.bmi.nlp.easycie.NLPDBLogger;
+import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
 import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
 import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
@@ -26,7 +26,7 @@ import edu.utah.bmi.nlp.easycie.writer.EhostWriter_AE;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.easycie.writer.XMIWritter_AE;
 import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;
-import edu.utah.bmi.simple.gui.controller.GUILogger;
+import edu.utah.bmi.nlp.uima.loggers.GUILogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
@@ -216,7 +216,7 @@ public class RunEasyCIE extends GUITask {
 	}
 
 	protected void initUIMALogger() {
-		wdao = new EDAO(new File(writeConfigFileName), false, false);
+		wdao = EDAO.getInstance(new File(writeConfigFileName), false, false);
 		uimaLogger = new NLPDBLogger(wdao, "LOG", "RUN_ID", annotator);
 		uimaLogger.setReportable(report);
 		uimaLogger.logStartTime();
@@ -336,7 +336,7 @@ public class RunEasyCIE extends GUITask {
 				wdao.insertRecord("ANNOTATORS", new RecordRow(annotator));
 			}
 			runner.addAnalysisEngine(SQLWriterCasConsumer.class, new Object[]{
-					SQLWriterCasConsumer.PARAM_SQLFILE, writeConfigFileName,
+					SQLWriterCasConsumer.PARAM_DB_CONFIG_FILE, writeConfigFileName,
 					SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable,
 					SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable,
 					SQLWriterCasConsumer.PARAM_ANNOTATOR, annotator,

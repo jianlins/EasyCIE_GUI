@@ -85,7 +85,7 @@ public class Export2Excel3 extends GUITask {
         }
         // Update UI here.
         boolean res = false;
-        EDAO dao = new EDAO(new File(outputDB));
+        EDAO dao = EDAO.getInstance(new File(outputDB));
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetResultTable, false);
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", documentResultTable, false);
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", bunchResultTable, false);

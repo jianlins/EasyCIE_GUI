@@ -38,7 +38,7 @@ import java.io.IOException;
 public class RecordRowReader extends StringMetaReader {
 
 
-    public void getNext(CAS aCAS) throws IOException, CollectionException {
+    public void getNext(CAS aCAS) throws CollectionException {
         String metaInfor = meta;
         JCas jcas;
         try {

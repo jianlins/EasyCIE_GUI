@@ -29,9 +29,11 @@ import java.util.logging.Logger;
  */
 public class EDAO {
     public static Logger logger = IOUtil.getLogger(EDAO.class);
+    public static HashMap<String, EDAO> instances = new HashMap<>();
+    private static EDAO lastInstance;
     @Deprecated
     public boolean debug = false;
-
+    private boolean isClosed = true;
     private String server, username, password, driver;
     private boolean concurUpdatable;
     public Connection con = null;
@@ -42,6 +44,7 @@ public class EDAO {
     private LinkedHashMap<String, ArrayList<String>> dropTableSQLs;
     public HashMap<String, String> insertReturnEnabledTables;
     private HashMap<String, ColumnInfo> insertTableColumnInfo;
+    private HashMap<String, ColumnInfo> updateTableColumnInfo;
     private File configFile;
     public ConfigReader configReader;
 //    public static boolean createTables = false;
@@ -58,24 +61,54 @@ public class EDAO {
     public int batchsize = 200, batchCounter = 0;
     public String databaseName = "";
 
-    protected EDAO(){
+    protected EDAO() {
 
     }
 
-    public EDAO(File configFile) {
+    public static EDAO getInstance(File configFile) {
+        return getInstance(configFile, false, false, true);
+    }
+
+    public static EDAO getInstance(File configFile, boolean initiateTables, boolean overwriteExistingTables) {
+        return getInstance(configFile, initiateTables, overwriteExistingTables, true);
+    }
+
+    public static EDAO getInstance(File configFile, boolean initiateTables, boolean overwriteExistingTables, boolean concurUpdatable) {
+        String key = configFile.getAbsolutePath();
+        if (!instances.containsKey(key) || instances.get(key).isClosed()) {
+            instances.put(key, new EDAO(configFile, initiateTables, overwriteExistingTables, concurUpdatable));
+            instances.get(key).isClosed = false;
+        }
+        lastInstance = instances.get(key);
+        return instances.get(key);
+    }
+
+    public static EDAO getLastInstance() {
+        if (lastInstance != null) {
+            return lastInstance;
+        } else {
+            logger.warning("No instance has been initiated. ");
+        }
+        return null;
+    }
+
+
+    protected EDAO(File configFile) {
         initConnection(configFile, false, false, true);
     }
 
 
-    public EDAO(File configFile, boolean initiateTables, boolean overwriteExistingTables) {
+    protected EDAO(File configFile, boolean initiateTables, boolean overwriteExistingTables) {
         initConnection(configFile, initiateTables, overwriteExistingTables, true);
     }
 
-    public EDAO(File configFile, boolean initiateTables, boolean overwriteExistingTables, boolean concurUpdatable) {
+    protected EDAO(File configFile, boolean initiateTables, boolean overwriteExistingTables, boolean concurUpdatable) {
         initConnection(configFile, initiateTables, overwriteExistingTables, concurUpdatable);
     }
 
     protected void initConnection(File configFile, boolean initiateTables, boolean overwriteExistingTables, boolean concurUpdatable) {
+
+
         this.configFile = configFile;
         configReader = ConfigReaderFactory.createConfigReader(configFile);
 
@@ -96,6 +129,7 @@ public class EDAO {
         createTableTemplates = new LinkedHashMap<>();
         dropTableSQLs = new LinkedHashMap<>();
         insertTableColumnInfo = new HashMap<>();
+        updateTableColumnInfo = new HashMap<>();
         updateTableSQLs = new HashMap<>();
         insertReturnEnabledTables = new HashMap<>();
         insertTemplates = new HashMap<>();
@@ -166,6 +200,7 @@ public class EDAO {
                     }
                 }
             }
+
         }
 
         if (configReader.getValue("updateStatements") != null)
@@ -197,11 +232,12 @@ public class EDAO {
         }
 
         if (configReader.getValue("updateStatements") != null) {
-            initStatements(inserts, "updateStatements", updatePreparedStatements);
+            initUpdateStatements(inserts, "updateStatements", updatePreparedStatements, updateTableColumnInfo);
         }
 //		if (configReader.getValue("dropTables") != null) {
 //			initStatements("dropTables", dropPreparedStatements);
 //		}
+
     }
 
 
@@ -214,6 +250,7 @@ public class EDAO {
             else
                 stmt = con.createStatement();
             con.setAutoCommit(false);
+            this.isClosed = false;
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -265,6 +302,51 @@ public class EDAO {
         }
     }
 
+    protected void initUpdateStatements(HashMap<String, String> sqls, String statementSetName,
+                                        HashMap<String, PreparedStatement> statementHashMap,
+                                        HashMap<String, ColumnInfo> updateTableColumnInfo) {
+        for (Map.Entry<String, Object> entry : ((HashMap<String, Object>) configReader.getValue(statementSetName)).entrySet()) {
+            String name = entry.getKey();
+            String sql = (String) ((HashMap<String, Object>) entry.getValue()).get("sql");
+            sql = fillVariables(sql, name);
+            boolean tableExist = checkTableExits(name);
+            if (tableExist) {
+                parseUpdateSQLColumnInfor(name, sql, updateTableColumnInfo);
+            }
+            if (sql.indexOf("{tableName}") == -1) {
+                PreparedStatement pstms;
+                try {
+                    pstms = con.prepareStatement(sql);
+                    statementHashMap.put(name, pstms);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            sqls.put(name, sql);
+        }
+    }
+
+    private ColumnInfo parseUpdateSQLColumnInfor(String tableName, String sql, HashMap<String, ColumnInfo> sqlColumnInfo) {
+        ColumnInfo tableColumnInfo = getTableColumnInfo(tableName);
+        ColumnInfo updateColumnInfo = new ColumnInfo();
+        for (String section : sql.split("\\s*=\\s*\\?")) {
+            String[] subsect = section.split("(,| )+");
+            String columnName = "";
+            if (subsect.length > 1) {
+                columnName = subsect[subsect.length - 1];
+            } else {
+                logger.warning("SQL setting error at: " + sql);
+            }
+            if (!tableColumnInfo.getColumnInfo().containsKey(columnName)) {
+                logger.warning("SQL setting error: column " + columnName + " does not exist in table " + tableName);
+            } else {
+                updateColumnInfo.addColumnInfo(columnName, tableColumnInfo.getColumnType(columnName));
+            }
+        }
+        sqlColumnInfo.put(tableName, updateColumnInfo);
+        return updateColumnInfo;
+    }
+
     protected void initInsertStatements() {
         for (Map.Entry<String, Object> entry : ((HashMap<String, Object>) configReader.getValue("insertStatements")).entrySet()) {
             String tableName = entry.getKey();
@@ -276,7 +358,7 @@ public class EDAO {
                 returnKey = values.get("returnKey");
             boolean tableExist = checkTableExits(tableName);
             if (tableExist) {
-                parseInsertColumnInfor(tableName, sql);
+                parseSQLColumnInfor(tableName, sql, insertTableColumnInfo);
                 addInsertPreparedStatement(tableName, sql, returnKey);
                 if (returnKey != null)
                     insertReturnEnabledTables.put(tableName, (String) returnKey);
@@ -291,7 +373,7 @@ public class EDAO {
      * @param tableName *
      * @return
      */
-    private ColumnInfo parseInsertColumnInfor(String tableName, String sql) {
+    private ColumnInfo parseSQLColumnInfor(String tableName, String sql, HashMap<String, ColumnInfo> tableColumnInfo) {
         String columnNames = sql.substring(sql.indexOf("(") + 1);
         String parameters = sql.substring(sql.indexOf(")"));
         parameters = parameters.substring(parameters.indexOf("(") + 1);
@@ -315,7 +397,7 @@ public class EDAO {
                 column.substring(1, column.length() - 1);
             insertColumnInfo.addColumnInfo(column, tableColumnInfor.getColumnType(column));
         }
-        insertTableColumnInfo.put(tableName, insertColumnInfo);
+        tableColumnInfo.put(tableName, insertColumnInfo);
         return insertColumnInfo;
     }
 
@@ -405,7 +487,7 @@ public class EDAO {
             String returnKey = insertReturnEnabledTables.getOrDefault(templateName, null);
             if (returnKey != null)
                 insertReturnEnabledTables.put(tableName, returnKey);
-            parseInsertColumnInfor(tableName, insertSQL);
+            parseSQLColumnInfor(tableName, insertSQL, insertTableColumnInfo);
             addInsertPreparedStatement(tableName, insertSQL, returnKey);
         }
         if (queryTemplates.containsKey(templateName)) {
@@ -656,10 +738,13 @@ public class EDAO {
         }
         HashMap<Integer, Object> idCells = recordRow.getId_cells();
         PreparedStatement updatePstmt = getUpdatePstmt(tableName);
-
+        ColumnInfo columnInfo = updateTableColumnInfo.get(tableName);
         try {
-            for (Map.Entry<Integer, Object> cell : idCells.entrySet()) {
-                updatePstmt.setObject(cell.getKey(), cell.getValue());
+            for (Map.Entry<String, String> columnNameType : columnInfo.getColumnInfoSet()) {
+                String columnName = columnNameType.getKey();
+                int columnId = columnInfo.getColumnId(columnName);
+                updatePstmt.setObject(columnId, recordRow.getValueByColumnName(columnName));
+
             }
             updatePstmt.executeUpdate();
             if (!con.getAutoCommit())
@@ -768,8 +853,10 @@ public class EDAO {
     }
 
 
-    public String fillVariables(String query) {
+    public String fillVariables(String query, String... tableName) {
         query = query.replaceAll("\\{databaseName\\}", databaseName);
+        if (tableName.length > 0)
+            query = query.replaceAll("\\{tableName\\}", tableName[0]);
         return query;
     }
 
@@ -796,6 +883,7 @@ public class EDAO {
     public void close() {
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("pseudo close dao...");
+            this.isClosed = true;
             return;
         }
         try {
@@ -806,6 +894,7 @@ public class EDAO {
                 }
                 stmt.close();
                 con.close();
+                this.isClosed = true;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -911,14 +1000,8 @@ public class EDAO {
     }
 
     public boolean isClosed() {
-        boolean connected = false;
-        try {
-            if (con.isClosed()) {
-                connected = true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return connected;
+        return isClosed;
     }
+
+
 }

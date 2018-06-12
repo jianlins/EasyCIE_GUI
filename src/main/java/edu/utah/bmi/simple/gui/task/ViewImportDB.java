@@ -49,7 +49,7 @@ public class ViewImportDB extends GUITask {
                 }
                 // Update UI here.
                 boolean res = false;
-                EDAO dao = new EDAO(new File(SQLFile), true, false);
+                EDAO dao = EDAO.getInstance(new File(SQLFile), true, false);
                 if (!dao.checkTableExits(corpusTable)) {
                     popDialog("Note", "Table '" + corpusTable + "' does not exit.",
                             " You need to import documents first.");

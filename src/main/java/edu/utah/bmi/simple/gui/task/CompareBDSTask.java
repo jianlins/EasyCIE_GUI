@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.easycie.NLPDBLogger;
+import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
@@ -74,10 +74,10 @@ public class CompareBDSTask extends GUITask {
         String importDB = settingConfig.getValue(ConfigKeys.readDBConfigFileName);
         String goldReferenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
 
-        wdao = new EDAO(new File(outputDB));
+        wdao = EDAO.getInstance(new File(outputDB));
         if (goldReferenceTable.equals(compareReferenceTable) && !importDB.equals(outputDB)) {
 //            if compare with gold standard
-            rdao = new EDAO(new File(importDB));
+            rdao = EDAO.getInstance(new File(importDB));
         } else {
 //            if compare with different runs
             rdao = wdao;

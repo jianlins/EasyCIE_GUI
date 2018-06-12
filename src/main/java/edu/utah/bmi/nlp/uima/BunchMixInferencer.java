@@ -2,8 +2,10 @@ package edu.utah.bmi.nlp.uima;
 
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
+import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
@@ -24,13 +26,13 @@ import java.util.logging.Logger;
  * Rule format:
  * Question name    Bunch Conclusion Type   Evidence Type 1, Evidence Type 2...
  */
-public class BunchMixInferencer extends JCasAnnotator_ImplBase {
+public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBasedAEInf {
     public static Logger logger = IOUtil.getLogger(BunchMixInferencer.class);
     public static final String PARAM_SQLFILE = "DBConfigFile";
     public static final String PARAM_TABLENAME = "ResultTableName";
     public static final String PARAM_AUTO_ID_ENABLED = "AutoIdEnabled";
-    public static final String PARAM_RULE_STR = "RuleFileOrStr";
-    public static final String PARAM_BUNCH_COLUMN_NAME = "BUNCH_COLUMN_NAME";
+    public static final String PARAM_RULE_STR = DeterminantValueSet.PARAM_RULE_STR;
+    public static final String PARAM_BUNCH_COLUMN_NAME = "BunchColumnName";
     public static final String PARAM_ANNOTATOR = "Annotator";
     public static final String PARAM_VERSION = "Version";
 
@@ -59,9 +61,9 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase {
         String configFile = parameterObject != null ? (String) parameterObject : "conf/sqliteconfig.xml";
 
         parameterObject = cont.getConfigParameterValue(PARAM_TABLENAME);
-        resultTableName = parameterObject != null ? (String) parameterObject : "OUTPUT";
+        resultTableName = parameterObject != null && parameterObject.toString().trim().length() > 0 ? (String) parameterObject : "OUTPUT";
         parameterObject = cont.getConfigParameterValue(PARAM_BUNCH_COLUMN_NAME);
-        bunchColumnName = parameterObject != null ? (String) parameterObject : "BUNCH_ID";
+        bunchColumnName = parameterObject != null && parameterObject.toString().trim().length() > 0 ? (String) parameterObject : "BUNCH_ID";
         parameterObject = cont.getConfigParameterValue(PARAM_AUTO_ID_ENABLED);
         if (parameterObject != null && parameterObject instanceof Boolean && (Boolean) parameterObject != true)
             autoIdEnabled = false;
@@ -71,13 +73,13 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase {
             annotator = (String) parameterObject;
         else
             annotator = "uima";
-        parameterObject = (String) cont.getConfigParameterValue(PARAM_VERSION);
+        parameterObject = cont.getConfigParameterValue(PARAM_VERSION);
         if (parameterObject != null && parameterObject instanceof String)
             runId = Integer.parseInt((String) parameterObject);
         else
             runId = -2;
         if (dao == null || dao.isClosed()) {
-            dao = new EDAO(new File(configFile));
+            dao = EDAO.getInstance(new File(configFile));
         }
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", resultTableName, false);
         parseRuleStr(inferenceStr);
@@ -177,11 +179,11 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase {
             for (ArrayList<Object> rule : rules) {
                 HashMap<String, Integer> evidencesMap = (HashMap<String, Integer>) rule.get(2);
                 matched = true;
-                for (String typeName: evidencesMap.keySet()){
-                    if(!typeCounter.containsKey(typeName) || typeCounter.get(typeName)<evidencesMap.get(typeName))
-                        matched=false;
+                for (String typeName : evidencesMap.keySet()) {
+                    if (!typeCounter.containsKey(typeName) || typeCounter.get(typeName) < evidencesMap.get(typeName))
+                        matched = false;
                 }
-                if(matched){
+                if (matched) {
                     addBunchConclusion(previousRecordRow, rule);
                     break;
                 }
@@ -239,5 +241,10 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase {
         if (previousBunchId != -1 && previousRecordRow != null) {
             evaluateVisitCounts(previousRecordRow);
         }
+    }
+
+    @Override
+    public LinkedHashMap<String, TypeDefinition> getTypeDefs(String ruleStr) {
+        return new LinkedHashMap<>();
     }
 }

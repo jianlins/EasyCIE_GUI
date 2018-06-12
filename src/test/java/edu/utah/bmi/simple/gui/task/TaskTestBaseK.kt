@@ -35,7 +35,7 @@ class TaskTestBaseK {
             tasks = settingOper.readSettings()
             tasks!!.getTask("settings")!!.setValue(ConfigKeys.readDBConfigFileName, dbConfig)
             tasks!!.getTask("settings")!!.setValue(ConfigKeys.writeDBConfigFileName, dbConfig)
-            dao = EDAO(File(dbConfig), true, false)
+            dao = EDAO.getInstance(File(dbConfig), true, false)
         }
 
     }

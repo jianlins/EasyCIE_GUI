@@ -112,8 +112,6 @@ public class JavaFXDynTable extends Application {
 
     }
 
-    ;
-
     ObservableList<Record> data = FXCollections.observableArrayList();
 
     @Override
@@ -131,7 +129,7 @@ public class JavaFXDynTable extends Application {
 
         btnNew.setOnAction(btnNewHandler);
 
-        //initTypeGenerator table
+        //initCpe table
         //Un-editable column of "id"
         TableColumn col_id = new TableColumn("ID");
         tableView.getColumns().add(col_id);

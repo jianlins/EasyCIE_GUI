@@ -6,7 +6,6 @@
 package edu.utah.bmi.nlp.uima;
 
 import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
-import edu.utah.bmi.simple.gui.controller.GUILogger;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.collection.CollectionProcessingEngine;
 import org.apache.uima.collection.EntityProcessStatus;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener {
@@ -28,11 +26,6 @@ public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener 
     protected final List<Exception> exceptions = new ArrayList();
     protected boolean isProcessing;
     protected UIMALogger logger;
-    protected int entityCount;
-    long size = 0L;
-    public int totaldocs = -1;
-    public long mInitCompleteTime;
-    public int maxCommentLength = 1000;
     public CollectionProcessingEngine mCPE;
     protected DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
@@ -49,56 +42,36 @@ public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener 
     }
 
     public void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
-        if (!aStatus.isException()) {
-            ++this.entityCount;
-            if (this.logger != null && syslogger.isLoggable(Level.FINE)) {
-                if (this.totaldocs != -1) {
-                    this.logger.logString("Processed " + this.entityCount + " of " + this.totaldocs);
-                } else {
-                    this.logger.logString("Processed " + this.entityCount);
-                }
-            }
+        logger.entityProcessComplete(aCas, aStatus);
 
-            String docText = aCas.getDocumentText();
-            if (docText != null) {
-                this.size += (long) docText.length();
-            }
-
-        } else {
-            List exceptions = aStatus.getExceptions();
-
-            for (int i = 0; i < exceptions.size(); ++i) {
-                ((Throwable) exceptions.get(i)).printStackTrace();
-            }
-
-        }
     }
 
     public void aborted() {
         synchronized (this) {
+            logger.aborted();
             if (this.isProcessing) {
                 this.isProcessing = false;
                 this.notify();
             }
-
         }
     }
 
     public void initializationComplete() {
-        this.mInitCompleteTime = System.currentTimeMillis();
         if (this.logger == null) {
             return;
         }
-        this.logger.logString(this.df.format(new Date()) + "\tCPM Initialization Complete");
+        int totalDocs = 0;
         Progress[] progress = this.mCPE.getCollectionReader().getProgress();
         if (progress != null) {
             for (int i = 0; i < progress.length; ++i) {
                 if (progress[i].getUnit().equals(this.logger.getUnit())) {
-                    this.totaldocs = (int) progress[i].getTotal();
+                    totalDocs = (int) progress[i].getTotal();
                     break;
                 }
             }
         }
+        logger.initializationComplete(totalDocs);
+
 
     }
 
@@ -107,19 +80,20 @@ public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener 
 
     public void paused() {
         if (this.logger != null) {
-            this.logger.logString(this.df.format(new Date()) + "\tPipeline paused");
+            logger.paused();
         }
 
     }
 
     public void resumed() {
         if (this.logger != null) {
-            this.logger.logString(this.df.format(new Date()) + "\tPipeline resumed");
+            logger.resumed();
         }
 
     }
 
     public void collectionProcessComplete() {
+
         if (this.logger != null) {
             this.logger.logString(this.df.format(new Date()) + "\tCollection completed");
         }
@@ -128,22 +102,8 @@ public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener 
             if (this.isProcessing) {
                 this.notify();
                 if (this.logger != null) {
-                    long mCompleteTime = this.logger.getCompletetime();
-                    long mStartTime = this.logger.getStarttime();
-                    long initTime = this.mInitCompleteTime - mStartTime;
-                    long processingTime = mCompleteTime - this.mInitCompleteTime;
-                    long elapsedTime = initTime + processingTime;
                     StringBuilder reportContent = new StringBuilder();
-                    reportContent.append(this.entityCount + " notes\n");
-                    if (this.size > 0L) {
-                        reportContent.append(this.size + " characters\n");
-                    }
-
-                    reportContent.append("Total:\t" + elapsedTime + " ms\n");
-                    reportContent.append("Initialization:\t" + initTime + " ms\n");
-                    reportContent.append("Processing:\t" + processingTime + " ms\n");
                     Iterator var13 = this.mCPE.getPerformanceReport().getEvents().iterator();
-
                     while (var13.hasNext()) {
                         ProcessTraceEvent event = (ProcessTraceEvent) var13.next();
                         String componentName = event.getComponentName();
@@ -155,25 +115,12 @@ public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener 
                             reportContent.append(componentName + "\t" + event.getType() + "\t" + event.getDuration() + " ms\n");
                         }
                     }
-
-                    this.logger.setItem("NUM_NOTES", this.entityCount);
-                    String comments;
-                    if (reportContent.length() > this.maxCommentLength) {
-                        comments = reportContent.substring(0, this.maxCommentLength);
-                    } else {
-                        comments = reportContent.toString();
-                    }
-
-                    if (!(logger instanceof GUILogger) || ((GUILogger) logger).reportable())
-                        this.logger.setItem("COMMENTS", comments);
-                    else
-                        this.logger.setItem("COMMENTS", "");
-                    this.logger.logItems();
-                    this.logger.logCompleteTime();
+                    logger.collectionProcessComplete(reportContent.toString());
                 }
             }
 
             this.isProcessing = false;
+//            System.exit(1);
         }
     }
 }

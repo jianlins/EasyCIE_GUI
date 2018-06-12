@@ -18,11 +18,11 @@
 <analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
     <primitive>true</primitive>
-    <annotatorImplementationName>edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General</annotatorImplementationName>
+    <annotatorImplementationName>edu.utah.bmi.nlp.uima.TemporalContext_AE_General</annotatorImplementationName>
     <analysisEngineMetaData>
-        <name>FastNER_AE</name>
-        <description/>
-        <version>1.0</version>
+        <name>TemporalContext_AE</name>
+        <description>Detect temporal mentions in the context, and compare them with reference datetime to assert the context as historical or present</description>
+        <version>1.3</version>
         <vendor/>
         <configurationParameters>
             <configurationParameter>
@@ -35,53 +35,48 @@
                 <name>SentenceTypeName</name>
                 <type>String</type>
                 <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>IntervalDaysBeforeReferenceDate</name>
+                <description>The days before the reference date that will be inferred as historical, default is 14</description>
+                <type>Integer</type>
+                <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>TokenTypeName</name>
+                <name>TargetConceptTypeName</name>
+                <description>Which type of concept will apply the temporal inference</description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>InferTemporalStatusForAllTargetConcept</name>
+                <description>When there is no date time mentions, whether infer the temporal status based on report date and reference date</description>
+                <type>Boolean</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>RecordDateColumnName</name>
+                <description>The column name that contains the note date information, default is DATE</description>
                 <type>String</type>
                 <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>IncludeSections</name>
+                <name>ReferenceDateColumnName</name>
+                <description>The column name that contains the reference date information, default is REF_DTM</description>
                 <type>String</type>
+                <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>ExcludeSections</name>
-                <type>String</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>MarkPseudo</name>
+                <name>SaveDateAnnotations</name>
+                <description>Whether save teh date time mentions as annotations</description>
                 <type>Boolean</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>LogRuleInfo</name>
-                <type>Boolean</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>CaseSensitive</name>
-                <type>Boolean</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>SpanCompareMethod</name>
-                <description>The way of comparing the priority of matched spans: score, scorewidth, widthscore or width
-                    (default is scorewidth)
-                </description>
-                <type>String</type>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>WidthCompareMethod</name>
-                <description>The way of comparing the width priority of matched rules, either ruleLength or strWidth
-                    (default is ruleLength)
-                </description>
-                <type>String</type>
+                <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>
         </configurationParameters>
@@ -89,7 +84,7 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>conf/fastner_rule.csv</string>
+                    <string>conf/date_rule.csv</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
@@ -99,51 +94,39 @@
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>TokenTypeName</name>
+                <name>IntervalDaysBeforeReferenceDate</name>
                 <value>
-                    <string>edu.utah.bmi.nlp.type.system.Token</string>
+                    <integer>14</integer>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>IncludeSections</name>
+                <name>TargetConceptTypeName</name>
                 <value>
-                    <string></string>
+                    <string>edu.utah.bmi.nlp.type.system.Concept</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>ExcludeSections</name>
+                <name>InferTemporalStatusForAllTargetConcept</name>
                 <value>
-                    <string></string>
+                    <boolean>true</boolean>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>MarkPseudo</name>
+                <name>RecordDateColumnName</name>
+                <value>
+                    <string>DATE</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>ReferenceDateColumnName</name>
+                <value>
+                    <string>REF_DTM</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>SaveDateAnnotations</name>
                 <value>
                     <boolean>false</boolean>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>LogRuleInfo</name>
-                <value>
-                    <boolean>false</boolean>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>CaseSensitive</name>
-                <value>
-                    <boolean>false</boolean>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>SpanCompareMethod</name>
-                <value>
-                    <string>scorewidth</string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>WidthCompareMethod</name>
-                <value>
-                    <string>ruleLength</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>

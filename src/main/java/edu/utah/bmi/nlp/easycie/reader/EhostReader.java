@@ -88,7 +88,7 @@ public class EhostReader extends AbFileCollectionReader {
         }
 
         // open input stream to file
-        File file = (File) mFiles.get(mCurrentIndex++);
+        File file = mFiles.get(mCurrentIndex++);
         if (print)
             System.out.print("Import annotations for file: " + file.getName() + "\t\t");
         fileName = file.getName();
@@ -186,7 +186,7 @@ public class EhostReader extends AbFileCollectionReader {
         return content.toString();
     }
 
-    public void parseXML(JCas jcas, String txtContent, String xmlContent, String docId) throws IOException {
+    public void parseXML(JCas jcas, String txtContent, String xmlContent, String docId) {
         InputStream inputStream = new ByteArrayInputStream(xmlContent.getBytes());
         LinkedHashMap<String, String> attributes = new LinkedHashMap<>();
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
@@ -243,8 +243,6 @@ public class EhostReader extends AbFileCollectionReader {
                                 try {
                                     addAnnotation(jcas, typeName, attributes);
                                     attributes.clear();
-                                } catch (ClassNotFoundException e) {
-                                    e.printStackTrace();
                                 } catch (IllegalAccessException e) {
                                     e.printStackTrace();
                                 } catch (InvocationTargetException e) {
@@ -264,7 +262,7 @@ public class EhostReader extends AbFileCollectionReader {
     }
 
     protected void addAnnotation(JCas jcas, String typeName, LinkedHashMap<String, String> attributes)
-            throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+            throws IllegalAccessException, InvocationTargetException, InstantiationException {
         typeName = DeterminantValueSet.checkNameSpace(typeName);
         int begin = Integer.parseInt(attributes.get("Begin"));
         int end = Integer.parseInt(attributes.get("End"));
@@ -272,7 +270,7 @@ public class EhostReader extends AbFileCollectionReader {
         attributes.remove("End");
         if (!typeClasses.containsKey(typeName))
             return;
-        Annotation annotation = typeConstructors.get(typeClasses.get(typeName)).newInstance(new Object[]{jcas});
+        Annotation annotation = typeConstructors.get(typeClasses.get(typeName)).newInstance(jcas);
         annotation.setBegin(begin);
         annotation.setEnd(end);
 
@@ -298,7 +296,7 @@ public class EhostReader extends AbFileCollectionReader {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 

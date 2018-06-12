@@ -6,12 +6,11 @@ import edu.utah.bmi.nlp.core.IntervalST;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import edu.utah.bmi.nlp.easycie.NLPDBLogger;
+import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 import static edu.utah.bmi.simple.gui.core.CommonFunc.addOption;
@@ -32,7 +31,7 @@ public class Compare {
     public final String total = "OVERALL";
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Compare compare = new Compare(args);
     }
 
@@ -64,12 +63,12 @@ public class Compare {
         strictCompare = cmd.hasOption("-s");
 
 
-        dao1 = new EDAO(new File(writeConfigFileName));
+        dao1 = EDAO.getInstance(new File(writeConfigFileName));
         dao1.batchsize = 1000;
         if (referConfigFileName == null) {
             daor = dao1;
         } else
-            daor = new EDAO(new File(referConfigFileName));
+            daor = EDAO.getInstance(new File(referConfigFileName));
 
         logger = new NLPDBLogger(dao1, "LOG", "RUN_ID", annotator + "_vs_" + referenceAnnotator);
         logger.logStartTime();

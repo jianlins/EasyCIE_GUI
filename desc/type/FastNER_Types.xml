@@ -121,5 +121,11 @@
             <supertypeName>edu.utah.bmi.nlp.type.system.ConceptBASE</supertypeName>
             <features></features>
         </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.Date</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.Concept</supertypeName>
+            <features></features>
+        </typeDescription>
     </types>
 </typeSystemDescription>

@@ -30,7 +30,7 @@ import java.util.*;
 
 /**
  * @author Jianlin Shi
- *         Created on 2/26/17.
+ * Created on 2/26/17.
  */
 public class GenericAdaptableCPERunner extends AdaptableUIMACPEDescriptorTaskRunner {
     public boolean debug = false;
@@ -101,8 +101,8 @@ public class GenericAdaptableCPERunner extends AdaptableUIMACPEDescriptorTaskRun
         if (new File("desc/type/" + pipelineName + ".xml").exists()) {
             dynamicTypeGenerator = new DynamicTypeGenerator("desc/type/" + pipelineName);
         } else if (customizedSettings.containsKey(ConfigKeys.customizedTypes)) {
-            String types=customizedSettings.get(ConfigKeys.customizedTypes).getSettingValue().trim();
-            if(types.length()>0) {
+            String types = customizedSettings.get(ConfigKeys.customizedTypes).getSettingValue().trim();
+            if (types.length() > 0) {
                 for (String type : customizedSettings.get(ConfigKeys.customizedTypes).getSettingValue().split(",")) {
                     type = type.trim();
                     addConceptType(type);
@@ -115,7 +115,7 @@ public class GenericAdaptableCPERunner extends AdaptableUIMACPEDescriptorTaskRun
 
 
     private void updateParameters(String casProcName, CasProcessorConfigurationParameterSettings aSettings,
-                                  ProcessingResourceMetaData processingResourceMetaData, LinkedHashMap<String, SettingAb> customizedSettings) throws CpeDescriptorException {
+                                  ProcessingResourceMetaData processingResourceMetaData, LinkedHashMap<String, SettingAb> customizedSettings) {
         int casProcNameLength = casProcName.length() + 1;
         HashMap<String, String> modifiedPara = new HashMap<>();
         for (Map.Entry<String, SettingAb> entry : customizedSettings.entrySet()) {
@@ -148,34 +148,10 @@ public class GenericAdaptableCPERunner extends AdaptableUIMACPEDescriptorTaskRun
     protected boolean reportable(LinkedHashMap<String, SettingAb> customizedSettings) {
         if (customizedSettings.containsKey(ConfigKeys.report)) {
             String value = customizedSettings.get(ConfigKeys.report).getSettingValue().trim();
-            if (value.length() > 0 && !value.toLowerCase().startsWith("f") && !value.toLowerCase().startsWith("0")) {
-                return true;
-            }
+            return value.length() > 0 && !value.toLowerCase().startsWith("f") && !value.toLowerCase().startsWith("0");
         }
         return false;
     }
-    public void run(){
-        try {
-            super.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    @Override
-    protected Object call() throws Exception {
-        try {
-            mCPE = null;
-            mCPE = UIMAFramework.produceCollectionProcessingEngine(currentCpeDesc);
-            SimpleStatusCallbackListenerImpl statCbL = new SimpleStatusCallbackListenerImpl(logger);
-            mCPE.addStatusCallbackListener(statCbL);
-            statCbL.setCollectionProcessingEngine(mCPE);
 
-            // start processing
-            mCPE.process();
-        } catch (UIMAException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

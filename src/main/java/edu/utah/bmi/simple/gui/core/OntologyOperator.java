@@ -86,7 +86,7 @@ public class OntologyOperator {
         String str = anchor.toString();
         for (String type : anchor.getSemanticType()) {
             type = type.replaceAll("\\s+", "_");
-            tokenAnchors.add(Arrays.asList(new String[]{anchor.getPrefTerm(), type, pseudoType}));
+            tokenAnchors.add(Arrays.asList(anchor.getPrefTerm(), type, pseudoType));
         }
         readdSynonyms(tokenAnchors, anchor, anchor.getSynonym(), false);
         readdSynonyms(tokenAnchors, anchor, anchor.getAbbreviation(), false);
@@ -105,7 +105,7 @@ public class OntologyOperator {
         for (String term : synonyms) {
             for (String type : anchor.getSemanticType()) {
                 type = type.replaceAll("\\s+", "_");
-                anchors.add(Arrays.asList(new String[]{term, type, pseudoType}));
+                anchors.add(Arrays.asList(term, type, pseudoType));
             }
         }
     }

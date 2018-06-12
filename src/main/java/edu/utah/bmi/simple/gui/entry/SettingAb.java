@@ -7,15 +7,15 @@ package edu.utah.bmi.simple.gui.entry;
 public interface SettingAb {
 
 
-    public void init(String settingName, String settingValue, String settingDesc, String doubleClick, String openClick);
+    void init(String settingName, String settingValue, String settingDesc, String doubleClick, String openClick);
 
-    public String getSettingName();
+    String getSettingName();
 
-    public String getSettingValue();
+    String getSettingValue();
 
-    public String getSettingDesc();
+    String getSettingDesc();
 
-    public String getDoubleClick();
+    String getDoubleClick();
 
-    public String getOpenClick();
+    String getOpenClick();
 }

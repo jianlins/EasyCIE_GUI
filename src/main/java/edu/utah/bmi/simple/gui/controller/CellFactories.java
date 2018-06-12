@@ -174,7 +174,7 @@ public class CellFactories {
         config = tasks.getTask(ConfigKeys.maintask);
         String annotator = config.getValue(ConfigKeys.annotator);
         String viewQueryName = config.getValue(ConfigKeys.viewQueryName);
-        EDAO dao = new EDAO(new File(outputDB));
+        EDAO dao = EDAO.getInstance(new File(outputDB));
 
         String[] values = ViewOutputDB.buildQuery(dao, viewQueryName, annotator, snippetResultTable, docResultTable, bunchResultTable, inputTable);
         String sourceQuery = values[0];

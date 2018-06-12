@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
+ * Find overlapped annotations with the same annotation type, choose the widest one
  * @author Jianlin Shi
  *         Created on 7/6/16.
  */
@@ -19,7 +20,7 @@ public class CoordinateNERResults_AE extends JCasAnnotator_ImplBase {
 
 
     @Override
-    public void process(JCas jCas) throws AnalysisEngineProcessException {
+    public void process(JCas jCas) {
 
         ArrayList<ConceptBASE> concepts = new ArrayList<>();
 

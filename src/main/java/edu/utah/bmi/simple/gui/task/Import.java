@@ -65,9 +65,9 @@ public class Import extends GUITask {
         String includeAnnotationTypes = config.getValue(ConfigKeys.includeAnnotationTypes);
         overWriteAnnotatorName = config.getValue(ConfigKeys.overWriteAnnotatorName);
         String enableSentenceSegValue = config.getValue(ConfigKeys.enableSentenceSnippet);
-        boolean enableSentenceSeg = enableSentenceSegValue.length() > 0 ? (config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 't'
+        boolean enableSentenceSeg = enableSentenceSegValue.length() > 0 && (config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 't'
                 || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 'T'
-                || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == '1') : false;
+                || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == '1');
 
         importTable = settingConfig.getValue(ConfigKeys.inputTableName);
         referenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
@@ -102,7 +102,7 @@ public class Import extends GUITask {
             initSuccess = false;
             return;
         }
-        dao = new EDAO(dbconfig, true, false);
+        dao = EDAO.getInstance(dbconfig, true, false);
         switch (corpusType) {
             case brat:
                 if (overWriteAnnotatorName.length() == 0)
@@ -154,7 +154,7 @@ public class Import extends GUITask {
 
     protected void run(String inputDir, String outputTable, String SQLFile, boolean overWrite, String[] filters) throws IOException {
         updateGUIMessage("Start import....");
-        EDAO dao = new EDAO(new File(SQLFile));
+        EDAO dao = EDAO.getInstance(new File(SQLFile));
         dao.initiateTable(outputTable, overWrite);
         if (filters.length == 0 || filters[0].trim().length() == 0)
             filters = null;

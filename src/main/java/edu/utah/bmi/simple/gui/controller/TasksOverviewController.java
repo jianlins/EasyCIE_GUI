@@ -137,7 +137,7 @@ public class TasksOverviewController {
 
     public GUITask currentGUITask;
 
-    private HashMap<Object, Tab> tabLocator = new HashMap<>();
+    private HashMap<Object, Integer> tabLocator = new HashMap<>();
     //    save the current sqls displayed in Tabviews
     private HashMap<String, String> currentSQLs = new HashMap<>();
     //    save the current db used displayed in Tabviews
@@ -420,7 +420,7 @@ public class TasksOverviewController {
         StaticVariables.postTagLength = StaticVariables.postTag.length();
         StaticVariables.snippetLength = Integer.parseInt(mainApp.tasks.getTask("settings").getValue("viewer/snippet_length"));
         StaticVariables.colorPool.clear();
-        StaticVariables.randomPick = mainApp.tasks.getTask("settings").getValue("viewer/random_pick_color").toLowerCase().startsWith("t") ? true : false;
+        StaticVariables.randomPick = mainApp.tasks.getTask("settings").getValue("viewer/random_pick_color").toLowerCase().startsWith("t");
         int i = 0;
         for (String color : mainApp.tasks.getTask("settings").getValue("viewer/color_pool").split("\\|")) {
             StaticVariables.colorPool.put(i, color.trim());
@@ -451,17 +451,19 @@ public class TasksOverviewController {
 //        return showDBTable(rs, columanInfo, colorDifferential, annoTableView);
 //    }
 
-    private Tab findTab(Object tabContentRegion) {
+    private int findTab(Object tabContentRegion) {
         if (tabLocator.containsKey(tabContentRegion)) {
             return tabLocator.get(tabContentRegion);
         } else {
+            int i = 0;
             for (Tab t : tabPane.getTabs()) {
-                tabLocator.put(t.getContent().getParent(), t);
+                tabLocator.put(t.getContent().getParent(), i);
+                i++;
             }
             if (tabLocator.containsKey(tabContentRegion)) {
                 return tabLocator.get(tabContentRegion);
             } else {
-                return null;
+                return -1;
             }
         }
     }
@@ -469,7 +471,7 @@ public class TasksOverviewController {
     public boolean showDBTable(String sql, String dbName, String colorDifferential, String tableViewName, Object... values) {
         if (sql == null || sql.length() == 0 || sql.equals("null"))
             return false;
-        dao = new EDAO(new File(dbName));
+        dao = EDAO.getInstance(new File(dbName));
         RecordRowIterator recordRowIter;
         ColumnInfo columnInfo;
         Object[] res;
@@ -574,12 +576,10 @@ public class TasksOverviewController {
 
         tableView.setVisible(true);
         Object tabContentRegion = tableView.getParent().getParent();
-        Tab tab = findTab(tabContentRegion);
+        int tabId = findTab(tabContentRegion);
         SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
-        if (tab != null) {
-
-            selectionModel.select(tab);
-
+        if (tabId != -1 && selectionModel.getSelectedIndex() != tabId) {
+            selectionModel.select(tabId);
         }
         tabPane.setVisible(true);
 
@@ -727,7 +727,7 @@ public class TasksOverviewController {
         }
         tableView.setItems(data);
         tableView.refresh();
-        if (dao != null)
+        if (dao != null && !dao.isClosed())
             dao.close();
         return haveRead;
     }

@@ -12,7 +12,6 @@ import edu.utah.bmi.nlp.type.system.Sentence;
 import org.apache.uima.UIMA_IllegalArgumentException;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
-import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.cas.Feature;
@@ -21,7 +20,6 @@ import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.fit.util.CasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
-import org.apache.uima.resource.ResourceInitializationException;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,7 +37,7 @@ import java.util.Iterator;
  * Created on 5/22/16.
  */
 public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
-    public static final String PARAM_SQLFILE = "SQLFile";
+    public static final String PARAM_DB_CONFIG_FILE = "DBConfigFile";
     public static final String PARAM_SNIPPET_TABLENAME = "SnippetTableName";
     public static final String PARAM_DOC_TABLENAME = "DocTableName";
     public static final String PARAM_OVERWRITETABLE = "OverWriteTable";
@@ -62,9 +60,9 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
     }
 
 
-    public void initialize(UimaContext cont) throws ResourceInitializationException {
+    public void initialize(UimaContext cont) {
         this.mDocNum = 0;
-        this.sqlFile = new File(readConfigureString(cont, PARAM_SQLFILE, null));
+        this.sqlFile = new File(readConfigureString(cont, PARAM_DB_CONFIG_FILE, null));
         this.snippetTableName = readConfigureString(cont, PARAM_SNIPPET_TABLENAME, "RESULT_SNIPPET");
         this.docTableName = readConfigureString(cont, PARAM_DOC_TABLENAME, "RESULT_DOC");
 
@@ -76,7 +74,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
         version = readConfigureString(cont, PARAM_VERSION, null);
 
         if (dao == null) {
-            dao = new EDAO(this.sqlFile);
+            dao = EDAO.getInstance(this.sqlFile);
         }
         dao.batchsize = batchSize;
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetTableName, overwriteTable);
@@ -95,7 +93,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
         }
     }
 
-    public void process(JCas jcas) throws AnalysisEngineProcessException {
+    public void process(JCas jcas) {
         String fileName = null;
         if (jcas.getDocumentText().length() < minTextLength)
             return;
@@ -251,7 +249,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
     }
 
 
-    public void collectionProcessComplete() throws AnalysisEngineProcessException {
+    public void collectionProcessComplete() {
         dao.endBatchInsert();
     }
 

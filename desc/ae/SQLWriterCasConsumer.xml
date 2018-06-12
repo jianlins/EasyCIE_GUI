@@ -26,11 +26,11 @@
     <primitive>true</primitive>
     <annotatorImplementationName>edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer</annotatorImplementationName>
     <analysisEngineMetaData>
-        <name>SQL Writer CasConsumer</name>
+        <name>SQLWriter_AE</name>
         <description>Write annotations in structured format table</description>
         <configurationParameters>
             <configurationParameter>
-                <name>SQLFile</name>
+                <name>DBConfigFile</name>
                 <description>db configuration file
                 </description>
                 <type>String</type>
@@ -38,8 +38,16 @@
                 <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>TableName</name>
-                <description>The table name to save the text documents.
+                <name>SnippetTableName</name>
+                <description>The table name to save the snippet level annotations.
+                </description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>DocTableName</name>
+                <description>The table name to save the document level annotations.
                 </description>
                 <type>String</type>
                 <multiValued>false</multiValued>
@@ -96,15 +104,21 @@
         </configurationParameters>
         <configurationParameterSettings>
             <nameValuePair>
-                <name>SQLFile</name>
+                <name>DBConfigFile</name>
                 <value>
                     <string>data/output.sqlite</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
-                <name>TableName</name>
+                <name>SnippetTableName</name>
                 <value>
-                    <string>output</string>
+                    <string>RESULT_SNIPPET</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>DocTableName</name>
+                <value>
+                    <string>RESULT_DOC</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
@@ -116,7 +130,7 @@
             <nameValuePair>
                 <name>WriteConcepts</name>
                 <value>
-                    <string>Concept,PseudoConcept</string>
+                    <string>Concept,Doc_Base</string>
                 </value>
             </nameValuePair>
             <nameValuePair>

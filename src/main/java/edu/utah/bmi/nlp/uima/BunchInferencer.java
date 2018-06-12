@@ -2,8 +2,10 @@ package edu.utah.bmi.nlp.uima;
 
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
+import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
@@ -21,7 +23,7 @@ import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class BunchInferencer extends JCasAnnotator_ImplBase {
+public class BunchInferencer extends JCasAnnotator_ImplBase implements RuleBasedAEInf {
     public static Logger logger = IOUtil.getLogger(BunchInferencer.class);
     public static final String PARAM_SQLFILE = "DBConfigFile";
     public static final String PARAM_TABLENAME = "ResultTableName";
@@ -70,13 +72,13 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
             annotator = (String) parameterObject;
         else
             annotator = "uima";
-        parameterObject = (String) cont.getConfigParameterValue(PARAM_VERSION);
+        parameterObject = cont.getConfigParameterValue(PARAM_VERSION);
         if (parameterObject != null && parameterObject instanceof String)
             runId = Integer.parseInt((String) parameterObject);
         else
             runId = -2;
         if (dao == null || dao.isClosed()) {
-            dao = new EDAO(new File(configFile));
+            dao = EDAO.getInstance(new File(configFile));
         }
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", resultTableName, false);
         parseRuleStr(inferenceStr);
@@ -156,8 +158,8 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
             serializedString = e.getUri();
             recordRow.deserialize(serializedString);
         }
-        Object value=recordRow.getValueByColumnName(bunchColumnName);
-        int currentBunchId = value==null?0:Integer.parseInt(value.toString());
+        Object value = recordRow.getValueByColumnName(bunchColumnName);
+        int currentBunchId = value == null ? 0 : Integer.parseInt(value.toString());
         if (previousBunchId == -1) {
             previousBunchId = currentBunchId;
             previousRecordRow = recordRow;
@@ -226,7 +228,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
 
     private void addVisitConclusion(RecordRow previousRecordRow, List<Object> rule) {
         String typeName = (String) rule.get(1);
-        if (runId==-2 && previousRecordRow.getValueByColumnName("RUN_ID") != null)
+        if (runId == -2 && previousRecordRow.getValueByColumnName("RUN_ID") != null)
             runId = Integer.parseInt(previousRecordRow.getStrByColumnName("RUN_ID"));
         RecordRow recordRow = new RecordRow()
                 .addCell("RUN_ID", runId)
@@ -286,5 +288,10 @@ public class BunchInferencer extends JCasAnnotator_ImplBase {
         if (previousBunchId != -1 && previousRecordRow != null) {
             evaluateVisitCounts(previousRecordRow);
         }
+    }
+
+    @Override
+    public LinkedHashMap<String, TypeDefinition> getTypeDefs(String ruleStr) {
+        return new LinkedHashMap<>();
     }
 }

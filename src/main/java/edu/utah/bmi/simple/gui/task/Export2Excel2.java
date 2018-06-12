@@ -78,7 +78,7 @@ public class Export2Excel2 extends GUITask {
         }
         // Update UI here.
         boolean res = false;
-        EDAO dao = new EDAO(new File(outputDB));
+        EDAO dao = EDAO.getInstance(new File(outputDB));
 
         if (sql.toLowerCase().indexOf("where") == -1) {
             sql += " WHERE RUN_ID=" + getLastRunIdofAnnotator(dao, outputTable, annotator);

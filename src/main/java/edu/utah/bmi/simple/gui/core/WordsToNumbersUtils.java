@@ -179,7 +179,7 @@ public class WordsToNumbersUtils {
 	 * @return
 	 */
 	private static String wordListToString(List<String> list) {
-		StringBuilder result = new StringBuilder("");
+		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < list.size(); i++) {
 			String str = list.get(i);
 			if (i == 0 && str != null) {

@@ -115,7 +115,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
     }
 
 
-    public void process(JCas jcas) throws AnalysisEngineProcessException {
+    public void process(JCas jcas) {
         Collection<Annotation> annotations = JCasUtil.select(jcas, Annotation.class);
         File[] files = initialOutputXml(jcas);
         File outputXml = files[1];
@@ -270,7 +270,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
 
 
     protected XMLStreamWriter initiateWritter(FileOutputStream outputFileStream, File sourceFile)
-            throws XMLStreamException, IOException {
+            throws XMLStreamException {
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         XMLStreamWriter xtw = xof.createXMLStreamWriter(outputFileStream, "UTF-8");
 //		System.out.println(outputPath			+ sourcefileName + ".knowtator.xml");
@@ -297,7 +297,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
         return new File[]{sourceFile, outFile};
     }
 
-    public void collectionProcessComplete() throws AnalysisEngineProcessException {
+    public void collectionProcessComplete() {
         // no default behavior
         EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeMethods);
 

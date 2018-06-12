@@ -2,7 +2,6 @@ package edu.utah.bmi.simple.gui.task;
 
 
 import edu.utah.bmi.nlp.core.GUITask;
-import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.easycie.CoordinateNERResults_AE;
 import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
 import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
@@ -12,13 +11,12 @@ import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.TDAO;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
 import edu.utah.bmi.nlp.uima.AdaptableUIMACPETaskJCasRunner;
-import edu.utah.bmi.nlp.uima.BunchInferencer;
 import edu.utah.bmi.nlp.uima.BunchMixInferencer;
 import edu.utah.bmi.nlp.uima.TemporalContext_AE_General;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
 import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;
-import edu.utah.bmi.simple.gui.controller.GUILogger;
+import edu.utah.bmi.nlp.uima.loggers.GUILogger;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -32,9 +30,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 /**
  * Created by Jianlin Shi on 9/19/16.
@@ -111,7 +106,7 @@ public class FastDebugPipe extends RunEasyCIE {
         uimaLogger = new GUILogger(guitask, "target/generated-test-sources",
                 "desc/type/pipeline_" + annotator);
         if (this.tasks.getTask("debug").getValue("log/ShowUimaViewer").toLowerCase().startsWith("t"))
-            ((GUILogger) uimaLogger).setUIMAViewer(true);
+            uimaLogger.setUIMAViewer(true);
         uimaLogger.setTabViewName(TasksOverviewController.DebugView);
         uimaLogger.logStartTime();
     }

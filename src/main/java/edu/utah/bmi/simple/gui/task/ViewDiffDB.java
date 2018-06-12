@@ -48,7 +48,7 @@ public class ViewDiffDB extends GUITask {
 //                // Update UI here.
 //                if (annotatorCompare.trim().length() > 0 && annotatorAgainst.trim().length() > 0) {
 //                    String annotator = annotatorCompare + "_vs_" + annotatorAgainst;
-//                    EDAO dao = new EDAO(new File(outputDB));
+//                    EDAO dao = EDAO.getInstance(new File(outputDB));
 //                    dao.initiateTableFromTemplate("ANNOTATION_TABLE", diffTable, false);
 //                    if (!dao.checkExists(diffTable)) {
 //                        updateMessage("Table '" + diffTable + "' does not exit.");
@@ -96,7 +96,7 @@ public class ViewDiffDB extends GUITask {
                 boolean res = false;
                 if (annotatorCompare.trim().length() > 0 && annotatorAgainst.trim().length() > 0) {
                     String annotator = annotatorCompare + "_vs_" + annotatorAgainst;
-                    EDAO dao = new EDAO(new File(outputDB));
+                    EDAO dao = EDAO.getInstance(new File(outputDB));
                     dao.initiateTableFromTemplate("ANNOTATION_TABLE", diffTable, false);
                     String[] values = buildQuery(dao, annotator, diffTable, inputTable);
                     String sourceQuery = values[0];

@@ -63,7 +63,7 @@ public class ImportExcelTxt extends Import {
             initSuccess = false;
             return;
         }
-        dao = new EDAO(dbconfig, true, false);
+        dao = EDAO.getInstance(dbconfig, true, false);
         initSuccess = true;
     }
 

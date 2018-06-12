@@ -86,7 +86,7 @@ public class BratReader extends AbFileCollectionReader {
         }
 
         // open input stream to file
-        File file = (File) mFiles.get(mCurrentIndex++);
+        File file = mFiles.get(mCurrentIndex++);
         fileName = file.getName();
         fileName = fileName.substring(0, fileName.length() - 4);
         text = FileUtils.readFileToString(file, mEncoding);
@@ -116,7 +116,7 @@ public class BratReader extends AbFileCollectionReader {
 
     }
 
-    public void parseXML(JCas jcas, String txtContent, List<String> annoContent) throws IOException {
+    public void parseXML(JCas jcas, String txtContent, List<String> annoContent) {
 //                     concept id,      attribute names, values
         LinkedHashMap<String, LinkedHashMap<String, String>> annotations = new LinkedHashMap<>();
         for (int i = 0; i < annoContent.size(); i++) {
@@ -148,8 +148,6 @@ public class BratReader extends AbFileCollectionReader {
             annotation.remove(typeName);
             try {
                 addAnnotation(jcas, type, annotation);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
@@ -163,7 +161,7 @@ public class BratReader extends AbFileCollectionReader {
     }
 
     protected void addAnnotation(JCas jcas, String typeName, LinkedHashMap<String, String> attributes)
-            throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+            throws IllegalAccessException, InvocationTargetException, InstantiationException {
         typeName = DeterminantValueSet.checkNameSpace(typeName);
         int begin = Integer.parseInt(attributes.get(beginOffset));
         int end = Integer.parseInt(attributes.get(endOffset));
@@ -171,7 +169,7 @@ public class BratReader extends AbFileCollectionReader {
         attributes.remove(endOffset);
         if (!typeClasses.containsKey(typeName))
             return;
-        Annotation annotation = typeConstructors.get(typeClasses.get(typeName)).newInstance(new Object[]{jcas});
+        Annotation annotation = typeConstructors.get(typeClasses.get(typeName)).newInstance(jcas);
         annotation.setBegin(begin);
         annotation.setEnd(end);
 
@@ -197,7 +195,7 @@ public class BratReader extends AbFileCollectionReader {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 

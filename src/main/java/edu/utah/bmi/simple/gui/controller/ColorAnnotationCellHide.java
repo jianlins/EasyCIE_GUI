@@ -98,7 +98,7 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
         String text = "";
         TaskFX task = TasksOverviewController.currentTasksOverviewController.mainApp.tasks.getTask("settings");
         String inputDB = task.getValue(ConfigKeys.readDBConfigFileName);
-        EDAO dao = new EDAO(new File(inputDB));
+        EDAO dao = EDAO.getInstance(new File(inputDB));
         String docTableName = task.getValue(ConfigKeys.inputTableName);
         dao.initiateTableFromTemplate("DOCUMENTS_TABLE", docTableName, false);
         RecordRowIterator records = dao.queryRecordsFromPstmt(docTableName, docName);

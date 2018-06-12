@@ -53,23 +53,27 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
 	public static Logger logger = IOUtil.getLogger(TemporalContext_AE_General.class);
 
 	//  specify which type of annotations as the target concept
-	public static final String PARAM_TARGET_CONCEPT_TYPE_NAME = "targetConceptTypeName";
+	public static final String PARAM_TARGET_CONCEPT_TYPE_NAME = "TargetConceptTypeName";
+
+	public static final String PARAM_INTERVAL_DAYS = "IntervalDaysBeforeReferenceDate";
+
 	public static final String PARAM_INFER_ALL = "InferTemporalStatusForAllTargetConcept";
 	//    @ConfigurationParameter(name = CONCEPT_TYPE_NAME)
 	private String targetConceptTypeName;
 	private int targetConceptId;
 	//  read from record table, specify which column is the reference datetime, usually is set to admission datetime.
-	public static final String PARAM_REFERENCE_DATE_COLUMN_NAME = "referenceDateColumnName";
-	public static final String PARAM_RECORD_DATE_COLUMN_NAME = "recordDateColumnName";
+	public static final String PARAM_REFERENCE_DATE_COLUMN_NAME = "ReferenceDateColumnName";
+	public static final String PARAM_RECORD_DATE_COLUMN_NAME = "RecordDateColumnName";
 	public static final String PARAM_SAVE_DATE_ANNO = "SaveDateAnnotations";
+
 
 	private String referenceDateColumnName, recordDateColumnName;
 
-	public static final String PARAM_DATE_FORMAT = "dateFormat";
-	private String dateFormat;
+
+
 
 	// number of days before admission that still will be considered as current
-	public static final String PARAM_INTERVAL_DAYS = "intervalDaysBeforeReferenceDate";
+
 	private int intervalDaysBeforeReferenceDate;
 	protected boolean inferAll = false, saveDateAnnotations = false;
 
@@ -105,15 +109,11 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
 		else
 			recordDateColumnName = (String) obj;
 
-		obj = cont.getConfigParameterValue(PARAM_DATE_FORMAT);
-		if (obj == null)
-			dateFormat = "yyyy/dd/MM HH:mm:ss";
-		else
-			dateFormat = (String) obj;
+
 
 		obj = cont.getConfigParameterValue(PARAM_INTERVAL_DAYS);
 		if (obj == null)
-			intervalDaysBeforeReferenceDate = 10;
+			intervalDaysBeforeReferenceDate = 14;
 		else
 			intervalDaysBeforeReferenceDate = (int) obj;
 		targetConceptId = AnnotationOper.getTypeId(targetConceptTypeName);
@@ -143,7 +143,7 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
 	}
 
 
-	public void process(JCas jcas) throws AnalysisEngineProcessException {
+	public void process(JCas jcas) {
 		ArrayList<Annotation> sentences = new ArrayList<>();
 		ArrayList<ConceptBASE> targetConcepts = new ArrayList<>();
 		referenceDate = readReferenceDate(jcas, referenceDateColumnName);
@@ -152,7 +152,7 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
 		if (recordDate == null)
 			recordDate = referenceDate;
 		if (referenceDate == null) {
-			logger.info("No value in Reference date column: '" + referenceDateColumnName + "'. Skip the TemporalConTextDetector.");
+			logger.fine("No value in Reference date column: '" + referenceDateColumnName + "'. Skip the TemporalConTextDetector.");
 			return;
 		}
 

@@ -62,7 +62,7 @@ public class ViewOutputDB extends GUITask {
         TasksOverviewController.currentTasksOverviewController.annoSqlFilter.setText("");
         viewQueryName = config.getValue(ConfigKeys.viewQueryName);
         if (dao == null) {
-            dao = new EDAO(new File(outputDB));
+            dao = EDAO.getInstance(new File(outputDB));
         }
 
     }

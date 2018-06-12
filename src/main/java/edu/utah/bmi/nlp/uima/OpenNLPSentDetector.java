@@ -149,11 +149,11 @@ public class OpenNLPSentDetector extends JCasAnnotator_ImplBase {
 		try {
 			SentenceType = Class.forName(sentenceTypeName).asSubclass(Annotation.class);
 			TokenType = Class.forName(tokenTypeName).asSubclass(Annotation.class);
-			SentenceTypeConstructor = SentenceType.getConstructor(new Class[]{JCas.class, int.class, int.class});
-			TokenTypeConstructor = TokenType.getConstructor(new Class[]{JCas.class, int.class, int.class});
+			SentenceTypeConstructor = SentenceType.getConstructor(JCas.class, int.class, int.class);
+			TokenTypeConstructor = TokenType.getConstructor(JCas.class, int.class, int.class);
 			if (differentColoring) {
 				AlterSentenceType = Class.forName(alterSentenceTypeName).asSubclass(Annotation.class);
-				AlterSentenceTypeConstructor = AlterSentenceType.getConstructor(new Class[]{JCas.class, int.class, int.class});
+				AlterSentenceTypeConstructor = AlterSentenceType.getConstructor(JCas.class, int.class, int.class);
 			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -163,7 +163,7 @@ public class OpenNLPSentDetector extends JCasAnnotator_ImplBase {
 
 	}
 
-	public void process(JCas jCas) throws AnalysisEngineProcessException {
+	public void process(JCas jCas) {
 		for (Class sectionClass : sectionClasses) {
 			FSIndex annoIndex = jCas.getAnnotationIndex(sectionClass);
 			Iterator annoIter = annoIndex.iterator();
