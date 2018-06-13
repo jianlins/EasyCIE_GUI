@@ -34,13 +34,16 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 	public static final String PARAM_SQLFILE = "DBConfigFile";
 	public static final String PARAM_TABLENAME = "ResultTableName";
 	public static final String PARAM_OUTPUT_TYPE = "OutputType";
+	public static final String PARAM_PRIO_TYPE = "PrioType";
 	public static final String PARAM_SPELL_OUTPUT_TYPE = "SpellOutputType";
 	public static final String PARMA_ADD_OUTPUT_TYPE = "AdditionOutputType";
 	public static final String PARAM_ANNOTATOR = "Annotator";
-	public static String resultTableName, outputTypeName, spellOutputTypeName, additionOutputTypeName, annotator;
+	public static final String PARAM_MIN_VALUE = "MinValue";
+	public static final String PARAM_MAX_VALUE = "MaxValue";
+	public static String resultTableName, prioTypeName, outputTypeName, spellOutputTypeName, additionOutputTypeName, annotator;
 	public static EDAO dao = null;
-	private Type outputType = null, addOutputType = null, spellOutputType = null;
-	private int firstGroupSize = 0;
+	private Type prioType = null, outputType = null, addOutputType = null, spellOutputType = null;
+	private int firstGroupSize = 0, minValue = 9, maxValue = 30000;
 
 
 	public void initialize(UimaContext cont) {
@@ -49,6 +52,12 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 
 		parameterObject = cont.getConfigParameterValue(PARAM_TABLENAME);
 		resultTableName = (String) parameterObject;
+
+		parameterObject = cont.getConfigParameterValue(PARAM_PRIO_TYPE);
+		if (parameterObject != null && parameterObject.toString().trim().length() > 0)
+			prioTypeName = (String) parameterObject;
+		else
+			prioTypeName = "TOTAL_SAMPLE_SIZE";
 
 		parameterObject = cont.getConfigParameterValue(PARAM_OUTPUT_TYPE);
 		if (parameterObject != null && parameterObject.toString().trim().length() > 0)
@@ -68,18 +77,27 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 		else
 			additionOutputTypeName = "GROUP_SIZE";
 
+		parameterObject = cont.getConfigParameterValue(PARAM_MIN_VALUE);
+		if (parameterObject != null && parameterObject instanceof Integer)
+			minValue = (int) parameterObject;
+
+		parameterObject = cont.getConfigParameterValue(PARAM_MAX_VALUE);
+		if (parameterObject != null && parameterObject instanceof Integer)
+			maxValue = (int) parameterObject;
+
+
 		parameterObject = cont.getConfigParameterValue(PARAM_ANNOTATOR);
 		annotator = (String) parameterObject;
 
 		if (dao == null || dao.isClosed()) {
-			dao = EDAO.getInstance(new File(configFile));
+			dao = new EDAO(new File(configFile));
 		}
 		dao.initiateTableFromTemplate("NUMBERS_TABLE", resultTableName, false);
 
 	}
 
 	@Override
-	public void process(JCas jCas) {
+	public void process(JCas jCas) throws AnalysisEngineProcessException {
 		RecordRow recordRow = new RecordRow();
 		FSIterator it = jCas.getAnnotationIndex(SourceDocumentInformation.type).iterator();
 		SourceDocumentInformation e;
@@ -95,22 +113,41 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 			outputType = CasUtil.getAnnotationType(cas, DeterminantValueSet.checkNameSpace(outputTypeName));
 			addOutputType = CasUtil.getAnnotationType(cas, DeterminantValueSet.checkNameSpace(additionOutputTypeName));
 			spellOutputType = CasUtil.getAnnotationType(cas, DeterminantValueSet.checkNameSpace(spellOutputTypeName));
+			prioType = CasUtil.getAnnotationType(cas, DeterminantValueSet.checkNameSpace(prioTypeName));
 		}
 
 		firstGroupSize = 0;
-		boolean success = getSampleSize(cas, doc_name);
-		if (!success) {
-			success = getSpellSampleSize(cas, doc_name);
+		boolean success = false;
+		int sampleSize = getTotalSampleSize(cas, doc_name);
+		if (sampleSize > minValue && sampleSize < maxValue) {
+			dao.insertRecord(resultTableName, new RecordRow().addCell("DOC_NAME", doc_name)
+					.addCell("ANNOTATOR", annotator)
+					.addCell("NUMBER", sampleSize)
+					.addCell("COMMENTS", "certain"));
+			return;
 		}
-		if (!success) {
-			success = addGroupSizes(jCas, cas, doc_name);
-		}
-		if (!success && firstGroupSize > 0) {
+		int[] res1 = getSpellSampleSize(cas, doc_name);
+		int[] res2 = getSampleSize(cas, doc_name);
+		int[] res3 = addGroupSizes(jCas, cas, doc_name);
+		ArrayList<int[]> ress = new ArrayList<>();
+		ress.add(res1);
+		ress.add(res2);
+		ress.add(res3);
+		Collections.sort(ress, (o1, o2) -> o1[1] - o2[1]);
+		int[] res = ress.get(0);
+
+		if (res[1] != 999999) {
+			dao.insertRecord(resultTableName, new RecordRow().addCell("DOC_NAME", doc_name)
+					.addCell("ANNOTATOR", annotator)
+					.addCell("NUMBER", res[0])
+					.addCell("COMMENTS", "certain"));
+			success = true;
+		} else if (firstGroupSize > minValue && firstGroupSize < maxValue) {
 			dao.insertRecord(resultTableName, new RecordRow().addCell("DOC_NAME", doc_name)
 					.addCell("ANNOTATOR", annotator)
 					.addCell("NUMBER", firstGroupSize)
 					.addCell("COMMENTS", "uncertain"));
-			success=true;
+			success = true;
 		}
 
 		if (!success) {
@@ -122,25 +159,25 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 
 	}
 
-	private boolean getSpellSampleSize(CAS cas, String doc_name) {
-		Collection<AnnotationFS> annos = CasUtil.select(cas, spellOutputType);
+	private int getTotalSampleSize(CAS cas, String doc_name) {
+		Collection<AnnotationFS> annos = CasUtil.select(cas, prioType);
+		int sampleSize = 0;
 		for (AnnotationFS anno : annos) {
 			if (anno == null)
 				continue;
 			String numText = anno.getCoveredText();
-			int sampleSize = convertTextualNumbersToInteger(numText);
-			if (sampleSize > 0) {
-				dao.insertRecord(resultTableName, new RecordRow().addCell("DOC_NAME", doc_name)
-						.addCell("ANNOTATOR", annotator)
-						.addCell("NUMBER", sampleSize)
-						.addCell("COMMENTS", ""));
-				return true;
+			sampleSize = convertNumber(numText, doc_name);
+			if (sampleSize > minValue && sampleSize < maxValue) {
+//				dao.insertRecord(resultTableName, new RecordRow().addCell("DOC_NAME", doc_name)
+//						.addCell("ANNOTATOR", annotator)
+//						.addCell("NUMBER", sampleSize)
+//						.addCell("COMMENTS", ""));
+				return sampleSize;
 			} else {
 				System.out.println(numText + " cannot be converted in document " + doc_name);
 			}
 		}
-		return false;
-
+		return sampleSize;
 	}
 
 
@@ -154,20 +191,16 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 		return sentenceTree;
 	}
 
-	private boolean addGroupSizes(JCas jCas, CAS cas, String doc_name) {
+	private int[] addGroupSizes(JCas jCas, CAS cas, String doc_name) {
 		ArrayList<Sentence> sentences = new ArrayList<>();
 		IntervalST<Integer> sentenceTree = buildSentenceTree(jCas, sentences);
 		Collection<AnnotationFS> annos = CasUtil.select(cas, addOutputType);
 		ArrayList<Integer> groupSizes = new ArrayList<>();
 		int sampleSize = addGroupSizes(annos, doc_name, sentenceTree, groupSizes);
-		if (sampleSize > 0) {
-			dao.insertRecord(resultTableName, new RecordRow().addCell("DOC_NAME", doc_name)
-					.addCell("ANNOTATOR", annotator)
-					.addCell("NUMBER", sampleSize)
-					.addCell("COMMENTS", groupSizes.toString()));
-			return true;
+		if (sampleSize > minValue && sampleSize < maxValue) {
+			return new int[]{sampleSize, annos.iterator().next().getBegin()};
 		}
-		return false;
+		return new int[]{-1, 999999};
 	}
 
 	private int addGroupSizes(Collection<AnnotationFS> annos, String doc_name, IntervalST<Integer> sentenceTree, ArrayList<Integer> groupSizes) {
@@ -201,12 +234,14 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 		int counter = 0;
 		for (AnnotationFS anno : annos) {
 			int groupSize = convertNumber(anno.getCoveredText(), doc_name);
-			if (firstGroupSize == 0)
-				firstGroupSize = groupSize;
-			if (groupSize > 0) {
-				sampleSize += groupSize;
-				groupSizes.add(groupSize);
-				counter++;
+			if (groupSize > minValue / 2 && groupSize < maxValue) {
+				if (firstGroupSize == 0)
+					firstGroupSize = groupSize;
+				if (groupSize > 0) {
+					sampleSize += groupSize;
+					groupSizes.add(groupSize);
+					counter++;
+				}
 			}
 		}
 //		make sure there are >2 eligible group size numbers were extracted.
@@ -216,31 +251,61 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 			return 0;
 	}
 
-	public boolean getSampleSize(CAS cas, String doc_name) {
+	private int[] getSpellSampleSize(CAS cas, String doc_name) {
+		Collection<AnnotationFS> annos = CasUtil.select(cas, spellOutputType);
+		for (AnnotationFS anno : annos) {
+			if (anno == null)
+				continue;
+			String numText = anno.getCoveredText();
+			int sampleSize = convertTextualNumbersToInteger(numText);
+			if (sampleSize > minValue && sampleSize < maxValue) {
+//				dao.insertRecord(resultTableName, new RecordRow().addCell("DOC_NAME", doc_name)
+//						.addCell("ANNOTATOR", annotator)
+//						.addCell("NUMBER", sampleSize)
+//						.addCell("COMMENTS", ""));
+				return new int[]{sampleSize, anno.getBegin()};
+			} else {
+				System.out.println(numText + " cannot be converted in document " + doc_name);
+			}
+		}
+		return new int[]{-1, 999999};
+
+	}
+
+	public int[] getSampleSize(CAS cas, String doc_name) {
 		Collection<AnnotationFS> annos = CasUtil.select(cas, outputType);
 		for (AnnotationFS anno : annos) {
 			if (anno == null)
 				continue;
 			String numText = anno.getCoveredText();
 			int sampleSize = convertNumber(numText, doc_name);
-			if (sampleSize > 0) {
-				dao.insertRecord(resultTableName, new RecordRow().addCell("DOC_NAME", doc_name)
-						.addCell("ANNOTATOR", annotator)
-						.addCell("NUMBER", sampleSize)
-						.addCell("COMMENTS", ""));
-				return true;
+			if (sampleSize > minValue && sampleSize < maxValue) {
+//				dao.insertRecord(resultTableName, new RecordRow().addCell("DOC_NAME", doc_name)
+//						.addCell("ANNOTATOR", annotator)
+//						.addCell("NUMBER", sampleSize)
+//						.addCell("COMMENTS", ""));
+				return new int[]{sampleSize, anno.getBegin()};
 			}
 		}
-		return false;
+		return new int[]{-1, 999999};
 	}
 
 	private int convertNumber(String numText, String doc_name) {
-		int sampleSize = -1;
-		numText = numText.replaceAll("[,| ]", "");
+		int sampleSize = 0;
 		try {
-			sampleSize = NumberUtils.createInteger(numText);
+			sampleSize = NumberUtils.createInteger(numText.replaceAll("[,| ]", ""));
 		} catch (Exception error) {
-			System.out.println("Cannot parse " + numText + "in document: " + doc_name);
+
+		}
+		if (sampleSize == 0) {
+			try {
+				sampleSize = convertTextualNumbersToInteger(numText);
+			} catch (Exception error) {
+
+			}
+		}
+		if (sampleSize == 0) {
+			System.out.println(numText + " in document: " + doc_name + "  is not a spelled out number");
 		}
 		return sampleSize;
 	}
