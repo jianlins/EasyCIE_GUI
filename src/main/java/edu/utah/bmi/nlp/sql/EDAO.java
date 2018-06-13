@@ -93,7 +93,7 @@ public class EDAO {
     }
 
 
-    protected EDAO(File configFile) {
+    public EDAO(File configFile) {
         initConnection(configFile, false, false, true);
     }
 
@@ -882,7 +882,7 @@ public class EDAO {
 
     public void close() {
         if (logger.isLoggable(Level.FINE)) {
-            logger.fine("pseudo close dao...");
+            logger.fine("pseudo close ldao...");
             this.isClosed = true;
             return;
         }

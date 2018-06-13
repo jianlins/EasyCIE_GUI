@@ -35,7 +35,7 @@ public class Import extends GUITask {
     protected EDAO dao;
     protected boolean print = true;
 
-    protected String inputPath, dbConfigFile, importTable, referenceTable, overWriteAnnotatorName, datasetId, rushRule;
+    protected String inputPath, dbConfigFile, importDocTable, referenceTable, overWriteAnnotatorName, datasetId, rushRule;
     protected File inputDir;
     protected boolean overwrite = false, initSuccess = false;
     protected String includeTypes;
@@ -69,7 +69,7 @@ public class Import extends GUITask {
                 || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 'T'
                 || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == '1');
 
-        importTable = settingConfig.getValue(ConfigKeys.inputTableName);
+        importDocTable = settingConfig.getValue(ConfigKeys.inputTableName);
         referenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
         if (importType.equals(ConfigKeys.paraTxtType)) {
             corpusType = txt;
@@ -118,7 +118,7 @@ public class Import extends GUITask {
                 popDialog("Note", "Sorry, currently import xmi corpus is not supported.", "");
                 return;
             case n2c2:
-                importN2C2(inputDir, datasetId, importTable, referenceTable, overwrite);
+                importN2C2(inputDir, datasetId, importDocTable, referenceTable, overwrite);
                 break;
             case unknown:
                 popDialog("Note", "Sorry, which type of documents are you going to import?|",
@@ -135,7 +135,7 @@ public class Import extends GUITask {
             updateGUIMessage("Start import....");
             switch (corpusType) {
                 case txt:
-                    importText(inputDir, datasetId, importTable, overwrite,
+                    importText(inputDir, datasetId, importDocTable, overwrite,
                             includeTypes);
                     break;
                 case brat:
@@ -231,8 +231,8 @@ public class Import extends GUITask {
         if (annotator.length() == 0)
             annotator = "ehost_import";
         runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "", "",
-                false, false, dbConfigFile, importTable, datasetId,
-                dbConfigFile, importTable, "", "", "", includeTypes, "db");
+                false, false, dbConfigFile, importDocTable, datasetId,
+                dbConfigFile, importDocTable, "", "", "", includeTypes, "db");
 
         runner.initTypes(EhostReader.getTypeDefinitions(inputDir.getAbsolutePath()));
         runner.setReader(EhostReader.class, new Object[]{EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
@@ -251,8 +251,8 @@ public class Import extends GUITask {
         if (annotator.length() == 0)
             annotator = "ehost_import";
         runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "", "",
-                false, false, dbConfigFile, importTable, datasetId,
-                dbConfigFile, importTable, "", "", "", includeTypes, "db");
+                false, false, dbConfigFile, importDocTable, datasetId,
+                dbConfigFile, importDocTable, "", "", "", includeTypes, "db");
 
         runner.initTypes(BratReader.getTypeDefinitions(inputDir.getAbsolutePath()));
         runner.setReader(BratReader.class, new Object[]{BratReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
@@ -357,7 +357,7 @@ public class Import extends GUITask {
         }
         if (n2c2Data) {
             try {
-                dao.stmt.execute("UPDATE " + importTable + " SET REF_DATE = (SELECT MAX(\"DATE\") FROM " + importTable + " T2 WHERE T2.BUNCH_ID = " + importTable + ".BUNCH_ID);");
+                dao.stmt.execute("UPDATE " + importDocTable + " SET REF_DATE = (SELECT MAX(\"DATE\") FROM " + importDocTable + " T2 WHERE T2.BUNCH_ID = " + importDocTable + ".BUNCH_ID);");
                 dao.con.commit();
 
             } catch (SQLException e) {

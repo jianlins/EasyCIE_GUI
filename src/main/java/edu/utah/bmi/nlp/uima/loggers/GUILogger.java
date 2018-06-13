@@ -65,6 +65,10 @@ public class GUILogger extends ConsoleLogger {
 
     }
 
+    public void setTask(GUITask task) {
+        this.task = task;
+    }
+
     public void setUIMAViewer(boolean enableUIMAViewer) {
         this.enableUIMAViewer = enableUIMAViewer;
     }

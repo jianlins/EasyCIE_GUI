@@ -37,7 +37,7 @@ public class BratWritter_AE extends XMIWritter_AE {
     @Override
     public void process(JCas jCas) {
 
-        String fileName = readFileIDName(jCas);
+        String fileName = readFileIDName(jCas, nameWId);
         ArrayList<String> bratAnnotations = new ArrayList<>();
         int i = 0, attrId = 0;
         FSIndex annoIndex = jCas.getAnnotationIndex(Annotation.type);
@@ -148,17 +148,5 @@ public class BratWritter_AE extends XMIWritter_AE {
         return output.toString();
     }
 
-    public static String readFileIDName(JCas jCas) {
-        RecordRow baseRecordRow = new RecordRow();
-        FSIterator it = jCas.getAnnotationIndex(SourceDocumentInformation.type).iterator();
-        if (it.hasNext()) {
-            SourceDocumentInformation e = (SourceDocumentInformation) it.next();
-            String serializedString = new File(e.getUri()).getName();
-            baseRecordRow.deserialize(serializedString);
 
-        }
-        String fileName = baseRecordRow.getValueByColumnName("DOC_ID") + "_" +
-                baseRecordRow.getValueByColumnName("DOC_NAME");
-        return fileName;
-    }
 }

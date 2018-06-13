@@ -343,7 +343,7 @@ public class RunEasyCIE extends GUITask {
 					SQLWriterCasConsumer.PARAM_VERSION, runId,
 					SQLWriterCasConsumer.PARAM_WRITE_CONCEPT, exporttypes,
 					SQLWriterCasConsumer.PARAM_OVERWRITETABLE, false, SQLWriterCasConsumer.PARAM_BATCHSIZE, 150});
-//			NumberWriter.dao = wdao;
+//			NumberWriter.ldao = wdao;
 //			runner.addAnalysisEngine(NumberWriter.class, new Object[]{NumberWriter.PARAM_OUTPUT_TYPE, "SAMPLE_SIZE",
 //					NumberWriter.PARAM_SQLFILE, writeConfigFileName, NumberWriter.PARAM_TABLENAME, "NUMBERS",
 //					NumberWriter.PARAM_ANNOTATOR, annotator,

@@ -13,18 +13,19 @@ import org.apache.poi.ss.usermodel.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
 
-public class ImportExcelTxt extends Import {
-    public static Logger logger = IOUtil.getLogger(ImportExcelTxt.class);
+public class ImportExcelData extends Import {
+    public static Logger logger = IOUtil.getLogger(ImportExcelData.class);
     private static char excel = 'x';
-    private String sheetName;
-    private int docNameColumnPos, txtColumnPos, dateColumnPos, startRowNum;
+    private String sheetName, annotator;
+    private int docNameColumnPos, txtColumnPos, dateColumnPos, startRowNum, conclusionColumnPos;
     private File inputFile;
 
-    public ImportExcelTxt(TasksFX tasks) {
+    public ImportExcelData(TasksFX tasks) {
         initiate(tasks);
     }
 
@@ -42,13 +43,17 @@ public class ImportExcelTxt extends Import {
         docNameColumnPos = Integer.parseInt(config.getValue(ConfigKeys.docNameColumn, "1"));
         txtColumnPos = Integer.parseInt(config.getValue(ConfigKeys.docTextColumn, "2"));
         dateColumnPos = Integer.parseInt(config.getValue(ConfigKeys.docDateColumn, "-1"));
+        conclusionColumnPos = Integer.parseInt(config.getValue(ConfigKeys.conclusionColumn, "-1"));
         startRowNum = Integer.parseInt(config.getValue(ConfigKeys.startRowNum, "-1"));
 
 
         corpusType = excel;
         inputPath = documentPath;
-        importTable = settingConfig.getValue(ConfigKeys.inputTableName);
+        importDocTable = settingConfig.getValue(ConfigKeys.inputTableName);
+        referenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
         inputFile = new File(documentPath);
+        annotator = inputFile.getName();
+        annotator = annotator.substring(0, annotator.lastIndexOf("."));
         if (!checkFileExist(inputFile, ConfigKeys.importDir))
             return;
 
@@ -71,8 +76,8 @@ public class ImportExcelTxt extends Import {
     protected Object call() throws Exception {
         if (initSuccess) {
             updateGUIMessage("Start import....");
-            importExcel(inputFile, datasetId, importTable, overwrite, sheetName,
-                    docNameColumnPos, txtColumnPos, dateColumnPos, startRowNum);
+            importExcel(inputFile, datasetId, overwrite, sheetName,
+                    docNameColumnPos, txtColumnPos, dateColumnPos, conclusionColumnPos, startRowNum);
             updateGUIMessage("Import complete");
         }
         dao.endBatchInsert();
@@ -105,10 +110,15 @@ public class ImportExcelTxt extends Import {
     }
 
 
-    protected void importExcel(File inputFile, String datasetId, String tableName, boolean overWrite,
+    protected void importExcel(File inputFile, String datasetId, boolean overWrite,
                                String sheetName, int docNameColumnPos, int txtColumnPos,
-                               int dateColumnPos, int startRowNum) throws IOException {
-        dao.initiateTableFromTemplate("DOCUMENTS_TABLE", tableName, overWrite);
+                               int dateColumnPos, int conclusionColumnPos, int startRowNum) throws IOException {
+        dao.initiateTableFromTemplate("DOCUMENTS_TABLE", importDocTable, overWrite);
+        if (conclusionColumnPos != -1) {
+            dao.initiateTableFromTemplate("ANNOTATION_TABLE", referenceTable, overWrite);
+        }
+        HashMap<String, Integer> duplicateNames = new HashMap<>();
+
         int rowCounter = 0, counter = 1;
         try {
             Workbook workbook = WorkbookFactory.create(inputFile);
@@ -118,8 +128,16 @@ public class ImportExcelTxt extends Import {
             for (Row row : sheet) {
                 rowCounter++;
                 if (rowCounter >= startRowNum) {
+                    row.getCell(docNameColumnPos - 1).setCellType(CellType.STRING);
+                    String docName = row.getCell(docNameColumnPos - 1).getStringCellValue();
+                    if (duplicateNames.containsKey(docName)) {
+                        duplicateNames.put(docName, duplicateNames.get(docName) + 1);
+                        docName += "_" + duplicateNames.get(docName);
+                    } else {
+                        duplicateNames.put(docName, 0);
+                    }
                     RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
-                            .addCell("DOC_NAME", row.getCell(docNameColumnPos - 1))
+                            .addCell("DOC_NAME", docName)
                             .addCell("TEXT", row.getCell(txtColumnPos - 1));
                     Cell cell;
                     if (dateColumnPos != -1) {
@@ -130,7 +148,13 @@ public class ImportExcelTxt extends Import {
                             recordRow.addCell("DATE", cell.getDateCellValue());
                         }
                     }
-                    dao.insertRecord(tableName, recordRow);
+                    dao.insertRecord(importDocTable, recordRow);
+                    if (conclusionColumnPos != -1) {
+                        dao.insertRecord(referenceTable, new RecordRow()
+                                .addCell("DOC_NAME", docName)
+                                .addCell("TYPE", row.getCell(conclusionColumnPos - 1))
+                        );
+                    }
                     counter++;
                     updateGUIProgress(rowCounter, total);
                     rowCounter++;

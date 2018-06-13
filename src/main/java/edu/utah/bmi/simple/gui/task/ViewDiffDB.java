@@ -48,16 +48,16 @@ public class ViewDiffDB extends GUITask {
 //                // Update UI here.
 //                if (annotatorCompare.trim().length() > 0 && annotatorAgainst.trim().length() > 0) {
 //                    String annotator = annotatorCompare + "_vs_" + annotatorAgainst;
-//                    EDAO dao = EDAO.getInstance(new File(outputDB));
-//                    dao.initiateTableFromTemplate("ANNOTATION_TABLE", diffTable, false);
-//                    if (!dao.checkExists(diffTable)) {
+//                    EDAO ldao = EDAO.getInstance(new File(outputDB));
+//                    ldao.initiateTableFromTemplate("ANNOTATION_TABLE", diffTable, false);
+//                    if (!ldao.checkExists(diffTable)) {
 //                        updateMessage("Table '" + diffTable + "' does not exit.");
 //                        popDialog("Note", "Table '" + diffTable + "' does not exit.",
 //                                " You need to execute 'Compare' first.");
 //                        updateProgress(0, 0);
 //                        return;
 //                    }
-//                    RecordRowIterator recordRowIter = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", diffTable, annotator);
+//                    RecordRowIterator recordRowIter = ldao.queryRecordsFromPstmt("maxRunIDofAnnotator", diffTable, annotator);
 //                    if (recordRowIter == null) {
 //                        updateMessage("Table " + diffTable + " hasn't been created.");
 //                        updateProgress(1, 1);
@@ -79,9 +79,9 @@ public class ViewDiffDB extends GUITask {
 //                                    "The last comparison of \"" + annotator + "\" has no difference saved in table \"" + diffTable + "\".\n" +
 //                                            "Here displays the previous comparison that has some difference saved.");
 //                        }
-//                        dao.close();
+//                        ldao.close();
 //                        String filter = "annotator='" + annotator + "' AND RUN_ID=" + lastRunId;
-//                        dao.queryTemplates.get()
+//                        ldao.queryTemplates.get()
 //
 //                        TasksOverviewController.currentTasksOverviewController.showDBTable(outputDB, diffTable,
 //                                " WHERE " + filter, ColorAnnotationCell.colorCompare);

@@ -32,11 +32,15 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
 
     public static final String PARAM_ANNOTATOR = "Annotator";
 
+    public static final String PARAM_NAME_W_ID = "NameWithId";
+
     protected String annotator;
 
     protected HashMap<Class, Boolean> uimaTypes = new HashMap<>();
 
     public File outputDirectory;
+
+    protected boolean nameWId = false;
 
     public void initialize(UimaContext cont) {
         String includeTypes = baseInit(cont, "data/output/xmi", "uima");
@@ -59,6 +63,10 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
     protected String baseInit(UimaContext cont, String defaultDir, String defaultAnnotator) {
         outputDirectory = new File(readConfigureString(cont, PARAM_OUTPUTDIR, defaultDir));
         System.out.println("UIMA annotations will be exported to: " + outputDirectory.getAbsolutePath());
+        Object tmpObj = cont.getConfigParameterValue(PARAM_NAME_W_ID);
+        if (tmpObj != null && tmpObj instanceof Boolean) {
+            nameWId = (Boolean) tmpObj;
+        }
         if (!outputDirectory.exists())
             try {
                 FileUtils.forceMkdir(outputDirectory);
@@ -75,7 +83,7 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
     @Override
     public void process(JCas jCas) throws AnalysisEngineProcessException {
 
-        String FileName = readFileIDName(jCas);
+        String FileName = readFileIDName(jCas,nameWId);
         if (uimaTypes.size() > 0 && !uimaTypes.containsKey("")) {
             Iterator<Annotation> iterator = JCasUtil.iterator(jCas, Annotation.class);
             while (iterator.hasNext()) {
@@ -111,7 +119,7 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
         return false;
     }
 
-    public static String readFileIDName(JCas jCas) {
+    public static String readFileIDName(JCas jCas, boolean includeId) {
         RecordRow baseRecordRow = new RecordRow();
         FSIterator it = jCas.getAnnotationIndex(SourceDocumentInformation.type).iterator();
         if (it.hasNext()) {
@@ -120,7 +128,7 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
             baseRecordRow.deserialize(serializedString);
 
         }
-        String fileName = baseRecordRow.getValueByColumnName("DOC_ID") + "_" +
+        String fileName = (includeId ? baseRecordRow.getValueByColumnName("DOC_ID") + "_" : "") +
                 baseRecordRow.getValueByColumnName("DOC_NAME");
         return fileName;
     }

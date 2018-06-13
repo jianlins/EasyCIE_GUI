@@ -16,27 +16,34 @@ import java.util.Date;
  * Created on 1/13/17.
  */
 public class NLPDBLogger extends GUILogger {
-    private final EDAO dao;
-    private final String tableName;
-    long starttime = 0, completetime = 0;
-    private final String keyColumnName;
-    private String annotator;
+    protected EDAO ldao;
+    protected String tableName;
+    protected String keyColumnName;
+    protected long starttime = 0, completetime = 0;
+    protected String annotator;
 
 
-    private Object runid;
-    private RecordRow recordRow;
+    protected Object runid;
+    protected RecordRow recordRow;
+
+    protected NLPDBLogger() {
+        ldao = null;
+        tableName = "";
+        keyColumnName = "";
+
+    }
 
     public NLPDBLogger(EDAO dao, String tableName, String keyColumnName, String annotator) {
-        this.dao = dao;
+        this.ldao = dao;
         this.tableName = tableName;
-        this.keyColumnName = keyColumnName;
         this.annotator = annotator;
+        this.keyColumnName = keyColumnName;
         recordRow = new RecordRow();
         runid = dao.insertRecord(tableName, recordRow);
         if (runid == null)
             runid = dao.getLastId(tableName);
         setItem("RUN_ID", runid);
-//        runid = dao.getLastId(tableName, keyColumnName) + 1;
+//        runid = ldao.getLastId(tableName, keyColumnName) + 1;
     }
 
 
@@ -44,9 +51,9 @@ public class NLPDBLogger extends GUILogger {
         recordRow = new RecordRow();
         starttime = 0;
         completetime = 0;
-        runid = dao.insertRecord(tableName, recordRow);
+        runid = ldao.insertRecord(tableName, recordRow);
         if (runid == null)
-            runid = dao.getLastId(tableName);
+            runid = ldao.getLastId(tableName);
     }
 
     public void setItem(String key, Object value) {
@@ -146,12 +153,12 @@ public class NLPDBLogger extends GUILogger {
         if (reportable())
             setItem("COMMENTS", comments);
 
-        dao.updateRecord(tableName, recordRow);
-        dao.close();
+        ldao.updateRecord(tableName, recordRow);
+        ldao.close();
 
         logItems();
 
-        if (task!=null && task.guiEnabled) {
+        if (task != null && task.guiEnabled) {
             Platform.runLater(() -> {
                 boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(
                         AnnotationLogger.records.iterator(), columnInfo, "output", tabViewName);

@@ -125,7 +125,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
         for (RecordRow anno : annotations) {
             dao.insertRecord(snippetTableName, anno);
         }
-//        dao.insertRecords(snippetResultTable, annotations);
+//        ldao.insertRecords(snippetResultTable, annotations);
     }
 
     protected void saveAnnotations(JCas jcas, RecordRow baseRecordRow, ArrayList<Sentence> sentenceList, IntervalST sentenceTree, String fileName) {

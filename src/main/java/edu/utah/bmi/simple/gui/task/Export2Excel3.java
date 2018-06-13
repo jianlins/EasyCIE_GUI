@@ -96,7 +96,7 @@ public class Export2Excel3 extends GUITask {
         String lastLogRunId = values[3];
 //
 //        if (sql.toLowerCase().indexOf("where") == -1) {
-//            sql += " WHERE RUN_ID=" + getLastRunIdofAnnotator(dao, snippetResultTable, annotator);
+//            sql += " WHERE RUN_ID=" + getLastRunIdofAnnotator(ldao, snippetResultTable, annotator);
 //        }
         if (sql.trim().length() == 0) {
             sql = sourceQuery;

@@ -158,7 +158,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
     protected void writeEhostXML(JCas jcas, Collection<Annotation> annotations,
                                  File sourceFile, File outputXml) throws IOException, XMLStreamException {
         try {
-            FileUtils.write(sourceFile, jcas.getDocumentText().replace((char)13,' '),StandardCharsets.UTF_8);
+            FileUtils.write(sourceFile, jcas.getDocumentText().replace((char) 13, ' '), StandardCharsets.UTF_8);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -282,7 +282,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
 
     protected File[] initialOutputXml(JCas jcas) {
 
-        String originalFileName = readFileIDName(jcas);
+        String originalFileName = readFileIDName(jcas, nameWId);
         File outFile, sourceFile;
         if (originalFileName.length() == 0) {
             originalFileName = "doc" + mDocNum;

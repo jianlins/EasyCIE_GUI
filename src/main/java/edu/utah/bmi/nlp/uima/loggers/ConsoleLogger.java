@@ -124,6 +124,8 @@ public class ConsoleLogger implements UIMALogger {
         if (aStatus.isException()) {
             List ex = aStatus.getExceptions();
             displayError((Throwable) ex.get(0));
+        }else{
+            entityCount++;
         }
     }
 

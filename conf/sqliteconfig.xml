@@ -16,7 +16,7 @@
   -->
 <config>
     <username>test</username>
-    <server>jdbc:sqlite:data/my.sqlite?journal_mode=WAL&amp;synchronous=OFF</server>
+    <server>jdbc:sqlite:data/smoke.sqlite?journal_mode=WAL&amp;synchronous=OFF</server>
     <password>test</password>
     <databaseName></databaseName>
     <driver>org.sqlite.JDBC</driver>

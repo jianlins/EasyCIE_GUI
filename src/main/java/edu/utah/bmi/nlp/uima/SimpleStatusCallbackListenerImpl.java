@@ -35,6 +35,7 @@ public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener 
     public SimpleStatusCallbackListenerImpl(UIMALogger logger) {
         this.isProcessing = true;
         this.logger = logger;
+        logger.logStartTime();
     }
 
     public void setCollectionProcessingEngine(CollectionProcessingEngine engine) {

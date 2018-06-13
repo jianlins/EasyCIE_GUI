@@ -16,6 +16,7 @@ public class ConfigKeys {
     public static final String docNameColumn = "excelData/docNameColumnPos";
     public static final String docTextColumn = "excelData/docTxtColumnPos";
     public static final String docDateColumn = "excelData/docDateColumnPos";
+    public static final String conclusionColumn ="excelData/conclusionColumnPos";
     public static final String startRowNum = "excelData/startRowNum";
 
 
@@ -111,6 +112,7 @@ public class ConfigKeys {
     public static final String featureInfType = "log/featureInfType";
     public static final String docInfType = "log/docInfType";
     public static final String metaStr = "log/metaStr";
+
 
 
     public static String getRelativePath(String basePath, String file) {
