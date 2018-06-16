@@ -13,7 +13,7 @@ import edu.utah.bmi.nlp.type.system.SentenceOdd;
 import edu.utah.bmi.nlp.uima.AdaptableUIMACPETaskJCasRunner;
 import edu.utah.bmi.nlp.uima.BunchMixInferencer;
 import edu.utah.bmi.nlp.uima.NumberWriter;
-import edu.utah.bmi.nlp.uima.TemporalContext_AE_General;
+import edu.utah.bmi.nlp.uima.ae.TemporalContext_AE_General;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
 import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;

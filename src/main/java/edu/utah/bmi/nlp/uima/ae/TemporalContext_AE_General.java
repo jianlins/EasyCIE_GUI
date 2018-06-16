@@ -1,4 +1,4 @@
-package edu.utah.bmi.nlp.uima;
+package edu.utah.bmi.nlp.uima.ae;
 
 /*******************************************************************************
  * Copyright  Apr 11, 2015  Department of Biomedical Informatics, University of Utah
@@ -26,7 +26,6 @@ import edu.utah.bmi.nlp.type.system.Concept;
 import edu.utah.bmi.nlp.type.system.ConceptBASE;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UimaContext;
-import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.FSIndex;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.examples.SourceDocumentInformation;

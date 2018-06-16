@@ -11,7 +11,7 @@ import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
 import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.type.system.Doc_Base;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
-import edu.utah.bmi.nlp.uima.TemporalContext_AE_General;
+import edu.utah.bmi.nlp.uima.ae.TemporalContext_AE_General;
 import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;

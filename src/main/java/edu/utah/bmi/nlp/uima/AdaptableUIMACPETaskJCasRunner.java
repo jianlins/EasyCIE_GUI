@@ -51,14 +51,17 @@ public class AdaptableUIMACPETaskJCasRunner extends AdaptableUIMACPETaskRunner {
 		}
 	}
 
-	public void addAnalysisEngineFromDescriptor(String descriptorFile, Object[] configurations) {
+	public AnalysisEngineDescription addAnalysisEngineFromDescriptor(String descriptorFile, Object[] configurations) {
+		AnalysisEngineDescription aed = null;
 		try {
-			analysisEngineDescriptors.add(AnalysisEngineFactory.createEngineDescriptionFromPath(descriptorFile, configurations));
+			aed = AnalysisEngineFactory.createEngineDescriptionFromPath(descriptorFile, configurations);
+			analysisEngineDescriptors.add(aed);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InvalidXMLException e) {
 			e.printStackTrace();
 		}
+		return aed;
 	}
 
 	public void run() {
