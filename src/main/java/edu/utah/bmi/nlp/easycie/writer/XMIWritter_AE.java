@@ -44,8 +44,8 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
 
     public void initialize(UimaContext cont) {
         String includeTypes = baseInit(cont, "data/output/xmi", "uima");
+        uimaTypes = new HashMap<>();
         if (includeTypes.length() > 0) {
-            uimaTypes = new HashMap<>();
             String[] types = includeTypes.split(",");
             Arrays.asList(types).forEach(e -> {
                 try {
@@ -55,8 +55,6 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
                     e1.printStackTrace();
                 }
             });
-        } else {
-            uimaTypes.put(Concept.class, true);
         }
     }
 
