@@ -28,6 +28,7 @@ import org.apache.uima.UimaContext;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.tcas.Annotation;
 import org.joda.time.DateTime;
 import org.pojava.datetime.DateTimeConfig;
 
@@ -60,7 +61,6 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 	//  read from record table, specify which column is the reference datetime, usually is set to admission datetime.
 	public static final String PARAM_REFERENCE_DATE_COLUMN_NAME = "ReferenceDateColumnName";
 	public static final String PARAM_RECORD_DATE_COLUMN_NAME = "RecordDateColumnName";
-	public static final String PARAM_SAVE_DATE_ANNO = "SaveDateAnnotations";
 
 
 	private String referenceDateColumnName, recordDateColumnName;
@@ -69,7 +69,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 	// number of days before admission that still will be considered as current
 
 	private int intervalDaysBeforeReferenceDate;
-	protected boolean inferAll = false, saveDateAnnotations = false;
+	protected boolean inferAll = false;
 
 
 	private HashMap<String, IntervalST<Span>> dateAnnos = new HashMap();
@@ -79,6 +79,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 	private Pattern[] patterns = new Pattern[5];
 
 	private DateTime referenceDate;
+	private boolean globalCertainty = false;
 
 	public void initialize(UimaContext cont) {
 		super.initialize(cont);
@@ -114,9 +115,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 		obj = cont.getConfigParameterValue(PARAM_INFER_ALL);
 		if (obj != null && obj instanceof Boolean && (Boolean) obj == true)
 			inferAll = true;
-		obj = cont.getConfigParameterValue(PARAM_SAVE_DATE_ANNO);
-		if (obj != null && obj instanceof Boolean && (Boolean) obj == true)
-			saveDateAnnotations = true;
+
 	}
 
 	public void initPatterns() {
@@ -139,16 +138,20 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 	public void process(JCas jcas) {
 		DateTime recordDate = readReferenceDate(jcas, recordDateColumnName);
 		referenceDate = readReferenceDate(jcas, referenceDateColumnName);
-		if(referenceDate==null)
-			referenceDate=new DateTime(System.currentTimeMillis());
+		if (referenceDate == null)
+			referenceDate = new DateTime(System.currentTimeMillis());
+
+		globalCertainty = recordDate != null;
 		dateAnnos.clear();
 		String docText = jcas.getDocumentText();
 		HashMap<String, ArrayList<Span>> dates = ((FastCNER) fastNER).processString(docText);
-		parseDateMentions(jcas, dates, recordDate);
+		ArrayList<Annotation> allDateMentions = parseDateMentions(jcas, dates, recordDate);
+		coordinateDateMentions(allDateMentions, jcas.getDocumentText().length());
 	}
 
+
 	private DateTime readReferenceDate(JCas jcas, String referenceDateColumnName) {
-		if(referenceDateColumnName==null || referenceDateColumnName.trim().length()==0)
+		if (referenceDateColumnName == null || referenceDateColumnName.trim().length() == 0)
 			return null;
 		FSIterator it = jcas.getAnnotationIndex(SourceDocumentInformation.type).iterator();
 		RecordRow recordRow = new RecordRow();
@@ -191,16 +194,51 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 	 * @param dates
 	 * @param recordDate
 	 */
-	private void parseDateMentions(JCas jcas, HashMap<String, ArrayList<Span>> dates,
-								   DateTime recordDate) {
+	private ArrayList<Annotation> parseDateMentions(JCas jcas, HashMap<String, ArrayList<Span>> dates,
+													DateTime recordDate) {
 		String text = jcas.getDocumentText();
+		String latestDateMention = "";
+		ArrayList<Annotation> allDateMentions = new ArrayList<>();
+		if (recordDate == null) {
+			for (Span span : dates.get("CERTAIN_DATE")) {
+				DateTime dt = null;
+				String dateMention = text.substring(span.begin, span.end).trim();
+				try {
+					dt = parseDateString(dateMention, recordDate);
+					if (recordDate == null || dt.isAfter(recordDate)) {
+						recordDate = dt;
+						latestDateMention = dateMention;
+					}
+				} catch (Exception e) {
+//                    e.printStackTrace();
+				}
+			}
+		}
+		if (recordDate == null) {
+			for (Span span : dates.get("CERTAIN_YEAR")) {
+				DateTime dt = null;
+				String dateMention = text.substring(span.begin, span.end).trim();
+				try {
+					dt = parseDateString(dateMention, recordDate);
+					if (recordDate == null || dt.isAfter(recordDate)) {
+						recordDate = dt;
+						latestDateMention = dateMention;
+					}
+				} catch (Exception e) {
+//                    e.printStackTrace();
+				}
+			}
+		}
+		logger.finest(latestDateMention.length() > 0 ? "Record date is not set, inferred from the mention: \"" + latestDateMention + "\" as " + recordDate : "");
 		for (Map.Entry<String, ArrayList<Span>> entry : dates.entrySet()) {
 			String typeOfDate = entry.getKey();
 			switch (typeOfDate) {
 				case "Date":
+				case "CERTAIN_YEAR":
+				case "CERTAIN_DATE":
 					ArrayList<Span> dateMentions = entry.getValue();
 					for (Span span : dateMentions) {
-						String certainty = recordDate == null ? "uncertain" : "certain";
+						String certainty = globalCertainty || typeOfDate.startsWith("CERTAIN") ? "certain" : "uncertain";
 						if (fastNER.getMatchedNEType(span) == DeterminantValueSet.Determinants.PSEUDO)
 							continue;
 						String dateMention = text.substring(span.begin, span.end).trim();
@@ -208,84 +246,126 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 						try {
 							dt = parseDateString(dateMention, recordDate);
 						} catch (Exception e) {
-//                    e.printStackTrace();
+//                    		e.printStackTrace();
 						}
 						if (dt == null) {
-							certainty="uncertain";
+							certainty = "uncertain";
 							dt = handleAmbiguousCase(dateMention, recordDate);
 						}
 						logger.finest("Parse '" + dateMention + "' as: '" + dt.toString() + "'");
-						saveDateConcept(jcas, ConceptTypeConstructors, typeOfDate, certainty, span, dt.toString(), getRuleInfo(span));
+						addDateMentions(jcas, ConceptTypeConstructors, allDateMentions,
+								typeOfDate, certainty, span, dt.toString(), getRuleInfo(span));
 					}
 					break;
 				case "Yeard":
 					for (Span span : entry.getValue())
-						inferDateFromRelativeNumericTime(jcas, typeOfDate, text, span, recordDate, 365);
+						inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 365);
 					break;
 				case "Monthd":
 					for (Span span : entry.getValue())
-						inferDateFromRelativeNumericTime(jcas, typeOfDate, text, span, recordDate, 30);
+						inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 30);
 					break;
 				case "Weekd":
 					for (Span span : entry.getValue())
-						inferDateFromRelativeNumericTime(jcas, typeOfDate, text, span, recordDate, 7);
+						inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 7);
 					break;
 				case "Dayd":
 					for (Span span : entry.getValue())
-						inferDateFromRelativeNumericTime(jcas, typeOfDate, text, span, recordDate, 1);
+						inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 1);
 					break;
 				case "Yearw":
 					for (Span span : entry.getValue())
-						inferDateFromRelativeLiteralTime(jcas, typeOfDate, text, span, recordDate, 365);
+						inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 365);
 					break;
 				case "Monthw":
 					for (Span span : entry.getValue())
-						inferDateFromRelativeLiteralTime(jcas, typeOfDate, text, span, recordDate, 30);
+						inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 30);
 					break;
 				case "Weekw":
 					for (Span span : entry.getValue())
-						inferDateFromRelativeLiteralTime(jcas, typeOfDate, text, span, recordDate, 7);
+						inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 7);
 					break;
 				case "Dayw":
 					for (Span span : entry.getValue())
-						inferDateFromRelativeLiteralTime(jcas, typeOfDate, text, span, recordDate, 1);
+						inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 1);
 					break;
 			}
+		}
+		return allDateMentions;
+	}
+
+	private void addDateMentions(JCas jcas, HashMap<String, Constructor<? extends Concept>> ConceptTypeConstructors,
+								 ArrayList<Annotation> allDateMentions, String typeName,
+								 String certainty, Span span, String dateStr, String... ruleInfo) {
+		if (getSpanType(span) != DeterminantValueSet.Determinants.ACTUAL) {
+			return;
+		}
+		Concept anno = null;
+		if (!dateAnnos.containsKey(typeName)) {
+			dateAnnos.put(typeName, new IntervalST<>());
+		}
+		IntervalST<Span> intervalST = dateAnnos.get(typeName);
+		Interval1D interval1D = new Interval1D(span.begin, span.end);
+		if (intervalST.contains(interval1D)) {
+			return;
+		} else {
+			intervalST.put(interval1D, span);
+		}
+		try {
+			anno = ConceptTypeConstructors.get(typeName).newInstance(jcas, span.begin, span.end);
+			anno.setCertainty(certainty);
+			if (dateStr != null)
+				anno.setCategory(dateStr);
+			if (ruleInfo.length > 0) {
+				anno.setNote(String.join("\n", ruleInfo));
+			}
+			allDateMentions.add(anno);
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
 		}
 
 	}
 
 
-	private DateTime inferDateFromRelativeNumericTime(JCas jcas, String typeName, String text, Span span,
+	private DateTime inferDateFromRelativeNumericTime(JCas jcas, ArrayList<Annotation> allDateMentions, String typeName, String text, Span span,
 													  DateTime recordDate, int unit) {
 		DateTime dt = null;
 		try {
+
+			String certainty = globalCertainty  ? "certain" : "uncertain";
 			int interval = Integer.parseInt(text.substring(span.begin, span.end).trim());
+			if (recordDate == null)
+				recordDate = referenceDate;
 			dt = recordDate.minusDays(interval * unit);
-			String certainty = recordDate == null ? "uncertain" : "certain";
 			if (unit > 7) {
 				certainty = "uncertain";
 			}
-			saveDateConcept(jcas, ConceptTypeConstructors, typeName, certainty, span, dt.toString(), getRuleInfo(span));
+			addDateMentions(jcas, ConceptTypeConstructors, allDateMentions, typeName, certainty, span, dt.toString(), getRuleInfo(span));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return dt;
 	}
 
-	private DateTime inferDateFromRelativeLiteralTime(JCas jcas, String typeName, String text, Span span,
+	private DateTime inferDateFromRelativeLiteralTime(JCas jcas, ArrayList<Annotation> allDateMentions, String typeName, String text, Span span,
 													  DateTime recordDate, int unit) {
 		DateTime dt = null;
 		try {
 			String numWord = text.substring(span.begin, span.end).trim().toLowerCase();
-			String certainty = recordDate == null ? "uncertain" : "certain";
+			String certainty = globalCertainty  ? "certain" : "uncertain";
 			if (numberMap.containsKey(numWord)) {
 				int interval = numberMap.get(numWord);
+				if (recordDate == null)
+					recordDate = referenceDate;
 				dt = recordDate.minusDays(interval * unit);
 				if (interval > 7) {
 					certainty = "uncertain";
 				}
-				saveDateConcept(jcas, ConceptTypeConstructors, typeName, certainty, span, dt.toString(), getRuleInfo(span));
+				addDateMentions(jcas, ConceptTypeConstructors, allDateMentions, typeName, certainty, span, dt.toString(), getRuleInfo(span));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -296,6 +376,8 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 
 	private DateTime handleAmbiguousCase(String dateMentions, DateTime recordDate) {
 		DateTime dt = null;
+		if (recordDate == null)
+			recordDate = referenceDate;
 		if (patterns[0].matcher(dateMentions).find()) {
 			dt = parseDateString(dateMentions + " " + referenceDate.getYear(), recordDate);
 			if (dt == null)
@@ -341,39 +423,42 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 		return new FastNER(ruleFile, caseSenstive, false).getTypeDefinitions();
 	}
 
-
-	protected void saveDateConcept(JCas jcas, HashMap<String, Constructor<? extends Concept>> ConceptTypeConstructors,
-								   String typeName, String certainty, Span span, String comments, String... rule) {
-		if (!saveDateAnnotations || getSpanType(span) != DeterminantValueSet.Determinants.ACTUAL) {
-			return;
-		}
-		Concept anno = null;
-		if (!dateAnnos.containsKey(typeName)) {
-			dateAnnos.put(typeName, new IntervalST<>());
-		}
-		IntervalST<Span> intervalST = dateAnnos.get(typeName);
-		Interval1D interval1D = new Interval1D(span.begin, span.end);
-		if (intervalST.contains(interval1D)) {
-			return;
-		} else {
-			intervalST.put(interval1D, span);
-		}
-		try {
-			anno = ConceptTypeConstructors.get(typeName).newInstance(jcas, span.begin, span.end);
-			anno.setCertainty(certainty);
-			if (comments != null)
-				anno.setCategory(comments);
-			if (rule.length > 0) {
-				anno.setNote(String.join("\n", rule));
+	private void coordinateDateMentions(ArrayList<Annotation> allDateMentions, int length) {
+		IntervalST<Integer> checker = new IntervalST<>();
+		HashSet<Integer> scheduleToRemoveIds = new HashSet<>();
+		for (int i = 0; i < allDateMentions.size(); i++) {
+			Annotation anno = allDateMentions.get(i);
+			Interval1D span = new Interval1D(anno.getBegin(), anno.getEnd());
+			if (checker.contains(span)) {
+				for (Integer existingId : checker.getAll(span)) {
+					Annotation existingAnno = allDateMentions.get(existingId);
+					if ((existingAnno.getEnd() - existingAnno.getBegin()) <= (anno.getEnd() - anno.getBegin())) {
+						logger.finest("DateMention: \"" + anno.getCoveredText() + "\"(as " + anno.getClass().getSimpleName()
+								+ ") replaces the existing DateMention: \"" + existingAnno.getCoveredText() + "\"(as "
+								+ existingAnno.getClass().getSimpleName() + ")");
+						checker.remove(span);
+						scheduleToRemoveIds.add(existingId);
+						checker.put(span, i);
+					} else {
+						logger.finest("DateMention: \"" + anno.getCoveredText() + "\"(as " + anno.getClass().getSimpleName()
+								+ ") is covered by the existing DateMention: \"" + existingAnno.getCoveredText() + "\"(as "
+								+ existingAnno.getClass().getSimpleName() + ")");
+						scheduleToRemoveIds.add(i);
+					}
+				}
+			} else {
+				logger.finest("DateMention: \"" + anno.getCoveredText() + "\"(as " + anno.getClass().getSimpleName() + ") doesn't have any overlap.");
+				checker.put(span, i);
 			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
 		}
-		anno.addToIndexes();
+		for (int i = 0; i < allDateMentions.size(); i++) {
+			if (!scheduleToRemoveIds.contains(i)) {
+				Annotation anno = allDateMentions.get(i);
+				anno.addToIndexes();
+				logger.finest("DateMention: \"" + anno.getCoveredText() + "\"(as " + anno.getClass().getSimpleName() + ")");
+			}
+		}
+
 	}
 
 

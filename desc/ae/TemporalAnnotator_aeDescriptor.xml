@@ -39,7 +39,8 @@
             </configurationParameter>
             <configurationParameter>
                 <name>IntervalDaysBeforeReferenceDate</name>
-                <description>The days before the reference date that will be inferred as historical, default is 14</description>
+                <description>The days before the reference date that will be inferred as historical, default is 14
+                </description>
                 <type>Integer</type>
                 <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
@@ -53,7 +54,9 @@
             </configurationParameter>
             <configurationParameter>
                 <name>InferTemporalStatusForAllTargetConcept</name>
-                <description>When there is no date time mentions, whether infer the temporal status based on report date and reference date</description>
+                <description>When there is no date time mentions, whether infer the temporal status based on report date
+                    and reference date
+                </description>
                 <type>Boolean</type>
                 <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
@@ -67,15 +70,9 @@
             </configurationParameter>
             <configurationParameter>
                 <name>ReferenceDateColumnName</name>
-                <description>The column name that contains the reference date information, default is REF_DTM</description>
+                <description>The column name that contains the reference date information, default is REF_DTM
+                </description>
                 <type>String</type>
-                <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>SaveDateAnnotations</name>
-                <description>Whether save teh date time mentions as annotations</description>
-                <type>Boolean</type>
                 <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>
@@ -123,12 +120,7 @@
                     <string>REF_DTM</string>
                 </value>
             </nameValuePair>
-            <nameValuePair>
-                <name>SaveDateAnnotations</name>
-                <value>
-                    <boolean>false</boolean>
-                </value>
-            </nameValuePair>
+
         </configurationParameterSettings>
         <typeSystemDescription>
             <imports>
