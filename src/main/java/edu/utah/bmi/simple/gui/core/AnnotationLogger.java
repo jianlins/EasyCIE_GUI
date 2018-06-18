@@ -163,6 +163,7 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 						continue;
 					String featureName = feature.getShortName();
 					String value = getValue(thisAnnotation, featureName);
+//					System.out.println(featureName + ":v" + value);
 
 					switch (featureName) {
 						case "Annotator":
@@ -243,6 +244,7 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 				Object obj = getMethodsMap.get(cls).get(featureName).invoke(thisAnnotation);
 				if (obj instanceof FSArray) {
 					value = serilizeFSArray((FSArray) obj);
+//					System.out.println(value);
 				} else {
 					value = obj + "";
 				}
@@ -254,14 +256,14 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
-		return value.replaceAll("\n","|");
+		return value;
 	}
 
 	private String serilizeFSArray(FSArray ary) {
 		StringBuilder sb = new StringBuilder();
 		int size = ary.size();
-		String[]values=new String[size];
-		ary.copyToArray(0,values,0,size);
+		String[] values = new String[size];
+		ary.copyToArray(0, values, 0, size);
 		for (FeatureStructure fs : ary) {
 			List<Feature> features = fs.getType().getFeatures();
 			for (Feature feature : features) {
@@ -269,12 +271,11 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 				if (domain.equals("AnnotationBase") || domain.equals("Annotation"))
 					continue;
 				Type range = feature.getRange();
-				if (range.isArray()) {
+				if (!range.isPrimitive()) {
 					FeatureStructure child = fs.getFeatureValue(feature);
-					if (child instanceof FSArray)
-						sb.append(serilizeFSArray((FSArray) child));
+					sb.append(child + "");
 				} else {
-					sb.append(feature.getShortName() + ":" + fs.getFeatureValueAsString(feature));
+					sb.append("\t"+feature.getShortName() + ":" + fs.getFeatureValueAsString(feature)+"\n");
 				}
 			}
 

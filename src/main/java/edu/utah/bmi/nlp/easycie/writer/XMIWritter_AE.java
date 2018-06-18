@@ -8,10 +8,14 @@ import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.FSIterator;
+import org.apache.uima.cas.Feature;
+import org.apache.uima.cas.FeatureStructure;
+import org.apache.uima.cas.Type;
 import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.fit.util.CasIOUtil;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.tcas.Annotation;
 
 import java.io.File;
@@ -19,6 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Jianlin Shi
@@ -140,5 +145,29 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
             value = (tmpObj + "").trim();
         }
         return value;
+    }
+
+    protected String serilizeFSArray(FSArray ary) {
+        StringBuilder sb = new StringBuilder();
+        int size = ary.size();
+        String[] values = new String[size];
+        ary.copyToArray(0, values, 0, size);
+        for (FeatureStructure fs : ary) {
+            List<Feature> features = fs.getType().getFeatures();
+            for (Feature feature : features) {
+                String domain = feature.getDomain().getShortName();
+                if (domain.equals("AnnotationBase") || domain.equals("Annotation"))
+                    continue;
+                Type range = feature.getRange();
+                if (!range.isPrimitive()) {
+                    FeatureStructure child = fs.getFeatureValue(feature);
+                    sb.append(child + "");
+                } else {
+                    sb.append("\t"+feature.getShortName() + ":" + fs.getFeatureValueAsString(feature)+"\n");
+                }
+            }
+
+        }
+        return sb.toString();
     }
 }

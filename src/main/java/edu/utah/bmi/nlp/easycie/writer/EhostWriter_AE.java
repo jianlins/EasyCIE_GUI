@@ -25,6 +25,7 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
 
@@ -257,8 +258,11 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
         String value = "";
         try {
             Object valueObj = method.invoke(annotation, null);
-            if (valueObj != null)
+            if (valueObj instanceof FSArray) {
+                value = serilizeFSArray((FSArray) valueObj);
+            } else {
                 value = valueObj + "";
+            }
 
         } catch (IllegalAccessException e) {
             e.printStackTrace();

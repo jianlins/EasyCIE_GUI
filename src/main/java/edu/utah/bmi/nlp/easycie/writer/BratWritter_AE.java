@@ -9,6 +9,7 @@ import org.apache.uima.cas.FSIndex;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.tcas.Annotation;
 
 import java.io.File;
@@ -70,8 +71,15 @@ public class BratWritter_AE extends XMIWritter_AE {
             String attribute = method.getName().substring(3);
             String value = "";
             try {
-                value = (String) method.invoke(con);
-                if (value == null || value.trim().length() == 0)
+                Object valueObj = (String) method.invoke(con);
+                if (valueObj == null)
+                    continue;
+                if (valueObj instanceof FSArray) {
+                    value = serilizeFSArray((FSArray) valueObj);
+                } else {
+                    value = valueObj + "";
+                }
+                if(value.trim().length()==0)
                     continue;
             } catch (IllegalAccessException e) {
                 e.printStackTrace();

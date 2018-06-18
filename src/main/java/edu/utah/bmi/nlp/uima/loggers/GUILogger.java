@@ -35,7 +35,6 @@ public class GUILogger extends ConsoleLogger {
     protected String inputPath, descriptorPath;
     protected GUITask task;
     protected boolean enableUIMAViewer = false;
-    protected boolean report = true;
     protected String tabViewName = TasksOverviewController.AnnoView;
     public int maxCommentLength = 1000;
 
