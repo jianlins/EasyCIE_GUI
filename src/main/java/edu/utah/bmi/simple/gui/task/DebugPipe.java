@@ -16,7 +16,7 @@ import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.reader.StringMetaReader;
-import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;
+import edu.utah.bmi.nlp.sectiondectector.SectionDetectorR_AE;
 import edu.utah.bmi.nlp.uima.loggers.GUILogger;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;

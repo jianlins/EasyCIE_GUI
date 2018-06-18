@@ -9,32 +9,32 @@ import edu.utah.bmi.nlp.type.system.Sentence;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
-import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CAS;
-import org.apache.uima.cas.FSIterator;
 import org.apache.uima.cas.Feature;
+import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.cas.Type;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.fit.util.CasUtil;
+import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.tcas.Annotation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 
 public class AnnotationLogger extends JCasAnnotator_ImplBase {
 	public static final String PARAM_TYPE_NAMES = "TypeNames";
 	public static final String PARAM_INDICATION = "Indication";
 	public static final String PARAM_INDICATION_HEADER = "IndicationHeader";
+	public static final String PARAM_SENTENCE_TYPE = "SentenceType";
 	public static StringBuilder sb = new StringBuilder();
 	public static ArrayList<RecordRow> records = new ArrayList<>();
 	protected static HashMap<Class, HashMap<String, Method>> getMethodsMap = new HashMap<>();
 	private String printTypeNames;
 	private String indication, annotator, header;
+	private Class<? extends Annotation> sentenceCls = Sentence.class;
 
 
 	public AnnotationLogger() {
@@ -50,12 +50,21 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 		this.printTypeNames = "";
 		Object obj = cont.getConfigParameterValue(PARAM_TYPE_NAMES);
 		if (obj != null && obj instanceof String) {
-			this.printTypeNames = DeterminantValueSet.checkNameSpace((String) obj);
+			this.printTypeNames = (String) obj;
 		}
 
 		obj = cont.getConfigParameterValue(PARAM_INDICATION);
 		if (obj != null && obj instanceof String) {
 			this.indication = (String) obj;
+		}
+
+		obj = cont.getConfigParameterValue(PARAM_SENTENCE_TYPE);
+		if (obj != null && obj instanceof String) {
+			try {
+				sentenceCls = Class.forName(DeterminantValueSet.checkNameSpace((String) obj)).asSubclass(Annotation.class);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 
 		obj = cont.getConfigParameterValue(PARAM_INDICATION_HEADER);
@@ -69,7 +78,7 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 	public void process(JCas jCas) {
 
 		IntervalST sentenceTree = new IntervalST();
-		ArrayList<Sentence> sentenceList = new ArrayList<>();
+		ArrayList<Annotation> sentenceList = new ArrayList<>();
 		indexSentences(jCas, sentenceList, sentenceTree);
 		String docText = jCas.getDocumentText();
 
@@ -111,10 +120,10 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 		records.add(record);
 	}
 
-	private void indexSentences(JCas jCas, ArrayList<Sentence> sentenceList, IntervalST sentenceTree) {
-		FSIterator<Annotation> it = jCas.getAnnotationIndex(Sentence.type).iterator();
+	private void indexSentences(JCas jCas, ArrayList<Annotation> sentenceList, IntervalST sentenceTree) {
+		Iterator<? extends Annotation> it = JCasUtil.iterator(jCas, sentenceCls);
 		while (it.hasNext()) {
-			Sentence thisSentence = (Sentence) it.next();
+			Annotation thisSentence = it.next();
 			sentenceList.add(thisSentence);
 			sentenceTree.put(new Interval1D(thisSentence.getBegin(), thisSentence.getEnd()), sentenceList.size() - 1);
 		}
@@ -122,7 +131,7 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 
 	private void saveOneTypeAnnotation(CAS cas, String docText, String annotationType,
 									   RecordRow baseRecordRow, ArrayList<RecordRow> annotations,
-									   ArrayList<Sentence> sentenceList, IntervalST sentenceTree) {
+									   ArrayList<Annotation> sentenceList, IntervalST sentenceTree) {
 
 		Iterator<AnnotationFS> annoIter = CasUtil.iterator(cas, CasUtil.getType(cas, annotationType));
 		if (annotationType.indexOf("Sentence") != -1) {
@@ -173,7 +182,7 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 					Object sentenceIdObject = sentenceTree.get(new Interval1D(thisAnnotation.getBegin(), thisAnnotation.getEnd()));
 					String sentence;
 
-					Sentence sentenceAnno;
+					Annotation sentenceAnno;
 					int sentenceBegin, sentenceEnd;
 					if (sentenceIdObject != null) {
 						int sentenceId = (Integer) sentenceIdObject;
@@ -231,7 +240,12 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 				value = m.invoke(thisAnnotation) + "";
 				getMethodsMap.get(cls).put(featureName, m);
 			} else {
-				value = getMethodsMap.get(cls).get(featureName).invoke(thisAnnotation) + "";
+				Object obj = getMethodsMap.get(cls).get(featureName).invoke(thisAnnotation);
+				if (obj instanceof FSArray) {
+					value = serilizeFSArray((FSArray) obj).replaceAll("\n","|");
+				} else {
+					value = obj + "";
+				}
 			}
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
@@ -241,7 +255,29 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 			e.printStackTrace();
 		}
 		return value;
+	}
 
+	private String serilizeFSArray(FSArray ary) {
+		StringBuilder sb = new StringBuilder();
+		int size = ary.size();
+		String[]values=new String[size];
+		ary.copyToArray(0,values,0,size);
+		for (FeatureStructure fs : ary) {
+			List<Feature> features = fs.getType().getFeatures();
+			for (Feature feature : features) {
+				Type domain = feature.getDomain();
+				Type range = feature.getRange();
+				if (range.isArray()) {
+					FeatureStructure child = fs.getFeatureValue(feature);
+					if (child instanceof FSArray)
+						sb.append(serilizeFSArray((FSArray) child));
+				} else {
+					sb.append(feature.getShortName() + ":" + fs.getFeatureValueAsString(feature));
+				}
+			}
+
+		}
+		return sb.toString();
 	}
 
 }

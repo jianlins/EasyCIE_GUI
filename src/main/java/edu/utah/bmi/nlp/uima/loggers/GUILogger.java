@@ -69,6 +69,10 @@ public class GUILogger extends ConsoleLogger {
         this.task = task;
     }
 
+    public GUITask getTask() {
+        return task;
+    }
+
     public void setUIMAViewer(boolean enableUIMAViewer) {
         this.enableUIMAViewer = enableUIMAViewer;
     }
@@ -180,6 +184,8 @@ public class GUILogger extends ConsoleLogger {
                     task.updateGUIMessage("No annotation exported.");
 
                 task.updateGUIProgress(1, 1);
+                if (this.report)
+                    task.popDialog("Done", "Data process compelete", comments);
 
             });
             if (enableUIMAViewer)

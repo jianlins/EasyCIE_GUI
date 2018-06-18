@@ -5,19 +5,23 @@ import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
 
 public class RefreshDebugPipe extends GUITask {
-    protected GUITask guiTask;
-    private TasksFX tasks;
+	protected GUITask guiTask;
+	private static TasksFX tasks;
 
-    public RefreshDebugPipe(TasksFX tasks) {
-        this.tasks = tasks;
-        guiTask = this;
-    }
+	public RefreshDebugPipe(TasksFX tasks) {
+		this.tasks = tasks;
+		guiTask = this;
+	}
 
-    @Override
-    protected Object call() throws Exception {
-        if (guiEnabled)
-            FastDebugPipe.getInstance(tasks).refreshPipe();
+	@Override
+	protected Object call() throws Exception {
+		if (guiEnabled)
+			FastDebugPipe.getInstance(tasks).refreshPipe();
 
-        return null;
-    }
+		return null;
+	}
+
+	public static void showResults() {
+		FastDebugPipe.getInstance(tasks).showResults();
+	}
 }

@@ -60,7 +60,7 @@ public class NERCoordinator_AE extends JCasAnnotator_ImplBase implements RuleBas
 	private void checkOverlap(IntervalST<Annotation> intervalTree, Annotation concept) {
 		Interval1D interval = new Interval1D(concept.getBegin(), concept.getEnd());
 		for(Annotation overlapped :  intervalTree.getAll(interval)) {
-			if (overlapped != null && (overlapped.getEnd() != concept.getBegin() && concept.getEnd() != overlapped.getBegin())) {
+			if (overlapped != null ) {
 				if ((overlapped.getEnd() - overlapped.getBegin()) < (concept.getEnd() - concept.getBegin())) {
 					overlapped.removeFromIndexes();
 					intervalTree.remove(new Interval1D(overlapped.getBegin(), overlapped.getEnd()));

@@ -23,10 +23,10 @@ import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
 import edu.utah.bmi.nlp.fastner.FastNER;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Concept;
-import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UimaContext;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.examples.SourceDocumentInformation;
+import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.joda.time.DateTime;
@@ -50,26 +50,14 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 	public static Logger logger = IOUtil.getLogger(TemporalAnnotator_AE.class);
 
 	//  specify which type of annotations as the target concept
-	public static final String PARAM_TARGET_CONCEPT_TYPE_NAME = "TargetConceptTypeName";
+	public static final String PARAM_SAVE_INFERRED_RECORD_DATE = "SaveInferredRecordDate";
 
-	public static final String PARAM_INTERVAL_DAYS = "IntervalDaysBeforeReferenceDate";
-
-	public static final String PARAM_INFER_ALL = "InferTemporalStatusForAllTargetConcept";
-	//    @ConfigurationParameter(name = CONCEPT_TYPE_NAME)
-	private String targetConceptTypeName;
-	private int targetConceptId;
 	//  read from record table, specify which column is the reference datetime, usually is set to admission datetime.
 	public static final String PARAM_REFERENCE_DATE_COLUMN_NAME = "ReferenceDateColumnName";
 	public static final String PARAM_RECORD_DATE_COLUMN_NAME = "RecordDateColumnName";
 
 
 	private String referenceDateColumnName, recordDateColumnName;
-
-
-	// number of days before admission that still will be considered as current
-
-	private int intervalDaysBeforeReferenceDate;
-	protected boolean inferAll = false;
 
 
 	private HashMap<String, IntervalST<Span>> dateAnnos = new HashMap();
@@ -80,17 +68,16 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 
 	private DateTime referenceDate;
 	private boolean globalCertainty = false;
+	private boolean saveInferredRecordDate = false;
 
 	public void initialize(UimaContext cont) {
 		super.initialize(cont);
 		initPatterns();
 		initNumerMap();
 		Object obj;
-		obj = cont.getConfigParameterValue(PARAM_TARGET_CONCEPT_TYPE_NAME);
-		if (obj == null)
-			targetConceptTypeName = DeterminantValueSet.defaultNameSpace + "Concept";
-		else
-			targetConceptTypeName = (String) obj;
+		obj = cont.getConfigParameterValue(PARAM_SAVE_INFERRED_RECORD_DATE);
+		if (obj != null && obj instanceof Boolean)
+			saveInferredRecordDate = (Boolean) obj;
 
 		obj = cont.getConfigParameterValue(PARAM_REFERENCE_DATE_COLUMN_NAME);
 		if (obj == null)
@@ -104,17 +91,6 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 		else
 			recordDateColumnName = (String) obj;
 
-
-		obj = cont.getConfigParameterValue(PARAM_INTERVAL_DAYS);
-		if (obj == null)
-			intervalDaysBeforeReferenceDate = 14;
-		else
-			intervalDaysBeforeReferenceDate = (int) obj;
-		targetConceptId = AnnotationOper.getTypeId(targetConceptTypeName);
-
-		obj = cont.getConfigParameterValue(PARAM_INFER_ALL);
-		if (obj != null && obj instanceof Boolean && (Boolean) obj == true)
-			inferAll = true;
 
 	}
 
@@ -230,6 +206,13 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 			}
 		}
 		logger.finest(latestDateMention.length() > 0 ? "Record date is not set, inferred from the mention: \"" + latestDateMention + "\" as " + recordDate : "");
+		if(saveInferredRecordDate && recordDate!=null){
+			SourceDocumentInformation meta = JCasUtil.select(jcas, SourceDocumentInformation.class).iterator().next();
+			RecordRow metaRecord = new RecordRow();
+			metaRecord.deserialize(meta.getUri());
+			metaRecord.addCell(recordDateColumnName,recordDate);
+			meta.setUri(metaRecord.serialize());
+		}
 		for (Map.Entry<String, ArrayList<Span>> entry : dates.entrySet()) {
 			String typeOfDate = entry.getKey();
 			switch (typeOfDate) {
@@ -336,7 +319,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 		DateTime dt = null;
 		try {
 
-			String certainty = globalCertainty  ? "certain" : "uncertain";
+			String certainty = globalCertainty ? "certain" : "uncertain";
 			int interval = Integer.parseInt(text.substring(span.begin, span.end).trim());
 			if (recordDate == null)
 				recordDate = referenceDate;
@@ -356,7 +339,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 		DateTime dt = null;
 		try {
 			String numWord = text.substring(span.begin, span.end).trim().toLowerCase();
-			String certainty = globalCertainty  ? "certain" : "uncertain";
+			String certainty = globalCertainty ? "certain" : "uncertain";
 			if (numberMap.containsKey(numWord)) {
 				int interval = numberMap.get(numWord);
 				if (recordDate == null)

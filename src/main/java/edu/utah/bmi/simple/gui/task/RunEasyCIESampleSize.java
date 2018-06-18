@@ -22,7 +22,7 @@ import edu.utah.bmi.nlp.type.system.Doc_Base;
 import edu.utah.bmi.nlp.type.system.SectionHeader;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
 import edu.utah.bmi.nlp.uima.*;
-import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;
+import edu.utah.bmi.nlp.sectiondectector.SectionDetectorR_AE;
 import edu.utah.bmi.nlp.uima.loggers.GUILogger;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;

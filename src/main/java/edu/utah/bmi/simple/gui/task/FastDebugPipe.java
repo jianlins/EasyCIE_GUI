@@ -15,7 +15,7 @@ import edu.utah.bmi.nlp.uima.BunchMixInferencer;
 import edu.utah.bmi.nlp.uima.ae.TemporalContext_AE_General;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
-import edu.utah.bmi.sectiondectector.SectionDetectorR_AE;
+import edu.utah.bmi.nlp.sectiondectector.SectionDetectorR_AE;
 import edu.utah.bmi.nlp.uima.loggers.GUILogger;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
