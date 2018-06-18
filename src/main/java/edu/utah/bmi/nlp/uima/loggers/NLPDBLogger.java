@@ -9,6 +9,7 @@ import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import javafx.application.Platform;
 
 import javax.swing.*;
+import java.io.File;
 import java.util.Date;
 
 /**
@@ -21,6 +22,7 @@ public class NLPDBLogger extends GUILogger {
 	protected String keyColumnName;
 	protected long starttime = 0, completetime = 0;
 	protected String annotator;
+	protected String dbConfigureFile;
 
 
 	protected Object runid;
@@ -33,17 +35,31 @@ public class NLPDBLogger extends GUILogger {
 
 	}
 
+	public NLPDBLogger(String dbConfigureFile, String tableName, String keyColumnName, String annotator) {
+		this.dbConfigureFile = dbConfigureFile;
+		this.ldao = EDAO.getInstance(new File(dbConfigureFile));
+		this.tableName = tableName;
+		this.annotator = annotator;
+		this.keyColumnName = keyColumnName;
+		recordRow = new RecordRow();
+//        runid = ldao.getLastId(tableName, keyColumnName) + 1;
+	}
+
+	/**
+	 * Deprecated, because dao may be disconnected outside this class without known.
+	 *
+	 * @param dao
+	 * @param tableName
+	 * @param keyColumnName
+	 * @param annotator
+	 */
+	@Deprecated
 	public NLPDBLogger(EDAO dao, String tableName, String keyColumnName, String annotator) {
 		this.ldao = dao;
 		this.tableName = tableName;
 		this.annotator = annotator;
 		this.keyColumnName = keyColumnName;
 		recordRow = new RecordRow();
-		runid = dao.insertRecord(tableName, recordRow);
-		if (runid == null)
-			runid = dao.getLastId(tableName);
-		setItem("RUN_ID", runid);
-//        runid = ldao.getLastId(tableName, keyColumnName) + 1;
 	}
 
 
@@ -51,9 +67,6 @@ public class NLPDBLogger extends GUILogger {
 		recordRow = new RecordRow();
 		starttime = 0;
 		completetime = 0;
-		runid = ldao.insertRecord(tableName, recordRow);
-		if (runid == null)
-			runid = ldao.getLastId(tableName);
 	}
 
 	public void setItem(String key, Object value) {
@@ -77,6 +90,11 @@ public class NLPDBLogger extends GUILogger {
 
 
 	public void logStartTime() {
+		ldao = EDAO.getInstance(new File(dbConfigureFile));
+		runid = ldao.insertRecord(tableName, recordRow);
+		if (runid == null)
+			runid = ldao.getLastId(tableName);
+		setItem("RUN_ID", runid);
 		starttime = System.currentTimeMillis();
 		setItem("ANNOTATOR", annotator);
 		setItem("START_DTM", new Date(starttime));
@@ -180,6 +198,7 @@ public class NLPDBLogger extends GUILogger {
 					frame.setVisible(true);
 				});
 		}
+		reset();
 
 	}
 

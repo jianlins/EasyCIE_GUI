@@ -75,9 +75,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
 		annotator = readConfigureString(cont, PARAM_ANNOTATOR, "uima");
 		version = readConfigureString(cont, PARAM_VERSION, null);
 
-		if (dao == null) {
-			dao = EDAO.getInstance(this.sqlFile);
-		}
+		dao = EDAO.getInstance(this.sqlFile);
 		dao.batchsize = batchSize;
 		dao.initiateTableFromTemplate("ANNOTATION_TABLE", snippetTableName, overwriteTable);
 		dao.initiateTableFromTemplate("ANNOTATION_TABLE", docTableName, overwriteTable);
@@ -296,7 +294,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
 					FeatureStructure child = fs.getFeatureValue(feature);
 					sb.append(child + "");
 				} else {
-					sb.append("\t"+feature.getShortName() + ":" + fs.getFeatureValueAsString(feature)+"\n");
+					sb.append("\t" + feature.getShortName() + ":" + fs.getFeatureValueAsString(feature) + "\n");
 				}
 			}
 

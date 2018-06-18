@@ -89,9 +89,8 @@ public class NumberWriter extends JCasAnnotator_ImplBase {
 		parameterObject = cont.getConfigParameterValue(PARAM_ANNOTATOR);
 		annotator = (String) parameterObject;
 
-		if (dao == null || dao.isClosed()) {
-			dao = new EDAO(new File(configFile));
-		}
+		dao = new EDAO(new File(configFile));
+
 		dao.initiateTableFromTemplate("NUMBERS_TABLE", resultTableName, false);
 
 	}
