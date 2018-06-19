@@ -70,7 +70,7 @@ public class NLPDBLogger extends GUILogger {
 		completetime = 0;
 		initCompleteTime = 0;
 		size = 0;
-		runid=0;
+		runid=null;
 	}
 
 	public void setItem(String key, Object value) {
