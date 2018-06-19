@@ -145,6 +145,7 @@ public class TasksOverviewController {
 	public HashMap<String, String> currentDBFileName = new HashMap<>();
 
 	public HashMap<Integer, HashMap<String, Integer>> docIdRowPosMap = new HashMap<>();
+	private boolean showing = false;
 
 	public TasksOverviewController() {
 	}
@@ -397,15 +398,17 @@ public class TasksOverviewController {
 
 
 	public void refreshTableView(String viewName, TextField sqlFilter) {
-		String condition = sqlFilter.getText().trim();
-		String conditionLower = condition.toLowerCase();
-		if (condition.length() > 0) {
-			if (!conditionLower.startsWith("where") && !conditionLower.startsWith("limit")) {
-				condition = " WHERE " + condition;
+		if (!showing) {
+			String condition = sqlFilter.getText().trim();
+			String conditionLower = condition.toLowerCase();
+			if (condition.length() > 0) {
+				if (!conditionLower.startsWith("where") && !conditionLower.startsWith("limit")) {
+					condition = " WHERE " + condition;
+				}
 			}
+			String sql = currentSQLs.get(viewName) + condition;
+			showDBTable(sql, currentDBFileName.get(viewName), ColorAnnotationCell.colorDifferential, viewName);
 		}
-		String sql = currentSQLs.get(viewName) + condition;
-		showDBTable(sql, currentDBFileName.get(viewName), ColorAnnotationCell.colorDifferential, viewName);
 	}
 
 	private void refreshDebugView() {
@@ -591,6 +594,7 @@ public class TasksOverviewController {
 		dbPanel.setVisible(true);
 //      magic: tabPane won't show without following line
 		tabPane.setPrefSize(600, 500);
+		showing = true;
 
 		tableView.setVisible(true);
 		Object tabContentRegion = tableView.getParent().getParent();
@@ -743,10 +747,11 @@ public class TasksOverviewController {
 			data.add(row);
 			haveRead = true;
 		}
-		tableView.setItems(data);
-		tableView.refresh();
 		if (dao != null && !dao.isClosed())
 			dao.close();
+		tableView.setItems(data);
+		tableView.refresh();
+		showing = false;
 		return haveRead;
 	}
 

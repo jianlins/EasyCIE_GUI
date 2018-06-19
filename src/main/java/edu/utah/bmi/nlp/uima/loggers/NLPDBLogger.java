@@ -198,6 +198,16 @@ public class NLPDBLogger extends GUILogger {
 		logItems();
 		Object lastRun_id = runid;
 		if (task != null && task.guiEnabled) {
+
+			Platform.runLater(() -> {
+				TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
+				new ViewOutputDB(tasksOverviewController.mainApp.tasks).run();
+
+				task.updateGUIProgress(1, 1);
+				if (this.report)
+					task.popDialog("Done", "Data process compelete", comments);
+
+			});
 			if (enableUIMAViewer)
 				SwingUtilities.invokeLater(() -> {
 					JFrame frame = new MyAnnotationViewerPlain(new String[]{"Pipeline Debug Viewer", inputPath, descriptorPath + ".xml"});
