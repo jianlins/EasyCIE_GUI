@@ -37,7 +37,7 @@ public class NLPDBLogger extends GUILogger {
 
 	public NLPDBLogger(String dbConfigureFile, String tableName, String keyColumnName, String annotator) {
 		this.dbConfigureFile = dbConfigureFile;
-		this.ldao = EDAO.getInstance(new File(dbConfigureFile),true,false);
+		this.ldao = EDAO.getInstance(new File(dbConfigureFile), true, false);
 		this.tableName = tableName;
 		this.annotator = annotator;
 		this.keyColumnName = keyColumnName;
@@ -66,9 +66,11 @@ public class NLPDBLogger extends GUILogger {
 	public void reset() {
 		recordRow = new RecordRow();
 		starttime = 0;
-		entityCount=0;
+		entityCount = 0;
 		completetime = 0;
-		size=0;
+		initCompleteTime = 0;
+		size = 0;
+		runid=0;
 	}
 
 	public void setItem(String key, Object value) {
@@ -94,14 +96,16 @@ public class NLPDBLogger extends GUILogger {
 	public void logStartTime() {
 		recordRow = new RecordRow();
 		starttime = 0;
-		entityCount=0;
+		entityCount = 0;
 		completetime = 0;
-		initCompleteTime=0;
-		size=0;
+		initCompleteTime = 0;
+		size = 0;
 		ldao = EDAO.getInstance(new File(dbConfigureFile));
-		runid = ldao.insertRecord(tableName, recordRow);
-		if (runid == null)
-			runid = ldao.getLastId(tableName);
+		if(runid==null || runid.equals(0)) {
+			runid = ldao.insertRecord(tableName, recordRow);
+			if (runid == null)
+				runid = ldao.getLastId(tableName);
+		}
 		setItem("RUN_ID", runid);
 		starttime = System.currentTimeMillis();
 		setItem("ANNOTATOR", annotator);
@@ -126,6 +130,12 @@ public class NLPDBLogger extends GUILogger {
 	}
 
 	public Object getRunid() {
+		if (runid == null) {
+			runid = ldao.insertRecord(tableName, recordRow);
+			if (runid == null)
+				runid = ldao.getLastId(tableName);
+			setItem("RUN_ID", runid);
+		}
 		return runid;
 	}
 
@@ -206,7 +216,7 @@ public class NLPDBLogger extends GUILogger {
 					frame.setVisible(true);
 				});
 		}
-
+		reset();
 	}
 
 
