@@ -84,7 +84,9 @@ public class EDAO {
 			e.printStackTrace();
 		}
 		lastInstance = instances.get(key);
-		return instances.get(key);
+		if (initiateTables)
+			lastInstance.initiateTables(overwriteExistingTables);
+		return lastInstance;
 	}
 
 	public static EDAO getLastInstance() {
