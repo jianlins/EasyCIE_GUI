@@ -6,7 +6,9 @@ import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.MyAnnotationViewerPlain;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
+import edu.utah.bmi.simple.gui.task.ViewOutputDB;
 import javafx.application.Platform;
+import javafx.scene.input.MouseEvent;
 
 import javax.swing.*;
 import java.io.File;
@@ -70,7 +72,7 @@ public class NLPDBLogger extends GUILogger {
 		completetime = 0;
 		initCompleteTime = 0;
 		size = 0;
-		runid=null;
+		runid = null;
 	}
 
 	public void setItem(String key, Object value) {
@@ -101,7 +103,7 @@ public class NLPDBLogger extends GUILogger {
 		initCompleteTime = 0;
 		size = 0;
 		ldao = EDAO.getInstance(new File(dbConfigureFile));
-		if(runid==null || runid.equals(0)) {
+		if (runid == null || runid.equals(0)) {
 			runid = ldao.insertRecord(tableName, recordRow);
 			if (runid == null)
 				runid = ldao.getLastId(tableName);
@@ -130,6 +132,7 @@ public class NLPDBLogger extends GUILogger {
 	}
 
 	public Object getRunid() {
+		ldao = EDAO.getInstance(new File(dbConfigureFile));
 		if (runid == null) {
 			runid = ldao.insertRecord(tableName, recordRow);
 			if (runid == null)
@@ -193,21 +196,8 @@ public class NLPDBLogger extends GUILogger {
 		ldao.close();
 
 		logItems();
-
+		Object lastRun_id = runid;
 		if (task != null && task.guiEnabled) {
-			Platform.runLater(() -> {
-				boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(
-						AnnotationLogger.records.iterator(), columnInfo, "output", tabViewName);
-				if (res)
-					task.updateGUIMessage("String processing completed.");
-				else
-					task.updateGUIMessage("No annotation exported.");
-
-				task.updateGUIProgress(1, 1);
-				if (this.report)
-					task.popDialog("Done", "Data process compelete", comments);
-
-			});
 			if (enableUIMAViewer)
 				SwingUtilities.invokeLater(() -> {
 					JFrame frame = new MyAnnotationViewerPlain(new String[]{"Pipeline Debug Viewer", inputPath, descriptorPath + ".xml"});

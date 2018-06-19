@@ -100,7 +100,7 @@ public class TasksOverviewController {
 
 
 	@FXML
-	private Button annoTableRefresh, docTableRefresh, compareTableRefresh;
+	public Button annoTableRefresh, docTableRefresh, compareTableRefresh;
 
 	@FXML
 	public TextField annoSqlFilter, docSqlFilter, compareSqlFilter;

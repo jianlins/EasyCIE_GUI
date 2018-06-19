@@ -213,8 +213,7 @@ public class RunEasyCIE extends GUITask {
 	}
 
 	protected void initUIMALogger() {
-		wdao = EDAO.getInstance(new File(writeConfigFileName), false, false);
-		uimaLogger = new NLPDBLogger(wdao, "LOG", "RUN_ID", annotator);
+		uimaLogger = new NLPDBLogger(writeConfigFileName, "LOG", "RUN_ID", annotator);
 		uimaLogger.setReportable(report);
 		uimaLogger.logStartTime();
 	}
@@ -327,11 +326,6 @@ public class RunEasyCIE extends GUITask {
 							XMIWritter_AE.PARAM_UIMATYPES, exporttypes});
 
 		if (!(ehost || brat || xmi)) {
-			SQLWriterCasConsumer.dao = wdao;
-			BunchMixInferencer.dao = wdao;
-			if (!wdao.checkExits("checkAnnotatorExist", annotator)) {
-				wdao.insertRecord("ANNOTATORS", new RecordRow(annotator));
-			}
 			runner.addAnalysisEngine(SQLWriterCasConsumer.class, new Object[]{
 					SQLWriterCasConsumer.PARAM_DB_CONFIG_FILE, writeConfigFileName,
 					SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable,
