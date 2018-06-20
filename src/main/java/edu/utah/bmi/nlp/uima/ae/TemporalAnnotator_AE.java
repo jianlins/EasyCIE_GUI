@@ -176,41 +176,43 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 		String latestDateMention = "";
 		ArrayList<Annotation> allDateMentions = new ArrayList<>();
 		if (recordDate == null) {
-			for (Span span : dates.get("CERTAIN_DATE")) {
-				DateTime dt = null;
-				String dateMention = text.substring(span.begin, span.end).trim();
-				try {
-					dt = parseDateString(dateMention, recordDate);
-					if (recordDate == null || dt.isAfter(recordDate)) {
-						recordDate = dt;
-						latestDateMention = dateMention;
-					}
-				} catch (Exception e) {
+			if (dates.containsKey("CERTAIN_DATE"))
+				for (Span span : dates.get("CERTAIN_DATE")) {
+					DateTime dt = null;
+					String dateMention = text.substring(span.begin, span.end).trim();
+					try {
+						dt = parseDateString(dateMention, recordDate);
+						if (recordDate == null || dt.isAfter(recordDate)) {
+							recordDate = dt;
+							latestDateMention = dateMention;
+						}
+					} catch (Exception e) {
 //                    e.printStackTrace();
+					}
 				}
-			}
 		}
 		if (recordDate == null) {
-			for (Span span : dates.get("CERTAIN_YEAR")) {
-				DateTime dt = null;
-				String dateMention = text.substring(span.begin, span.end).trim();
-				try {
-					dt = parseDateString(dateMention, recordDate);
-					if (recordDate == null || dt.isAfter(recordDate)) {
-						recordDate = dt;
-						latestDateMention = dateMention;
-					}
-				} catch (Exception e) {
+			if (dates.containsKey("CERTAIN_YEAR"))
+				for (Span span : dates.get("CERTAIN_YEAR")) {
+					DateTime dt = null;
+					String dateMention = text.substring(span.begin, span.end).trim();
+					try {
+						dt = parseDateString(dateMention, recordDate);
+						if (recordDate == null || dt.isAfter(recordDate)) {
+							recordDate = dt;
+							latestDateMention = dateMention;
+						}
+					} catch (Exception e) {
 //                    e.printStackTrace();
+					}
 				}
-			}
 		}
 		logger.finest(latestDateMention.length() > 0 ? "Record date is not set, inferred from the mention: \"" + latestDateMention + "\" as " + recordDate : "");
-		if(saveInferredRecordDate && recordDate!=null){
+		if (saveInferredRecordDate && recordDate != null) {
 			SourceDocumentInformation meta = JCasUtil.select(jcas, SourceDocumentInformation.class).iterator().next();
 			RecordRow metaRecord = new RecordRow();
 			metaRecord.deserialize(meta.getUri());
-			metaRecord.addCell(recordDateColumnName,recordDate);
+			metaRecord.addCell(recordDateColumnName, recordDate);
 			meta.setUri(metaRecord.serialize());
 		}
 		for (Map.Entry<String, ArrayList<Span>> entry : dates.entrySet()) {
