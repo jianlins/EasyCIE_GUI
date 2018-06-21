@@ -1,6 +1,7 @@
 package edu.utah.bmi.nlp.uima.ae;
 
 import edu.utah.bmi.nlp.core.*;
+import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.fit.util.JCasUtil;
@@ -8,6 +9,7 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.logging.Logger;
@@ -19,7 +21,7 @@ import java.util.logging.Logger;
  * Created on 7/6/16.
  */
 public class NERCoordinator_AE extends JCasAnnotator_ImplBase implements RuleBasedAEInf {
-	private static Logger logger = IOUtil.getLogger(NERCoordinator_AE.class);
+	private static Logger logger = IOUtil.getLogger(edu.utah.bmi.nlp.uima.ae.NERCoordinator_AE.class);
 	public static final String PARAM_RULE_STR = DeterminantValueSet.PARAM_RULE_STR;
 	protected LinkedHashSet<Class> inclusions = new LinkedHashSet<>();
 	public void initialize(UimaContext cont) {
@@ -59,17 +61,23 @@ public class NERCoordinator_AE extends JCasAnnotator_ImplBase implements RuleBas
 	 */
 	private void checkOverlap(IntervalST<Annotation> intervalTree, Annotation concept) {
 		Interval1D interval = new Interval1D(concept.getBegin(), concept.getEnd());
-		for(Annotation overlapped :  intervalTree.getAll(interval)) {
-			if (overlapped != null ) {
-				if ((overlapped.getEnd() - overlapped.getBegin()) < (concept.getEnd() - concept.getBegin())) {
-					overlapped.removeFromIndexes();
-					intervalTree.remove(new Interval1D(overlapped.getBegin(), overlapped.getEnd()));
-					intervalTree.put(interval, concept);
+		Iterator<Annotation> overlaps = intervalTree.getAll(interval).iterator();
+		if(!overlaps.hasNext()){
+			intervalTree.put(interval, concept);
+		}else {
+			while (overlaps.hasNext()) {
+				Annotation overlapped = overlaps.next();
+				if (overlapped != null) {
+					if ((overlapped.getEnd() - overlapped.getBegin()) < (concept.getEnd() - concept.getBegin())) {
+						overlapped.removeFromIndexes();
+						intervalTree.remove(new Interval1D(overlapped.getBegin(), overlapped.getEnd()));
+						intervalTree.put(interval, concept);
+					} else {
+						concept.removeFromIndexes();
+					}
 				} else {
-					concept.removeFromIndexes();
+					intervalTree.put(interval, concept);
 				}
-			} else {
-				intervalTree.put(interval, concept);
 			}
 		}
 	}
