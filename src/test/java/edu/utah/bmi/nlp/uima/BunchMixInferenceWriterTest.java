@@ -21,7 +21,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.logging.Level;
 
-public class BunchMixInferencerTest {
+public class BunchMixInferenceWriterTest {
     static AdaptableUIMACPERunner runner;
     static JCas jCas;
     static CAS cas;
@@ -73,10 +73,10 @@ public class BunchMixInferencerTest {
     public void process() throws AnalysisEngineProcessException, ClassNotFoundException, ResourceInitializationException {
         String ruleStr = "&DefaultBunchConclusion\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC";
-        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferencer.class, BunchMixInferencer.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
-                BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                BunchMixInferencer.PARAM_RULE_STR, ruleStr);
-        BunchMixInferencer.dao=new TDAO();
+        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class, BunchMixInferenceWriter.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
+                BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                BunchMixInferenceWriter.PARAM_RULE_STR, ruleStr);
+        BunchMixInferenceWriter.dao=new TDAO();
         processDoc(jCas, 11, "MI_DOC");
         processDoc(jCas, 11, "ASP_DOC");
         processDoc(jCas, 11, "Neg_MI_DOC");
@@ -87,10 +87,10 @@ public class BunchMixInferencerTest {
     public void process2() throws AnalysisEngineProcessException, ClassNotFoundException, ResourceInitializationException {
         String ruleStr = "&DefaultBunchConclusion\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC,Neg_MI_DOC";
-        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferencer.class, BunchMixInferencer.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
-                BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                BunchMixInferencer.PARAM_RULE_STR, ruleStr);
-        BunchMixInferencer.dao=new TDAO();
+        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class, BunchMixInferenceWriter.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
+                BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                BunchMixInferenceWriter.PARAM_RULE_STR, ruleStr);
+        BunchMixInferenceWriter.dao=new TDAO();
         processDoc(jCas, 11, "MI_DOC");
         processDoc(jCas, 11, "ASP_DOC");
         processDoc(jCas, 11, "Neg_MI_DOC");
@@ -101,10 +101,10 @@ public class BunchMixInferencerTest {
     public void process3() throws AnalysisEngineProcessException, ClassNotFoundException, ResourceInitializationException {
         String ruleStr = "&DefaultBunchConclusion\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC";
-        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferencer.class, BunchMixInferencer.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
-                BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                BunchMixInferencer.PARAM_RULE_STR, ruleStr);
-        BunchMixInferencer.dao=new TDAO();
+        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class, BunchMixInferenceWriter.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
+                BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                BunchMixInferenceWriter.PARAM_RULE_STR, ruleStr);
+        BunchMixInferenceWriter.dao=new TDAO();
         processDoc(jCas, 11, "MI_DOC");
         processDoc(jCas, 11, "Neg_MI_DOC");
         processDoc(jCas, 12, "Neg_MI_DOC");

@@ -29,7 +29,6 @@ public class ExecuteOsCommand extends javafx.concurrent.Task {
 
     private void initiate(TasksFX tasks, String args) {
         command = smartParseArgs(tasks, args);
-        System.out.println(command);
     }
 
     /**
@@ -86,9 +85,8 @@ public class ExecuteOsCommand extends javafx.concurrent.Task {
             // Show exit code of process
 
             BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line = "";
+            String line ;
             while ((line = b.readLine()) != null) {
-                System.out.println(line);
                 if (line.startsWith("prg:")) {
                     String[] progressNums = line.substring(4).trim().split(",");
                     Long workDone = Long.parseLong(progressNums[0]);

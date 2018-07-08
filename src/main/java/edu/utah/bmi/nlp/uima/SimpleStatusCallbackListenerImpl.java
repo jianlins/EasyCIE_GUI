@@ -22,110 +22,112 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener {
-	public static Logger syslogger = Logger.getLogger(SimpleStatusCallbackListenerImpl.class.getCanonicalName());
-	protected final List<Exception> exceptions = new ArrayList();
-	protected boolean isProcessing;
-	protected UIMALogger logger;
-	public CollectionProcessingEngine mCPE;
-	protected DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    public static Logger syslogger = Logger.getLogger(SimpleStatusCallbackListenerImpl.class.getCanonicalName());
+    protected final List<Exception> exceptions = new ArrayList();
+    protected boolean isProcessing;
+    protected UIMALogger logger;
+    public CollectionProcessingEngine mCPE;
+    protected StatusSetable runner;
 
-	protected SimpleStatusCallbackListenerImpl() {
-	}
+    protected SimpleStatusCallbackListenerImpl() {
+    }
 
-	public SimpleStatusCallbackListenerImpl(UIMALogger logger) {
-		this.isProcessing = true;
-		this.logger = logger;
-		if (logger != null)
-			logger.logStartTime();
-	}
+    public SimpleStatusCallbackListenerImpl(UIMALogger logger) {
+        this.isProcessing = true;
+        this.logger = logger;
+        if (logger != null)
+            logger.logStartTime();
+    }
 
-	public void setCollectionProcessingEngine(CollectionProcessingEngine engine) {
-		this.mCPE = engine;
-	}
+    public void setCollectionProcessingEngine(CollectionProcessingEngine engine) {
+        this.mCPE = engine;
+    }
 
-	public void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
-		if (logger != null)
-			logger.entityProcessComplete(aCas, aStatus);
+    public void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
+        if (logger != null)
+            logger.entityProcessComplete(aCas, aStatus);
 
-	}
+    }
 
-	public void aborted() {
-		synchronized (this) {
-			if (logger != null)
-				logger.aborted();
-			if (this.isProcessing) {
-				this.isProcessing = false;
-				this.notify();
-			}
-		}
-	}
+    public void aborted() {
+        synchronized (this) {
+            if (logger != null)
+                logger.aborted();
+            if (this.isProcessing) {
+                this.isProcessing = false;
+                this.notify();
+            }
+        }
+    }
 
-	public void initializationComplete() {
-		if (this.logger == null) {
-			return;
-		}
-		int totalDocs = 0;
-		Progress[] progress = this.mCPE.getCollectionReader().getProgress();
-		if (progress != null) {
-			for (int i = 0; i < progress.length; ++i) {
-				if (progress[i].getUnit().equals(this.logger.getUnit())) {
-					totalDocs = (int) progress[i].getTotal();
-					break;
-				}
-			}
-		}
-		logger.initializationComplete(totalDocs);
+    public void initializationComplete() {
+        if (this.logger == null) {
+            return;
+        }
+        int totalDocs = 0;
+        Progress[] progress = this.mCPE.getCollectionReader().getProgress();
+        if (progress != null) {
+            for (int i = 0; i < progress.length; ++i) {
+                if (progress[i].getUnit().equals(this.logger.getUnit())) {
+                    totalDocs = (int) progress[i].getTotal();
+                    break;
+                }
+            }
+        }
+        logger.initializationComplete(totalDocs);
 
 
-	}
+    }
 
-	public void batchProcessComplete() {
-	}
+    public void batchProcessComplete() {
+    }
 
-	public void paused() {
-		if (this.logger != null) {
-			logger.paused();
-		}
+    public void paused() {
+        if (this.logger != null) {
+            logger.paused();
+        }
 
-	}
+    }
 
-	public void resumed() {
-		if (this.logger != null) {
-			logger.resumed();
-		}
+    public void resumed() {
+        if (this.logger != null) {
+            logger.resumed();
+        }
 
-	}
+    }
 
-	public void collectionProcessComplete() {
+    public void collectionProcessComplete() {
 
-		if (this.logger != null) {
-			this.logger.logString(this.df.format(new Date()) + "\tCollection completed");
-		}
+        synchronized (this) {
+            if (this.isProcessing) {
+                this.notify();
+                if (this.logger != null) {
+                    if (runner != null)
+                        runner.setStatus(2);
+                    StringBuilder reportContent = new StringBuilder();
+                    Iterator var13 = this.mCPE.getPerformanceReport().getEvents().iterator();
+                    while (var13.hasNext()) {
+                        ProcessTraceEvent event = (ProcessTraceEvent) var13.next();
+                        String componentName = event.getComponentName();
+                        componentName = componentName.substring(componentName.lastIndexOf(".") + 1);
+                        String eventType = event.getType();
+                        if (eventType.startsWith("End")) {
+                            reportContent.append("\t\t" + event.getType() + "\t" + event.getDuration() + " ms\n");
+                        } else {
+                            reportContent.append(componentName + "\t" + event.getType() + "\t" + event.getDuration() + " ms\n");
+                        }
+                    }
+                    if (logger != null)
+                        logger.collectionProcessComplete(reportContent.toString());
+                }
+            }
 
-		synchronized (this) {
-			if (this.isProcessing) {
-				this.notify();
-				if (this.logger != null) {
-					StringBuilder reportContent = new StringBuilder();
-					Iterator var13 = this.mCPE.getPerformanceReport().getEvents().iterator();
-					while (var13.hasNext()) {
-						ProcessTraceEvent event = (ProcessTraceEvent) var13.next();
-						String componentName = event.getComponentName();
-						componentName = componentName.substring(componentName.lastIndexOf(".") + 1);
-						String eventType = event.getType();
-						if (eventType.startsWith("End")) {
-							reportContent.append("\t\t" + event.getType() + "\t" + event.getDuration() + " ms\n");
-						} else {
-							reportContent.append(componentName + "\t" + event.getType() + "\t" + event.getDuration() + " ms\n");
-						}
-					}
-					if (logger != null)
-						logger.collectionProcessComplete(reportContent.toString());
-				}
-			}
-
-			this.isProcessing = false;
+            this.isProcessing = false;
 //            System.exit(1);
-		}
-	}
+        }
+    }
+
+    public void setRunner(StatusSetable runner) {
+        this.runner = runner;
+    }
 }

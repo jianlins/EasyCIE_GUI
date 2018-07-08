@@ -37,7 +37,7 @@ public class ConfigKeys {
     public static final String excludesections = "pipeLineSetting/excludesections";
 
     public static final String contextRule = "pipeLineSetting/contextRule";
-    public static final String reportPreannotating = "pipeLineSetting/report";
+    public static final String reportAfterProcessing = "pipeLineSetting/report";
     public static final String fastNerCaseSensitive = "pipeLineSetting/fastNERCaseSensitive";
     public static final String forceAssignSection = "pipeLineSetting/forceAssignSection";
 

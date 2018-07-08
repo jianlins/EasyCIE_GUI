@@ -3,6 +3,7 @@ package edu.utah.bmi.simple.gui.doubleclick;
 import edu.utah.bmi.simple.gui.entry.Setting;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import javafx.application.Platform;
+import org.apache.uima.tools.cpm.AdaptableCpmFrame;
 import org.apache.uima.tools.cpm.MyCpmFrame;
 
 import javax.swing.*;
@@ -23,8 +24,8 @@ public class RunCpmFrame extends javafx.concurrent.Task {
     @Override
     protected Object call() {
         SwingUtilities.invokeLater(() -> {
-            MyCpmFrame.main(new String[]{cpeDescriptor});
-            Frame[] frames = MyCpmFrame.getFrames();
+            AdaptableCpmFrame.main(new String[]{cpeDescriptor});
+            Frame[] frames = AdaptableCpmFrame.getFrames();
             frames[0].setSize(800,600);
         });
         updateMessage("Open UIMA CPE Configurator");

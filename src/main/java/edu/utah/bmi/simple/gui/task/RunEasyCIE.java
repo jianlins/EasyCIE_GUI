@@ -12,7 +12,6 @@ import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
 import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
 import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.sql.EDAO;
-import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Doc_Base;
 import edu.utah.bmi.nlp.type.system.SectionHeader;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
@@ -149,7 +148,8 @@ public class RunEasyCIE extends GUITask {
 		excludesections = config.getValue(ConfigKeys.excludesections);
 		contextRule = config.getValue(ConfigKeys.contextRule);
 		dateRule = config.getValue(ConfigKeys.dateRule);
-		dayInterval = Integer.parseInt(config.getValue(ConfigKeys.dayInterval).trim());
+		String value=config.getValue(ConfigKeys.dayInterval).trim();
+		dayInterval = value.length()==0?0:Integer.parseInt(value);
 		String rawStringValue = config.getValue(ConfigKeys.inferAllTemporal);
 		inferAllTemporal = rawStringValue.length() > 0 && (rawStringValue.charAt(0) == 't' || rawStringValue.charAt(0) == 'T' || rawStringValue.charAt(0) == '1');
 		rawStringValue = config.getValue(ConfigKeys.saveDateAnnotation);
@@ -160,7 +160,7 @@ public class RunEasyCIE extends GUITask {
 		docInfRule = config.getValue(ConfigKeys.docInfRule);
 		bunchInfRule = config.getValue(ConfigKeys.bunchInfRule);
 
-		rawStringValue = config.getValue(ConfigKeys.reportPreannotating);
+		rawStringValue = config.getValue(ConfigKeys.reportAfterProcessing);
 		report = rawStringValue.length() > 0 && (rawStringValue.charAt(0) == 't' || rawStringValue.charAt(0) == 'T' || rawStringValue.charAt(0) == '1');
 		rawStringValue = config.getValue(ConfigKeys.fastNerCaseSensitive);
 		fastNERCaseSensitive = rawStringValue.length() > 0 && (rawStringValue.charAt(0) == 't' || rawStringValue.charAt(0) == 'T' || rawStringValue.charAt(0) == '1');
@@ -336,16 +336,16 @@ public class RunEasyCIE extends GUITask {
 					SQLWriterCasConsumer.PARAM_OVERWRITETABLE, false, SQLWriterCasConsumer.PARAM_BATCHSIZE, 150});
 //			NumberWriter.ldao = wdao;
 //			runner.addAnalysisEngine(NumberWriter.class, new Object[]{NumberWriter.PARAM_OUTPUT_TYPE, "SAMPLE_SIZE",
-//					NumberWriter.PARAM_SQLFILE, writeConfigFileName, NumberWriter.PARAM_TABLENAME, "NUMBERS",
+//					NumberWriter.PARAM_SQLFILE, writerDBConfigFileName, NumberWriter.PARAM_TABLENAME, "NUMBERS",
 //					NumberWriter.PARAM_ANNOTATOR, annotator,
 //					NumberWriter.PARMA_ADD_OUTPUT_TYPE, "GROUP_SIZE"});
 			if (bunchInfRule.length() > 0) {
-				runner.addAnalysisEngine(BunchMixInferencer.class, new Object[]{BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-						BunchMixInferencer.PARAM_SQLFILE, writeConfigFileName,
-						BunchMixInferencer.PARAM_RULE_STR, bunchInfRule,
-						BunchMixInferencer.PARAM_TABLENAME, bunchResultTable,
-						BunchMixInferencer.PARAM_ANNOTATOR, annotator,
-						BunchMixInferencer.PARAM_VERSION, runId});
+				runner.addAnalysisEngine(BunchMixInferenceWriter.class, new Object[]{BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+						BunchMixInferenceWriter.PARAM_SQLFILE, writeConfigFileName,
+						BunchMixInferenceWriter.PARAM_RULE_STR, bunchInfRule,
+						BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable,
+						BunchMixInferenceWriter.PARAM_ANNOTATOR, annotator,
+						BunchMixInferenceWriter.PARAM_VERSION, runId});
 			}
 		}
 

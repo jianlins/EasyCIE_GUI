@@ -20,13 +20,14 @@ import org.apache.uima.UIMAException;
 import org.apache.uima.UIMARuntimeException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.collection.EntityProcessStatus;
+import org.apache.uima.resource.ResourceManager;
+import org.apache.uima.util.Level;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -70,12 +71,12 @@ public class ConsoleLogger implements UIMALogger {
     }
 
 
-    public long getStarttime() {
+    public long getStartTime() {
         return startTime;
     }
 
 
-    public long getCompletetime() {
+    public long getCompleteTime() {
         return completeTime;
     }
 
@@ -97,7 +98,7 @@ public class ConsoleLogger implements UIMALogger {
     }
 
     public void logString(String msg) {
-        System.out.println(msg);
+        syslogger.log(syslogger.getLevel(), msg);
     }
 
     @Override
@@ -116,7 +117,6 @@ public class ConsoleLogger implements UIMALogger {
         this.initCompleteTime = System.currentTimeMillis();
         logString(this.df.format(new Date()) + "\tCPM Initialization Complete");
         this.totaldocs = totalDocs;
-
     }
 
     @Override
@@ -124,7 +124,7 @@ public class ConsoleLogger implements UIMALogger {
         if (aStatus.isException()) {
             List ex = aStatus.getExceptions();
             displayError((Throwable) ex.get(0));
-        }else{
+        } else {
             entityCount++;
         }
     }
@@ -208,4 +208,143 @@ public class ConsoleLogger implements UIMALogger {
         logString(message);
     }
 
+    @Override
+    public void log(String aMessage) {
+        logString(aMessage);
+    }
+
+    @Override
+    public void log(String aResourceBundleName, String aMessageKey, Object[] aArguments) {
+        logString(aResourceBundleName + "\t" + aMessageKey + "\n\t" + Arrays.asList(aArguments));
+    }
+
+    @Override
+    public void logException(Exception aException) {
+        logString(aException.toString());
+    }
+
+    @Override
+    public void setOutputStream(PrintStream aStream) {
+
+    }
+
+    @Override
+    public void setOutputStream(OutputStream aStream) {
+
+    }
+
+    @Override
+    public void log(Level level, String aMessage) {
+        switch (level.toInteger()) {
+            case Level.FINEST_INT:
+                syslogger.finest(aMessage);
+                break;
+            case Level.FINER_INT:
+                syslogger.finer(aMessage);
+                break;
+            case Level.FINE_INT:
+                syslogger.fine(aMessage);
+                break;
+            case Level.INFO_INT:
+                syslogger.info(aMessage);
+                break;
+            case Level.WARNING_INT:
+                syslogger.warning(aMessage);
+                break;
+            case Level.SEVERE_INT:
+                syslogger.severe(aMessage);
+                break;
+            case Level.ALL_INT:
+                syslogger.log(java.util.logging.Level.ALL, aMessage);
+                break;
+            case Level.CONFIG_INT:
+                syslogger.log(java.util.logging.Level.CONFIG,aMessage);
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void log(Level level, String aMessage, Object param1) {
+        log(level, aMessage + "\t" + param1);
+
+    }
+
+    @Override
+    public void log(Level level, String aMessage, Object[] params) {
+        log(level, aMessage + "\t" + Arrays.asList(params));
+    }
+
+    @Override
+    public void log(Level level, String aMessage, Throwable thrown) {
+        log(level, aMessage + "\t" + thrown.toString());
+    }
+
+    @Override
+    public void logrb(Level level, String sourceClass, String sourceMethod, String bundleName, String msgKey) {
+        log(level, sourceClass + ":\t" + sourceMethod + "\t" + bundleName + "\t" + msgKey);
+    }
+
+    @Override
+    public void logrb(Level level, String sourceClass, String sourceMethod, String bundleName, String msgKey, Object param1) {
+        log(level, sourceClass + ":\t" + sourceMethod + "\t" + bundleName + "\t" + msgKey + "\t" + param1);
+    }
+
+    @Override
+    public void logrb(Level level, String sourceClass, String sourceMethod, String bundleName, String msgKey, Object[] params) {
+        log(level, sourceClass + ":\t" + sourceMethod + "\t" + bundleName + "\t" + msgKey + "\t" + Arrays.asList(params));
+    }
+
+    @Override
+    public void logrb(Level level, String sourceClass, String sourceMethod, String bundleName, String msgKey, Throwable thrown) {
+        log(level, sourceClass + ":\t" + sourceMethod + "\t" + bundleName + "\t" + msgKey + "\t" + thrown.toString());
+    }
+
+    @Override
+    public void log(String wrapperFQCN, Level level, String message, Throwable thrown) {
+        log(level, wrapperFQCN + ":\t" + message + "\t" + thrown.toString());
+    }
+
+    @Override
+    public boolean isLoggable(Level level) {
+        return false;
+    }
+
+    @Override
+    public void setLevel(Level level) {
+        switch (level.toInteger()) {
+            case Level.FINEST_INT:
+                syslogger.setLevel(java.util.logging.Level.FINEST);
+                break;
+            case Level.FINER_INT:
+                syslogger.setLevel(java.util.logging.Level.FINER);
+                break;
+            case Level.FINE_INT:
+                syslogger.setLevel(java.util.logging.Level.FINE);
+                break;
+            case Level.INFO_INT:
+                syslogger.setLevel(java.util.logging.Level.INFO);
+                break;
+            case Level.WARNING_INT:
+                syslogger.setLevel(java.util.logging.Level.WARNING);
+                break;
+            case Level.SEVERE_INT:
+                syslogger.setLevel(java.util.logging.Level.SEVERE);
+                break;
+            case Level.ALL_INT:
+                syslogger.setLevel(java.util.logging.Level.ALL);
+                break;
+            case Level.CONFIG_INT:
+                syslogger.setLevel(java.util.logging.Level.CONFIG);
+                break;
+            default:
+                syslogger.setLevel(java.util.logging.Level.OFF);
+                break;
+        }
+    }
+
+    @Override
+    public void setResourceManager(ResourceManager resourceManager) {
+
+    }
 }

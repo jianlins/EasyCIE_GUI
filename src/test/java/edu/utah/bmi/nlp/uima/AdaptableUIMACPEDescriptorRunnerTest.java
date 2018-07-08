@@ -1,72 +1,71 @@
 package edu.utah.bmi.nlp.uima;
 
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
-import edu.utah.bmi.nlp.sql.EDAO;
-import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
-import org.apache.uima.collection.CollectionProcessingEngine;
+import org.apache.uima.collection.base_cpm.CasProcessor;
 import org.apache.uima.collection.metadata.CpeCasProcessor;
 import org.apache.uima.collection.metadata.CpeDescriptorException;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.LinkedHashMap;
+
+import static java.lang.Thread.sleep;
 
 public class AdaptableUIMACPEDescriptorRunnerTest {
     @Test
-    public void test() throws CpeDescriptorException {
-        AdaptableUIMACPEDescriptorRunner runner = new AdaptableUIMACPEDescriptorRunner("desc/cpe/Preannotator.xml");
-        CollectionProcessingEngine mCPE = runner.mCPE;
+    public void testBasic() throws CpeDescriptorException {
+        AdaptableCPEDescriptorRunner runner = new AdaptableCPEDescriptorRunner("desc/cpe/n2c2_mi2.xml", "test",null);
         CpeCasProcessor[] cpeCasProcessors = runner.currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors();
         for (CpeCasProcessor cpeCasProcessor : cpeCasProcessors) {
             System.out.println(cpeCasProcessor.getName());
-
         }
 
     }
 
     @Test
-    public void test2() throws CpeDescriptorException {
+    public void testExteranlConfigureMap() throws CpeDescriptorException {
         LinkedHashMap<String, String> configs = new LinkedHashMap<>();
         configs.put("FastNER", "@fastner\n" +
                 "@splitter:|\n" +
                 "very concept|ConceptA\n" +
                 "tee|ConceptB");
-        AdaptableUIMACPEDescriptorRunner runner = new AdaptableUIMACPEDescriptorRunner("desc/cpe/Preannotator.xml", configs);
-        CollectionProcessingEngine mCPE = runner.mCPE;
+        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/n2c2_mi2.xml", null, configs);
         CpeCasProcessor[] cpeCasProcessors = runner.currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors();
         for (CpeCasProcessor cpeCasProcessor : cpeCasProcessors) {
             System.out.println(cpeCasProcessor.getName());
         }
     }
 
-
-    @Test
-    public void test3() throws CpeDescriptorException {
-        LinkedHashMap<String, String> configs = new LinkedHashMap<>();
-        AdaptableUIMACPEDescriptorRunner runner = new AdaptableUIMACPEDescriptorRunner("desc/cpe/n2c2_mi2.xml", "classes");
-        runner.setLogger(new ConsoleLogger());
-//        CollectionProcessingEngine mCPE = runner.mCPE;
-//        CpeCasProcessor[] cpeCasProcessors = runner.currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors();
-//        for (CpeCasProcessor cpeCasProcessor : cpeCasProcessors) {
-//            System.out.println(cpeCasProcessor.getName());
-//        }
-        runner.run();
-    }
-
+//
+//    public static void main(String[] args) {
+//        LinkedHashMap<String, String> configs = new LinkedHashMap<>();
+//        configs.put("SQLWriter_AE/Annotator", "test1");
+//        configs.put("BunchInferenceWriter_AE/Annotator", "test1");
+//        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/n2c2_mi2.xml",
+//                configs, "classes");
+//        runner.compileCPE();
+//        CasProcessor[] processors = runner.getmCPE().getCasProcessors();
+//        processors[processors.length - 1] = null;
+//        runner.run();
+//    }
 
 
-
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 //        AdaptableCpmFrame.main(new String[]{});
         LinkedHashMap<String, String> configs = new LinkedHashMap<>();
-        configs.put("SQL_Text_Reader/DBConfigFile","/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/test/sqliteconfig.xml");
-        configs.put("SQLWriter_AE/SQLFile","/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/test/sqliteconfig.xml");
-        configs.put("Section_Detector_R_AE/RuleFileOrStr","conf/mi/mi_section.xlsx");
-        configs.put("FastNER_AE/RuleFileOrStr","conf/mi/mi_rule.xlsx");
-        AdaptableUIMACPEDescriptorRunner runner = new AdaptableUIMACPEDescriptorRunner("desc/cpe/smoke_cpe.xml","classes");
-        runner.setLogger(new NLPDBLogger(EDAO.getInstance(new File("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/sqliteconfig.xml"),true,false),"LOG","RUN_ID","test"));
-//        runner.setLogger(new ConsoleLogger());
+        configs.put("SQL_Text_Reader/DBConfigFile", "/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml");
+        configs.put("SQLWriter/DBConfigFile", "/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml");
+        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/smoke_cpe.xml", "test",
+                new NLPDBLogger("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml", "test"), configs
+                , "classes");
+//        runner.setUIMALogger(new ConsoleLogger());
+//        runner.compileCPE();
+//        runner.updateCpeProcessorConfiguration("Section_Detector_R_AE", SectionDetectorR_AE.PARAM_RULE_STR, "conf/asp/asp_section.xlsx");
+//        runner.updateCpeProcessorConfiguration("FastNER_AE", SectionDetectorR_AE.PARAM_RULE_STR, "@fastner\t\t\n" +
+//                "ASA\torg.apache.ctakes.type.system.ASP");
+//        runner.compileCPE();
         runner.run();
+        sleep(20000);
+        runner.run();
+
     }
 }

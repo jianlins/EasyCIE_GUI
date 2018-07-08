@@ -11,7 +11,7 @@ import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.TDAO;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
 import edu.utah.bmi.nlp.uima.AdaptableUIMACPETaskJCasRunner;
-import edu.utah.bmi.nlp.uima.BunchMixInferencer;
+import edu.utah.bmi.nlp.uima.BunchMixInferenceWriter;
 import edu.utah.bmi.nlp.uima.NumberWriter;
 import edu.utah.bmi.nlp.uima.ae.TemporalContext_AE_General;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
@@ -346,13 +346,13 @@ public class FastDebugPipeSampleSize extends RunEasyCIE {
                 NumberWriter.PARMA_ADD_OUTPUT_TYPE, "GROUP_SIZE"});
 
         if (bunchInfRule.length() > 0) {
-            runner.addAnalysisEngine(BunchMixInferencer.class, new Object[]{BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-                    BunchMixInferencer.PARAM_SQLFILE, writeConfigFileName,
-                    BunchMixInferencer.PARAM_RULE_STR, bunchInfRule,
-                    BunchMixInferencer.PARAM_TABLENAME, bunchResultTable,
-                    BunchMixInferencer.PARAM_ANNOTATOR, annotator,
-                    BunchMixInferencer.PARAM_VERSION, "-1"});
-            BunchMixInferencer.dao = new TDAO();
+            runner.addAnalysisEngine(BunchMixInferenceWriter.class, new Object[]{BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+                    BunchMixInferenceWriter.PARAM_SQLFILE, writeConfigFileName,
+                    BunchMixInferenceWriter.PARAM_RULE_STR, bunchInfRule,
+                    BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable,
+                    BunchMixInferenceWriter.PARAM_ANNOTATOR, annotator,
+                    BunchMixInferenceWriter.PARAM_VERSION, "-1"});
+            BunchMixInferenceWriter.dao = new TDAO();
         }
     }
 

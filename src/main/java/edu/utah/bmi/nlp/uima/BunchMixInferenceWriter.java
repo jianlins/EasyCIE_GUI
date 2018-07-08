@@ -26,15 +26,15 @@ import java.util.logging.Logger;
  * Rule format:
  * Question name    Bunch Conclusion Type   Evidence Type 1, Evidence Type 2...
  */
-public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBasedAEInf {
-	public static Logger logger = IOUtil.getLogger(BunchMixInferencer.class);
-	public static final String PARAM_SQLFILE = "DBConfigFile";
+public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements RuleBasedAEInf {
+	public static Logger logger = IOUtil.getLogger(BunchMixInferenceWriter.class);
+	public static final String PARAM_SQLFILE = DeterminantValueSet.PARAM_DB_CONFIG_FILE;
 	public static final String PARAM_TABLENAME = "ResultTableName";
 	public static final String PARAM_AUTO_ID_ENABLED = "AutoIdEnabled";
 	public static final String PARAM_RULE_STR = DeterminantValueSet.PARAM_RULE_STR;
 	public static final String PARAM_BUNCH_COLUMN_NAME = "BunchColumnName";
-	public static final String PARAM_ANNOTATOR = "Annotator";
-	public static final String PARAM_VERSION = "Version";
+	public static final String PARAM_ANNOTATOR = DeterminantValueSet.PARAM_ANNOTATOR;
+	public static final String PARAM_VERSION = DeterminantValueSet.PARAM_VERSION;
 
 
 	public static String resultTableName, bunchColumnName;
@@ -74,7 +74,7 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBa
 		else
 			annotator = "uima";
 		parameterObject = cont.getConfigParameterValue(PARAM_VERSION);
-		if (parameterObject != null && parameterObject instanceof String)
+		if (parameterObject != null && parameterObject instanceof String && parameterObject.toString().trim().length()>0)
 			runId = Integer.parseInt((String) parameterObject);
 		else
 			runId = -2;

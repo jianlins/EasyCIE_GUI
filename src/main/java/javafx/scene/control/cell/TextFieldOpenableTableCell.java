@@ -145,7 +145,7 @@ public class TextFieldOpenableTableCell<S, T> extends TableCell<S, T> {
             javafx.concurrent.Task thisTask = null;
             Class<? extends javafx.concurrent.Task> c = null;
             try {
-                System.out.println(openApp);
+//                System.out.println(openApp);
                 c = Class.forName(openApp).asSubclass(javafx.concurrent.Task.class);
                 Constructor<? extends Task> taskConstructor;
                 if (file.exists()) {

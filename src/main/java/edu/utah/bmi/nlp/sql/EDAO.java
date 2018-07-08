@@ -70,7 +70,7 @@ public class EDAO {
 	}
 
 	public static EDAO getInstance(File configFile, boolean initiateTables, boolean overwriteExistingTables) {
-		return getInstance(configFile, initiateTables, overwriteExistingTables, true);
+ 		return getInstance(configFile, initiateTables, overwriteExistingTables, true);
 	}
 
 	public static EDAO getInstance(File configFile, boolean initiateTables, boolean overwriteExistingTables, boolean concurUpdatable) {
@@ -1009,5 +1009,7 @@ public class EDAO {
 		return isClosed;
 	}
 
-
+	public File getConfigFile() {
+		return configFile;
+	}
 }

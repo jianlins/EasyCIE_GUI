@@ -18,9 +18,9 @@
 <analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
     <primitive>true</primitive>
-    <annotatorImplementationName>edu.utah.bmi.nlp.uima.BunchMixInferencer</annotatorImplementationName>
+    <annotatorImplementationName>edu.utah.bmi.nlp.uima.BunchMixInferenceWriter</annotatorImplementationName>
     <analysisEngineMetaData>
-        <name>BunchInference_AE</name>
+        <name>BunchInferenceWriter_AE</name>
         <description/>
         <version>1.3</version>
         <vendor/>
@@ -108,7 +108,7 @@
             <nameValuePair>
                 <name>Version</name>
                 <value>
-                    <string>0</string>
+                    <string></string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>

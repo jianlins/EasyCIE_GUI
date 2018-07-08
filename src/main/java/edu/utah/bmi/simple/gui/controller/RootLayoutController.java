@@ -219,7 +219,7 @@ public class RootLayoutController {
                 "      (a) You must give any other recipients of the Work or\n" +
                 "          Derivative Works a copy of this License; and\n" +
                 "\n" +
-                "      (b) You must cause any modified files to carry prominent notices\n" +
+                "      (b) You must cause any checkModifiedAEs files to carry prominent notices\n" +
                 "          stating that You changed the files; and\n" +
                 "\n" +
                 "      (c) You must retain, in the Source form of any Derivative Works\n" +

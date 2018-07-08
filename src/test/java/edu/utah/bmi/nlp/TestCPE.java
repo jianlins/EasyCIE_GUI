@@ -22,8 +22,8 @@ public class TestCPE {
 //        Class c=Class.forName("org.apache.uima.tools.cpm.CpmFrame");
 //        Method m=c.getMethod("main",String[].class);
 //        m.invoke(null,(Object)new String[]{});
-//        AdaptableUIMACPEDescriptorRunner runner=new AdaptableUIMACPEDescriptorRunner("desc/cpe/PreannotatorCPE.xml");
-//        runner.setLogger(new ConsoleLogger());
+//        AdaptableCPEDescriptorRunner runner=new AdaptableCPEDescriptorRunner("desc/cpe/PreannotatorCPE.xml");
+//        runner.setUIMALogger(new ConsoleLogger());
 //        runner.run();
     }
 

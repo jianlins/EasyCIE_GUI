@@ -2,6 +2,8 @@ package edu.utah.bmi.simple.gui.controller;
 
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorStringDebugger;
+import edu.utah.bmi.nlp.uima.Processable;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
@@ -16,6 +18,9 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class CellFactories {
 
@@ -32,7 +37,7 @@ public class CellFactories {
         return contextMenu;
     }
 
-    public static FastDebugPipe debugRunner;
+    public static Processable debugRunner;
 
 
     public static Callback<TableColumn, TableCell> colorCellFactory =
@@ -58,14 +63,13 @@ public class CellFactories {
                             System.out.println("Start debugging...");
                             TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                             if (cell.getItem() instanceof RecordRow) {
-                                debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks);
-                                debugRunner.guitask.updateGUIMessage("Start debugging...");
                                 RecordRow recordRow = (RecordRow) cell.getItem();
-                                debugRunner.guitask.updateGUIMessage("Execute pipeline...");
-                                debugRunner.process(recordRow, "SNIPPET", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT",
-                                        "DOC_TEXT", "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
-                                debugRunner.showResults();
-//                            new Thread(() -> fastDebugPipe.run()).start();
+                                String text = "";
+                                if (recordRow.getValueByColumnName("TEXT") != null) {
+                                    text = recordRow.getStrByColumnName("TEXT");
+                                }
+                                final String docText = text;
+                                new Thread(() -> process(recordRow, docText)).start();
                             }
                         }
 
@@ -110,16 +114,16 @@ public class CellFactories {
                         } else {
                             TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                             if (cell.getItem() instanceof RecordRow) {
-                                debugRunner = FastDebugPipe.getInstance(TasksOverviewController.currentTasksOverviewController.mainApp.tasks);
-                                debugRunner.guitask.updateGUIMessage("Start debugging...");
                                 RecordRow recordRow = (RecordRow) cell.getItem();
-                                debugRunner.guitask.updateGUIMessage("Execute pipeline...");
+                                String text = "";
                                 if (recordRow.getValueByColumnName("DOC_TEXT") == null) {
-                                    recordRow.addCell("DOC_TEXT", cell.queryDocContent(recordRow.getStrByColumnName("DOC_NAME")));
+                                    text = cell.queryDocContent(recordRow.getStrByColumnName("DOC_NAME"));
+                                } else {
+                                    text = recordRow.getStrByColumnName("DOC_TEXT");
                                 }
-                                debugRunner.process(recordRow, "DOC_TEXT", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT", "DOC_TEXT",
-                                        "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
-                                debugRunner.showResults();
+                                final String docText = text;
+                                process(recordRow, docText);
+//                                new Thread(() -> process(recordRow, docText)).start();
 //                            new Thread(() -> fastDebugPipe.run()).start();
                             }
                         }
@@ -163,8 +167,8 @@ public class CellFactories {
             };
 
 
-    public static boolean viewBunchId( String bunchId) {
-        TasksFX tasks=TasksOverviewController.currentTasksOverviewController.mainApp.tasks;
+    public static boolean viewBunchId(String bunchId) {
+        TasksFX tasks = TasksOverviewController.currentTasksOverviewController.mainApp.tasks;
         TaskFX config = tasks.getTask("settings");
         String inputTable = config.getValue(ConfigKeys.inputTableName);
         String outputDB = config.getValue(ConfigKeys.writeDBConfigFileName);
@@ -185,5 +189,47 @@ public class CellFactories {
         dao.close();
         boolean res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, outputDB, ColorAnnotationCell.colorOutput, TasksOverviewController.AnnoView);
         return res;
+    }
+
+    public static String initDBdebugger() {
+        String clsName = "";
+        if (TasksOverviewController.currentTasksOverviewController != null) {
+            TasksFX tasks = TasksOverviewController.currentTasksOverviewController.mainApp.tasks;
+            clsName = tasks.getTask("settings").getValue("debug/class");
+            try {
+                Class debuggerCls = Class.forName(clsName);
+                Method getInstanceMethod = debuggerCls.getMethod("getInstance", TasksFX.class);
+                Object debugger = getInstanceMethod.invoke(null, tasks);
+                if (debugger.getClass().isAssignableFrom(Processable.class)) {
+                    debugRunner = (Processable) debugger;
+                } else if (Processable.class.isAssignableFrom(debugger.getClass())) {
+                    debugRunner = (Processable) debugger;
+                }
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+        return clsName;
+    }
+
+    public static void process(RecordRow recordRow, String doctext) {
+        String clsName = "";
+        clsName = initDBdebugger();
+        if (debugRunner != null) {
+            if (recordRow.getValueByColumnName("DOC_TEXT") == null) {
+                recordRow.addCell("DOC_TEXT", doctext);
+            }
+            debugRunner.process(recordRow, "DOC_TEXT", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT", "DOC_TEXT",
+                    "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
+            debugRunner.showResults();
+        } else {
+            AdaptableCPEDescriptorStringDebugger.classLogger.warning("Class not found: " + clsName);
+        }
     }
 }

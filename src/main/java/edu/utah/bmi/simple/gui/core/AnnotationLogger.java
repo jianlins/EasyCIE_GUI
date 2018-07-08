@@ -76,33 +76,32 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 	}
 
 	public void process(JCas jCas) {
+		if(printTypeNames.trim().length()>0) {
+			IntervalST sentenceTree = new IntervalST();
+			ArrayList<Annotation> sentenceList = new ArrayList<>();
+			indexSentences(jCas, sentenceList, sentenceTree);
+			String docText = jCas.getDocumentText();
 
-		IntervalST sentenceTree = new IntervalST();
-		ArrayList<Annotation> sentenceList = new ArrayList<>();
-		indexSentences(jCas, sentenceList, sentenceTree);
-		String docText = jCas.getDocumentText();
+			RecordRow baseRecordRow = new RecordRow().addCell("DOC_NAME", "SNIPPET_TEST")
+					.addCell("RUN_ID", 0).addCell("ANNOTATOR", annotator);
+			addIntroductionRecordRow(baseRecordRow, records, indication);
+			CAS cas = jCas.getCas();
+			sb.append(indication + "\n");
 
-		RecordRow baseRecordRow = new RecordRow().addCell("DOC_NAME", "SNIPPET_TEST")
-				.addCell("RUN_ID", 0).addCell("ANNOTATOR", annotator);
-		addIntroductionRecordRow(baseRecordRow, records, indication);
+			for (String typeName : printTypeNames.split(",")) {
+				typeName = typeName.trim();
+				if (typeName.length() == 0)
+					continue;
+				typeName = DeterminantValueSet.checkNameSpace(typeName);
+				saveOneTypeAnnotation(cas, docText, typeName, baseRecordRow, records, sentenceList, sentenceTree);
 
+				Type type = CasUtil.getAnnotationType(cas, typeName);
 
-		CAS cas = jCas.getCas();
-		sb.append(indication + "\n");
-
-		for (String typeName : printTypeNames.split(",")) {
-			typeName = typeName.trim();
-			if (typeName.length() == 0)
-				continue;
-			typeName = DeterminantValueSet.checkNameSpace(typeName);
-			saveOneTypeAnnotation(cas, docText, typeName, baseRecordRow, records, sentenceList, sentenceTree);
-
-			Type type = CasUtil.getAnnotationType(cas, typeName);
-
-			Collection<AnnotationFS> annotations = CasUtil.select(cas, type);
-			sb.append(" Here is a list of annotation '" + typeName + "':\n");
-			for (AnnotationFS annotation : annotations) {
-				sb.append(annotation.toString() + "   Covered Text: \"" + annotation.getCoveredText() + "\"\n");
+				Collection<AnnotationFS> annotations = CasUtil.select(cas, type);
+				sb.append(" Here is a list of annotation '" + typeName + "':\n");
+				for (AnnotationFS annotation : annotations) {
+					sb.append(annotation.toString() + "   Covered Text: \"" + annotation.getCoveredText() + "\"\n");
+				}
 			}
 		}
 	}

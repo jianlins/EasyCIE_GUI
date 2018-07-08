@@ -159,7 +159,7 @@ public class RunEasyCIESampleSize extends GUITask {
 		docInfRule = config.getValue(ConfigKeys.docInfRule);
 		bunchInfRule = config.getValue(ConfigKeys.bunchInfRule);
 
-		rawStringValue = config.getValue(ConfigKeys.reportPreannotating);
+		rawStringValue = config.getValue(ConfigKeys.reportAfterProcessing);
 		report = rawStringValue.length() > 0 && (rawStringValue.charAt(0) == 't' || rawStringValue.charAt(0) == 'T' || rawStringValue.charAt(0) == '1');
 		rawStringValue = config.getValue(ConfigKeys.fastNerCaseSensitive);
 		fastNERCaseSensitive = rawStringValue.length() > 0 && (rawStringValue.charAt(0) == 't' || rawStringValue.charAt(0) == 'T' || rawStringValue.charAt(0) == '1');
@@ -326,7 +326,7 @@ public class RunEasyCIESampleSize extends GUITask {
 
 		if (!(ehost || brat || xmi)) {
 			SQLWriterCasConsumer.dao = wdao;
-			BunchMixInferencer.dao = wdao;
+			BunchMixInferenceWriter.dao = wdao;
 			if (!wdao.checkExits("checkAnnotatorExist", annotator)) {
 				wdao.insertRecord("ANNOTATORS", new RecordRow(annotator));
 			}
@@ -344,12 +344,12 @@ public class RunEasyCIESampleSize extends GUITask {
 					NumberWriter.PARAM_ANNOTATOR, annotator,
 					NumberWriter.PARMA_ADD_OUTPUT_TYPE, "GROUP_SIZE"});
 			if (bunchInfRule.length() > 0) {
-				runner.addAnalysisEngine(BunchMixInferencer.class, new Object[]{BunchMixInferencer.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
-						BunchMixInferencer.PARAM_SQLFILE, writeConfigFileName,
-						BunchMixInferencer.PARAM_RULE_STR, bunchInfRule,
-						BunchMixInferencer.PARAM_TABLENAME, bunchResultTable,
-						BunchMixInferencer.PARAM_ANNOTATOR, annotator,
-						BunchMixInferencer.PARAM_VERSION, runId});
+				runner.addAnalysisEngine(BunchMixInferenceWriter.class, new Object[]{BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
+						BunchMixInferenceWriter.PARAM_SQLFILE, writeConfigFileName,
+						BunchMixInferenceWriter.PARAM_RULE_STR, bunchInfRule,
+						BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable,
+						BunchMixInferenceWriter.PARAM_ANNOTATOR, annotator,
+						BunchMixInferenceWriter.PARAM_VERSION, runId});
 			}
 		}
 

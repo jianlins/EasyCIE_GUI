@@ -41,10 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.*;
 
 /**
  * This XMIWriter is derived from the simple CAS consumer provided by apache
@@ -303,7 +300,16 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
 
     public void collectionProcessComplete() {
         // no default behavior
-        EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeMethods);
+        HashMap<String,LinkedHashSet<String>>typeConfigs=new HashMap<>();
+        for(Class cls:typeMethods.keySet()){
+            String typeName=cls.getSimpleName();
+            typeConfigs.put(typeName,new LinkedHashSet<>());
+            for(Method method:typeMethods.get(cls)){
+                typeConfigs.get(typeName).add(method.getName().substring(3));
+            }
+
+        }
+        EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeConfigs);
 
     }
 

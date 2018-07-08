@@ -2,12 +2,13 @@ package edu.utah.bmi.nlp.uima.loggers;
 
 import org.apache.uima.cas.CAS;
 import org.apache.uima.collection.EntityProcessStatus;
+import org.apache.uima.util.Logger;
 
 /**
  * @author Jianlin Shi
  * Created on 1/13/17.
  */
-public interface UIMALogger {
+public interface UIMALogger extends Logger {
 
     void reset();
 
@@ -17,9 +18,9 @@ public interface UIMALogger {
 
     void logCompleteTime();
 
-    long getStarttime();
+    long getStartTime();
 
-    long getCompletetime();
+    long getCompleteTime();
 
     String logItems();
 
