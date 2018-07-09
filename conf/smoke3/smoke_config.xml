@@ -123,7 +123,7 @@
   <settings> 
     <import> 
       <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/smoke3/sqliteconfig.xml</dbFile>  
-      <table memo="the table used to saved the txt corpus">SAMPLES</table>  
+      <table memo="the table used to saved the txt corpus">SAMPLES2</table>  
       <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">I2B2</datasetId>  
       <overwrite memo="if the table exist, whether overwrite it">true</overwrite> 
     </import>  

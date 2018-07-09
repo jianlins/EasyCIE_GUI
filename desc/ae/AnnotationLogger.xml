@@ -41,7 +41,7 @@
                 <name>Indication</name>
                 <description>Give a hint for you to what will be logged
                 </description>
-                <type>Boolean</type>
+                <type>String</type>
                 <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>

@@ -439,6 +439,10 @@ public class CPMEngine extends Thread {
         statusCbL.remove(aListener);
     }
 
+    public void removeStatusCallbackListener() {
+        statusCbL.clear();
+    }
+
     /**
      * Returns true if this engine has been killed
      *

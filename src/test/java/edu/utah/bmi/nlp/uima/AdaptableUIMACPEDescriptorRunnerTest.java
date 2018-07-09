@@ -1,11 +1,19 @@
 package edu.utah.bmi.nlp.uima;
 
+import edu.utah.bmi.nlp.core.DeterminantValueSet;
+import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
+import edu.utah.bmi.nlp.sql.EDAO;
+import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.sql.RecordRowIterator;
+import edu.utah.bmi.nlp.sql.TDAO;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import org.apache.uima.collection.base_cpm.CasProcessor;
 import org.apache.uima.collection.metadata.CpeCasProcessor;
 import org.apache.uima.collection.metadata.CpeDescriptorException;
 import org.junit.Test;
 
+import java.io.File;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 
 import static java.lang.Thread.sleep;
@@ -13,7 +21,7 @@ import static java.lang.Thread.sleep;
 public class AdaptableUIMACPEDescriptorRunnerTest {
     @Test
     public void testBasic() throws CpeDescriptorException {
-        AdaptableCPEDescriptorRunner runner = new AdaptableCPEDescriptorRunner("desc/cpe/n2c2_mi2.xml", "test",null);
+        AdaptableCPEDescriptorRunner runner = new AdaptableCPEDescriptorRunner("desc/cpe/n2c2_mi2.xml", "test", null);
         CpeCasProcessor[] cpeCasProcessors = runner.currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors();
         for (CpeCasProcessor cpeCasProcessor : cpeCasProcessors) {
             System.out.println(cpeCasProcessor.getName());
@@ -49,12 +57,18 @@ public class AdaptableUIMACPEDescriptorRunnerTest {
 //    }
 
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, SQLException {
 //        AdaptableCpmFrame.main(new String[]{});
         LinkedHashMap<String, String> configs = new LinkedHashMap<>();
         configs.put("SQL_Text_Reader/DBConfigFile", "/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml");
+        configs.put("SQL_Text_Reader/DocTableName", "SAMPLES");
         configs.put("SQLWriter/DBConfigFile", "/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml");
-        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/smoke_cpe.xml", "test",
+//        configs.put("FastContext/"+DeterminantValueSet.PARAM_RULE_STR, "");
+//        configs.put("FeatureInference/"+DeterminantValueSet.PARAM_RULE_STR, "");
+//        configs.put("SentenceInferencer/"+DeterminantValueSet.PARAM_RULE_STR, "");+
+        File dbConfigFile=new File("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml");
+        EDAO dao = EDAO.getInstance(dbConfigFile, true, false);
+        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/smoke_cpe2.xml", "test",
                 new NLPDBLogger("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml", "test"), configs
                 , "classes");
 //        runner.setUIMALogger(new ConsoleLogger());
@@ -63,9 +77,55 @@ public class AdaptableUIMACPEDescriptorRunnerTest {
 //        runner.updateCpeProcessorConfiguration("FastNER_AE", SectionDetectorR_AE.PARAM_RULE_STR, "@fastner\t\t\n" +
 //                "ASA\torg.apache.ctakes.type.system.ASP");
 //        runner.compileCPE();
+
+//        dao.stmt.execute("DELETE FROM RESULT_SNIPPET;");
+//        dao.stmt.execute("DELETE FROM LOG;");
+//        RecordRow record = dao.queryRecord("SELECT COUNT(*) FROM RESULT_SNIPPET;");
+//        System.out.println(record);
+//        SQLWriterCasConsumer.dao=new TDAO();
         runner.run();
-        sleep(20000);
+        for (int i = 2; i > 0; i--) {
+            sleep(1000);
+//            System.out.println("count down: " + i);
+        }
+        dao = EDAO.getInstance(dbConfigFile, true, false);
+        RecordRow record = dao.queryRecord("SELECT COUNT(*) FROM RESULT_SNIPPET;");
+        System.out.println(record);
+
+
+        System.out.println("2nd run");
+//        dao.stmt.execute("DELETE FROM RESULT_SNIPPET;");
         runner.run();
+        for (int i = 2; i > 0; i--) {
+            sleep(1000);
+            System.out.println("count down: " + i);
+        }
+
+        dao = EDAO.getInstance(dbConfigFile, true, false);
+        record = dao.queryRecord("SELECT COUNT(*) FROM RESULT_SNIPPET;");
+        System.out.println(record);
+
+        System.out.println("3rd run");
+//        dao.stmt.execute("DELETE FROM RESULT_SNIPPET;");
+        runner.run();
+        for (int i = 2; i > 0; i--) {
+            sleep(1000);
+//            System.out.println("count down: " + i);
+        }
+        dao = EDAO.getInstance(new File("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml"), true, false);
+        record = dao.queryRecord("SELECT COUNT(*) FROM RESULT_SNIPPET;");
+        System.out.println(record);
+
+        System.out.println("4th run");
+//        dao.stmt.execute("DELETE FROM RESULT_SNIPPET;");
+        runner.run();
+        for (int i = 2; i > 0; i--) {
+            sleep(1000);
+            System.out.println("count down: " + i);
+        }
+        dao = EDAO.getInstance(new File("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml"), true, false);
+        record = dao.queryRecord("SELECT COUNT(*) FROM RESULT_SNIPPET;");
+        System.out.println(record);
 
     }
 }

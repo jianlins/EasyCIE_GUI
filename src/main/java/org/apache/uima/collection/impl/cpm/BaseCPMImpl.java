@@ -31,6 +31,7 @@ import java.util.Properties;
 
 import org.apache.uima.UIMAFramework;
 import org.apache.uima.UIMARuntimeException;
+import org.apache.uima.cas.CAS;
 import org.apache.uima.collection.StatusCallbackListener;
 import org.apache.uima.collection.base_cpm.AbortCPMException;
 import org.apache.uima.collection.base_cpm.BaseCPM;
@@ -124,7 +125,7 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
     public BaseCPMImpl(CpeDescription aDescriptor, ResourceManager aResourceManager,
                        boolean aDefaultProcessTrace, Properties aProps) throws Exception {
         this.cpeDescriptionLocation = aDescriptor.getCpeConfiguration().getSourceUrl().toString();
-        cpeFactory = new CPEFactory(aDescriptor, aResourceManager);
+        cpeFactory = CPEFactory.getInstance(aDescriptor, aResourceManager);
         defaultProcessTrace = aDefaultProcessTrace;
         cpmThreadGroup = new CPMThreadGroup("CPM Thread Group");
         init(false, aProps);
@@ -250,6 +251,7 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
         }
         // Instantiate class responsible for processing
         cpEngine = new CPMEngine(cpmThreadGroup, cpeFactory, procTr, checkpointData);
+//      because cpeFactory is cached, need to release cas
         if (!aDummyCasProcessor) {
             int concurrentThreadCount = cpeFactory.getCpeDescriptor().getCpeCasProcessors()
                     .getConcurrentPUCount();
@@ -435,6 +437,10 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
      */
     public void removeStatusCallbackListener(BaseStatusCallbackListener aListener) {
         cpEngine.removeStatusCallbackListener(aListener);
+    }
+
+    public void removeStatusCallbackListener() {
+        cpEngine.removeStatusCallbackListener();
     }
 
     /*

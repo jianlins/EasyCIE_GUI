@@ -102,7 +102,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     protected ArrayList<Integer> versionedCpProcessorId = new ArrayList<>();
 
     protected File customTypeDescXmlDir = new File("target/generated-test-sources/uima-descripters");
-    protected String runId = "-1";
+    protected String runId = "-1", previousRunId = "-1";
     protected File customTypeDescXmlLoc = null;
 
     protected String cpeDescripterFileName = "", cpeDescriptorPath = "";
@@ -191,9 +191,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                                                            String... options) {
         AdaptableCPEDescriptorRunner runner;
         String cpeName = FilenameUtils.getBaseName(cpeDescriptor) + "_" + annotator;
-        if (runners.containsKey(cpeName) && modifiedAes!=null) {
+        if (runners.containsKey(cpeName) && modifiedAes != null) {
             runner = runners.get(cpeName);
-            if(modifiedAes.size()>0){
+            if (modifiedAes.size() > 0) {
                 for (String aeName : modifiedAes) {
                     classLogger.finest("The configuration of the AE: " + aeName + " has been modified. Re-initiate this AE.");
                     runner.updateProcessorConfigurations(aeName, externalConfigMap.get(aeName));
@@ -201,7 +201,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
             }
         } else {
             if (classLogger.isLoggable(Level.FINEST)) {
-                if (modifiedAes==null)
+                if (modifiedAes == null)
                     classLogger.finest("Cpe descriptor modification detected.");
                 else
                     classLogger.finest("Configuration modification detected: " + modifiedAes);
@@ -572,14 +572,14 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 //                        only update to current run_id when cpe didn't configure run_id to a real value.
                 if (cpeVersionValue == null || cpeVersionValue.equals("")) {
                     versionedCpProcessorId.add(i - numRemoved);
-                    if (runId.equals("-1")) {
-                        Object dbConfigFile = cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_DB_CONFIG_FILE);
-                        if(annotator.length()==0)
-                            annotator = cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_ANNOTATOR).toString();
+//                    if (runId.equals("-1")) {
+//                        Object dbConfigFile = cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_DB_CONFIG_FILE);
+//                        if (annotator.length() == 0)
+//                            annotator = cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_ANNOTATOR).toString();
 //                        if (this.logger==null && dbConfigFile != null && dbConfigFile instanceof String && dbConfigFile.toString().trim().length() > 0) {
 //                            setUIMALogger(new NLPDBLogger(dbConfigFile.toString(), annotator));
 //                        }
-                    }
+//                    }
                     cp.getConfigurationParameterSettings().setParameterValue(DeterminantValueSet.PARAM_VERSION, runId);
                 }
                 cp.getConfigurationParameterSettings().setParameterValue(DeterminantValueSet.PARAM_ANNOTATOR, annotator);
@@ -847,9 +847,23 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public void updateProcessorConfigurations(String cpeName, LinkedHashMap configurations) {
         if (cpeProcessorIds.containsKey(cpeName)) {
             int id = cpeProcessorIds.get(cpeName);
-            CasProcessor processor = mCPE.getCasProcessors()[id];
+            updateProcessorConfigurations(id, configurations);
+        } else {
+            classLogger.warning(cpeName + " doesn't exist in this CPE descriptor.");
+        }
+    }
+
+    /**
+     * Try to update the configuration after mCPE is compiled--handy for debugging--reduce recompile time
+     *
+     * @param cpeId          processor name
+     * @param configurations new configuraitons
+     */
+    public void updateProcessorConfigurations(int cpeId, LinkedHashMap configurations) {
+        if (mCPE != null && cpeId < mCPE.getCasProcessors().length) {
+            CasProcessor processor = mCPE.getCasProcessors()[cpeId];
             try {
-                CpeCasProcessor cpeProcessor = currentCpeDesc.getCpeCasProcessors().getCpeCasProcessor(id);
+                CpeCasProcessor cpeProcessor = currentCpeDesc.getCpeCasProcessors().getCpeCasProcessor(cpeId);
                 String processorName = cpeProcessor.getName();
                 if (processor instanceof PrimitiveAnalysisEngine_impl) {
                     PrimitiveAnalysisEngine_impl ae = (PrimitiveAnalysisEngine_impl) processor;
@@ -876,7 +890,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 e.printStackTrace();
             }
         } else {
-            classLogger.warning(cpeName + " doesn't exist in this CPE descriptor.");
+            classLogger.warning(cpeId + " doesn't exist in this CPE descriptor.");
         }
     }
 
@@ -890,11 +904,18 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public void updateCpeProcessorConfiguration(String cpeName, String parameter, Object value) {
         if (cpeProcessorIds.containsKey(cpeName)) {
             int id = cpeProcessorIds.get(cpeName);
-            CasProcessor processor = mCPE.getCasProcessors()[id];
+            updateCpeProcessorConfiguration(id, parameter, value);
+        } else {
+            classLogger.warning(cpeName + " doesn't exist in this CPE descriptor.");
+        }
+    }
 
+    public void updateCpeProcessorConfiguration(int cpeId, String parameter, Object value) {
+        if (mCPE != null && cpeId < mCPE.getCasProcessors().length) {
+            CasProcessor processor = mCPE.getCasProcessors()[cpeId];
             try {
                 CPMEngine cpeEngine = ((CollectionProcessingEngine_impl) mCPE).getCPM().getCpEngine();
-                CpeCasProcessor cpeProcessor = currentCpeDesc.getCpeCasProcessors().getCpeCasProcessor(id);
+                CpeCasProcessor cpeProcessor = currentCpeDesc.getCpeCasProcessors().getCpeCasProcessor(cpeId);
                 String processorName = cpeProcessor.getName();
                 if (processor instanceof PrimitiveAnalysisEngine_impl) {
                     PrimitiveAnalysisEngine_impl ae = (PrimitiveAnalysisEngine_impl) processor;
@@ -921,7 +942,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 e.printStackTrace();
             }
         } else {
-            classLogger.warning(cpeName + " doesn't exist in this CPE descriptor.");
+            classLogger.warning(cpeId + " doesn't exist in this CPE descriptor.");
         }
     }
 
@@ -932,6 +953,11 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public void compileCPE() {
         try {
             mCPE = UIMAFramework.produceCollectionProcessingEngine(currentCpeDesc);
+            if (runId.equals(previousRunId))
+                runId = logger.getRunid() + "";
+            for (int writerId : writerIds.values()) {
+                updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runId);
+            }
         } catch (ResourceInitializationException e) {
             e.printStackTrace();
         }
@@ -951,6 +977,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 classLogger.info("Pipeline is running. Please wait till finish.");
                 return;
             }
+
             status = 1;
             compileCPE();
             // Create and register a Status Callback Listener
@@ -963,7 +990,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
             // Start Processing
 //            System.out.println("Running CPE");
             mCPE.process();
-
+            previousRunId = runId;
 
         } catch (UIMAException e) {
             e.printStackTrace();

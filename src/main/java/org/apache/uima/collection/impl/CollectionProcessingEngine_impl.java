@@ -54,7 +54,7 @@ public class CollectionProcessingEngine_impl implements CollectionProcessingEngi
         if (mCPM != null) // repeat initialization - not allowed
         {
             throw new UIMA_IllegalStateException(UIMA_IllegalStateException.RESOURCE_ALREADY_INITIALIZED,
-                    new Object[] { getClass().getName() });
+                    new Object[]{getClass().getName()});
         }
 
         // get the ResourceManager (if any) supplied in the aAdditionalParams map
@@ -98,6 +98,10 @@ public class CollectionProcessingEngine_impl implements CollectionProcessingEngi
      */
     public void removeStatusCallbackListener(StatusCallbackListener aListener) {
         mCPM.removeStatusCallbackListener(aListener);
+    }
+
+    public void removeStatusCallbackListener() {
+        mCPM.removeStatusCallbackListener();
     }
 
     /*

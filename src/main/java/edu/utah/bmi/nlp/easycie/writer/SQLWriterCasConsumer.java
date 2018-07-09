@@ -1,6 +1,7 @@
 package edu.utah.bmi.nlp.easycie.writer;
 
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
+import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.Interval1D;
 import edu.utah.bmi.nlp.core.IntervalST;
 import edu.utah.bmi.nlp.sql.EDAO;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.logging.Logger;
 
 
 /**
@@ -38,6 +40,7 @@ import java.util.*;
  * Created on 5/22/16.
  */
 public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
+    public static Logger classLogger = IOUtil.getLogger(SQLWriterCasConsumer.class);
     public static final String PARAM_DB_CONFIG_FILE = DeterminantValueSet.PARAM_DB_CONFIG_FILE;
     public static final String PARAM_SNIPPET_TABLENAME = "SnippetTableName";
     public static final String PARAM_DOC_TABLENAME = "DocTableName";
@@ -84,6 +87,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
             this.sqlFile.mkdirs();
         }
         Object writeConceptObj = cont.getConfigParameterValue(PARAM_WRITE_CONCEPT);
+        typeToSave.clear();
         if (writeConceptObj != null && writeConceptObj.toString().trim().length() > 0) {
             for (String type : ((String) writeConceptObj).split("[,;\\|]"))
                 typeToSave.add(DeterminantValueSet.checkNameSpace(type.trim()));
@@ -99,7 +103,6 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
             return;
 
 
-        ArrayList<RecordRow> annotations = new ArrayList<>();
         IntervalST sentenceTree = new IntervalST();
         ArrayList<Sentence> sentenceList = new ArrayList<>();
 
@@ -111,8 +114,8 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
             baseRecordRow.deserialize(serializedString);
         }
         baseRecordRow.addCell("RUN_ID", version);
-        if (debug)
-            System.err.println("processing doc: " + fileName);
+
+        classLogger.finest("Write annotations for doc: " + baseRecordRow.getStrByColumnName("DOC_NAME"));
 
         it = jcas.getAnnotationIndex(Sentence.type).iterator();
         while (it.hasNext()) {
@@ -121,24 +124,25 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
             sentenceTree.put(new Interval1D(thisSentence.getBegin(), thisSentence.getEnd()), sentenceList.size() - 1);
         }
 
-        saveAnnotations(jcas, baseRecordRow, sentenceList, sentenceTree, fileName);
-        for (RecordRow anno : annotations) {
-            dao.insertRecord(snippetTableName, anno);
-        }
+        int total = saveAnnotations(jcas, baseRecordRow, sentenceList, sentenceTree, fileName);
+        classLogger.finest("Total annotations: " + total);
+
 //        ldao.insertRecords(snippetResultTable, annotations);
     }
 
-    protected void saveAnnotations(JCas jcas, RecordRow baseRecordRow, ArrayList<Sentence> sentenceList, IntervalST sentenceTree, String fileName) {
+    protected int saveAnnotations(JCas jcas, RecordRow baseRecordRow, ArrayList<Sentence> sentenceList, IntervalST sentenceTree, String fileName) {
         CAS cas = jcas.getCas();
         String docText = jcas.getDocumentText();
+        int total = 0;
         for (String type : typeToSave)
-            saveOneTypeAnnotation(cas, docText, type, baseRecordRow, sentenceList, sentenceTree, fileName);
+            total += saveOneTypeAnnotation(cas, docText, type, baseRecordRow, sentenceList, sentenceTree, fileName);
+        return total;
     }
 
-    private void saveOneTypeAnnotation(CAS cas, String docText, String annotationType,
-                                       RecordRow baseRecordRow,
-                                       ArrayList<Sentence> sentenceList, IntervalST sentenceTree, String fileName) {
-
+    private int saveOneTypeAnnotation(CAS cas, String docText, String annotationType,
+                                      RecordRow baseRecordRow,
+                                      ArrayList<Sentence> sentenceList, IntervalST sentenceTree, String fileName) {
+        int total = 0;
         Iterator<AnnotationFS> annoIter = CasUtil.iterator(cas, CasUtil.getType(cas, annotationType));
         String tableName = snippetTableName;
         while (annoIter.hasNext()) {
@@ -275,7 +279,9 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
                 record.addCell("END", thisAnnotation.getEnd() - thisAnnotation.getBegin());
             }
             dao.insertRecord(tableName, record);
+            total++;
         }
+        return total;
     }
 
     private String serilizeFSArray(FSArray ary) {

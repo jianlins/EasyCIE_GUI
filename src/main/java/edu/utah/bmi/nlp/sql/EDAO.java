@@ -76,7 +76,9 @@ public class EDAO {
 	public static EDAO getInstance(File configFile, boolean initiateTables, boolean overwriteExistingTables, boolean concurUpdatable) {
 		String key = configFile.getAbsolutePath();
 		try {
-			if (!instances.containsKey(key) || instances.get(key).isClosed() || instances.get(key).con.isClosed()) {
+			if (!instances.containsKey(key)
+					|| instances.get(key).isClosed()
+					|| instances.get(key).con.isClosed()) {
 				instances.put(key, new EDAO(configFile, initiateTables, overwriteExistingTables, concurUpdatable));
 				instances.get(key).isClosed = false;
 			}
