@@ -91,7 +91,7 @@
       <FastNER memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastNER>  
       <FastContext memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastContext>  
       <TemporalContext memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</TemporalContext>  
-      <FeatureInference memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FeatureInference>  
+      <FeatureInferencer memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FeatureInferencer>
       <SentenceInferencer memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</SentenceInferencer>  
       <metaStr memo="manually add metadata for debugging">DOC_ID,-1|DATASETID,-1|DOC_NAME,debug.dco|DATE,2085-01-01 00:00:00|REF_DATE,2085-06-05 00:00:00</metaStr>  
       <ShowUimaViewer memo="if true then display UIMA annotation viewer after execution">f</ShowUimaViewer> 
@@ -123,7 +123,7 @@
   <settings> 
     <import> 
       <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/smoke3/sqliteconfig.xml</dbFile>  
-      <table memo="the table used to saved the txt corpus">SAMPLES2</table>  
+      <table memo="the table used to saved the txt corpus">SAMPLES</table>  
       <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">I2B2</datasetId>  
       <overwrite memo="if the table exist, whether overwrite it">true</overwrite> 
     </import>  

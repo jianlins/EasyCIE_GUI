@@ -66,7 +66,7 @@ public class AdaptableUIMACPEDescriptorRunnerTest {
 //        configs.put("FastContext/"+DeterminantValueSet.PARAM_RULE_STR, "");
 //        configs.put("FeatureInference/"+DeterminantValueSet.PARAM_RULE_STR, "");
 //        configs.put("SentenceInferencer/"+DeterminantValueSet.PARAM_RULE_STR, "");+
-        File dbConfigFile=new File("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml");
+        File dbConfigFile = new File("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml");
         EDAO dao = EDAO.getInstance(dbConfigFile, true, false);
         AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/smoke_cpe2.xml", "test",
                 new NLPDBLogger("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml", "test"), configs
@@ -98,7 +98,7 @@ public class AdaptableUIMACPEDescriptorRunnerTest {
         runner.run();
         for (int i = 2; i > 0; i--) {
             sleep(1000);
-            System.out.println("count down: " + i);
+//            System.out.println("count down: " + i);
         }
 
         dao = EDAO.getInstance(dbConfigFile, true, false);
