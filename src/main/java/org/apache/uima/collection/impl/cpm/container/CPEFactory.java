@@ -108,6 +108,7 @@ public class CPEFactory {
     public static Logger classLogger = IOUtil.getLogger(CPEFactory.class);
     public static final String CPM_HOME = "${CPM_HOME}";
     public static CPEFactory lastCpeFactory = null;
+    public static CpeDescription lastCpeDescriptor;
     public static String lastCpeDescriptorUrl = "";
     public static long lastModifiedTime = 0l;
     private CasProcessor[] aeList = null;
@@ -138,16 +139,58 @@ public class CPEFactory {
 
     public static CPEFactory getInstance(CpeDescription aDescriptor, ResourceManager aResourceManager) {
         String cpePath = aDescriptor.getSourceUrl().getPath();
-        if (cpePath.equals(lastCpeDescriptorUrl) && new File(cpePath).lastModified() == lastModifiedTime) {
-            return lastCpeFactory;
-        } else {
-            try {
+        try {
+            if (cpePath.equals(lastCpeDescriptorUrl) && new File(cpePath).lastModified() == lastModifiedTime) {
+
+                CpeCollectionReader newReader = aDescriptor.getAllCollectionCollectionReaders()[0];
+                CpeCollectionReader lastReaders = lastCpeDescriptor.getAllCollectionCollectionReaders()[0];
+                if (lastReaders.equals(newReader)) {
+                    lastCpeFactory.getCpeDescriptor().getAllCollectionCollectionReaders()[0] = newReader;
+                    lastCpeFactory.getCollectionReader();
+                }
+                CpeCasProcessor[] newProcessors = aDescriptor.getCpeCasProcessors().getAllCpeCasProcessors();
+                CpeCasProcessor[] lastProcessors = lastCpeDescriptor.getCpeCasProcessors().getAllCpeCasProcessors();
+                if (newProcessors.length != lastProcessors.length) {
+                    lastCpeFactory = new CPEFactory(aDescriptor, aResourceManager);
+                    lastCpeDescriptorUrl = cpePath;
+                    lastModifiedTime = new File(cpePath).lastModified();
+                } else {
+                    for (int i = 0; i < newProcessors.length; i++) {
+                        CpeCasProcessor newProcessor = newProcessors[i];
+                        CpeCasProcessor lastProcessor = lastProcessors[i];
+                        System.out.println(newProcessor.getName() + "\t" + newProcessor.equals(lastProcessor));
+                        if (!newProcessor.equals(lastProcessor)) {
+                            lastCpeFactory.namesMap.remove(newProcessor.getName());
+                            CasProcessor casProcessor = lastCpeFactory.produceProcessor(newProcessor, lastCpeFactory.namesMap);
+                            if (casProcessor instanceof PrimitiveAnalysisEngine_impl) {
+                                PrimitiveAnalysisEngine_impl ae = (PrimitiveAnalysisEngine_impl) casProcessor;
+                                UimaContext uimaContext = ae.getUimaContext();
+                                if (uimaContext instanceof ChildUimaContext_impl) {
+                                    ChildUimaContext_impl uimaContext_impl = (ChildUimaContext_impl) uimaContext;
+                                    for (org.apache.uima.collection.metadata.NameValuePair pair : newProcessor.getConfigurationParameterSettings().getParameterSettings())
+                                        uimaContext_impl.setSharedParam("/" + newProcessor.getName() + "/" + pair.getName(), pair.getValue());
+                                }
+                                ae.setmInitialized(false);
+                                AnalysisComponent aeEngine = ae.getAnalysisComponent();
+                                aeEngine.initialize(uimaContext);
+                            }
+                            lastCpeFactory.aeList[i] = casProcessor;
+                        }
+                    }
+                }
+                return lastCpeFactory;
+            } else {
                 lastCpeFactory = new CPEFactory(aDescriptor, aResourceManager);
                 lastCpeDescriptorUrl = cpePath;
                 lastModifiedTime = new File(cpePath).lastModified();
-            } catch (ResourceInitializationException e) {
-                e.printStackTrace();
+
             }
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        } catch (ResourceConfigurationException e) {
+            e.printStackTrace();
+        } catch (ResourceInitializationException e) {
+            e.printStackTrace();
         }
         return lastCpeFactory;
     }
@@ -172,6 +215,7 @@ public class CPEFactory {
      */
     public CPEFactory(CpeDescription aDescriptor, ResourceManager aResourceManager)
             throws ResourceInitializationException {
+        lastCpeDescriptor = aDescriptor;
         if (aDescriptor == null) {
             throw new UIMARuntimeException(new InvalidObjectException(CpmLocalizedMessage
                     .getLocalizedMessage(CPMUtils.CPM_LOG_RESOURCE_BUNDLE,
@@ -1611,4 +1655,7 @@ public class CPEFactory {
         return uimaContext.getResourceManager();
     }
 
+    public boolean compileCached(String cpeDescriptorUrl) {
+        return cpeDescriptorUrl.equals(lastCpeDescriptorUrl);
+    }
 }

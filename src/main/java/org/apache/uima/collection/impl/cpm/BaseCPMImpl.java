@@ -251,7 +251,6 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
         }
         // Instantiate class responsible for processing
         cpEngine = new CPMEngine(cpmThreadGroup, cpeFactory, procTr, checkpointData);
-//      because cpeFactory is cached, need to release cas
         if (!aDummyCasProcessor) {
             int concurrentThreadCount = cpeFactory.getCpeDescriptor().getCpeCasProcessors()
                     .getConcurrentPUCount();

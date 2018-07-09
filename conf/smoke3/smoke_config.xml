@@ -62,7 +62,7 @@
       <report memo="whether report the processing details at the end">f</report> 
     </pipeLineSetting>  
     <annotators> 
-      <current memo="Mark current annotations with annotator: ">v2</current> 
+      <current memo="Mark current annotations with annotator: ">v5</current> 
     </annotators>  
     <executes> 
       <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunEasyCIE>  
@@ -91,7 +91,7 @@
       <FastNER memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastNER>  
       <FastContext memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastContext>  
       <TemporalContext memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</TemporalContext>  
-      <FeatureInferencer memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FeatureInferencer>
+      <FeatureInferencer memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FeatureInferencer>  
       <SentenceInferencer memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</SentenceInferencer>  
       <metaStr memo="manually add metadata for debugging">DOC_ID,-1|DATASETID,-1|DOC_NAME,debug.dco|DATE,2085-01-01 00:00:00|REF_DATE,2085-06-05 00:00:00</metaStr>  
       <ShowUimaViewer memo="if true then display UIMA annotation viewer after execution">f</ShowUimaViewer> 

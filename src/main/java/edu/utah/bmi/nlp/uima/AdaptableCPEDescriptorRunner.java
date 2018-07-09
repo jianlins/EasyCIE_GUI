@@ -79,8 +79,8 @@ import static edu.utah.bmi.nlp.core.DeterminantValueSet.defaultSuperTypeName;
  */
 public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public static Logger classLogger = IOUtil.getLogger(AdaptableCPEDescriptorRunner.class);
-    public static HashMap<String, AdaptableCPEDescriptorRunner> runners = new HashMap<>();
-    protected String annotator;
+    public static AdaptableCPEDescriptorRunner lastRunner = null;
+    protected String annotator, runnerName;
     protected static ModifiedChecker modifiedChecker = new ModifiedChecker();
     protected CollectionReaderDescription reader;
     protected CpeDescription currentCpeDesc;
@@ -189,14 +189,12 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                                                            UIMALogger logger, ArrayList<String> modifiedAes,
                                                            LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap,
                                                            String... options) {
-        AdaptableCPEDescriptorRunner runner;
         String cpeName = FilenameUtils.getBaseName(cpeDescriptor) + "_" + annotator;
-        if (runners.containsKey(cpeName) && modifiedAes != null) {
-            runner = runners.get(cpeName);
+        if (lastRunner != null && lastRunner.runnerName.equals(cpeName) && modifiedAes != null) {
             if (modifiedAes.size() > 0) {
                 for (String aeName : modifiedAes) {
                     classLogger.finest("The configuration of the AE: " + aeName + " has been modified. Re-initiate this AE.");
-                    runner.updateProcessorConfigurations(aeName, externalConfigMap.get(aeName));
+                    lastRunner.updateProcessorConfigurations(aeName, externalConfigMap.get(aeName));
                 }
             }
         } else {
@@ -206,11 +204,11 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 else
                     classLogger.finest("Configuration modification detected: " + modifiedAes);
             }
-            runner = new AdaptableCPEDescriptorRunner(cpeDescriptor, annotator, logger, externalConfigMap, options);
-            runners.put(cpeName, runner);
+            lastRunner = new AdaptableCPEDescriptorRunner(cpeDescriptor, annotator, logger, externalConfigMap, options);
+            lastRunner.runnerName=cpeName;
         }
-        runner.setUIMALogger(logger);
-        return runner;
+        lastRunner.setUIMALogger(logger);
+        return lastRunner;
     }
 
     /**

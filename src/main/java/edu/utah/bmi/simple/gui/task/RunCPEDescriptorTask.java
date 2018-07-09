@@ -14,6 +14,7 @@ import edu.utah.bmi.simple.gui.entry.SettingAb;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.scene.control.Button;
+import org.apache.uima.collection.impl.cpm.container.CPEFactory;
 
 
 import java.io.File;
@@ -93,7 +94,6 @@ public class RunCPEDescriptorTask extends GUITask {
         snippetResultTable = config.getValue(ConfigKeys.snippetResultTableName);
         docResultTable = config.getValue(ConfigKeys.docResultTableName);
         bunchResultTable = config.getValue(ConfigKeys.bunchResultTableName);
-        HashMap<String, AdaptableCPEDescriptorRunner> runners = AdaptableCPEDescriptorRunner.runners;
         String pipelineName = new File(cpeDescriptor).getName();
         pipelineName = pipelineName.substring(0, pipelineName.length() - 4);
         runner = AdaptableCPEDescriptorRunner.getInstance(cpeDescriptor, annotator, new NLPDBLogger(writerDBConfigFileName, annotator),
@@ -113,16 +113,8 @@ public class RunCPEDescriptorTask extends GUITask {
 
 
     protected void updateWriterConfigurations(AdaptableCPEDescriptorRunner runner) {
-        if (runner.getmCPE() == null) {
-            for (int writerId : runner.getWriterIds().values()) {
-                runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, writerDBConfigFileName);
-                runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
-                runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_ANNOTATOR, annotator);
-                runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable);
-                runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable);
-                runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable);
-            }
-        } else {
+        if (CPEFactory.lastCpeDescriptorUrl.length() > 0 ||
+                new File(CPEFactory.lastCpeDescriptorUrl).getAbsolutePath().equals(new File(cpeDescriptor).getAbsolutePath())) {
             for (int writerId : runner.getWriterIds().values()) {
                 runner.updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, writerDBConfigFileName);
                 runner.updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
@@ -130,6 +122,15 @@ public class RunCPEDescriptorTask extends GUITask {
                 runner.updateCpeProcessorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable);
                 runner.updateCpeProcessorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable);
                 runner.updateCpeProcessorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable);
+            }
+        } else {
+            for (int writerId : runner.getWriterIds().values()) {
+                runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, writerDBConfigFileName);
+                runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
+                runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_ANNOTATOR, annotator);
+                runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable);
+                runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable);
+                runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable);
             }
         }
     }
