@@ -2,6 +2,7 @@ package edu.utah.bmi.simple.gui.controller;
 
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
 import edu.utah.bmi.simple.gui.task.FastDebugPipe;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -12,6 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import org.apache.uima.collection.impl.cpm.container.CPEFactory;
 
 
 /**
@@ -329,6 +331,7 @@ public class RootLayoutController {
 
 
     public void refreshDebug(ActionEvent actionEvent) {
-        FastDebugPipe.getInstance(mainApp.tasks).refreshPipe();
+        CPEFactory.reset();
+        AdaptableCPEDescriptorRunner.lastRunner=null;
     }
 }

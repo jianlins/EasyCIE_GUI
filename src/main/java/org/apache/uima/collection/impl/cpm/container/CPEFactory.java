@@ -136,6 +136,12 @@ public class CPEFactory {
 
     private HashMap cpMap = new HashMap();
 
+    public static void reset() {
+        lastCpeFactory = null;
+        lastCpeDescriptorUrl = "";
+        lastCpeDescriptor = null;
+        lastModifiedTime = 0;
+    }
 
     public static CPEFactory getInstance(CpeDescription aDescriptor, ResourceManager aResourceManager) {
         String cpePath = aDescriptor.getSourceUrl().getPath();

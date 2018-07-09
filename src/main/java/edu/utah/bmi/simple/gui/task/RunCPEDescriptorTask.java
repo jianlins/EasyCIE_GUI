@@ -113,17 +113,18 @@ public class RunCPEDescriptorTask extends GUITask {
 
 
     protected void updateWriterConfigurations(AdaptableCPEDescriptorRunner runner) {
-        if (CPEFactory.lastCpeDescriptorUrl.length() > 0 ||
-                new File(CPEFactory.lastCpeDescriptorUrl).getAbsolutePath().equals(new File(cpeDescriptor).getAbsolutePath())) {
-            for (int writerId : runner.getWriterIds().values()) {
-                runner.updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, writerDBConfigFileName);
-                runner.updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
-                runner.updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_ANNOTATOR, annotator);
-                runner.updateCpeProcessorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable);
-                runner.updateCpeProcessorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable);
-                runner.updateCpeProcessorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable);
-            }
-        } else {
+//        if (CPEFactory.lastCpeDescriptorUrl.length() > 0 ||
+//                new File(CPEFactory.lastCpeDescriptorUrl).getAbsolutePath().equals(new File(cpeDescriptor).getAbsolutePath())) {
+//            for (int writerId : runner.getWriterIds().values()) {
+//                runner.updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, writerDBConfigFileName);
+//                runner.updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
+//                runner.updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_ANNOTATOR, annotator);
+//                runner.updateCpeProcessorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable);
+//                runner.updateCpeProcessorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable);
+//                runner.updateCpeProcessorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable);
+//            }
+//        } else {
+//        changed to the compiled processors will be handled in cached CPEFactory
             for (int writerId : runner.getWriterIds().values()) {
                 runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, writerDBConfigFileName);
                 runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
@@ -132,7 +133,7 @@ public class RunCPEDescriptorTask extends GUITask {
                 runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable);
                 runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable);
             }
-        }
+//        }
     }
 
     protected LinkedHashMap<String, String> readPipelineConfigurations(LinkedHashMap<String, SettingAb> pipelineSettings) {

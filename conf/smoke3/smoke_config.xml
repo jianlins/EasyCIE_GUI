@@ -62,7 +62,7 @@
       <report memo="whether report the processing details at the end">f</report> 
     </pipeLineSetting>  
     <annotators> 
-      <current memo="Mark current annotations with annotator: ">v5</current> 
+      <current memo="Mark current annotations with annotator: ">v6</current> 
     </annotators>  
     <executes> 
       <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunEasyCIE>  

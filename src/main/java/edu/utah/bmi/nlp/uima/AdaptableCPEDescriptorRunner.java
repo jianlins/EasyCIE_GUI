@@ -205,7 +205,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                     classLogger.finest("Configuration modification detected: " + modifiedAes);
             }
             lastRunner = new AdaptableCPEDescriptorRunner(cpeDescriptor, annotator, logger, externalConfigMap, options);
-            lastRunner.runnerName=cpeName;
+            lastRunner.runnerName = cpeName;
         }
         lastRunner.setUIMALogger(logger);
         return lastRunner;
@@ -354,7 +354,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         if (compiledClassPath != null)
             dynamicTypeGenerator.setCompiledRootPath(compiledClassPath);
 //      if customized type system needs to be generated
-        if (conceptTypeDefinitions.size() > 0) {
+        if (conceptTypeDefinitions.size() > 0 || !annotator.equals(lastRunner.annotator)) {
             reInitTypeSystem(genDescriptorPath);
 //       attach the new type descriptor to new cpe descriptor
             try {

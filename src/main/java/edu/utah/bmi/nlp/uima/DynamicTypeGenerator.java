@@ -290,6 +290,18 @@ public class DynamicTypeGenerator {
 //                    writeCompiledClass(compilationUnits, compiledRootPath);
 //                }
 //            }
+        }else{
+            writeTypeDescriptorXML(customTypeDescXml);
+        }
+    }
+
+    public void writeTypeDescriptorXML(String customTypeDescXml) {
+        try {
+            typeSystemDescription.toXML(new FileWriter(customTypeDescXml));
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -297,13 +309,7 @@ public class DynamicTypeGenerator {
         if (!customTypeDescXml.toLowerCase().endsWith(".xml"))
             customTypeDescXml += ".xml";
         if (!classOnly)
-            try {
-                typeSystemDescription.toXML(new FileWriter(customTypeDescXml));
-            } catch (SAXException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            writeTypeDescriptorXML(customTypeDescXml);
         HashMap<String, String> classes;
         if (srcPath == null)
             classes = new JcasGen().main(customTypeDescXml, toBeCompiledTypes);
