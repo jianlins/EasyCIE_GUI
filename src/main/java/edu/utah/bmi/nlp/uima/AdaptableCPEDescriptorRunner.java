@@ -767,6 +767,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 }
             }
         } else {
+//            classLogger.finest("add type:"+typeDefinition.fullTypeName);
             conceptTypeDefinitions.put(typeDefinition.fullTypeName, typeDefinition);
         }
     }
@@ -859,7 +860,8 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      */
     public void updateProcessorConfigurations(int cpeId, LinkedHashMap configurations) {
         if (mCPE != null && cpeId < mCPE.getCasProcessors().length) {
-            CasProcessor processor = mCPE.getCasProcessors()[cpeId];
+            CasProcessor[] processors = mCPE.getCasProcessors();
+            CasProcessor processor = processors[cpeId];
             try {
                 CpeCasProcessor cpeProcessor = currentCpeDesc.getCpeCasProcessors().getCpeCasProcessor(cpeId);
                 String processorName = cpeProcessor.getName();

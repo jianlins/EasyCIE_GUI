@@ -35,7 +35,7 @@
                 </Menu>
                 <Menu mnemonicParsing="true" text="_Help">
                     <items>
-                        <MenuItem mnemonicParsing="true" text="_Refresh Debug Pipeline" onAction="#refreshDebug">
+                        <MenuItem mnemonicParsing="true" text="_Reset Pipeline" onAction="#resetPipeline">
                             <accelerator>
                                 <KeyCodeCombination alt="UP" code="F10" control="UP" meta="UP" shift="UP" shortcut="UP"></KeyCodeCombination>
                             </accelerator>

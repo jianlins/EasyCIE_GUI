@@ -1278,26 +1278,43 @@ public class CPMEngine extends Thread {
         }
         // CasProcessors have been classified into AEs and CCs, so merge the two lists
         ArrayList aList = new ArrayList();
-        Iterator keyIt = analysisEngines.keySet().iterator();
-        while (keyIt.hasNext()) {
-            String keyName = (String) keyIt.next();
-            List kList = (List) analysisEngines.get(keyName);
+        for(Object annotator:this.annotatorDeployList){
+            List kList = (List) annotator;
             if (kList != null) {
                 for (int i = 0; i < kList.size(); i++) {
                     aList.add(kList.get(i));
                 }
             }
         }
-        keyIt = consumers.keySet().iterator();
-        while (keyIt.hasNext()) {
-            String keyName = (String) keyIt.next();
-            List kList = (List) consumers.get(keyName);
+        for(Object annotator:this.consumerDeployList){
+            List kList = (List) annotator;
             if (kList != null) {
                 for (int i = 0; i < kList.size(); i++) {
                     aList.add(kList.get(i));
                 }
             }
         }
+//        the following code is problematic, because HashTable is not ordered.
+//        Iterator keyIt = analysisEngines.keySet().iterator();
+//        while (keyIt.hasNext()) {
+//            String keyName = (String) keyIt.next();
+//            List kList = (List) analysisEngines.get(keyName);
+//            if (kList != null) {
+//                for (int i = 0; i < kList.size(); i++) {
+//                    aList.add(kList.get(i));
+//                }
+//            }
+//        }
+//        keyIt = consumers.keySet().iterator();
+//        while (keyIt.hasNext()) {
+//            String keyName = (String) keyIt.next();
+//            List kList = (List) consumers.get(keyName);
+//            if (kList != null) {
+//                for (int i = 0; i < kList.size(); i++) {
+//                    aList.add(kList.get(i));
+//                }
+//            }
+//        }
 
         if (aList.size() == 0)
             return null;

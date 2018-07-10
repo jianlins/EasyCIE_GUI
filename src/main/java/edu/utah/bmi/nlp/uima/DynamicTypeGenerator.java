@@ -182,10 +182,7 @@ public class DynamicTypeGenerator {
         if (compiledTypes.contains(conceptName))
             return;
         boolean loaded = classLoaded(conceptName);
-        if (loaded) {
-            compiledTypes.add(conceptName);
-            return;
-        }
+
         if (!toBeCompiledTypes.contains(conceptName)) {
             typeSystemDescription.addType(conceptName, "an automatic generated concept type", superTypeName);
             if (featureNames != null && featureNames.size() > 0) {
@@ -213,7 +210,12 @@ public class DynamicTypeGenerator {
                 type.setFeatures(aFeatures);
 //                System.out.println(type);
             }
-            toBeCompiledTypes.add(conceptName);
+//           although loaded types do not need to recompile, but still need to be added to type xml
+            if (loaded) {
+                compiledTypes.add(conceptName);
+            } else {
+                toBeCompiledTypes.add(conceptName);
+            }
         }
     }
 
@@ -229,11 +231,15 @@ public class DynamicTypeGenerator {
         if (!superTypefeatureNamesCache.containsKey(superTypeName)) {
             superTypefeatureNamesCache.put(superTypeName, new HashSet<>());
             Class<? extends Annotation> evidenceTypeClass = AnnotationOper.getTypeClass(superTypeName);
-            for (Method method : evidenceTypeClass.getMethods()) {
-                if (method.getName().startsWith("get") && method.getParameterCount() == 0) {
-                    String featureName = method.getName().substring(3);
-                    superTypefeatureNamesCache.get(superTypeName).add(featureName);
+            if (evidenceTypeClass != null) {
+                for (Method method : evidenceTypeClass.getMethods()) {
+                    if (method.getName().startsWith("get") && method.getParameterCount() == 0) {
+                        String featureName = method.getName().substring(3);
+                        superTypefeatureNamesCache.get(superTypeName).add(featureName);
+                    }
                 }
+            }else {
+                System.out.println(superTypeName);
             }
         }
         for (String featureName : featureNames) {
@@ -290,7 +296,7 @@ public class DynamicTypeGenerator {
 //                    writeCompiledClass(compilationUnits, compiledRootPath);
 //                }
 //            }
-        }else{
+        } else {
             writeTypeDescriptorXML(customTypeDescXml);
         }
     }

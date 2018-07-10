@@ -330,7 +330,7 @@ public class RootLayoutController {
     }
 
 
-    public void refreshDebug(ActionEvent actionEvent) {
+    public void resetPipeline(ActionEvent actionEvent) {
         CPEFactory.reset();
         AdaptableCPEDescriptorRunner.lastRunner=null;
     }

@@ -760,47 +760,47 @@ public abstract class MetaDataObject_impl implements MetaDataObject {
             return true;
         }
 
-        if (val1 instanceof CasProcessorConfigurationParameterSettingsImpl) {// only need this to handle Maps w/ array vals
-            if (!(val2 instanceof CasProcessorConfigurationParameterSettingsImpl)) {
-                return false;
-            }
-            CasProcessorConfigurationParameterSettingsImpl settings1 = (CasProcessorConfigurationParameterSettingsImpl) val1;
-            CasProcessorConfigurationParameterSettingsImpl settings2 = (CasProcessorConfigurationParameterSettingsImpl) val2;
-            if (settings1.getParameterSettings().length != settings2.getParameterSettings().length) {
-                return false;
-            }
-            if (settings1.getParameterSettings().length >= settings2.getParameterSettings().length) {
-                Map<String, Object> values2 = new HashMap<>();
-                for (NameValuePair pair : settings2.getParameterSettings()) {
-                    values2.put(pair.getName(), pair.getValue());
-                }
-                for (NameValuePair pair : settings1.getParameterSettings()) {
-                    if (values2.containsKey(pair.getName())
-                            && !values2.get(pair.getName()).equals(pair.getValue())) {
-                        return false;
-                    }
-                    values2.remove(pair.getName());
-                }
-                if (values2.size() > 0)
-                    return false;
-            } else {
-                Map<String, Object> values1 = new HashMap<>();
-                for (NameValuePair pair : settings1.getParameterSettings()) {
-                    values1.put(pair.getName(), pair.getValue());
-                }
-                for (NameValuePair pair : settings2.getParameterSettings()) {
-                    if (values1.containsKey(pair.getName())
-                            && values1.get(pair.getName()).equals(pair.getValue())) {
-                        return false;
-                    }
-                    values1.remove(pair.getName());
-                }
-                if (values1.size() > 0)
-                    return false;
-            }
-            // for Map values, get here if all values in the map are equal
-            return true;
-        }
+//      overwrite CasProcessorConfigurationParameterSettingsImpl compare, allowing partial match settings.
+//        if (val1 instanceof CasProcessorConfigurationParameterSettingsImpl) {// only need this to handle Maps w/ array vals
+//            if (!(val2 instanceof CasProcessorConfigurationParameterSettingsImpl)) {
+//                return false;
+//            }
+//            CasProcessorConfigurationParameterSettingsImpl settings1 = (CasProcessorConfigurationParameterSettingsImpl) val1;
+//            CasProcessorConfigurationParameterSettingsImpl settings2 = (CasProcessorConfigurationParameterSettingsImpl) val2;
+//            if (settings1.getParameterSettings().length != settings2.getParameterSettings().length) {
+//                return false;
+//            }
+//            if (settings1.getParameterSettings().length >= settings2.getParameterSettings().length) {
+//                Map<String, Object> values2 = new HashMap<>();
+//                for (NameValuePair pair : settings2.getParameterSettings()) {
+//                    values2.put(pair.getName(), pair.getValue());
+//                }
+//                for (NameValuePair pair : settings1.getParameterSettings()) {
+//                    if (values2.containsKey(pair.getName())
+//                            && !values2.get(pair.getName()).equals(pair.getValue())) {
+//                        return false;
+//                    }
+//                    values2.remove(pair.getName());
+//                }
+//                if (values2.size() > 0)
+//                    return false;
+//            } else {
+//                Map<String, Object> values1 = new HashMap<>();
+//                for (NameValuePair pair : settings1.getParameterSettings()) {
+//                    values1.put(pair.getName(), pair.getValue());
+//                }
+//                for (NameValuePair pair : settings2.getParameterSettings()) {
+//                    if (values1.containsKey(pair.getName())
+//                            && values1.get(pair.getName()).equals(pair.getValue())) {
+//                        return false;
+//                    }
+//                    values1.remove(pair.getName());
+//                }
+//                if (values1.size() > 0)
+//                    return false;
+//            }
+//            return true;
+//        }
         // not an instance of Map
         return val1.equals(val2);
     }
