@@ -1,5 +1,6 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea
+classes
 target
 data/output
 data/*.sqlite
@@ -9,3 +10,4 @@ conf/poetconfig.xml
 conf/.log
 desc/type/pipeline*.xml
 desc/type/*TypesStyleMap.xml
+data/input/*

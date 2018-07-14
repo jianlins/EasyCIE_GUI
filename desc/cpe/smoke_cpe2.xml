@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cpeDescription xmlns="http://uima.apache.org/resourceSpecifier">
+    <collectionReader>
+        <collectionIterator>
+            <descriptor>
+                <import location="../ae/SQLTextReader.xml"/>
+            </descriptor>
+            <configurationParameterSettings>
+                <nameValuePair>
+                    <name>DBConfigFile</name>
+                    <value>
+                        <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml</string>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>DocTableName</name>
+                    <value>
+                        <string>SAMPLES</string>
+                    </value>
+                </nameValuePair>
+                <nameValuePair>
+                    <name>DatasetId</name>
+                    <value>
+                        <string>I2B2</string>
+                    </value>
+                </nameValuePair>
+            </configurationParameterSettings>
+        </collectionIterator>
+    </collectionReader>
+    <casProcessors casPoolSize="2" processingUnitThreadCount="1">
+    <casProcessor deployment="integrated" name="Section_Detector_R_AE">
+        <descriptor>
+            <import location="../ae/SectionDetectorR_aeDescriptor.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="0/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000" default="-1"/>
+        </errorHandling>
+        <checkpoint batch="10000" time="1000ms"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>RuleFileOrStr</name>
+                <value>
+                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_section.xlsx</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+    </casProcessor>
+    <casProcessor deployment="integrated" name="RuSH_AE">
+        <descriptor>
+            <import location="../ae/RuSH_AE.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="0/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000" default="-1"/>
+        </errorHandling>
+        <checkpoint batch="10000" time="1000ms"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>RuleFileOrStr</name>
+                <value>
+                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_rush.xlsx</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+    </casProcessor>
+    <casProcessor deployment="integrated" name="FastNER_AE">
+        <descriptor>
+            <import location="../ae/FastNER_aeDescriptor.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="0/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000" default="-1"/>
+        </errorHandling>
+        <checkpoint batch="10000" time="1000ms"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>RuleFileOrStr</name>
+                <value>
+                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_rule.xlsx</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+    </casProcessor>
+    <casProcessor deployment="integrated" name="FastContext_AE">
+        <descriptor>
+            <import location="../ae/FastContext_aeDescriptor.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="0/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000" default="-1"/>
+        </errorHandling>
+        <checkpoint batch="10000" time="1000ms"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>RuleFileOrStr</name>
+                <value>
+                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_context.xlsx</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+    </casProcessor>
+    <casProcessor deployment="integrated" name="TemporalContext_AE">
+        <descriptor>
+            <import location="../ae/TemporalContext_aeDescriptor.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="0/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000" default="-1"/>
+        </errorHandling>
+        <checkpoint batch="10000" time="1000ms"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>RuleFileOrStr</name>
+                <value>
+                    <string/>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+    </casProcessor>
+    <casProcessor deployment="integrated" name="FeatureInference_AE">
+        <descriptor>
+            <import location="../ae/FeatureInference_aeDescriptor.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="0/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000" default="-1"/>
+        </errorHandling>
+        <checkpoint batch="10000" time="1000ms"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>RuleFileOrStr</name>
+                <value>
+                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_featureInf.xlsx</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+    </casProcessor>
+    <casProcessor deployment="integrated" name="SentenceInference_AE">
+        <descriptor>
+            <import location="../ae/SentenceInferencer_aeDescriptor.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="0/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000" default="-1"/>
+        </errorHandling>
+        <checkpoint batch="10000" time="1000ms"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>RuleFileOrStr</name>
+                <value>
+                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_sentInf.xlsx</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+    </casProcessor>
+    <casProcessor deployment="integrated" name="SQLWriter_AE">
+        <descriptor>
+            <import location="../ae/SQLWriterCasConsumer.xml"/>
+        </descriptor>
+            <deploymentParameters/>
+            <filter/>
+        <errorHandling>
+            <errorRateThreshold action="terminate" value="100/1000"/>
+            <maxConsecutiveRestarts action="terminate" value="30"/>
+            <timeout max="100000"/>
+        </errorHandling>
+        <checkpoint batch="10000"/>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>DBConfigFile</name>
+                <value>
+                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>WriteConcepts</name>
+                <value>
+                    <string>Concept</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>Annotator</name>
+                <value>
+                    <string>test</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+    </casProcessor>
+    </casProcessors>
+    <cpeConfig>
+        <numToProcess>-1</numToProcess>
+        <deployAs>immediate</deployAs>
+        <checkpoint batch="0" time="300000"/>
+        <timerImpl/>
+    </cpeConfig>
+</cpeDescription>

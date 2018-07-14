@@ -5,10 +5,13 @@ import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.simple.gui.core.SettingOper;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
+import org.apache.commons.io.FileUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -68,5 +71,12 @@ public class TaskTestBase {
         System.out.println(recordRow);
     }
 
+    @Test
+    public void readConfigString() throws IOException {
+        String content=FileUtils.readFileToString(new File("conf/demo.xml"),StandardCharsets.UTF_8);
+        SettingOper settingOper = new SettingOper(content);
+        tasks = settingOper.readSettings();
+        System.out.println(tasks.getTask("settings").getValue(ConfigKeys.readDBConfigFileName));
+    }
 
 }
