@@ -9,8 +9,10 @@ import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.sqlite.SQLiteException;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.*;
 
 import static edu.utah.bmi.simple.gui.core.CommonFunc.addOption;
@@ -78,11 +80,15 @@ public class Compare {
 
     public String getMaxRunId(EDAO dao, String tableName, String annotator) {
         String runId = null;
-        RecordRowIterator records = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", tableName, annotator);
-        if (records.hasNext()) {
-            Object runIdObj = records.next().getValueByColumnId(1);
-            if (runIdObj != null)
-                runId = runIdObj.toString();
+        try {
+            RecordRowIterator records = dao.queryRecordsFromPstmt("maxRunIDofAnnotator", tableName, annotator);
+            if (records.hasNext()) {
+                Object runIdObj = records.next().getValueByColumnId(1);
+                if (runIdObj != null)
+                    runId = runIdObj.toString();
+            }
+        } catch (Exception e) {
+
         }
         return runId;
     }

@@ -8,10 +8,8 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by Jianlin_Shi on 10/15/15.
@@ -23,13 +21,23 @@ public class XMLConfigOper {
     public XMLConfigOper(String configFile) {
         this.configFile = configFile;
         try {
-            File inputFile = new File(configFile);
+            InputStream inputStream;
+            if (configFile.length() < 200) {
+                File inputFile = new File(configFile);
+                if (inputFile.exists())
+                    inputStream = new FileInputStream(inputFile);
+                else
+                    inputStream = new ByteArrayInputStream(configFile.getBytes(StandardCharsets.UTF_8));
+            } else {
+                inputStream = new ByteArrayInputStream(configFile.getBytes(StandardCharsets.UTF_8));
+            }
             SAXReader reader = new SAXReader();
-            document = reader.read(inputFile);
-
+            document = reader.read(inputStream);
 //            System.out.println("Root element :"
 //                    + document.getRootElement().getName());
         } catch (DocumentException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
