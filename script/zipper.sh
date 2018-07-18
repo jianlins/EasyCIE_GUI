@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-version="2.0.9-samplesize-edition"
+version="2.0.8-beta"
 cd ..
 base="$PWD"
 if [ ! -d "$base/target/release" ]; then
