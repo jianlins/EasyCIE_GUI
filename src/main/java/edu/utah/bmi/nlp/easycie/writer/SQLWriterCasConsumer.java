@@ -25,6 +25,7 @@ import org.apache.uima.jcas.tcas.Annotation;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -277,6 +278,11 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
                 record.addCell("SNIPPET_END", thisAnnotation.getEnd());
                 record.addCell("BEGIN", 0);
                 record.addCell("END", thisAnnotation.getEnd() - thisAnnotation.getBegin());
+            }
+            try {
+                System.out.println(dao.con.isClosed());
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
             dao.insertRecord(tableName, record);
             total++;

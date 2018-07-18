@@ -229,7 +229,7 @@ public class NLPDBLogger extends GUILogger {
 
             Platform.runLater(() -> {
                 TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
-                new ViewOutputDB(tasksOverviewController.mainApp.tasks).run();
+                new ViewOutputDB(tasksOverviewController.mainApp.tasks, annotator).run();
 
                 task.updateGUIProgress(1, 1);
                 if (reportable())

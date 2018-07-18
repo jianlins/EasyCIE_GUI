@@ -1,11 +1,16 @@
 package edu.utah.bmi.simple.gui.task;
 
+import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
+import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.easycie.reader.BratReader;
 import edu.utah.bmi.nlp.easycie.reader.EhostReader;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
+import edu.utah.bmi.nlp.uima.BunchMixInferenceWriter;
+import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import edu.utah.bmi.simple.gui.core.CommonFunc;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -20,6 +25,11 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.comparator.NameFileComparator;
+import org.apache.uima.collection.CollectionProcessingEngine;
+import org.apache.uima.collection.base_cpm.BaseCollectionReader;
+import org.apache.uima.collection.impl.CollectionProcessingEngine_impl;
+import org.apache.uima.fit.factory.CollectionReaderFactory;
+import org.apache.uima.resource.ResourceInitializationException;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -40,7 +50,8 @@ public class Import extends GUITask {
     protected boolean overwrite = false, initSuccess = false;
     protected String includeTypes;
     protected char corpusType;
-    protected RunEasyCIE runner;
+    protected AdaptableCPEDescriptorRunner runner;
+    private boolean report;
 
     protected Import() {
 
@@ -103,30 +114,11 @@ public class Import extends GUITask {
             return;
         }
         dao = EDAO.getInstance(dbconfig, true, false);
-        switch (corpusType) {
-            case brat:
-                if (overWriteAnnotatorName.length() == 0)
-                    overWriteAnnotatorName = "brat_import";
-                importBrat(inputDir, datasetId, overWriteAnnotatorName, referenceTable, rushRule, includeTypes, overwrite);
-                break;
-            case ehost:
-                if (overWriteAnnotatorName.length() == 0)
-                    overWriteAnnotatorName = "ehost_import";
-                importEhost(inputDir, datasetId, overWriteAnnotatorName, referenceTable, rushRule, includeTypes, overwrite);
-                break;
-            case xmi:
-                popDialog("Note", "Sorry, currently import xmi corpus is not supported.", "");
-                return;
-            case n2c2:
-                importN2C2(inputDir, datasetId, importDocTable, referenceTable, overwrite);
-                break;
-            case unknown:
-                popDialog("Note", "Sorry, which type of documents are you going to import?|",
-                        "Currently, there is not any txt or text file in the import directory.\n" +
-                                "Use parameter includeFileTypes to specify the document types, separated by commas.");
-                return;
-        }
+
         initSuccess = true;
+        config = tasks.getTask(ConfigKeys.maintask);
+        String rawStringValue = config.getValue(ConfigKeys.reportAfterProcessing);
+        report = rawStringValue.length() > 0 && (rawStringValue.charAt(0) == 't' || rawStringValue.charAt(0) == 'T' || rawStringValue.charAt(0) == '1');
     }
 
     @Override
@@ -139,14 +131,28 @@ public class Import extends GUITask {
                             includeTypes);
                     break;
                 case brat:
-                case ehost:
+                    if (overWriteAnnotatorName.length() == 0)
+                        overWriteAnnotatorName = "brat_import";
+                    importBrat(inputDir, datasetId, overWriteAnnotatorName, referenceTable, rushRule, includeTypes, overwrite);
                     runner.run();
+                    break;
+                case ehost:
+                    if (overWriteAnnotatorName.length() == 0)
+                        overWriteAnnotatorName = "ehost_import";
+                    importEhost(inputDir, datasetId, overWriteAnnotatorName, referenceTable, rushRule, includeTypes, overwrite);
+                    runner.run();
+                    break;
+                case n2c2:
+                    importN2C2(inputDir, datasetId, importDocTable, referenceTable, overwrite);
+                    break;
+                default:
+                    popDialog("Note", "Sorry, which type of documents are you going to import?|",
+                            "Currently, there is not any txt or text file in the import directory.\n" +
+                                    "Use parameter includeFileTypes to specify the document types, separated by commas.");
                     break;
             }
             updateGUIMessage("Import complete");
         }
-        dao.endBatchInsert();
-        dao.close();
         updateGUIProgress(1, 1);
         return null;
     }
@@ -226,19 +232,24 @@ public class Import extends GUITask {
         if (overWrite)
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", tableName, overWrite);
 
-        runner = new RunEasyCIE();
 
-        if (annotator.length() == 0)
-            annotator = "ehost_import";
-        runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "", "",
-                false, false, dbConfigFile, importDocTable, datasetId,
-                dbConfigFile, importDocTable, "", "", "", includeTypes, "db");
-
-        runner.initTypes(EhostReader.getTypeDefinitions(inputDir.getAbsolutePath()));
-        runner.setReader(EhostReader.class, new Object[]{EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
-                EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator,
-                EhostReader.PARAM_READ_TYPES, includeTypes,
-                EhostReader.PARAM_PRINT, print});
+        runner = new AdaptableCPEDescriptorRunner("desc/cpe/import_cpe.xml", annotator, new NLPDBLogger(dao.getConfigFile().getAbsolutePath(), annotator));
+        ((NLPDBLogger) runner.getLogger()).setReportable(report);
+        ((NLPDBLogger) runner.getLogger()).setTask(this);
+        for (int writerId : runner.getWriterIds().values()) {
+            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, dbConfigFile);
+            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
+            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_ANNOTATOR, annotator);
+            runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, referenceTable);
+            runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, referenceTable);
+            runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, referenceTable);
+        }
+        runner.setReaderDescriptor("desc/ae/EhostReader.xml", EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
+                EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, EhostReader.PARAM_READ_TYPES, includeTypes,
+                EhostReader.PARAM_PRINT, print);
+        runner.addConceptTypes(EhostReader.getTypeDefinitions(inputDir.getAbsolutePath()));
+        runner.reInitTypeSystem("desc/type/" + annotator + ".xml");
+        runner.attachTypeDescriptorToReader();
 
     }
 
@@ -247,19 +258,25 @@ public class Import extends GUITask {
         if (overWrite)
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", tableName, overWrite);
 
-        runner = new RunEasyCIE();
         if (annotator.length() == 0)
-            annotator = "ehost_import";
-        runner.init(this, overWriteAnnotatorName, rushRule, "", "", "", "", "", "",
-                false, false, dbConfigFile, importDocTable, datasetId,
-                dbConfigFile, importDocTable, "", "", "", includeTypes, "db");
-
-        runner.initTypes(BratReader.getTypeDefinitions(inputDir.getAbsolutePath()));
-        runner.setReader(BratReader.class, new Object[]{BratReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
-                BratReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator,
-                BratReader.PARAM_READ_TYPES, includeTypes,
-                BratReader.PARAM_PRINT, print});
-
+            annotator = "brat_import";
+        runner = new AdaptableCPEDescriptorRunner("desc/cpe/import_cpe.xml", annotator, new NLPDBLogger(dao.getConfigFile().getAbsolutePath(), annotator));
+        ((NLPDBLogger) runner.getLogger()).setReportable(report);
+        ((NLPDBLogger) runner.getLogger()).setTask(this);
+        for (int writerId : runner.getWriterIds().values()) {
+            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, dbConfigFile);
+            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
+            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_ANNOTATOR, annotator);
+            runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, referenceTable);
+            runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, referenceTable);
+            runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, referenceTable);
+        }
+        runner.setReaderDescriptor("desc/ae/BratReader.xml", BratReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
+                BratReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, BratReader.PARAM_READ_TYPES, includeTypes,
+                BratReader.PARAM_PRINT, print);
+        runner.addConceptTypes(BratReader.getTypeDefinitions(inputDir.getAbsolutePath()));
+        runner.reInitTypeSystem("desc/type/" + annotator + ".xml");
+        runner.attachTypeDescriptorToReader();
 
     }
 
@@ -285,7 +302,7 @@ public class Import extends GUITask {
                     return xmi;
                 if (fileName.endsWith(".ann"))
                     return brat;
-                if (fileName.endsWith(".knowtator.xml"))
+                if (fileName.endsWith(".knowtator.xml")|| fileName.equals("projectschema.xml"))
                     return ehost;
                 if (fileName.endsWith(".xml"))
                     return n2c2;
@@ -313,7 +330,7 @@ public class Import extends GUITask {
             System.out.println("Reading files from: " + inputDir.getAbsolutePath() +
                     "\nImporting into table: " + tableName);
         int total = files.size();
-        int fileCounter = 0, noteCounter=0;
+        int fileCounter = 0, noteCounter = 0;
 
         Boolean n2c2Data = false;
         for (File file : fileArray) {
@@ -322,7 +339,7 @@ public class Import extends GUITask {
             String content = n2c2Parser(file, docName, annotations);
             if (print)
                 System.out.print("Import: " + file.getName() + "\t\t");
-            RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId+"_ORIG")
+            RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId + "_ORIG")
                     .addCell("DOC_NAME", docName)
                     .addCell("TEXT", content.trim())
                     .addCell("BUNCH_ID", docName);
@@ -364,10 +381,10 @@ public class Import extends GUITask {
                 e.printStackTrace();
             }
         }
-        System.out.println("Totally " + fileCounter + (fileCounter > 1 ? " documents have" : " document has") + " been imported successfully ("+noteCounter+" notes).");
-        popDialog("Message","Import success","Totally " + fileCounter + (fileCounter > 1 ? " documents have" : " document has")
-                + " been imported successfully("+noteCounter+" notes). \n\nThe original documents are imported directly to DATASET_ID: '"+datasetId
-                +"_ORIG'.\n\nEach document was split into individual notes with DATASET_ID: '"+datasetId+"'.");
+        System.out.println("Totally " + fileCounter + (fileCounter > 1 ? " documents have" : " document has") + " been imported successfully (" + noteCounter + " notes).");
+        popDialog("Message", "Import success", "Totally " + fileCounter + (fileCounter > 1 ? " documents have" : " document has")
+                + " been imported successfully(" + noteCounter + " notes). \n\nThe original documents are imported directly to DATASET_ID: '" + datasetId
+                + "_ORIG'.\n\nEach document was split into individual notes with DATASET_ID: '" + datasetId + "'.");
     }
 
     private Date tryFindDate(String docTxt) {

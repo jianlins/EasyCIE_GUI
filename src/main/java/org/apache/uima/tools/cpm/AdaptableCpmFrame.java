@@ -61,7 +61,7 @@ public class AdaptableCpmFrame extends JFrame implements ActionListener {
 
     private JDialog aboutDialog;
 
-    public AdaptableCpmFrame() {
+    public AdaptableCpmFrame(String[] args) {
         super("Collection Processing Engine Configurator");
 
         try {
@@ -90,8 +90,10 @@ public class AdaptableCpmFrame extends JFrame implements ActionListener {
 
         JLabel banner = new JLabel(Images.getImageIcon(Images.BANNER));
         this.getContentPane().add(banner, BorderLayout.NORTH);
-
-        cpmPanel = new AdaptableCpmPanel();
+        if (args.length == 0)
+            cpmPanel = new AdaptableCpmPanel();
+        else
+            cpmPanel = new AdaptableCpmPanel(args[0]);
         this.getContentPane().add(cpmPanel, BorderLayout.CENTER);
         this.setTitle(cpmPanel.title);
 
@@ -154,7 +156,7 @@ public class AdaptableCpmFrame extends JFrame implements ActionListener {
 
     public Dimension getPreferredSize() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        return new Dimension((int)(screenSize.width*0.7), (int)(0.7*(screenSize.height - 65)));
+        return new Dimension((int) (screenSize.width * 0.7), (int) (0.7 * (screenSize.height - 65)));
     }
 
     /**
@@ -165,19 +167,15 @@ public class AdaptableCpmFrame extends JFrame implements ActionListener {
         //not thread-safe.  This is particularly important for the CPE Configurator
         //because it's initialization can be quite complex (it loads the last known
         //CPE descriptor).
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                initGUI();
-            }
-        });
+        SwingUtilities.invokeLater(() -> initGUI(args));
     }
 
     /**
      * Creates and shows the GUI.
      */
-    private static void initGUI() {
+    private static void initGUI(String[] args) {
         try {
-            final AdaptableCpmFrame frame = new AdaptableCpmFrame();
+            final AdaptableCpmFrame frame = new AdaptableCpmFrame(args);
             frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
             frame.addWindowListener(new WindowAdapter() {

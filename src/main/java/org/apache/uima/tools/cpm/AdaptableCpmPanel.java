@@ -223,10 +223,20 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
     private boolean saveUsingImports = true;
 
     private JCheckBoxMenuItem saveUsingImportMenuItem;
+    private String cpeDescriptorPath;
 
     public AdaptableCpmPanel() {
         super();
+        init();
+    }
 
+    public AdaptableCpmPanel(String cpeDescriptorPath) {
+        super();
+        this.cpeDescriptorPath = cpeDescriptorPath;
+        init();
+    }
+
+    private void init() {
         // The following is VERY flaky:
         // Don't 'try' this at home:
         /*
@@ -405,6 +415,7 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
         }
     }
 
+
     /**
      * Initialize the file choosers. This is called initially from the constructor but can be called
      * again to reset the file choosers to their default state.
@@ -514,15 +525,17 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
     }
 
     private void readPreferences() {
-        String cpeDescFileString = prefs.get(PREFS_CPE_DESCRIPTOR_FILE, null);
-        if (cpeDescFileString != null) {
-            File cpeDescFile = new File(cpeDescFileString);
+        if(cpeDescriptorPath==null || cpeDescriptorPath.trim().length()==0) {
+            cpeDescriptorPath = prefs.get(PREFS_CPE_DESCRIPTOR_FILE, null);
+        }
+        if (cpeDescriptorPath != null) {
+            File cpeDescFile = new File(cpeDescriptorPath);
             if (cpeDescFile.exists()) {
                 openSaveFileChooser.setSelectedFile(cpeDescFile);
                 try {
                     openCpeDescriptor(cpeDescFile);
                 } catch (Exception e) {
-                    System.err.println("Error loading last known CPE Descriptor " + cpeDescFileString);
+                    System.err.println("Error loading last known CPE Descriptor " + cpeDescriptorPath);
                     e.printStackTrace();
                 }
             }

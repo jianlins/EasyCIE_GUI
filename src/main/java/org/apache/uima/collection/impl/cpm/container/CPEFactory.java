@@ -161,6 +161,8 @@ public class CPEFactory {
                     lastCpeDescriptorUrl = cpePath;
                     lastModifiedTime = new File(cpePath).lastModified();
                 } else {
+                    if(lastCpeFactory.aeList==null)
+                        lastCpeFactory.aeList = new CasProcessor[newProcessors.length];
                     for (int i = 0; i < newProcessors.length; i++) {
                         CpeCasProcessor newProcessor = newProcessors[i];
                         CpeCasProcessor lastProcessor = lastProcessors[i];

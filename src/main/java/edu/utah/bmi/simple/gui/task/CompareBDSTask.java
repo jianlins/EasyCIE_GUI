@@ -45,7 +45,7 @@ public class CompareBDSTask extends GUITask {
         TaskFX config = tasks.getTask(ConfigKeys.comparetask);
 
         targetAnnotator = config.getValue(ConfigKeys.targetAnnotator);
-        if(targetAnnotator.trim().length()==0){
+        if (targetAnnotator.trim().length() == 0) {
             targetAnnotator = tasks.getTask(ConfigKeys.maintask).getValue(ConfigKeys.annotator);
         }
         targetRunId = config.getValue(ConfigKeys.targetRunId);
@@ -75,6 +75,7 @@ public class CompareBDSTask extends GUITask {
         String goldReferenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
 
         wdao = EDAO.getInstance(new File(outputDB));
+        logger = new NLPDBLogger(outputDB, "LOG", "RUN_ID", targetAnnotator + "_vs_" + referenceAnnotator);
         if (goldReferenceTable.equals(compareReferenceTable) && !importDB.equals(outputDB)) {
 //            if compare with gold standard
             rdao = EDAO.getInstance(new File(importDB));
@@ -95,7 +96,7 @@ public class CompareBDSTask extends GUITask {
         HashMap<String, HashMap<String, ArrayList<RecordRow>>> targetAnnotations = new HashMap<>();
         HashMap<String, HashMap<String, ArrayList<RecordRow>>> referenceAnnotations = new HashMap<>();
         typeCategories.clear();
-        logger = new NLPDBLogger(wdao, "LOG", "RUN_ID", targetAnnotator + "_vs_" + referenceAnnotator);
+
         logger.logStartTime();
         if (!wdao.checkTableExits(snippetResultTable)) {
             updateGUIMessage("Table '" + snippetResultTable + "' does not exit.");
@@ -112,9 +113,12 @@ public class CompareBDSTask extends GUITask {
             return null;
         }
 
-        readAnnotations(wdao, targetAnnotations, targetAnnotator, snippetResultTable, typeFilter, targetRunId);
-        readAnnotations(wdao, targetAnnotations, targetAnnotator, documentResultTable, typeFilter, targetRunId);
-        readAnnotations(wdao, targetAnnotations, targetAnnotator, bunchResultTable, typeFilter, targetRunId);
+        if (wdao.checkTableExits(snippetResultTable))
+            readAnnotations(wdao, targetAnnotations, targetAnnotator, snippetResultTable, typeFilter, targetRunId);
+        if (wdao.checkTableExits(documentResultTable))
+            readAnnotations(wdao, targetAnnotations, targetAnnotator, documentResultTable, typeFilter, targetRunId);
+        if (wdao.checkTableExits(bunchResultTable))
+            readAnnotations(wdao, targetAnnotations, targetAnnotator, bunchResultTable, typeFilter, targetRunId);
 
         readAnnotations(rdao, referenceAnnotations, referenceAnnotator, compareReferenceTable, typeFilter, referenceRunId);
         updateGUIMessage("Start comparing...");
@@ -129,7 +133,6 @@ public class CompareBDSTask extends GUITask {
             comparior.logDiff(wdao, logger, strictCompare, evalCounters.get(comparior.total),
                     targetAnnotator, referenceAnnotator, diffTable);
         }
-        lastRunId = (int) logger.getRunid();
         return null;
     }
 

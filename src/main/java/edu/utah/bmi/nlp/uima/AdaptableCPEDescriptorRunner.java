@@ -39,11 +39,14 @@ import org.apache.uima.analysis_engine.impl.PrimitiveAnalysisEngine_impl;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.collection.CasConsumerDescription;
 import org.apache.uima.collection.CollectionProcessingEngine;
+import org.apache.uima.collection.CollectionReader;
 import org.apache.uima.collection.CollectionReaderDescription;
 import org.apache.uima.collection.base_cpm.CasProcessor;
 import org.apache.uima.collection.impl.CollectionProcessingEngine_impl;
 import org.apache.uima.collection.impl.cpm.engine.CPMEngine;
+import org.apache.uima.collection.impl.metadata.cpe.CpeComponentDescriptorImpl;
 import org.apache.uima.collection.metadata.*;
+import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.impl.ChildUimaContext_impl;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.*;
@@ -65,6 +68,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -82,7 +86,6 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public static AdaptableCPEDescriptorRunner lastRunner = null;
     protected String annotator, runnerName;
     protected static ModifiedChecker modifiedChecker = new ModifiedChecker();
-    protected CollectionReaderDescription reader;
     protected CpeDescription currentCpeDesc;
     protected File rootFolder;
     protected LinkedHashMap<String, TypeDefinition> conceptTypeDefinitions = new LinkedHashMap<>();
@@ -354,20 +357,25 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         if (compiledClassPath != null)
             dynamicTypeGenerator.setCompiledRootPath(compiledClassPath);
 //      if customized type system needs to be generated
-        if (conceptTypeDefinitions.size() > 0 || !annotator.equals(lastRunner.annotator)) {
+        if (conceptTypeDefinitions.size() > 0 || (lastRunner != null && !annotator.equals(lastRunner.annotator))) {
             reInitTypeSystem(genDescriptorPath);
 //       attach the new type descriptor to new cpe descriptor
-            try {
-                CpeCollectionReader reader = currentCpeDesc.getAllCollectionCollectionReaders()[0];
-                String readerxml = reader.getDescriptor().getImport().getLocation();
-                readerxml = new File(new File(cpeDescriptor).getParentFile(), readerxml).getAbsolutePath();
-                String newReaderXml = updateTypeDescriptor(readerxml, customTypeDescXmlDir, customTypeDescXmlLoc);
-                reader.getDescriptor().getImport().setLocation(new File(newReaderXml).toURI().toString());
-            } catch (CpeDescriptorException e) {
-                e.printStackTrace();
-            }
+            attachTypeDescriptorToReader();
         }
 
+    }
+
+    public void attachTypeDescriptorToReader() {
+        try {
+            CpeCollectionReader reader = currentCpeDesc.getAllCollectionCollectionReaders()[0];
+            String readerxml = reader.getDescriptor().getImport().getLocation();
+            if (!new File(readerxml).exists())
+                readerxml = new File(new File(currentCpeDesc.getSourceUrl().getPath()).getParentFile(), readerxml).getAbsolutePath();
+            String newReaderXml = updateTypeDescriptor(readerxml, customTypeDescXmlDir, customTypeDescXmlLoc);
+            reader.getDescriptor().getImport().setLocation(new File(newReaderXml).toURI().toString());
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
     }
 
     protected boolean checkClassLoaded(String className) {
@@ -615,6 +623,24 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         } catch (CpeDescriptorException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setReaderDescriptor(String descriptorPath, Object... configurationData) {
+        try {
+            CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
+            URL url = new File(descriptorPath).toURI().toURL();
+            collRdrs[0].setSourceUrl(url);
+            collRdrs[0].getDescriptor().getImport().setLocation(url.getPath());
+            collRdrs[0].getDescriptor();
+            for (int i = 0; i < configurationData.length; i += 2)
+                collRdrs[0].getConfigurationParameterSettings().setParameterValue(configurationData[i] + "", configurationData[i + 1]);
+            currentCpeDesc.setAllCollectionCollectionReaders(collRdrs);
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**

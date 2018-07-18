@@ -4,6 +4,7 @@ import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.type.system.Concept;
 import edu.utah.bmi.nlp.type.system.Doc_Base;
+import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
 import org.apache.commons.io.FileUtils;
 import org.apache.uima.cas.CAS;
@@ -24,7 +25,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- *
  * @author Jianlin Shi on 5/20/16.
  */
 public class BratReader extends AbFileCollectionReader {
@@ -37,7 +37,7 @@ public class BratReader extends AbFileCollectionReader {
     protected static final String beginOffset = "<begin>";
     protected static final String endOffset = "<end>";
     protected static final String typeName = "<typeName>";
-    private String readTypes="";
+    private String readTypes = "";
 
 
     public void initialize() throws ResourceInitializationException {
@@ -60,10 +60,6 @@ public class BratReader extends AbFileCollectionReader {
 
         mRecursive = true;
 
-        para = getConfigParameterValue(PARAM_PRINT);
-        if (para != null && para instanceof Boolean) {
-            print = (Boolean) para;
-        }
 
         mFiles = new ArrayList<>();
         mFiles = UIMATypeFunctions.addFilesFromDir(directory, "txt", true);
@@ -167,8 +163,15 @@ public class BratReader extends AbFileCollectionReader {
         int end = Integer.parseInt(attributes.get(endOffset));
         attributes.remove(beginOffset);
         attributes.remove(endOffset);
-        if (!typeClasses.containsKey(typeName))
+        boolean contain = false;
+        if (!typeClasses.containsKey(typeName)) {
+            contain = checkNewType(typeName);
+        } else {
+            contain = true;
+        }
+        if (!contain)
             return;
+
         Annotation annotation = typeConstructors.get(typeClasses.get(typeName)).newInstance(jcas);
         annotation.setBegin(begin);
         annotation.setEnd(end);
@@ -188,6 +191,30 @@ public class BratReader extends AbFileCollectionReader {
         annotation.addToIndexes();
     }
 
+    private boolean checkNewType(String typeName) {
+        boolean contain = false;
+        Class cls = classLoaded(typeName);
+        if (cls == null)
+            return false;
+        for (Class<? extends Annotation> existCls : typeClasses.values()) {
+            if (existCls.isAssignableFrom(cls)) {
+                typeClasses.put(typeName, cls);
+                UIMATypeFunctions.addTypeInfo(cls, typeClasses, typeConstructors, typeSetMethods);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Class classLoaded(String className) {
+        Class cls = null;
+        try {
+            cls = Class.forName(DeterminantValueSet.checkNameSpace(typeName));
+        } catch (ClassNotFoundException e) {
+
+        }
+        return cls;
+    }
 
     @Override
     public Progress[] getProgress() {

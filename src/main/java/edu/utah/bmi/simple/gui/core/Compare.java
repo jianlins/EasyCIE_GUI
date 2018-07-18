@@ -31,6 +31,7 @@ public class Compare {
     protected HashSet<String> types = new HashSet<>();
     protected Boolean strictCompare = false;
     public final String total = "OVERALL";
+    private HashMap<String, EvalCounter> evalCounters;
 
 
     public static void main(String[] args) {
@@ -64,15 +65,7 @@ public class Compare {
 
         strictCompare = cmd.hasOption("-s");
 
-
-        dao1 = EDAO.getInstance(new File(writeConfigFileName));
-        dao1.batchsize = 1000;
-        if (referConfigFileName == null) {
-            daor = dao1;
-        } else
-            daor = EDAO.getInstance(new File(referConfigFileName));
-
-        logger = new NLPDBLogger(dao1, "LOG", "RUN_ID", annotator + "_vs_" + referenceAnnotator);
+        logger = new NLPDBLogger(writeConfigFileName, "LOG", "RUN_ID", annotator + "_vs_" + referenceAnnotator);
         logger.logStartTime();
         run(annotator, nlpOutputTable, runId1, referenceAnnotator, referenceTableName, runId2, diffTableName, typeFilter);
     }
@@ -159,6 +152,7 @@ public class Compare {
         logAnnoDifferenceWSentence(dao, logger, compareName, "fn", evalCounter.fns, diffTable);
         logAnnoDifferenceWSentence(dao, logger, compareName, "fp", evalCounter.fps, diffTable);
         logger.logCompletToDB(evalCounter.total(), strictCompare ? "strict compare" : "relax compare");
+        logger.collectionProcessComplete(getScore());
         dao.close();
     }
 
@@ -177,6 +171,10 @@ public class Compare {
 
     public void printScores(HashMap<String, EvalCounter> evalCounters) {
         System.out.println(getScores(evalCounters));
+    }
+
+    public String getScore() {
+        return getScores(evalCounters);
     }
 
     public String getScores(HashMap<String, EvalCounter> evalCounters) {
@@ -206,14 +204,14 @@ public class Compare {
 
         System.out.println("Read annotation finished. Start comparison");
 
-        HashMap<String, EvalCounter> evalCounters = eval(annotations1, annotations2, types, strictCompare);
+        evalCounters = eval(annotations1, annotations2, types, strictCompare);
         return evalCounters;
     }
 
     public HashMap<String, EvalCounter> eval(HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations1,
                                              HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations2,
                                              Set<String> types, boolean strictCompare) {
-        LinkedHashMap<String, EvalCounter> evalCounters = new LinkedHashMap<>();
+        evalCounters = new LinkedHashMap<>();
         for (String type : types) {
             if (!evalCounters.containsKey(total))
                 evalCounters.put(total, new EvalCounter());

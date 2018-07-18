@@ -82,6 +82,11 @@ public class CollectionProcessingEngine_impl implements CollectionProcessingEngi
         }
     }
 
+    public void setReader(BaseCollectionReader reader) {
+        this.mCPM.setCollectionReader(reader);
+
+    }
+
     /*
      * (non-Javadoc)
      *
