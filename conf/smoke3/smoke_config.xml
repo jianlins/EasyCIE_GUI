@@ -3,7 +3,7 @@
 <configurations> 
   <import> 
     <documents> 
-      <corpusDir memo="The directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/ehost/v2/corpus</corpusDir>  
+      <corpusDir memo="The directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/training/corpus</corpusDir>  
       <includeFileTypes memo="Filter files by extension names (separate by comma). If not filter defined, all files will be read">txt</includeFileTypes> 
     </documents>  
     <excelData> 
@@ -71,7 +71,7 @@
   </easycie>  
   <compare> 
     <compare> 
-      <targetAnnotator memo="Compare annotations from annotator (leave it blank will use easycie's current annotator as default)"></targetAnnotator>  
+      <targetAnnotator memo="Compare annotations from annotator (leave it blank will use easycie's current annotator as default)"/>  
       <targetRunId memo="run id of target annotator. Default is the latest run id when leave blank"/>  
       <referenceAnnotator memo="Compare annotations against annotator: ">gold</referenceAnnotator>  
       <referenceRunId memo="run id of reference annotator. Default is the latest run id when leave blank"/>  
@@ -125,7 +125,7 @@
       <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/smoke3/sqliteconfig.xml</dbFile>  
       <table memo="the table used to saved the txt corpus">SAMPLES</table>  
       <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">TEST</datasetId>  
-      <overwrite memo="if the table exist, whether overwrite it">f</overwrite> 
+      <overwrite memo="if the table exist, whether overwrite it">t</overwrite> 
     </import>  
     <reference> 
       <table>REFERENCE</table> 
