@@ -15,7 +15,7 @@
       <startRowNum memo="Start to import from row #(you need to skip header columns, if there is any)">2</startRowNum> 
     </excelData>  
     <annotations memo="support Brat and eHOST format, the format will be automatically detected."> 
-      <projectDir memo="the directory that hosts the eHOST project" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/output/ehost/v2</projectDir>  
+      <projectDir memo="the directory that hosts the eHOST project" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">../../../Desktop/tmp/training_v2</projectDir>  
       <includeAnnotationTypes>Concept, Doc_Base</includeAnnotationTypes>  
       <enableSentenceSnippet>true</enableSentenceSnippet>  
       <overWriteAnnotatorName memo="if a name is set, all the annotations' annotator will be overwritten by this name">gold</overWriteAnnotatorName> 
@@ -125,7 +125,7 @@
       <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/smoke3/sqliteconfig.xml</dbFile>  
       <table memo="the table used to saved the txt corpus">SAMPLES</table>  
       <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">TEST</datasetId>  
-      <overwrite memo="if the table exist, whether overwrite it">t</overwrite> 
+      <overwrite memo="if the table exist, whether overwrite it">true</overwrite> 
     </import>  
     <reference> 
       <table>REFERENCE</table> 

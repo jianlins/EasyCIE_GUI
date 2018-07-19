@@ -185,50 +185,56 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-jar-plugin</artifactId>-->
-            <!--<version>2.3.1</version>-->
-            <!--<configuration>-->
-            <!--<outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-dependency-plugin</artifactId>-->
-            <!--<version>3.0.0</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>copy-dependencies</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>copy-dependencies</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
-            <!--&lt;!&ndash; configure the plugin here &ndash;&gt;-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.0.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <excludeGroupIds>org.apache.maven.plugins</excludeGroupIds>
+                            <excludeGroupIds>junit</excludeGroupIds>
+                            <excludeGroupIds>org.apache.maven</excludeGroupIds>
+                            <excludeGroupIds>ch.vorburger.mariaDB4j</excludeGroupIds>
+                        </configuration>
+
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
                     <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>
                 </configuration>
             </plugin>
+            <!--<plugin>-->
+                <!--<artifactId>maven-assembly-plugin</artifactId>-->
+                <!--<version>3.0.0</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>single</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+                <!--<configuration>-->
+                    <!--<descriptorRefs>-->
+                        <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
+                    <!--</descriptorRefs>-->
+                    <!--<outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.0.1</version>
@@ -297,21 +303,21 @@
                             </resources>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>copy-input-data</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/deploy/data/input</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>data/input</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
+                    <!--<execution>-->
+                        <!--<id>copy-input-data</id>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>copy-resources</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<outputDirectory>${project.build.directory}/deploy/data/input</outputDirectory>-->
+                            <!--<resources>-->
+                                <!--<resource>-->
+                                    <!--<directory>data/input</directory>-->
+                                <!--</resource>-->
+                            <!--</resources>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                 </executions>
             </plugin>
             <plugin>
@@ -326,14 +332,8 @@
                             <target>
                                 <chmod file="target/deploy/run_gui" perm="755"/>
                                 <chmod file="target/deploy/run_gui.bat" perm="755"/>
-                                <chmod file="target/deploy/run" perm="755"/>
-                                <chmod file="target/deploy/run.bat" perm="755"/>
-                                <chmod file="target/deploy/help.bat" perm="755"/>
-                                <chmod file="target/deploy/help" perm="755"/>
-                            </target>
-                            <tasks>
                                 <mkdir dir="target/deploy/data"/>
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>

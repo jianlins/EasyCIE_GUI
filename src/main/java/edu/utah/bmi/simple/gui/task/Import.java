@@ -223,6 +223,7 @@ public class Import extends GUITask {
             updateGUIProgress(counter, total);
             counter++;
         }
+        dao.close();
         System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
     }
 
