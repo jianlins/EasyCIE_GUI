@@ -751,6 +751,7 @@ public class EDAO {
             for (Map.Entry<String, String> columnNameType : columnInfo.getColumnInfoSet()) {
                 String columnName = columnNameType.getKey();
                 int columnId = columnInfo.getColumnId(columnName);
+                String type=columnNameType.getValue();
                 updatePstmt.setObject(columnId, recordRow.getValueByColumnName(columnName));
 
             }

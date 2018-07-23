@@ -44,7 +44,9 @@ import org.apache.uima.collection.CollectionReaderDescription;
 import org.apache.uima.collection.base_cpm.CasProcessor;
 import org.apache.uima.collection.impl.CollectionProcessingEngine_impl;
 import org.apache.uima.collection.impl.cpm.engine.CPMEngine;
+import org.apache.uima.collection.impl.metadata.cpe.CasProcessorConfigurationParameterSettingsImpl;
 import org.apache.uima.collection.impl.metadata.cpe.CpeComponentDescriptorImpl;
+import org.apache.uima.collection.impl.metadata.cpe.CpeDescriptorFactory;
 import org.apache.uima.collection.metadata.*;
 import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.impl.ChildUimaContext_impl;
@@ -362,7 +364,41 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 //       attach the new type descriptor to new cpe descriptor
             attachTypeDescriptorToReader();
         }
+    }
 
+    public void updateAllReaderDescriptorConfigs(LinkedHashMap<String, String> configs) {
+        try {
+            CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
+            for (CpeCollectionReader collReader : collRdrs) {
+                for (String paraName : configs.keySet())
+                    collReader.getConfigurationParameterSettings().setParameterValue(paraName, configs.get(paraName));
+            }
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateAllReaderDescriptorConfigs(String paraName, Object value) {
+        try {
+            CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
+            for (CpeCollectionReader collReader : collRdrs) {
+                collReader.getConfigurationParameterSettings().setParameterValue(paraName, value);
+            }
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateAllReaderDescriptorConfigs(Object... configs) {
+        try {
+            CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
+            for (CpeCollectionReader collReader : collRdrs) {
+                for (int i = 0; i < configs.length; i += 2)
+                    collReader.getConfigurationParameterSettings().setParameterValue((String) configs[i], configs[i + 1]);
+            }
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
     }
 
     public void attachTypeDescriptorToReader() {
@@ -529,6 +565,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         int numRemoved = 0;
         for (int i = 0; i < cpeCasProcessorsArray.length; i++) {
             CpeCasProcessor cp = cpeCasProcessorsArray[i];
+
             String processorName = cp.getName();
             File descFile = new File(rootFolder + File.separator + cp.getCpeComponentDescriptor().getImport().getLocation());
             AnalysisEngineDescription aed = UIMAFramework.getXMLParser().parseAnalysisEngineDescription(new XMLInputSource(descFile));
@@ -543,8 +580,16 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 //          initiate class Map to read customized types from rule configurations
             Class<? extends JCasAnnotator_ImplBase> aeClass = getJCasAnnotatorClassByName(className);
             boolean ruleBasedAE = false;
+            Object cpeVersionValue = null;
+            if (cp.getConfigurationParameterSettings() != null) {
+                cpeVersionValue = cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_VERSION);
+            } else {
+                CasProcessorConfigurationParameterSettings aSe = CpeDescriptorFactory.produceCasProcessorConfigurationParameterSettings();
+                cp.setConfigurationParameterSettings(aSe);
+
+            }
             Object aeVersionValue = aed.getMetaData().getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_VERSION);
-            Object cpeVersionValue = cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_VERSION);
+
             if (RuleBasedAEInf.class.isAssignableFrom(aeClass)) {
                 ruleBasedAE = true;
                 if (externalConfigMap.containsKey(processorName)
@@ -556,11 +601,17 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                     continue;
                 } else {
                     Object aeRuleValue = aed.getMetaData().getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_RULE_STR);
-                    Object cpeRuleValue = cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_RULE_STR);
+                    Object cpeRuleValue = cp.getConfigurationParameterSettings() == null ? null : cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_RULE_STR);
+                    String externalValue = null;
+                    if (externalConfigMap.containsKey(processorName)
+                            && externalConfigMap.get(processorName).containsKey(DeterminantValueSet.PARAM_RULE_STR)) {
+                        externalValue = externalConfigMap.get(processorName).get(DeterminantValueSet.PARAM_RULE_STR);
+                    }
                     if ((cpeRuleValue == null || cpeRuleValue.equals(""))
                             && (aeRuleValue == null || aeRuleValue.equals("")
                             || (aeRuleValue.toString().indexOf("\t") == -1
-                            && !new File(aeRuleValue.toString()).exists()))) {
+                            && !new File(aeRuleValue.toString()).exists()))
+                            && (externalValue == null || externalValue.trim().length() == 0)) {
                         cpeCasProcessors.removeCpeCasProcessor(i - numRemoved);
                         classLogger.fine("The rule for the Rule-based AE: '" + processorName + "' has not been configured, skip this AE.");
                         numRemoved++;
@@ -586,13 +637,21 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 //                            setUIMALogger(new NLPDBLogger(dbConfigFile.toString(), annotator));
 //                        }
 //                    }
-                    cp.getConfigurationParameterSettings().setParameterValue(DeterminantValueSet.PARAM_VERSION, runId);
+
                 }
                 cp.getConfigurationParameterSettings().setParameterValue(DeterminantValueSet.PARAM_ANNOTATOR, annotator);
             }
             addAeTypes(aed, typeSystems);
             if (ruleBasedAE) {
-                addAutoGenTypesForAE((Class<? extends RuleBasedAEInf>) aeClass, cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_RULE_STR).toString());
+
+                CasProcessorConfigurationParameterSettings settings = cp.getConfigurationParameterSettings();
+                if (settings.getParameterValue(DeterminantValueSet.PARAM_RULE_STR) == null)
+                    for (NameValuePair namevalue : settings.getParameterSettings()) {
+                        if(namevalue.getName().equals(DeterminantValueSet.PARAM_RULE_STR))
+                            addAutoGenTypesForAE((Class<? extends RuleBasedAEInf>) aeClass, namevalue.getValue().toString());
+                    }
+                else
+                    addAutoGenTypesForAE((Class<? extends RuleBasedAEInf>) aeClass, cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_RULE_STR).toString());
             }
         }
     }
@@ -606,6 +665,10 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public void updateDescriptorConfiguration(int id, String paraName, Object value) {
         try {
             CpeCasProcessor cpeProcessor = currentCpeDesc.getCpeCasProcessors().getCpeCasProcessor(id);
+            if (cpeProcessor.getConfigurationParameterSettings() == null) {
+                CasProcessorConfigurationParameterSettings aSe = CpeDescriptorFactory.produceCasProcessorConfigurationParameterSettings();
+                cpeProcessor.setConfigurationParameterSettings(aSe);
+            }
             cpeProcessor.getConfigurationParameterSettings().setParameterValue(paraName, value);
         } catch (CpeDescriptorException e) {
             e.printStackTrace();

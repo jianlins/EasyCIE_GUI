@@ -29,6 +29,7 @@ public class NLPDBLogger extends GUILogger {
     protected String keyColumnName;
     protected String annotator;
     protected String dbConfigureFile;
+    private int maxCommentLength = -1;
 
 
     protected Object runid;
@@ -48,7 +49,6 @@ public class NLPDBLogger extends GUILogger {
         this.annotator = annotator;
         this.keyColumnName = "RUN_ID";
         recordRow = new RecordRow();
-//        runid = ldao.getLastId(tableName, keyColumnName) + 1;
     }
 
     public NLPDBLogger(String dbConfigureFile, String tableName, String keyColumnName, String annotator) {
@@ -58,7 +58,16 @@ public class NLPDBLogger extends GUILogger {
         this.annotator = annotator;
         this.keyColumnName = keyColumnName;
         recordRow = new RecordRow();
-//        runid = ldao.getLastId(tableName, keyColumnName) + 1;
+    }
+
+    public NLPDBLogger(String dbConfigureFile, String tableName, String keyColumnName, String annotator, int maxCommentLength) {
+        this.dbConfigureFile = dbConfigureFile;
+        this.ldao = EDAO.getInstance(new File(dbConfigureFile), true, false);
+        this.tableName = tableName;
+        this.annotator = annotator;
+        this.keyColumnName = keyColumnName;
+        recordRow = new RecordRow();
+        this.maxCommentLength = maxCommentLength;
     }
 
     /**
@@ -213,12 +222,13 @@ public class NLPDBLogger extends GUILogger {
         report.append(reportContent);
         setItem("NUM_NOTES", this.entityCount);
         String comments;
-        if (report.length() > this.maxCommentLength) {
+        if (this.maxCommentLength>0 && report.length() > this.maxCommentLength) {
             comments = report.substring(0, this.maxCommentLength);
         } else {
             comments = report.toString();
         }
-
+        if (maxCommentLength > 0 && comments.length() > maxCommentLength)
+            comments = comments.substring(0, maxCommentLength);
         setItem("COMMENTS", comments);
 
         ldao.updateRecord(tableName, recordRow);
@@ -226,14 +236,14 @@ public class NLPDBLogger extends GUILogger {
 
 //		AdaptableCPEDescriptorRunner.getInstance("desc/cpe/smoke_cpe.xml").getmCPE().stop();
         if (task != null && task.guiEnabled) {
-
+            String showComment=comments;
             Platform.runLater(() -> {
                 TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
                 new ViewOutputDB(tasksOverviewController.mainApp.tasks, annotator).run();
 
                 task.updateGUIProgress(1, 1);
                 if (reportable())
-                    task.popDialog("Done", "Data process compelete", comments);
+                    task.popDialog("Done", "Data process compelete", showComment);
 
             });
             if (enableUIMAViewer)
