@@ -21,6 +21,7 @@ import edu.utah.bmi.nlp.core.IOUtil;
 import java.io.File;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -751,8 +752,31 @@ public class EDAO {
             for (Map.Entry<String, String> columnNameType : columnInfo.getColumnInfoSet()) {
                 String columnName = columnNameType.getKey();
                 int columnId = columnInfo.getColumnId(columnName);
-                String type=columnNameType.getValue();
-                updatePstmt.setObject(columnId, recordRow.getValueByColumnName(columnName));
+                String type = columnNameType.getValue();
+                Object value=recordRow.getValueByColumnName(columnName);
+//                System.out.println(columnName + "\t" + type+"\t"+(value!=null?value.getClass():null));
+                switch (type) {
+                    case "number":
+                    case "long":
+                        if (value != null)
+                            updatePstmt.setLong(columnId, Long.parseLong(value+""));
+                        else
+                            updatePstmt.setObject(columnId, null);
+                        break;
+                    case "string":
+                    case "varchar2":
+                        updatePstmt.setString(columnId, recordRow.getStrByColumnName(columnName));
+                        break;
+                    case "date":
+                        if(value instanceof Date)
+                            value=new java.sql.Date(((Date)value).getTime());
+                        updatePstmt.setDate(columnId, (java.sql.Date) value);
+                        break;
+                    default:
+                        updatePstmt.setObject(columnId, recordRow.getValueByColumnName(columnName));
+                        break;
+                }
+
 
             }
             updatePstmt.executeUpdate();
