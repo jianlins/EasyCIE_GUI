@@ -4,14 +4,11 @@ package edu.utah.bmi.nlp.uima.loggers;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
 import edu.utah.bmi.nlp.uima.MyAnnotationViewerPlain;
 import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
-import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask;
 import edu.utah.bmi.simple.gui.task.ViewOutputDB;
 import javafx.application.Platform;
-import javafx.scene.input.MouseEvent;
 
 import javax.swing.*;
 import java.io.File;
