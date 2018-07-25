@@ -525,7 +525,7 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
     }
 
     private void readPreferences() {
-        if(cpeDescriptorPath==null || cpeDescriptorPath.trim().length()==0) {
+        if (cpeDescriptorPath == null || cpeDescriptorPath.trim().length() == 0) {
             cpeDescriptorPath = prefs.get(PREFS_CPE_DESCRIPTOR_FILE, null);
         }
         if (cpeDescriptorPath != null) {
@@ -1796,6 +1796,7 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
         boolean dbEnabled = false;
 
         public CpeJPanelLogger() {
+            initRecordRow = new RecordRow();
             try {
                 CpeCasProcessor[] cpes = currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors();
                 for (CpeCasProcessor cp : cpes) {
@@ -1808,7 +1809,7 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
                             ldao = EDAO.getInstance(new File((String) para.getValue()));
                             dbEnabled = true;
                         } else if (para.getName().equals(SQLWriterCasConsumer.PARAM_ANNOTATOR)) {
-                            annotator = (String) para.getValue();
+                            initRecordRow.addCell("ANNOTATOR", (String) para.getValue());
                         }
                     }
                 }
@@ -1828,8 +1829,8 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
 
         public void logStartTime() {
             startTime = System.currentTimeMillis();
+            recordRow = initRecordRow.clone();
             if (dbEnabled) {
-                setItem("ANNOTATOR", annotator);
                 setItem("START_DTM", new Date(startTime));
             }
         }

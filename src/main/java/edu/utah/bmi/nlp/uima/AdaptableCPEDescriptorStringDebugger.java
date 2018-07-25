@@ -371,18 +371,21 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
     }
 
     public void showResults() {
-        Platform.runLater(() -> {
-            if (guiTask == null) {
-                if (TasksOverviewController.currentTasksOverviewController != null)
-                    guiTask = TasksOverviewController.currentTasksOverviewController.currentGUITask;
-                else
-                    return;
-            }
-            TasksOverviewController.currentTasksOverviewController.refreshDebugView();
-            guiTask.updateGUIMessage("Process complete.");
-            guiTask.updateGUIProgress(1, 1);
+        if (TasksOverviewController.currentTasksOverviewController != null) {
+            Platform.runLater(() -> {
+                if (guiTask == null) {
+                    if (TasksOverviewController.currentTasksOverviewController != null)
+                        guiTask = TasksOverviewController.currentTasksOverviewController.currentGUITask;
+                    else
+                        return;
+                }
 
-        });
+                TasksOverviewController.currentTasksOverviewController.refreshDebugView();
+                guiTask.updateGUIMessage("Process complete.");
+                guiTask.updateGUIProgress(1, 1);
+
+            });
+        }
     }
 
     public static LinkedHashMap<String, String> readLoggerConfigurations(LinkedHashMap<String, SettingAb> loggerSettings) {

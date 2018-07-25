@@ -27,13 +27,12 @@ public class NLPDBLogger extends GUILogger {
     protected EDAO ldao;
     protected String tableName;
     protected String keyColumnName;
-    protected String annotator;
     protected String dbConfigureFile;
     private int maxCommentLength = -1;
 
 
     protected Object runid;
-    protected RecordRow recordRow;
+    protected RecordRow recordRow, initRecordRow;
 
     protected NLPDBLogger() {
         ldao = null;
@@ -46,7 +45,7 @@ public class NLPDBLogger extends GUILogger {
         this.dbConfigureFile = dbConfigureFile;
         this.ldao = EDAO.getInstance(new File(dbConfigureFile), true, false);
         this.tableName = "LOG";
-        this.annotator = annotator;
+        this.initRecordRow = new RecordRow().addCell("ANNOTATOR", annotator);
         this.keyColumnName = "RUN_ID";
         recordRow = new RecordRow();
     }
@@ -55,7 +54,7 @@ public class NLPDBLogger extends GUILogger {
         this.dbConfigureFile = dbConfigureFile;
         this.ldao = EDAO.getInstance(new File(dbConfigureFile), true, false);
         this.tableName = tableName;
-        this.annotator = annotator;
+        this.initRecordRow = new RecordRow().addCell("ANNOTATOR", annotator);
         this.keyColumnName = keyColumnName;
         recordRow = new RecordRow();
     }
@@ -64,10 +63,36 @@ public class NLPDBLogger extends GUILogger {
         this.dbConfigureFile = dbConfigureFile;
         this.ldao = EDAO.getInstance(new File(dbConfigureFile), true, false);
         this.tableName = tableName;
-        this.annotator = annotator;
+        this.initRecordRow = new RecordRow().addCell("ANNOTATOR", annotator);
         this.keyColumnName = keyColumnName;
         recordRow = new RecordRow();
         this.maxCommentLength = maxCommentLength;
+    }
+
+
+    public NLPDBLogger(String dbConfigureFile, String tableName, String keyColumnName, int maxCommentLength, Object... initials) {
+        this.dbConfigureFile = dbConfigureFile;
+        this.ldao = EDAO.getInstance(new File(dbConfigureFile), true, false);
+        this.tableName = tableName;
+        this.keyColumnName = keyColumnName;
+        recordRow = new RecordRow();
+        this.maxCommentLength = maxCommentLength;
+        initRecordRow = new RecordRow();
+        for (int i = 0; i < initials.length - 1; i += 2) {
+            String name = (String) initials[i];
+            Object value = initials[i + 1];
+            initRecordRow.addCell(name, value);
+        }
+    }
+
+    public NLPDBLogger(String dbConfigureFile, String tableName, String keyColumnName, int maxCommentLength, RecordRow initialRecordRow) {
+        this.dbConfigureFile = dbConfigureFile;
+        this.ldao = EDAO.getInstance(new File(dbConfigureFile), true, false);
+        this.tableName = tableName;
+        this.keyColumnName = keyColumnName;
+        recordRow = new RecordRow();
+        this.maxCommentLength = maxCommentLength;
+        initRecordRow = initialRecordRow;
     }
 
     /**
@@ -82,7 +107,7 @@ public class NLPDBLogger extends GUILogger {
     public NLPDBLogger(EDAO dao, String tableName, String keyColumnName, String annotator) {
         this.ldao = dao;
         this.tableName = tableName;
-        this.annotator = annotator;
+        this.initRecordRow = new RecordRow().addCell("ANNOTATOR", annotator);
         this.keyColumnName = keyColumnName;
         this.dbConfigureFile = dao.getConfigFile().getAbsolutePath();
         recordRow = new RecordRow();
@@ -90,7 +115,7 @@ public class NLPDBLogger extends GUILogger {
 
 
     public void reset() {
-        recordRow = new RecordRow();
+        recordRow = initRecordRow.clone();
         startTime = 0;
         entityCount = 0;
         completeTime = 0;
@@ -120,7 +145,7 @@ public class NLPDBLogger extends GUILogger {
 
 
     public void logStartTime() {
-        recordRow = new RecordRow();
+        recordRow = initRecordRow.clone();
         startTime = 0;
         entityCount = 0;
         completeTime = 0;
@@ -134,7 +159,6 @@ public class NLPDBLogger extends GUILogger {
         }
         setItem("RUN_ID", runid);
         startTime = System.currentTimeMillis();
-        setItem("ANNOTATOR", annotator);
         setItem("START_DTM", new Date(startTime));
     }
 
@@ -222,7 +246,7 @@ public class NLPDBLogger extends GUILogger {
         report.append(reportContent);
         setItem("NUM_NOTES", this.entityCount);
         String comments;
-        if (this.maxCommentLength>0 && report.length() > this.maxCommentLength) {
+        if (this.maxCommentLength > 0 && report.length() > this.maxCommentLength) {
             comments = report.substring(0, this.maxCommentLength);
         } else {
             comments = report.toString();
@@ -236,10 +260,10 @@ public class NLPDBLogger extends GUILogger {
 
 //		AdaptableCPEDescriptorRunner.getInstance("desc/cpe/smoke_cpe.xml").getmCPE().stop();
         if (task != null && task.guiEnabled) {
-            String showComment=comments;
+            String showComment = comments;
             Platform.runLater(() -> {
                 TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
-                new ViewOutputDB(tasksOverviewController.mainApp.tasks, annotator).run();
+                new ViewOutputDB(tasksOverviewController.mainApp.tasks, recordRow.getStrByColumnName("ANNOTATOR")).run();
 
                 task.updateGUIProgress(1, 1);
                 if (reportable())
