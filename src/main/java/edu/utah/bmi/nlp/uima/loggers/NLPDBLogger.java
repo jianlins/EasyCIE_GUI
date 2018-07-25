@@ -187,7 +187,6 @@ public class NLPDBLogger extends GUILogger {
             runid = ldao.insertRecord(tableName, recordRow);
             if (runid == null)
                 runid = ldao.getLastId(tableName);
-            setItem("RUN_ID", runid);
         }
         return runid;
     }
