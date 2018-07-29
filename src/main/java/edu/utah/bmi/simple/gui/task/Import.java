@@ -245,7 +245,7 @@ public class Import extends GUITask {
             runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, referenceTable);
             runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, referenceTable);
         }
-        runner.setReaderDescriptor("desc/ae/EhostReader.xml", EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
+        runner.setCollectionReaderDescriptor("desc/ae/EhostReader.xml", EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
                 EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, EhostReader.PARAM_READ_TYPES, includeTypes,
                 EhostReader.PARAM_PRINT, print);
         runner.addConceptTypes(EhostReader.getTypeDefinitions(inputDir.getAbsolutePath()));
@@ -272,7 +272,7 @@ public class Import extends GUITask {
             runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, referenceTable);
             runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, referenceTable);
         }
-        runner.setReaderDescriptor("desc/ae/BratReader.xml", BratReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
+        runner.setCollectionReaderDescriptor("desc/ae/BratReader.xml", BratReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
                 BratReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, BratReader.PARAM_READ_TYPES, includeTypes,
                 BratReader.PARAM_PRINT, print);
         runner.addConceptTypes(BratReader.getTypeDefinitions(inputDir.getAbsolutePath()));

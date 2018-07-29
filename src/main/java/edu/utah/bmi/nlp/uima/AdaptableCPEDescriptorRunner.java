@@ -21,7 +21,6 @@ import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
-import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
 import edu.utah.bmi.simple.gui.entry.SettingAb;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -29,9 +28,7 @@ import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.uima.UIMAException;
-import org.apache.uima.UIMAFramework;
-import org.apache.uima.UimaContext;
+import org.apache.uima.*;
 import org.apache.uima.analysis_component.AnalysisComponent;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
@@ -39,16 +36,14 @@ import org.apache.uima.analysis_engine.impl.PrimitiveAnalysisEngine_impl;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.collection.CasConsumerDescription;
 import org.apache.uima.collection.CollectionProcessingEngine;
-import org.apache.uima.collection.CollectionReader;
 import org.apache.uima.collection.CollectionReaderDescription;
 import org.apache.uima.collection.base_cpm.CasProcessor;
 import org.apache.uima.collection.impl.CollectionProcessingEngine_impl;
 import org.apache.uima.collection.impl.cpm.engine.CPMEngine;
-import org.apache.uima.collection.impl.metadata.cpe.CasProcessorConfigurationParameterSettingsImpl;
-import org.apache.uima.collection.impl.metadata.cpe.CpeComponentDescriptorImpl;
+import org.apache.uima.collection.impl.metadata.CpeDefaultValues;
 import org.apache.uima.collection.impl.metadata.cpe.CpeDescriptorFactory;
 import org.apache.uima.collection.metadata.*;
-import org.apache.uima.fit.factory.CollectionReaderFactory;
+import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.impl.ChildUimaContext_impl;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.*;
@@ -60,17 +55,14 @@ import org.apache.uima.util.CasCreationUtils;
 import org.apache.uima.util.InvalidXMLException;
 import org.apache.uima.util.UriUtils;
 import org.apache.uima.util.XMLInputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.stream.*;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -78,6 +70,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static edu.utah.bmi.nlp.core.DeterminantValueSet.defaultSuperTypeName;
+import static org.apache.uima.collection.impl.metadata.cpe.CpeDescriptorFactory.produceCollectionReader;
 
 /**
  * @author Jianlin Shi
@@ -113,6 +106,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     protected String cpeDescripterFileName = "", cpeDescriptorPath = "";
     protected boolean refreshed = false;
     protected int status = 0;
+    private static final String ACTION_ON_MAX_ERROR = "terminate";
 
     protected AdaptableCPEDescriptorRunner() {
 
@@ -345,8 +339,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 configureReader(collReader, crd, externalConfigMap);
             }
             CpeCasProcessors cpeCasProcessors = currentCpeDesc.getCpeCasProcessors();
-            updateProcessorDescriptorConfigurations(cpeCasProcessors, annotator, ruleBaseAeClassMap,
-                    aeConfigTypeMap, typeSystems, externalConfigMap);
+            updateProcessorsDescriptorConfigurations(cpeCasProcessors, annotator, typeSystems, externalConfigMap);
 
         } catch (InvalidXMLException e) {
             e.printStackTrace();
@@ -366,12 +359,36 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         }
     }
 
+    public void setCollectionReaderDescriptor(String readerDescriptor, Object... configs) {
+        try {
+            CpeCollectionReader reader = CpeDescriptorFactory.produceCollectionReader(readerDescriptor);
+            currentCpeDesc.setAllCollectionCollectionReaders(new CpeCollectionReader[]{reader});
+            updateAllReaderDescriptorConfigs(configs);
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void setCollectionReaderDescriptor(String readerDescriptor, LinkedHashMap<String, String> configs) {
+        try {
+            CpeCollectionReader reader = CpeDescriptorFactory.produceCollectionReader(readerDescriptor);
+            currentCpeDesc.setAllCollectionCollectionReaders(new CpeCollectionReader[]{reader});
+            updateAllReaderDescriptorConfigs(configs);
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public void updateAllReaderDescriptorConfigs(LinkedHashMap<String, String> configs) {
         try {
             CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
+
             for (CpeCollectionReader collReader : collRdrs) {
                 for (String paraName : configs.keySet())
                     collReader.getConfigurationParameterSettings().setParameterValue(paraName, configs.get(paraName));
+
             }
         } catch (CpeDescriptorException e) {
             e.printStackTrace();
@@ -393,8 +410,15 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         try {
             CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
             for (CpeCollectionReader collReader : collRdrs) {
-                for (int i = 0; i < configs.length; i += 2)
-                    collReader.getConfigurationParameterSettings().setParameterValue((String) configs[i], configs[i + 1]);
+                for (int i = 0; i < configs.length; i += 2) {
+                    if (collReader.getConfigurationParameterSettings() == null) {
+                        CasProcessorConfigurationParameterSettings aSe = CpeDescriptorFactory.produceCasProcessorConfigurationParameterSettings();
+                        collReader.setConfigurationParameterSettings(aSe);
+                    }
+//                    collReader.getConfigurationParameterSettings().setParameterValue((String) configs[i], configs[i + 1]);
+                    collReader.getCollectionIterator().getConfigurationParameterSettings().setParameterValue((String) configs[i], configs[i + 1]);
+//                    System.out.println(collReader.getConfigurationParameterSettings().getParameterSettings()[0].getClass().getCanonicalName());
+                }
             }
         } catch (CpeDescriptorException e) {
             e.printStackTrace();
@@ -404,11 +428,19 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public void attachTypeDescriptorToReader() {
         try {
             CpeCollectionReader reader = currentCpeDesc.getAllCollectionCollectionReaders()[0];
-            String readerxml = reader.getDescriptor().getImport().getLocation();
-            if (!new File(readerxml).exists())
-                readerxml = new File(new File(currentCpeDesc.getSourceUrl().getPath()).getParentFile(), readerxml).getAbsolutePath();
-            String newReaderXml = updateTypeDescriptor(readerxml, customTypeDescXmlDir, customTypeDescXmlLoc);
-            reader.getDescriptor().getImport().setLocation(new File(newReaderXml).toURI().toString());
+            if (reader.getDescriptor().getImport() != null) {
+                String readerxml = reader.getDescriptor().getImport().getLocation();
+                if (!new File(readerxml).exists())
+                    readerxml = new File(new File(currentCpeDesc.getSourceUrl().getPath()).getParentFile(), readerxml).getAbsolutePath();
+                String newReaderXml = updateTypeDescriptor(readerxml, customTypeDescXmlDir, customTypeDescXmlLoc);
+                reader.getDescriptor().getImport().setLocation(new File(newReaderXml).toURI().toString());
+            } else {
+                String readerxml = reader.getDescriptor().getInclude().get();
+                if (!new File(readerxml).exists())
+                    readerxml = new File(new File(currentCpeDesc.getSourceUrl().getPath()).getParentFile(), readerxml).getAbsolutePath();
+                String newReaderXml = updateTypeDescriptor(readerxml, customTypeDescXmlDir, customTypeDescXmlLoc);
+                reader.getDescriptor().getInclude().set(new File(newReaderXml).toURI().toString());
+            }
         } catch (CpeDescriptorException e) {
             e.printStackTrace();
         }
@@ -544,20 +576,16 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     }
 
     /**
-     * @param cpeCasProcessors   cpeDescriptor's cpeCasProcessor
-     * @param ruleBaseAeClassMap a map to save rule-base AE name:Class
-     * @param aeConfigTypeMap    a map to save AE parameters' type
-     * @param typeSystems        TypeSystem for each AE
-     * @param externalConfigMap  external configurations for parameters
+     * @param cpeCasProcessors  cpeDescriptor's cpeCasProcessor
+     * @param typeSystems       TypeSystem for each AE
+     * @param externalConfigMap external configurations for parameters
      * @return
      * @throws IOException
      * @throws InvalidXMLException
      * @throws CpeDescriptorException
      */
-    protected void updateProcessorDescriptorConfigurations(
+    protected void updateProcessorsDescriptorConfigurations(
             CpeCasProcessors cpeCasProcessors, String annotator,
-            LinkedHashMap<String, Class<? extends JCasAnnotator_ImplBase>> ruleBaseAeClassMap,
-            LinkedHashMap<String, LinkedHashMap<String, String>> aeConfigTypeMap,
             ArrayList<TypeSystemDescription> typeSystems,
             LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap)
             throws IOException, InvalidXMLException, CpeDescriptorException {
@@ -565,6 +593,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         int numRemoved = 0;
         for (int i = 0; i < cpeCasProcessorsArray.length; i++) {
             CpeCasProcessor cp = cpeCasProcessorsArray[i];
+
 
             String processorName = cp.getName();
             File descFile = new File(rootFolder + File.separator + cp.getCpeComponentDescriptor().getImport().getLocation());
@@ -623,7 +652,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
             if (processorName.toLowerCase().indexOf("writer") != -1) {
                 writerIds.put(processorName, i - numRemoved);
             }
-            updateProcessorDescriptorConfigurations(processorName, cp, aeConfigTypeMap.get(processorName), aed, externalConfigMap);
+            updateProcessorsDescriptorConfigurations(processorName, cp, aed, externalConfigMap.get(processorName));
 //                  track versioned rule-based AE ids
             if (aeVersionValue != null) {
 //                        only update to current run_id when cpe didn't configure run_id to a real value.
@@ -647,7 +676,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 CasProcessorConfigurationParameterSettings settings = cp.getConfigurationParameterSettings();
                 if (settings.getParameterValue(DeterminantValueSet.PARAM_RULE_STR) == null)
                     for (NameValuePair namevalue : settings.getParameterSettings()) {
-                        if(namevalue.getName().equals(DeterminantValueSet.PARAM_RULE_STR))
+                        if (namevalue.getName().equals(DeterminantValueSet.PARAM_RULE_STR))
                             addAutoGenTypesForAE((Class<? extends RuleBasedAEInf>) aeClass, namevalue.getValue().toString());
                     }
                 else
@@ -656,6 +685,14 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         }
     }
 
+
+    protected void updateProcessorDescriptorConfigurations(
+            CpeCasProcessor cpeCasProcessor,
+            ArrayList<TypeSystemDescription> typeSystems,
+            LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap)
+            throws IOException, InvalidXMLException, CpeDescriptorException {
+
+    }
 
     /**
      * @param id
@@ -688,41 +725,60 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         }
     }
 
-    public void setReaderDescriptor(String descriptorPath, Object... configurationData) {
-        try {
-            CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
-            URL url = new File(descriptorPath).toURI().toURL();
-            collRdrs[0].setSourceUrl(url);
-            collRdrs[0].getDescriptor().getImport().setLocation(url.getPath());
-            collRdrs[0].getDescriptor();
-            for (int i = 0; i < configurationData.length; i += 2)
-                collRdrs[0].getConfigurationParameterSettings().setParameterValue(configurationData[i] + "", configurationData[i + 1]);
-            currentCpeDesc.setAllCollectionCollectionReaders(collRdrs);
-        } catch (CpeDescriptorException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+//    public void setReaderDescriptor(String descriptorPath, Object... configurationData) {
+//        try {
+//            CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
+//            URL url = new File(descriptorPath).toURI().toURL();
+//            collRdrs[0].setSourceUrl(url);
+//            collRdrs[0].getDescriptor().getImport().setLocation(url.getPath());
+//            collRdrs[0].getDescriptor();
+//            for (int i = 0; i < configurationData.length; i += 2)
+//                collRdrs[0].getConfigurationParameterSettings().setParameterValue(configurationData[i] + "", configurationData[i + 1]);
+//            currentCpeDesc.setAllCollectionCollectionReaders(collRdrs);
+//        } catch (CpeDescriptorException e) {
+//            e.printStackTrace();
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
+
+
+    protected void updateProcessorsDescriptorConfigurations(CpeCasProcessor cp,
+                                                            AnalysisEngineDescription aed, Object... configs) {
+        for (int i = 0; i < configs.length - 1; i += 2) {
+            String paraName = (String) configs[i];
+            Object value = configs[i + 1];
+            if (cp.getConfigurationParameterSettings() == null) {
+                CasProcessorConfigurationParameterSettings aSe = CpeDescriptorFactory.produceCasProcessorConfigurationParameterSettings();
+                try {
+                    cp.setConfigurationParameterSettings(aSe);
+                } catch (CpeDescriptorException e) {
+                    e.printStackTrace();
+                }
+            }
+            cp.getConfigurationParameterSettings().setParameterValue(paraName, value);
         }
 
     }
+
 
     /**
      * Filter out rule-based AEs with null or blank value in parameter  "RuleFileOrStr"
      *
      * @param processorName
      * @param cp
-     * @param aeparas
      * @param aed
      * @param externalConfigMap
      */
-    protected void updateProcessorDescriptorConfigurations(String processorName, CpeCasProcessor cp, LinkedHashMap<String, String> aeparas,
-                                                           AnalysisEngineDescription aed,
-                                                           LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap) {
+    protected void updateProcessorsDescriptorConfigurations(String processorName, CpeCasProcessor cp,
+                                                            AnalysisEngineDescription aed,
+                                                            LinkedHashMap<String, String> externalConfigMap) {
 
-
+        LinkedHashMap<String, String> aeparas = aeConfigTypeMap.get(processorName);
         /* configure cp process with external configuration, if applicable */
-        if (externalConfigMap.containsKey(processorName)) {
-            for (Map.Entry<String, String> externalConfigs : externalConfigMap.get(processorName).entrySet()) {
+        if (externalConfigMap != null) {
+            for (Map.Entry<String, String> externalConfigs : externalConfigMap.entrySet()) {
                 String configName = externalConfigs.getKey();
                 String valueStr = externalConfigs.getValue();
                 String valueType = aeparas.get(configName);
@@ -999,7 +1055,8 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         }
     }
 
-    public void updateCpeProcessorConfiguration(int cpeId, String parameter, Object value) {
+
+    public void updateCpeProcessorConfiguration(int cpeId, Object... configs) {
         if (mCPE != null && cpeId < mCPE.getCasProcessors().length) {
             CasProcessor processor = mCPE.getCasProcessors()[cpeId];
             try {
@@ -1009,16 +1066,23 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 if (processor instanceof PrimitiveAnalysisEngine_impl) {
                     PrimitiveAnalysisEngine_impl ae = (PrimitiveAnalysisEngine_impl) processor;
                     UimaContext uimaContext = ae.getUimaContext();
-                    if (uimaContext instanceof ChildUimaContext_impl) {
-                        ChildUimaContext_impl uimaContext_impl = (ChildUimaContext_impl) uimaContext;
-                        uimaContext_impl.setSharedParam("/" + processorName + "/" + parameter, value);
-                    }
-                    ae.setmInitialized(false);
                     AnalysisComponent aeEngine = ae.getAnalysisComponent();
-                    if (parameter.equals(DeterminantValueSet.PARAM_RULE_STR) && RuleBasedAEInf.class.isAssignableFrom(aeEngine.getClass())) {
-                        RuleBasedAEInf ruleAeEngine = (RuleBasedAEInf) aeEngine;
-                        dynamicTypeGenerator.addConceptTypes(ruleAeEngine.getTypeDefs(value.toString()).values());
-                        dynamicTypeGenerator.reInitTypeSystem(customTypeDescXmlLoc.getAbsolutePath(), srcClassRootPath);
+                    ae.setmInitialized(false);
+                    for (int i = 0; i < configs.length - 1; i += 2) {
+                        Object obj = configs[i];
+                        if (!(obj instanceof String))
+                            classLogger.warning("parameter \"" + obj + "\" to set for cpeprocess " + cpeId + " is not a string");
+                        String parameter = (String) configs[i];
+                        Object value = configs[i + 1];
+                        if (uimaContext instanceof ChildUimaContext_impl) {
+                            ChildUimaContext_impl uimaContext_impl = (ChildUimaContext_impl) uimaContext;
+                            uimaContext_impl.setSharedParam("/" + processorName + "/" + parameter, value);
+                        }
+                        if (parameter.equals(DeterminantValueSet.PARAM_RULE_STR) && RuleBasedAEInf.class.isAssignableFrom(aeEngine.getClass())) {
+                            RuleBasedAEInf ruleAeEngine = (RuleBasedAEInf) aeEngine;
+                            dynamicTypeGenerator.addConceptTypes(ruleAeEngine.getTypeDefs(value.toString()).values());
+                            dynamicTypeGenerator.reInitTypeSystem(customTypeDescXmlLoc.getAbsolutePath(), srcClassRootPath);
+                        }
                     }
                     aeEngine.initialize(uimaContext);
                 }
@@ -1035,6 +1099,107 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         }
     }
 
+
+    public void addCpeProcessorDescriptor(Class aeClass, String name, Object... configs) {
+        try {
+            addCpeProcessorDescriptor(aeClass, name, currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors().length, configs);
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addCpeProcessorDescriptor(Class aeClass, String name, int pos, Object... configs) {
+        try {
+            AnalysisEngineDescription aed = AnalysisEngineFactory.createEngineDescription(aeClass, configs);
+            CpeIntegratedCasProcessor cp = createProcessor(name, aed);
+            currentCpeDesc.getCpeCasProcessors().addCpeCasProcessor(cp, pos);
+            updateProcessorsDescriptorConfigurations(cp, aed, configs);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (ResourceInitializationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addCpeProcessorDescriptor(String descriptorPath, int pos, Object... configs) {
+        File descFile = new File(descriptorPath);
+        try {
+            AnalysisEngineDescription aed = UIMAFramework.getXMLParser().parseAnalysisEngineDescription(new XMLInputSource(descFile));
+            String name = aed.getAnalysisEngineMetaData().getName();
+            CpeIntegratedCasProcessor cp = createProcessor(name, aed);
+            currentCpeDesc.getCpeCasProcessors().addCpeCasProcessor(cp, pos);
+            cpeProcessorIds.put(name, pos);
+            updateCpeProcessorConfiguration(pos, configs);
+        } catch (InvalidXMLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addCpeProcessorDescriptor(String descriptorPath, String name, Object... configs) {
+        try {
+            addCpeProcessorDescriptor(descriptorPath, name, currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors().length, configs);
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void addCpeProcessorDescriptor(String descriptorPath, String name, int pos, Object... configs) {
+        File descFile = new File(descriptorPath);
+        try {
+            AnalysisEngineDescription aed = UIMAFramework.getXMLParser().parseAnalysisEngineDescription(new XMLInputSource(descFile));
+            CpeIntegratedCasProcessor cp = createProcessor(name, aed);
+            currentCpeDesc.getCpeCasProcessors().addCpeCasProcessor(cp, pos);
+            cpeProcessorIds.put(name, pos);
+            updateProcessorsDescriptorConfigurations(cp, aed, configs);
+        } catch (InvalidXMLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addCpeProcessorDescriptor(String name, AnalysisEngineDescription aDesc, int pos, Object... configs) {
+        try {
+            CpeCasProcessors cpeCasProcessors = currentCpeDesc.getCpeCasProcessors();
+            CpeIntegratedCasProcessor processor = createProcessor(name, aDesc);
+            cpeCasProcessors.addCpeCasProcessor(processor, pos);
+            cpeProcessorIds.put(name, pos);
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeCpeProcessDescriptor(String cpeName) {
+        removeCpeProcessDescriptor(this.cpeProcessorIds.get(cpeName));
+    }
+
+    public void removeCpeProcessDescriptor(int id) {
+        try {
+            currentCpeDesc.getCpeCasProcessors().removeCpeCasProcessor(id);
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Set<String> getCpeProcessorNames() {
         return cpeProcessorIds.keySet();
     }
@@ -1042,6 +1207,8 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public void compileCPE() {
         try {
             mCPE = UIMAFramework.produceCollectionProcessingEngine(currentCpeDesc);
+            Class<CompositeResourceFactory> e = CompositeResourceFactory.class;
+
             if (runId.equals(previousRunId))
                 runId = logger.getRunid() + "";
             for (int writerId : writerIds.values()) {
@@ -1248,5 +1415,43 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 
     public LinkedHashMap<String, Integer> getCpeProcessorIds() {
         return cpeProcessorIds;
+    }
+
+
+    private static CpeIntegratedCasProcessor createProcessor(String key,
+                                                             AnalysisEngineDescription aDesc) throws IOException, SAXException,
+            CpeDescriptorException {
+        URL descUrl = materializeDescriptor(aDesc).toURI().toURL();
+
+        CpeInclude cpeInclude = UIMAFramework.getResourceSpecifierFactory()
+                .createInclude();
+        cpeInclude.set(descUrl.toString());
+
+        CpeComponentDescriptor ccd = UIMAFramework
+                .getResourceSpecifierFactory().createDescriptor();
+        ccd.setInclude(cpeInclude);
+
+        CpeIntegratedCasProcessor proc = CpeDescriptorFactory
+                .produceCasProcessor(key);
+        proc.setCpeComponentDescriptor(ccd);
+        proc.setAttributeValue(CpeDefaultValues.PROCESSING_UNIT_THREAD_COUNT, 1);
+        proc.setActionOnMaxError(ACTION_ON_MAX_ERROR);
+        proc.setMaxErrorCount(0);
+
+        return proc;
+    }
+
+
+    private static File materializeDescriptor(ResourceSpecifier resource)
+            throws IOException, SAXException {
+        File tempDesc = File.createTempFile("desc", ".xml");
+        // tempDesc.deleteOnExit();
+
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(tempDesc), "UTF-8"));
+        resource.toXML(out);
+        out.close();
+
+        return tempDesc;
     }
 }
