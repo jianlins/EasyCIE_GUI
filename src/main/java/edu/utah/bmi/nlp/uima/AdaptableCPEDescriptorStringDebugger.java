@@ -252,6 +252,18 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
             classLogger.warning("CPE pipeline configuration error, no runner generated.");
             return;
         }
+        try {
+            CpeCasProcessors processors = runner.currentCpeDesc.getCpeCasProcessors();
+            ArrayList<Integer>writerIds=new ArrayList<>(runner.writerIds.values());
+            Collections.reverse(writerIds);
+            for(int id:writerIds){
+                processors.removeCpeCasProcessor(id);
+            }
+        } catch (CpeDescriptorException e) {
+            e.printStackTrace();
+        }
+
+
         if (runner.getmCPE() == null)
             runner.compileCPE();
         if (aes.size() == 0) {
