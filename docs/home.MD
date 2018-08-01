@@ -1,0 +1,2 @@
+# EasyCIE
+EasyCIE(Easy Clinical Information Extractor) is a rule-based clinical information extraction tool designed for non-NLP(natural language processing) expert users. It a GUI wrapper on top of EasyCIE, an UIMA-based command line version that allows executing on servers.
