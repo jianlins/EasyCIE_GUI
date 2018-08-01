@@ -161,7 +161,7 @@ public class CPEFactory {
                     lastCpeDescriptorUrl = cpePath;
                     lastModifiedTime = new File(cpePath).lastModified();
                 } else {
-                    if(lastCpeFactory.aeList==null)
+                    if (lastCpeFactory.aeList == null)
                         lastCpeFactory.aeList = new CasProcessor[newProcessors.length];
                     for (int i = 0; i < newProcessors.length; i++) {
                         CpeCasProcessor newProcessor = newProcessors[i];
@@ -598,8 +598,10 @@ public class CPEFactory {
                 CpeCasProcessor processorType = casProcessorList[i];
                 if (TasksOverviewController.currentTasksOverviewController != null) {
                     GUITask guiTask = TasksOverviewController.currentTasksOverviewController.currentGUITask;
-                    guiTask.updateGUIProgress(i, casProcessorList.length);
-                    guiTask.updateGUIMessage("Compile : " + processorType.getName());
+                    if (guiTask != null) {
+                        guiTask.updateGUIProgress(i, casProcessorList.length);
+                        guiTask.updateGUIMessage("Compile : " + processorType.getName());
+                    }
                 }
                 CasProcessor casProcessor = produceProcessor(processorType, namesMap);
                 if (processorType.getName().toLowerCase().indexOf("writer") != -1)

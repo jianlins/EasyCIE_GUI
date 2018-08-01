@@ -26,7 +26,8 @@ public class RunCpmFrame extends javafx.concurrent.Task {
         SwingUtilities.invokeLater(() -> {
             AdaptableCpmFrame.main(new String[]{cpeDescriptor});
             Frame[] frames = AdaptableCpmFrame.getFrames();
-            frames[0].setSize(800,600);
+            for (Frame frame : frames)
+                frame.setSize(800, 600);
         });
         updateMessage("Open UIMA CPE Configurator");
         updateProgress(1, 1);

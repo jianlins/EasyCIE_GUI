@@ -578,6 +578,7 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
 //            mCPE.process();
 
             adaptableUIMACPEDescriptorRunner = new AdaptableCPEDescriptorRunner(currentCpeDesc.getSourceUrl().getFile(), "", logger, "classes");
+            adaptableUIMACPEDescriptorRunner.compileCPE();
             mCPE = adaptableUIMACPEDescriptorRunner.getmCPE();
             adaptableUIMACPEDescriptorRunner.run();
         } catch (Exception ex) {
