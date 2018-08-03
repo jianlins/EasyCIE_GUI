@@ -261,6 +261,8 @@ public class EDAO {
             con.setAutoCommit(false);
             this.isClosed = false;
         } catch (SQLException e) {
+            logger.finest("server: "+server);
+            logger.finest("username: "+username);
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
