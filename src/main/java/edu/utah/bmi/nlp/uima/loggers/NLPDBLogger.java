@@ -25,7 +25,7 @@ public class NLPDBLogger extends GUILogger {
     protected String tableName;
     protected String keyColumnName;
     protected String dbConfigureFile;
-    private int maxCommentLength = -1;
+    protected int maxCommentLength = -1;
 
 
     protected Object runid;
