@@ -99,6 +99,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
 
     /**
      * @param cpeDescriptor location of cpe descripter xml file
+     * @param annotator annotator name
      * @param options       0~3 parameters:
      *                      1. The location of compiled classes for auto-gen type systems
      *                      2. The location of auto-gen type descriptor
@@ -114,6 +115,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
      * @param cpeDescriptor      location of cpe descripter xml file
      * @param annotator          annotator's name
      * @param externalSettingMap external configuration values
+     * @param logTypes type names to be logged for each AE
      * @param options            0~3 parameters:
      *                           1. The location of compiled classes for auto-gen type systems
      *                           2. The location of auto-gen type descriptor
@@ -188,7 +190,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
 
     /**
      * Try to update the configuration after mCPE is compiled--handy for debugging--reduce recompile time
-     *
+     * @param  aes a list of AEs
      * @param cpeName        processor name
      * @param configurations configurations
      */

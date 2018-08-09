@@ -119,8 +119,9 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
      * @param aResourceManager     -
      *                             ResourceManager instance to be used by the CPE
      * @param aDefaultProcessTrace -
-     *                             ProcessTrace instance to capture events and stats
-     * @throws Exception -
+     *                             ProcessTrace instance to capture events and stats     *
+     * @param aProps               aProps
+     * @throws Exception - Exception
      */
     public BaseCPMImpl(CpeDescription aDescriptor, ResourceManager aResourceManager,
                        boolean aDefaultProcessTrace, Properties aProps) throws Exception {
@@ -162,7 +163,7 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
     /**
      * Plugs in custom perfomance tunning parameters
      *
-     * @param aPerformanceTuningSettings
+     * @param aPerformanceTuningSettings perfomance tunning parameters
      */
     public void setPerformanceTuningSettings(Properties aPerformanceTuningSettings) {
         cpEngine.setPerformanceTuningSettings(aPerformanceTuningSettings);
@@ -184,7 +185,7 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
      * use at the end of processing. Jedii-style reporting shows a summary for this run. The CPM
      * default report shows more detail information.
      *
-     * @param aUseJediiReport
+     * @param aUseJediiReport whether use Jedii-styl report
      */
     public void setJediiReport(boolean aUseJediiReport) {
         mEventTypeMap = new HashMap();
@@ -194,12 +195,7 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
         useJediiReport = aUseJediiReport;
     }
 
-    /**
-     * Instantiates and initializes a CPE.
-     *
-     * @param aDummyCasProcessor -
-     * @throws Exception -
-     */
+
     public void init(boolean aDummyCasProcessor, Properties aProps) throws Exception {
         String uimaTimerClass = cpeFactory.getCPEConfig().getTimerImpl();
         try {
@@ -568,6 +564,8 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
      * This method is called by an applications to begin CPM processing with a given Collection. It
      * just creates a new thread and starts it.
      *
+     * @param aCollectionReader collection reader
+     * @throws ResourceInitializationException ResourceInitializationException
      * @see org.apache.uima.collection.base_cpm.BaseCPM#process()
      * @deprecated
      */
@@ -620,6 +618,9 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
      * This method is called by an applications to begin CPM processing with a given Collection. It
      * just creates a new thread and starts it.
      *
+     * @param aCollectionReader colleciton reader
+     * @param aBatchSize        batch size
+     * @throws ResourceInitializationException ResourceInitializationException
      * @see org.apache.uima.collection.base_cpm.BaseCPM#process()
      * @deprecated
      */
@@ -897,8 +898,8 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
     /**
      * Helper method to help build the CPM report
      *
-     * @param aEvent
-     * @param aTotalTime
+     * @param aEvent     event
+     * @param aTotalTime aTotalTime
      */
     public void buildEventTree(ProcessTraceEvent aEvent, int aTotalTime) {
         // Skip reporting the CPM time.This time has already been acquired by summing up
@@ -1134,9 +1135,9 @@ public class BaseCPMImpl implements BaseCPM, Runnable {
     /**
      * Returns a CPE descriptor as a String
      *
-     * @param aList -
-     *              list of components
+     * @param aList -             list of components
      * @return - descriptor populated with a given components
+     * @throws ResourceConfigurationException ResourceConfigurationException
      */
     public String getDescriptor(List aList) throws ResourceConfigurationException {
         return cpeFactory.getDescriptor(aList);

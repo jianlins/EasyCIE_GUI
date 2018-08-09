@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * Created by
  *
- * @Author Jianlin Shi on 4/10/17.
+ * @author Jianlin Shi on 4/10/17.
  */
 public class ConfigFileOpener extends GUITask {
     private TaskFX currentTask;

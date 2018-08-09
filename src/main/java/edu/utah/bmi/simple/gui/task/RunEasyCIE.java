@@ -248,6 +248,7 @@ public class RunEasyCIE extends GUITask {
 	 * Read through all the annotations, iterate all the types and features,
 	 * check to see if the type descriptor has included all of them, if not create
 	 * the missed types and features
+	 * @param customTypeDescriptor customized type descriptor file path
 	 */
 	protected void initTypes(String customTypeDescriptor) {
 		updateGUIMessage("Read and initiate type system...");

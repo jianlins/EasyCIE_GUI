@@ -803,7 +803,7 @@ public class TasksOverviewController {
     /**
      * Is called by the main application to give a reference back to itself.
      *
-     * @param mainApp
+     * @param mainApp main class instance
      */
     public void setMainApp(Main mainApp) {
         this.mainApp = mainApp;

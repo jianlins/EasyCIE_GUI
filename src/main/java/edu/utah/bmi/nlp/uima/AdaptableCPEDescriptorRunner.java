@@ -125,6 +125,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 
     /**
      * @param cpeDescriptor location of cpe descripter xml file
+     * @param annotator     annotator name
      * @param options       0~3 parameters:
      *                      1. The location of compiled classes for auto-gen type systems
      *                      2. The location of auto-gen type descriptor
@@ -138,6 +139,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 
     /**
      * @param cpeDescriptor location of cpe descripter xml file
+     * @param annotator     annotator name
      * @param logger        logger to track the pipeline running log (can be null)
      * @param options       0~3 parameters:
      *                      1. The location of compiled classes for auto-gen type systems
@@ -154,6 +156,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * db logger will automatically added if db writer is configured
      *
      * @param cpeDescriptor         location of cpe descripter xml file
+     * @param annotator             annotator name
      * @param externalRuleConfigMap external configuration values
      * @param options               0~3 parameters:
      *                              1. The location of compiled classes for auto-gen type systems
@@ -176,6 +179,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 
     /**
      * @param cpeDescriptor     location of cpe descripter xml file
+     * @param annotator         annotator name
      * @param logger            logger to track the pipeline running log (can be null)
      * @param externalConfigMap external configurations
      * @param options           0~3 parameters:
@@ -212,6 +216,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 
     /**
      * @param cpeDescriptor location of cpe descripter xml file
+     * @param annotator     annotator name
      * @param logger        logger to track the pipeline running log (can be null)
      * @param options       0~3 parameters:
      *                      1. The location of compiled classes for auto-gen type systems
@@ -227,8 +232,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 
     /**
      * @param cpeDescriptor     location of cpe descripter xml file
+     * @param annotator         annotator name
      * @param logger            logger to track the pipeline running log (can be null)
-     * @param externalConfigMap external configurations (AE name->( configuration name-> value))
+     * @param externalConfigMap external configurations (AE name -: (  configuration name-: value))
      * @param options           0~3 parameters:
      *                          1. The location of compiled classes for auto-gen type systems
      *                          2. The location of auto-gen type descriptor
@@ -252,6 +258,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * convert AEName/ParaName:value pair to nested maps (AE names as the 1st layer, parameter names in the 2nd layer)
      *
      * @param externalSettingMap external configurations (AEName/ParaName:value format)
+     * @return converted setting map(AeName: ParaName : ParaValue)
      */
     public static LinkedHashMap<String, LinkedHashMap<String, String>> parseExternalConfigMap(LinkedHashMap<String, String> externalSettingMap) {
         LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap = new LinkedHashMap<>();
@@ -286,6 +293,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 
     /**
      * @param cpeDescriptor location of cpe descripter xml file
+     * @param annotator     annotator name
      * @param options       0~3 parameters:
      *                      1. The location of compiled classes for auto-gen type systems
      *                      2. The location of auto-gen type descriptor
@@ -577,12 +585,12 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 
     /**
      * @param cpeCasProcessors  cpeDescriptor's cpeCasProcessor
+     * @param annotator         annotator name
      * @param typeSystems       TypeSystem for each AE
-     * @param externalConfigMap external configurations for parameters
-     * @return
-     * @throws IOException
-     * @throws InvalidXMLException
-     * @throws CpeDescriptorException
+     * @param externalConfigMap external configurations for parameters     *
+     * @throws IOException            IOException
+     * @throws InvalidXMLException    InvalidXMLException
+     * @throws CpeDescriptorException CpeDescriptorException
      */
     protected void updateProcessorsDescriptorConfigurations(
             CpeCasProcessors cpeCasProcessors, String annotator,
@@ -695,9 +703,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     }
 
     /**
-     * @param id
-     * @param paraName
-     * @param value
+     * @param id       id (integer)
+     * @param paraName parameter name
+     * @param value    parameter value (Object)
      */
     public void updateDescriptorConfiguration(int id, String paraName, Object value) {
         try {
@@ -766,10 +774,10 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     /**
      * Filter out rule-based AEs with null or blank value in parameter  "RuleFileOrStr"
      *
-     * @param processorName
-     * @param cp
-     * @param aed
-     * @param externalConfigMap
+     * @param processorName     processorName
+     * @param cp                processor
+     * @param aed               ae descriptor
+     * @param externalConfigMap external configuration map
      */
     protected void updateProcessorsDescriptorConfigurations(String processorName, CpeCasProcessor cp,
                                                             AnalysisEngineDescription aed,

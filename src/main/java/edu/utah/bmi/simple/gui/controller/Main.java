@@ -292,7 +292,7 @@ public class Main extends Application {
     /**
      * Returns the main stage.
      *
-     * @return
+     * @return primary Stage instance
      */
     public Stage getPrimaryStage() {
         return primaryStage;

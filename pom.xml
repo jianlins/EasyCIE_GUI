@@ -18,6 +18,7 @@
     <artifactId>easycie-gui</artifactId>
     <version>${current.version}</version>
     <url>https://github.com/jianlins/EasyCIE_GUI</url>
+    <description>The library of EasyCIE.</description>
     <scm>
         <connection>https://github.com/jianlins/EasyCIE_GUI.git</connection>
         <url>scm:git:git@github.com:jianlins/EasyCIE_GUI.git</url>
@@ -170,6 +171,19 @@
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

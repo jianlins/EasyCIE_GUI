@@ -301,6 +301,8 @@ public class CPMEngine extends Thread {
     /**
      * Returns a list of Processing Containers for Analysis Engines. Each CasProcessor is managed by
      * its own container.
+     *
+     * @return a list of processing containers
      */
     public LinkedList getProcessingContainers() {
         return annotatorList;
@@ -308,6 +310,8 @@ public class CPMEngine extends Thread {
 
     /**
      * Returns a list of All Processing Containers. Each CasProcessor is managed by its own container.
+     *
+     * @return a list of processing containers
      */
     public LinkedList getAllProcessingContainers() {
         LinkedList all = new LinkedList();
@@ -1121,6 +1125,7 @@ public class CPMEngine extends Thread {
      * status=DISABLED this method will re-enable the CasProcesser.
      *
      * @param aCasProcessor CASProcessor to be added to the processing pipeline
+     * @throws ResourceConfigurationException ResourceConfigurationException
      */
     public void addCasProcessor(CasProcessor aCasProcessor) throws ResourceConfigurationException {
         addCasProcessor(aCasProcessor, initial_cp_list.size());
@@ -1133,6 +1138,7 @@ public class CPMEngine extends Thread {
      * @param aCasProcessor CASProcessor to be added to the processing pipeline
      * @param aIndex        -
      *                      insertion point for a given CasProcessor
+     * @throws ResourceConfigurationException ResourceConfigurationException
      */
     public void addCasProcessor(CasProcessor aCasProcessor, int aIndex)
             throws ResourceConfigurationException {
@@ -1252,7 +1258,7 @@ public class CPMEngine extends Thread {
     }
 
     /**
-     * Returns all CASProcesors in the processing pipeline
+     * @return Returns all CASProcesors in the processing pipeline
      */
     public CasProcessor[] getCasProcessors() {
         if (casprocessorList != null) {
@@ -1278,7 +1284,7 @@ public class CPMEngine extends Thread {
         }
         // CasProcessors have been classified into AEs and CCs, so merge the two lists
         ArrayList aList = new ArrayList();
-        for(Object annotator:this.annotatorDeployList){
+        for (Object annotator : this.annotatorDeployList) {
             List kList = (List) annotator;
             if (kList != null) {
                 for (int i = 0; i < kList.size(); i++) {
@@ -1286,7 +1292,7 @@ public class CPMEngine extends Thread {
                 }
             }
         }
-        for(Object annotator:this.consumerDeployList){
+        for (Object annotator : this.consumerDeployList) {
             List kList = (List) annotator;
             if (kList != null) {
                 for (int i = 0; i < kList.size(); i++) {
@@ -1365,7 +1371,8 @@ public class CPMEngine extends Thread {
     /**
      * Deploys CasProcessor and associates it with a {@link ProcessingContainer}
      *
-     * @param aProcessingContainer
+     * @param aProcessingContainer aProcessingContainer
+     * @throws Exception Exception
      */
     public void redeployAnalysisEngine(ProcessingContainer aProcessingContainer) throws Exception {
         if (UIMAFramework.getLogger().isLoggable(Level.FINEST)) {
@@ -1478,6 +1485,7 @@ public class CPMEngine extends Thread {
     /**
      * Starts CASProcessor containers one a time. During this phase the container deploys a TAE as
      * local,remote, or integrated CasProcessor.
+     * @throws AbortCPMException AbortCPMException
      */
     public void deployCasProcessors() throws AbortCPMException {
         try {
@@ -1547,14 +1555,14 @@ public class CPMEngine extends Thread {
     }
 
     /**
-     * Returns a global flag indicating if this Thread is in processing state
+     * @return  Returns a global flag indicating if this Thread is in processing state
      */
     public boolean isRunning() {
         return isRunning;
     }
 
     /**
-     * Returns a global flag indicating if this Thread is in pause state
+     * @return  Returns a global flag indicating if this Thread is in pause state
      */
     public boolean isPaused() {
         synchronized (lockForPause) {
@@ -1633,6 +1641,7 @@ public class CPMEngine extends Thread {
 
     /**
      * Defines the size of the batch
+     * @param aNumToProcess aNumToProcess
      */
 
     public void setNumToProcess(long aNumToProcess) {
@@ -1640,7 +1649,7 @@ public class CPMEngine extends Thread {
     }
 
     /**
-     * Returns Id of the last document processed
+     * @return Returns Id of the last document processed
      */
     public String getLastProcessedDocId() {
         return producer.getLastDocId();
@@ -1656,7 +1665,7 @@ public class CPMEngine extends Thread {
      * @param aClassName -
      *                   name of a class that extends ProcessingUnit
      * @return - an instance of the ProcessingUnit
-     * @throws Exception -
+     * @throws Exception - Exception
      */
     private ProcessingUnit producePU(String aClassName) throws Exception {
         Class currentClass = Class.forName(aClassName);
@@ -2847,6 +2856,7 @@ public class CPMEngine extends Thread {
      * Stops All Cas Processors and optionally changes the status according to kill flag
      *
      * @param kill - true if CPE has been stopped before completing normally
+     * @throws  CasProcessorDeploymentException CasProcessorDeploymentException
      */
 
     public void stopCasProcessors(boolean kill) throws CasProcessorDeploymentException {
@@ -2904,7 +2914,7 @@ public class CPMEngine extends Thread {
     }
 
     /**
-     * Returns collectionReader progress.
+     * @return Returns collectionReader progress.
      */
     public Progress[] getProgress() {
         if (collectionReader == null) {
@@ -3000,7 +3010,7 @@ public class CPMEngine extends Thread {
     }
 
     /**
-     * @param aPca
+     * @param aPca ProcessControllerAdapter
      */
     public void setProcessControllerAdapter(ProcessControllerAdapter aPca) {
         pca = aPca;

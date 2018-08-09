@@ -159,9 +159,7 @@ public class AdaptableCpmFrame extends JFrame implements ActionListener {
         return new Dimension((int) (screenSize.width * 0.7), (int) (0.7 * (screenSize.height - 65)));
     }
 
-    /**
-     * Runs the application.
-     */
+
     public static void main(String[] args) {
         //GUI creation must be done in the event handler thread, because Swing is
         //not thread-safe.  This is particularly important for the CPE Configurator

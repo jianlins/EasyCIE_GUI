@@ -1005,7 +1005,7 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
 
 
     /**
-     * Ask user to confirm exist. Return true if they confirm, false if not.
+     * @return  Ask user to confirm exist. Return true if they confirm, false if not.
      */
     public boolean confirmExit() {
         mShuttingDown = true;

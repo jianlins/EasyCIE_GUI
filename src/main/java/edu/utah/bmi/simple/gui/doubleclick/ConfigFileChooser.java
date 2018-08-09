@@ -12,7 +12,7 @@ import java.io.File;
 /**
  * Created by
  *
- * @Author Jianlin Shi on 4/10/17.
+ * @author Jianlin Shi on 4/10/17.
  */
 public class ConfigFileChooser extends javafx.concurrent.Task {
     private TaskFX currentTask;

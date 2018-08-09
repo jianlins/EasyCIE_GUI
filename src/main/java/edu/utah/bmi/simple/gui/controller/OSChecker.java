@@ -26,8 +26,8 @@ public class OSChecker {
     /**
      * Input the cat /etc/*-release raw output, can return the os type.
      *
-     * @param catReleaseInfo
-     * @return
+     * @param catReleaseInfo catReleaseInfo
+     * @return os type name
      */
     public String getOSType(String catReleaseInfo) {
         catReleaseInfo = catReleaseInfo.toLowerCase();

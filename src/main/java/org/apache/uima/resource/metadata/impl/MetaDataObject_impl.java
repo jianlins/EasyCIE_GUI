@@ -63,33 +63,6 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-/**
- * Abstract base class for all MetaDataObjects in the reference implementation. Provides basic
- * support for getting and setting property values given their names, using bean introspection and reflection.
- * <p>
- * Also provides the ability to write objects to XML and build objects from their DOM
- * representation, as required to implement the {@link XMLizable} interface, which is a
- * superinterface of {@link MetaDataObject}. In future versions, this could be replaced by a
- * non-proprietary XML binding solution such as JAXB or EMF.
- * <p>
- * <p>
- * The implementation for getting and setting property values uses the JavaBeans introspection API.
- * Therefore subclasses of this class must be valid JavaBeans and either use the standard naming
- * conventions for getters and setters. BeanInfo augmentation is ignored; the implementation here
- * uses the flag IGNORE_ALL_BEANINFO. See <a href="http://java.sun.com/docs/books/tutorial/javabeans/">
- * The Java Beans Tutorial</a> for more information.
- * <p>
- * To support XML Comments, which can occur between any sub-elements, including array values,
- * the "data" for all objects is stored in a pair of ArrayLists; one holds the "name" of the slot,
- * the other the value; comments are interspersed within this list where they occur.
- * <p>
- * To the extent possible, this should be the *only* data storage used for the xml element.
- * Subclasses should access these elements on demand.  Data will be read into / written from this
- * representation; Cloning will copy this information.
- * <p>
- * For getters that need to do some special initial processing, a global flag will be set whenever
- * this base code changes the underlying value.
- */
 public abstract class MetaDataObject_impl implements MetaDataObject {
 
     static final long serialVersionUID = 5876728533863334480L;

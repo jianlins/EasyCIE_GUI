@@ -28,11 +28,6 @@ public class TextFieldOpenableTableCell<S, T> extends TableCell<S, T> {
     private Setting setting;
 
 
-    /***************************************************************************
-     *                                                                         *
-     * Static cell factories                                                   *
-     *                                                                         *
-     **************************************************************************/
 
     public static <S> Callback<TableColumn<S, String>, TableCell<S, String>> forTableColumn() {
         return forTableColumn(new SettingValueConverter());
@@ -99,23 +94,17 @@ public class TextFieldOpenableTableCell<S, T> extends TableCell<S, T> {
     private ObjectProperty<StringConverter<T>> converter =
             new SimpleObjectProperty<StringConverter<T>>(this, "converter");
 
-    /**
-     * The {@link StringConverter} property.
-     */
+
     public final ObjectProperty<StringConverter<T>> converterProperty() {
         return converter;
     }
 
-    /**
-     * Sets the {@link StringConverter} to be used in this cell.
-     */
+
     public final void setConverter(StringConverter<T> value) {
         converterProperty().set(value);
     }
 
-    /**
-     * Returns the {@link StringConverter} used in this cell.
-     */
+
     public final StringConverter<T> getConverter() {
         return converterProperty().get();
     }

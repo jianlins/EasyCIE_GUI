@@ -76,7 +76,7 @@ public class ModifiedChecker {
      * Otherwise, return an empty ArrayList.
      *
      * @param logTypes log types of each ae
-     * @return
+     * @return a list of checkModifiedAEs aes
      */
     public ArrayList<String> checkModifiedLoggers(HashMap<String, String> logTypes) {
         ArrayList<String> modifiedLogger = new ArrayList<>();

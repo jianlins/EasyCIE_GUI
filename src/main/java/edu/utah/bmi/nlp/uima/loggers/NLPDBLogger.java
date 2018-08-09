@@ -92,14 +92,7 @@ public class NLPDBLogger extends GUILogger {
         initRecordRow = initialRecordRow;
     }
 
-    /**
-     * Deprecated, because dao may be disconnected outside this class without known.
-     *
-     * @param dao
-     * @param tableName
-     * @param keyColumnName
-     * @param annotator
-     */
+    //Deprecated, because dao may be disconnected outside this class without known.
     @Deprecated
     public NLPDBLogger(EDAO dao, String tableName, String keyColumnName, String annotator) {
         this.ldao = dao;
