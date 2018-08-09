@@ -17,6 +17,7 @@
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
     <version>${current.version}</version>
+    <name>EasyCIE Project</name>
     <url>https://github.com/jianlins/EasyCIE_GUI</url>
     <description>The library of EasyCIE.</description>
     <scm>
