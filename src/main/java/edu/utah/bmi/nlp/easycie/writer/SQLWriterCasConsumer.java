@@ -272,6 +272,27 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
                 record.addCell("SNIPPET_END", sentenceBegin + sentence.length());
                 record.addCell("BEGIN", thisAnnotation.getBegin() - sentenceBegin);
                 record.addCell("END", thisAnnotation.getEnd() - sentenceBegin);
+            } else if (annotationType.indexOf("Sentence") != -1) {
+                Object sentenceIdObj = sentenceTree.get(new Interval1D(thisAnnotation.getBegin(), thisAnnotation.getEnd()));
+                int sentenceId = -1;
+                if (sentenceIdObj != null)
+                    sentenceId = (int) sentenceIdObj;
+                int snippetBegin;
+                int snippetEnd = thisAnnotation.getEnd();
+                if (sentenceId > 0)
+                    snippetBegin = sentenceList.get(sentenceId - 1).getBegin();
+                else
+                    snippetBegin = thisAnnotation.getBegin();
+
+                if (sentenceId < sentenceList.size() - 1)
+                    snippetEnd = sentenceList.get(sentenceId + 1).getEnd();
+                else
+                    snippetEnd = thisAnnotation.getEnd();
+                record.addCell("SNIPPET", docText.substring(snippetBegin,snippetEnd));
+                record.addCell("SNIPPET_BEGIN", snippetBegin);
+                record.addCell("SNIPPET_END", snippetEnd);
+                record.addCell("BEGIN", thisAnnotation.getBegin()-snippetBegin);
+                record.addCell("END", thisAnnotation.getEnd() - snippetBegin);
             } else {
                 record.addCell("SNIPPET", thisAnnotation.getCoveredText());
                 record.addCell("SNIPPET_BEGIN", thisAnnotation.getBegin());

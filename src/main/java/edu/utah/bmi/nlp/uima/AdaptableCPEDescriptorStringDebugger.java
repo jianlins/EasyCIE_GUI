@@ -93,7 +93,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
 
         String pipelineName = new File(cpeDescriptor).getName();
         pipelineName = pipelineName.substring(0, pipelineName.length() - 4);
-        return getInstance(cpeDescriptor, annotator, componentsSettings, loggerSettings, "classes", "desc/type/" + pipelineName + "_" + annotator + "_Type.xml");
+        return getInstance(cpeDescriptor, annotator, componentsSettings, loggerSettings, "desc/type/" + pipelineName + "_" + annotator + "_Type.xml");
     }
 
 
@@ -101,8 +101,8 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
      * @param cpeDescriptor location of cpe descripter xml file
      * @param annotator annotator name
      * @param options       0~3 parameters:
-     *                      1. The location of compiled classes for auto-gen type systems
-     *                      2. The location of auto-gen type descriptor
+     *                      1. The location of auto-gen type descriptor
+     *                      2. The location of compiled classes for auto-gen type systems
      *                      3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
@@ -117,9 +117,9 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
      * @param externalSettingMap external configuration values
      * @param logTypes type names to be logged for each AE
      * @param options            0~3 parameters:
-     *                           1. The location of compiled classes for auto-gen type systems
-     *                           2. The location of auto-gen type descriptor
-     *                           3. The location of class source files for auto-gen type systems
+     *                      1. The location of auto-gen type descriptor
+     *                      2. The location of compiled classes for auto-gen type systems
+     *                      3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
     public static AdaptableCPEDescriptorStringDebugger getInstance(String cpeDescriptor, String annotator,

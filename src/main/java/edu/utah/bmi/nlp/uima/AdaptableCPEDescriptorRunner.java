@@ -127,8 +127,8 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param cpeDescriptor location of cpe descripter xml file
      * @param annotator     annotator name
      * @param options       0~3 parameters:
-     *                      1. The location of compiled classes for auto-gen type systems
-     *                      2. The location of auto-gen type descriptor
+     *                      1. The location of auto-gen type descriptor
+     *                      2. The location of compiled classes for auto-gen type systems
      *                      3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
@@ -142,8 +142,8 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param annotator     annotator name
      * @param logger        logger to track the pipeline running log (can be null)
      * @param options       0~3 parameters:
-     *                      1. The location of compiled classes for auto-gen type systems
-     *                      2. The location of auto-gen type descriptor
+     *                      1. The location of auto-gen type descriptor
+     *                      2. The location of compiled classes for auto-gen type systems
      *                      3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
@@ -159,9 +159,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param annotator             annotator name
      * @param externalRuleConfigMap external configuration values
      * @param options               0~3 parameters:
-     *                              1. The location of compiled classes for auto-gen type systems
-     *                              2. The location of auto-gen type descriptor
-     *                              3. The location of class source files for auto-gen type systems
+     *                      1. The location of auto-gen type descriptor
+     *                      2. The location of compiled classes for auto-gen type systems
+     *                      3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
     public static AdaptableCPEDescriptorRunner getInstance(String cpeDescriptor, String annotator, LinkedHashMap<String, String> externalRuleConfigMap, String... options) {
@@ -183,9 +183,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param logger            logger to track the pipeline running log (can be null)
      * @param externalConfigMap external configurations
      * @param options           0~3 parameters:
-     *                          1. The location of compiled classes for auto-gen type systems
-     *                          2. The location of auto-gen type descriptor
-     *                          3. The location of class source files for auto-gen type systems
+     *                      1. The location of auto-gen type descriptor
+     *                      2. The location of compiled classes for auto-gen type systems
+     *                      3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
     public static AdaptableCPEDescriptorRunner getInstance(String cpeDescriptor, String annotator,
@@ -219,8 +219,8 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param annotator     annotator name
      * @param logger        logger to track the pipeline running log (can be null)
      * @param options       0~3 parameters:
-     *                      1. The location of compiled classes for auto-gen type systems
-     *                      2. The location of auto-gen type descriptor
+     *                      1. The location of auto-gen type descriptor
+     *                      2. The location of compiled classes for auto-gen type systems
      *                      3. The location of class source files for auto-gen type systems
      */
     public AdaptableCPEDescriptorRunner(String cpeDescriptor, String annotator, UIMALogger logger, String... options) {
@@ -236,9 +236,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param logger            logger to track the pipeline running log (can be null)
      * @param externalConfigMap external configurations (AE name -: (  configuration name-: value))
      * @param options           0~3 parameters:
-     *                          1. The location of compiled classes for auto-gen type systems
-     *                          2. The location of auto-gen type descriptor
-     *                          3. The location of class source files for auto-gen type systems
+     *                      1. The location of auto-gen type descriptor
+     *                      2. The location of compiled classes for auto-gen type systems
+     *                      3. The location of class source files for auto-gen type systems
      */
     public AdaptableCPEDescriptorRunner(String cpeDescriptor, String annotator, UIMALogger logger,
                                         LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap,
@@ -295,8 +295,8 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param cpeDescriptor location of cpe descripter xml file
      * @param annotator     annotator name
      * @param options       0~3 parameters:
-     *                      1. The location of compiled classes for auto-gen type systems
-     *                      2. The location of auto-gen type descriptor
+     *                      1. The location of auto-gen type descriptor
+     *                      2. The location of compiled classes for auto-gen type systems
      *                      3. The location of class source files for auto-gen type systems
      */
     public void initCpe(String cpeDescriptor, String annotator, String... options) {
@@ -311,14 +311,14 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 case 3:
                     this.srcClassRootPath = options[2];
                 case 2:
-                    this.genDescriptorPath = options[1];
+                    this.compiledClassPath = options[1];
                 case 1:
-                    this.compiledClassPath = options[0];
+                    this.genDescriptorPath = options[0];
                     initCpeDescriptor(cpeDescriptor, annotator);
                     break;
                 default:
-                    this.compiledClassPath = options[0];
-                    this.genDescriptorPath = options[1];
+                    this.genDescriptorPath = options[0];
+                    this.compiledClassPath = options[1];
                     this.srcClassRootPath = options[2];
                     initCpeDescriptor(cpeDescriptor, annotator);
                     break;

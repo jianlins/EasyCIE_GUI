@@ -9,7 +9,7 @@
                 <nameValuePair>
                     <name>DBConfigFile</name>
                     <value>
-                        <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/sqliteconfig.xml</string>
+                        <string>conf/smoke3/sqliteconfig.xml</string>
                     </value>
                 </nameValuePair>
                 <nameValuePair>
@@ -21,14 +21,14 @@
                 <nameValuePair>
                     <name>DatasetId</name>
                     <value>
-                        <string>TEST</string>
+                        <string>I2B2</string>
                     </value>
                 </nameValuePair>
             </configurationParameterSettings>
         </collectionIterator>
     </collectionReader>
     <casProcessors casPoolSize="2" processingUnitThreadCount="1">
-    <casProcessor deployment="integrated" name="Section_Detector_R_AE">
+    <casProcessor deployment="integrated" name="Section_Detector">
         <descriptor>
             <import location="../ae/SectionDetectorR_aeDescriptor.xml"/>
         </descriptor>
@@ -43,12 +43,12 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_section.xlsx</string>
+                    <string>conf/smoke3/smoke_section.xlsx</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="RuSH_AE">
+    <casProcessor deployment="integrated" name="RuSH">
         <descriptor>
             <import location="../ae/RuSH_AE.xml"/>
         </descriptor>
@@ -63,12 +63,12 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_rush.xlsx</string>
+                    <string>conf/smoke3/smoke_rush.xlsx</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="FastNER_AE">
+    <casProcessor deployment="integrated" name="FastNER">
         <descriptor>
             <import location="../ae/FastNER_aeDescriptor.xml"/>
         </descriptor>
@@ -83,12 +83,12 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_rule.xlsx</string>
+                    <string>conf/smoke3/smoke_rule.xlsx</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="FastContext_AE">
+    <casProcessor deployment="integrated" name="FastContext">
         <descriptor>
             <import location="../ae/FastContext_aeDescriptor.xml"/>
         </descriptor>
@@ -103,12 +103,12 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_context.xlsx</string>
+                    <string>conf/smoke3/smoke_context.xlsx</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="TemporalContext_AE">
+    <casProcessor deployment="integrated" name="TemporalContext">
         <descriptor>
             <import location="../ae/TemporalContext_aeDescriptor.xml"/>
         </descriptor>
@@ -123,12 +123,12 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_date.tsv</string>
+                    <string>conf/smoke3/smoke_date.tsv</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="FeatureInference_AE">
+    <casProcessor deployment="integrated" name="FeatureInferencer">
         <descriptor>
             <import location="../ae/FeatureInference_aeDescriptor.xml"/>
         </descriptor>
@@ -143,12 +143,12 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_featureInf.xlsx</string>
+                    <string>conf/smoke3/smoke_featureInf.xlsx</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="SentenceInference_AE">
+    <casProcessor deployment="integrated" name="SentenceInferencer">
         <descriptor>
             <import location="../ae/SentenceInferencer_aeDescriptor.xml"/>
         </descriptor>
@@ -163,12 +163,12 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/smoke_sentInf.xlsx</string>
+                    <string>conf/smoke3/smoke_sentInf.xlsx</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="SQLWriter_AE">
+    <casProcessor deployment="integrated" name="SQLWriter">
         <descriptor>
             <import location="../ae/SQLWriterCasConsumer.xml"/>
         </descriptor>
@@ -184,7 +184,13 @@
             <nameValuePair>
                 <name>DBConfigFile</name>
                 <value>
-                    <string>/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke/sqliteconfig.xml</string>
+                    <string>conf/smoke3/sqliteconfig.xml</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>OverWriteTable</name>
+                <value>
+                    <boolean>true</boolean>
                 </value>
             </nameValuePair>
             <nameValuePair>

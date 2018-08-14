@@ -25,261 +25,276 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class AnnotationLogger extends JCasAnnotator_ImplBase {
-	public static final String PARAM_TYPE_NAMES = "TypeNames";
-	public static final String PARAM_INDICATION = "Indication";
-	public static final String PARAM_INDICATION_HEADER = "IndicationHeader";
-	public static final String PARAM_SENTENCE_TYPE = "SentenceType";
-	public static StringBuilder sb = new StringBuilder();
-	public static ArrayList<RecordRow> records = new ArrayList<>();
-	protected static HashMap<Class, HashMap<String, Method>> getMethodsMap = new HashMap<>();
-	private String printTypeNames;
-	private String indication, annotator, header;
-	private Class<? extends Annotation> sentenceCls = Sentence.class;
+    public static final String PARAM_TYPE_NAMES = "TypeNames";
+    public static final String PARAM_INDICATION = "Indication";
+    public static final String PARAM_INDICATION_HEADER = "IndicationHeader";
+    public static final String PARAM_SENTENCE_TYPE = "SentenceType";
+    public static StringBuilder sb = new StringBuilder();
+    public static ArrayList<RecordRow> records = new ArrayList<>();
+    protected static HashMap<Class, HashMap<String, Method>> getMethodsMap = new HashMap<>();
+    private String printTypeNames;
+    private String indication, annotator, header;
+    private Class<? extends Annotation> sentenceCls = Sentence.class;
 
 
-	public AnnotationLogger() {
-	}
+    public AnnotationLogger() {
+    }
 
-	public static void reset() {
-		sb.setLength(0);
-		records.clear();
-		getMethodsMap.clear();
-	}
+    public static void reset() {
+        sb.setLength(0);
+        records.clear();
+        getMethodsMap.clear();
+    }
 
-	public void initialize(UimaContext cont) {
-		this.printTypeNames = "";
-		Object obj = cont.getConfigParameterValue(PARAM_TYPE_NAMES);
-		if (obj != null && obj instanceof String) {
-			this.printTypeNames = (String) obj;
-		}
+    public void initialize(UimaContext cont) {
+        this.printTypeNames = "";
+        Object obj = cont.getConfigParameterValue(PARAM_TYPE_NAMES);
+        if (obj != null && obj instanceof String) {
+            this.printTypeNames = (String) obj;
+        }
 
-		obj = cont.getConfigParameterValue(PARAM_INDICATION);
-		if (obj != null && obj instanceof String) {
-			this.indication = (String) obj;
-		}
+        obj = cont.getConfigParameterValue(PARAM_INDICATION);
+        if (obj != null && obj instanceof String) {
+            this.indication = (String) obj;
+        }
 
-		obj = cont.getConfigParameterValue(PARAM_SENTENCE_TYPE);
-		if (obj != null && obj instanceof String) {
-			try {
-				sentenceCls = Class.forName(DeterminantValueSet.checkNameSpace((String) obj)).asSubclass(Annotation.class);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
+        obj = cont.getConfigParameterValue(PARAM_SENTENCE_TYPE);
+        if (obj != null && obj instanceof String) {
+            try {
+                sentenceCls = Class.forName(DeterminantValueSet.checkNameSpace((String) obj)).asSubclass(Annotation.class);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
 
-		obj = cont.getConfigParameterValue(PARAM_INDICATION_HEADER);
-		if (obj != null && obj instanceof String) {
-			this.header = (String) obj;
-		}
-		annotator = "debugger";
+        obj = cont.getConfigParameterValue(PARAM_INDICATION_HEADER);
+        if (obj != null && obj instanceof String) {
+            this.header = (String) obj;
+        }
+        annotator = "debugger";
 
-	}
+    }
 
-	public void process(JCas jCas) {
-		if(printTypeNames.trim().length()>0) {
-			IntervalST sentenceTree = new IntervalST();
-			ArrayList<Annotation> sentenceList = new ArrayList<>();
-			indexSentences(jCas, sentenceList, sentenceTree);
-			String docText = jCas.getDocumentText();
+    public void process(JCas jCas) {
+        if (printTypeNames.trim().length() > 0) {
+            IntervalST sentenceTree = new IntervalST();
+            ArrayList<Annotation> sentenceList = new ArrayList<>();
+            indexSentences(jCas, sentenceList, sentenceTree);
+            String docText = jCas.getDocumentText();
 
-			RecordRow baseRecordRow = new RecordRow().addCell("DOC_NAME", "SNIPPET_TEST")
-					.addCell("RUN_ID", 0).addCell("ANNOTATOR", annotator);
-			addIntroductionRecordRow(baseRecordRow, records, indication);
-			CAS cas = jCas.getCas();
-			sb.append(indication + "\n");
+            RecordRow baseRecordRow = new RecordRow().addCell("DOC_NAME", "SNIPPET_TEST")
+                    .addCell("RUN_ID", 0).addCell("ANNOTATOR", annotator);
+            addIntroductionRecordRow(baseRecordRow, records, indication);
+            CAS cas = jCas.getCas();
+            sb.append(indication + "\n");
 
-			for (String typeName : printTypeNames.split(",")) {
-				typeName = typeName.trim();
-				if (typeName.length() == 0)
-					continue;
-				typeName = DeterminantValueSet.checkNameSpace(typeName);
-				saveOneTypeAnnotation(cas, docText, typeName, baseRecordRow, records, sentenceList, sentenceTree);
+            for (String typeName : printTypeNames.split(",")) {
+                typeName = typeName.trim();
+                if (typeName.length() == 0)
+                    continue;
+                typeName = DeterminantValueSet.checkNameSpace(typeName);
+                saveOneTypeAnnotation(cas, docText, typeName, baseRecordRow, records, sentenceList, sentenceTree);
 
-				Type type = CasUtil.getAnnotationType(cas, typeName);
+                Type type = CasUtil.getAnnotationType(cas, typeName);
 
-				Collection<AnnotationFS> annotations = CasUtil.select(cas, type);
-				sb.append(" Here is a list of annotation '" + typeName + "':\n");
-				for (AnnotationFS annotation : annotations) {
-					sb.append(annotation.toString() + "   Covered Text: \"" + annotation.getCoveredText() + "\"\n");
-				}
-			}
-		}
-	}
+                Collection<AnnotationFS> annotations = CasUtil.select(cas, type);
+                sb.append(" Here is a list of annotation '" + typeName + "':\n");
+                for (AnnotationFS annotation : annotations) {
+                    sb.append(annotation.toString() + "   Covered Text: \"" + annotation.getCoveredText() + "\"\n");
+                }
+            }
+        }
+    }
 
-	private void addIntroductionRecordRow(RecordRow baseRecordRow, ArrayList<RecordRow> records, String indication) {
-		RecordRow record = baseRecordRow.clone();
-		record.addCell("ID", header)
-				.addCell("TYPE", "")
-				.addCell("TEXT", indication)
-				.addCell("SNIPPET", indication)
-				.addCell("SNIPPET_BEGIN", 0)
-				.addCell("SNIPPET_END", indication.length())
-				.addCell("BEGIN", 0)
-				.addCell("END", indication.length());
-		records.add(record);
-	}
+    private void addIntroductionRecordRow(RecordRow baseRecordRow, ArrayList<RecordRow> records, String indication) {
+        RecordRow record = baseRecordRow.clone();
+        record.addCell("ID", header)
+                .addCell("TYPE", "")
+                .addCell("TEXT", indication)
+                .addCell("SNIPPET", indication)
+                .addCell("SNIPPET_BEGIN", 0)
+                .addCell("SNIPPET_END", indication.length())
+                .addCell("BEGIN", 0)
+                .addCell("END", indication.length());
+        records.add(record);
+    }
 
-	private void indexSentences(JCas jCas, ArrayList<Annotation> sentenceList, IntervalST sentenceTree) {
-		Iterator<? extends Annotation> it = JCasUtil.iterator(jCas, sentenceCls);
-		while (it.hasNext()) {
-			Annotation thisSentence = it.next();
-			sentenceList.add(thisSentence);
-			sentenceTree.put(new Interval1D(thisSentence.getBegin(), thisSentence.getEnd()), sentenceList.size() - 1);
-		}
-	}
+    private void indexSentences(JCas jCas, ArrayList<Annotation> sentenceList, IntervalST sentenceTree) {
+        Iterator<? extends Annotation> it = JCasUtil.iterator(jCas, sentenceCls);
+        while (it.hasNext()) {
+            Annotation thisSentence = it.next();
+            sentenceList.add(thisSentence);
+            sentenceTree.put(new Interval1D(thisSentence.getBegin(), thisSentence.getEnd()), sentenceList.size() - 1);
+        }
+    }
 
-	private void saveOneTypeAnnotation(CAS cas, String docText, String annotationType,
-									   RecordRow baseRecordRow, ArrayList<RecordRow> annotations,
-									   ArrayList<Annotation> sentenceList, IntervalST sentenceTree) {
+    private void saveOneTypeAnnotation(CAS cas, String docText, String annotationType,
+                                       RecordRow baseRecordRow, ArrayList<RecordRow> annotations,
+                                       ArrayList<Annotation> sentenceList, IntervalST sentenceTree) {
 
-		Iterator<AnnotationFS> annoIter = CasUtil.iterator(cas, CasUtil.getType(cas, annotationType));
-		if (annotationType.indexOf("Sentence") != -1) {
-			while (annoIter.hasNext()) {
-				Annotation thisAnnotation = (Annotation) annoIter.next();
-				RecordRow record = baseRecordRow.clone();
-				record.addCell("TYPE", thisAnnotation.getType().getShortName());
-				record.addCell("TEXT", thisAnnotation.getCoveredText());
-				record.addCell("FEATURES", "");
-				record.addCell("SNIPPET", thisAnnotation.getCoveredText());
-				record.addCell("SNIPPET_BEGIN", thisAnnotation.getBegin());
-				record.addCell("SNIPPET_END", thisAnnotation.getEnd());
-				record.addCell("BEGIN", 0);
-				record.addCell("END", thisAnnotation.getEnd() - thisAnnotation.getBegin());
-				annotations.add(record);
-			}
-		} else {
-			while (annoIter.hasNext()) {
-				Annotation thisAnnotation = (Annotation) annoIter.next();
-				RecordRow record = baseRecordRow.clone();
-				record.addCell("TYPE", thisAnnotation.getType().getShortName());
-				record.addCell("TEXT", thisAnnotation.getCoveredText());
+        Iterator<AnnotationFS> annoIter = CasUtil.iterator(cas, CasUtil.getType(cas, annotationType));
+        if (annotationType.indexOf("Sentence") != -1) {
+            while (annoIter.hasNext()) {
+                Annotation thisAnnotation = (Annotation) annoIter.next();
+                Object sentenceIdObj = sentenceTree.get(new Interval1D(thisAnnotation.getBegin(), thisAnnotation.getEnd()));
+                int sentenceId = -1;
+                if (sentenceIdObj != null)
+                    sentenceId = (int) sentenceIdObj;
+                int snippetBegin;
+                int snippetEnd = thisAnnotation.getEnd();
+                if (sentenceId > 0)
+                    snippetBegin = sentenceList.get(sentenceId - 1).getBegin();
+                else
+                    snippetBegin = thisAnnotation.getBegin();
+
+                if (sentenceId < sentenceList.size() - 1)
+                    snippetEnd = sentenceList.get(sentenceId + 1).getEnd();
+                else
+                    snippetEnd = thisAnnotation.getEnd();
+                RecordRow record = baseRecordRow.clone();
+                record.addCell("TYPE", thisAnnotation.getType().getShortName());
+                record.addCell("TEXT", thisAnnotation.getCoveredText());
+                record.addCell("FEATURES", "");
+                record.addCell("SNIPPET", docText.substring(snippetBegin,snippetEnd));
+                record.addCell("SNIPPET_BEGIN", snippetBegin);
+                record.addCell("SNIPPET_END", snippetEnd);
+                record.addCell("BEGIN", thisAnnotation.getBegin()-snippetBegin);
+                record.addCell("END", thisAnnotation.getEnd() - snippetBegin);
+                annotations.add(record);
+            }
+        } else {
+            while (annoIter.hasNext()) {
+                Annotation thisAnnotation = (Annotation) annoIter.next();
+                RecordRow record = baseRecordRow.clone();
+                record.addCell("TYPE", thisAnnotation.getType().getShortName());
+                record.addCell("TEXT", thisAnnotation.getCoveredText());
 
 
-				StringBuilder sb = new StringBuilder();
-				for (Feature feature : thisAnnotation.getType().getFeatures()) {
-					String domain = feature.getDomain().getShortName();
-					if (domain.equals("AnnotationBase") || domain.equals("Annotation"))
-						continue;
-					String featureName = feature.getShortName();
-					String value = getValue(thisAnnotation, featureName);
+                StringBuilder sb = new StringBuilder();
+                for (Feature feature : thisAnnotation.getType().getFeatures()) {
+                    String domain = feature.getDomain().getShortName();
+                    if (domain.equals("AnnotationBase") || domain.equals("Annotation"))
+                        continue;
+                    String featureName = feature.getShortName();
+                    String value = getValue(thisAnnotation, featureName);
 //					System.out.println(featureName + ":v" + value);
 
-					switch (featureName) {
-						case "Annotator":
-							record.addCell("ANNOTATOR", this.annotator);
-						default:
-							if (value != null && value.trim().length() > 0) {
-								sb.append(featureName + ": " + value);
+                    switch (featureName) {
+                        case "Annotator":
+                            record.addCell("ANNOTATOR", this.annotator);
+                        default:
+                            if (value != null && value.trim().length() > 0) {
+                                sb.append(featureName + ": " + value);
 //                sb.append(value);
-								sb.append("\n");
-							}
-					}
-				}
-				record.addCell("FEATURES", sb.toString());
+                                sb.append("\n");
+                            }
+                    }
+                }
+                record.addCell("FEATURES", sb.toString());
 
-				if (thisAnnotation instanceof ConceptBASE) {
+                if (thisAnnotation instanceof ConceptBASE) {
 
-					Object sentenceIdObject = sentenceTree.get(new Interval1D(thisAnnotation.getBegin(), thisAnnotation.getEnd()));
-					String sentence;
+                    Object sentenceIdObject = sentenceTree.get(new Interval1D(thisAnnotation.getBegin(), thisAnnotation.getEnd()));
+                    String sentence;
 
-					Annotation sentenceAnno;
-					int sentenceBegin, sentenceEnd;
-					if (sentenceIdObject != null) {
-						int sentenceId = (Integer) sentenceIdObject;
-						sentenceAnno = sentenceList.get(sentenceId);
-						sentence = sentenceAnno.getCoveredText();
+                    Annotation sentenceAnno;
+                    int sentenceBegin, sentenceEnd;
+                    if (sentenceIdObject != null) {
+                        int sentenceId = (Integer) sentenceIdObject;
+                        sentenceAnno = sentenceList.get(sentenceId);
+                        sentence = sentenceAnno.getCoveredText();
 
-						if (sentence.length() < 50) {
-							sentenceBegin = sentenceList.get(sentenceId == 0 ? sentenceId : sentenceId - 1).getBegin();
-							sentenceEnd = sentenceList.get(sentenceId == sentenceList.size() - 1 ? sentenceId : sentenceId + 1).getEnd();
-						} else {
-							sentenceBegin = sentenceAnno.getBegin();
-							sentenceEnd = sentenceAnno.getEnd();
-						}
-						sentence = docText.substring(sentenceBegin, sentenceEnd);
-					} else {
-						int contBegin = thisAnnotation.getBegin() - 50;
-						int contEnd = thisAnnotation.getEnd() + 50;
-						if (contBegin < 0)
-							contBegin = 0;
-						if (contEnd > docText.length()) {
-							contEnd = docText.length();
-						}
-						sentence = docText.substring(contBegin, contEnd);
-						record.addCell("NOTE", record.getValueByColumnName("NOTE") + "<missed sentence>");
-						sentenceBegin = contBegin;
-					}
-					record.addCell("SNIPPET", sentence);
-					record.addCell("SNIPPET_BEGIN", sentenceBegin);
-					record.addCell("SNIPPET_END", sentenceBegin + sentence.length());
-					record.addCell("BEGIN", thisAnnotation.getBegin() - sentenceBegin);
-					record.addCell("END", thisAnnotation.getEnd() - sentenceBegin);
-				} else {
-					record.addCell("SNIPPET", thisAnnotation.getCoveredText());
-					record.addCell("SNIPPET_BEGIN", thisAnnotation.getBegin());
-					record.addCell("SNIPPET_END", thisAnnotation.getEnd());
-					record.addCell("BEGIN", 0);
-					record.addCell("END", thisAnnotation.getEnd() - thisAnnotation.getBegin());
-				}
-				annotations.add(record);
-			}
-		}
-	}
+                        if (sentence.length() < 50) {
+                            sentenceBegin = sentenceList.get(sentenceId == 0 ? sentenceId : sentenceId - 1).getBegin();
+                            sentenceEnd = sentenceList.get(sentenceId == sentenceList.size() - 1 ? sentenceId : sentenceId + 1).getEnd();
+                        } else {
+                            sentenceBegin = sentenceAnno.getBegin();
+                            sentenceEnd = sentenceAnno.getEnd();
+                        }
+                        sentence = docText.substring(sentenceBegin, sentenceEnd);
+                    } else {
+                        int contBegin = thisAnnotation.getBegin() - 50;
+                        int contEnd = thisAnnotation.getEnd() + 50;
+                        if (contBegin < 0)
+                            contBegin = 0;
+                        if (contEnd > docText.length()) {
+                            contEnd = docText.length();
+                        }
+                        sentence = docText.substring(contBegin, contEnd);
+                        record.addCell("NOTE", record.getValueByColumnName("NOTE") + "<missed sentence>");
+                        sentenceBegin = contBegin;
+                    }
+                    record.addCell("SNIPPET", sentence);
+                    record.addCell("SNIPPET_BEGIN", sentenceBegin);
+                    record.addCell("SNIPPET_END", sentenceBegin + sentence.length());
+                    record.addCell("BEGIN", thisAnnotation.getBegin() - sentenceBegin);
+                    record.addCell("END", thisAnnotation.getEnd() - sentenceBegin);
+                } else {
+                    record.addCell("SNIPPET", thisAnnotation.getCoveredText());
+                    record.addCell("SNIPPET_BEGIN", thisAnnotation.getBegin());
+                    record.addCell("SNIPPET_END", thisAnnotation.getEnd());
+                    record.addCell("BEGIN", 0);
+                    record.addCell("END", thisAnnotation.getEnd() - thisAnnotation.getBegin());
+                }
+                annotations.add(record);
+            }
+        }
+    }
 
-	private String getValue(Annotation thisAnnotation, String featureName) {
-		String value = "";
-		Class cls = thisAnnotation.getClass();
-		if (!getMethodsMap.containsKey(cls)) {
-			getMethodsMap.put(cls, new HashMap<>());
-		}
-		try {
-			if (!getMethodsMap.get(cls).containsKey(featureName)) {
-				Method m = null;
-				String methodName = AnnotationOper.inferGetMethodName(featureName);
-				m = thisAnnotation.getClass().getMethod(methodName);
-				value = m.invoke(thisAnnotation) + "";
-				getMethodsMap.get(cls).put(featureName, m);
-			} else {
-				Object obj = getMethodsMap.get(cls).get(featureName).invoke(thisAnnotation);
-				if (obj instanceof FSArray) {
-					value = serilizeFSArray((FSArray) obj);
+    private String getValue(Annotation thisAnnotation, String featureName) {
+        String value = "";
+        Class cls = thisAnnotation.getClass();
+        if (!getMethodsMap.containsKey(cls)) {
+            getMethodsMap.put(cls, new HashMap<>());
+        }
+        try {
+            if (!getMethodsMap.get(cls).containsKey(featureName)) {
+                Method m = null;
+                String methodName = AnnotationOper.inferGetMethodName(featureName);
+                m = thisAnnotation.getClass().getMethod(methodName);
+                value = m.invoke(thisAnnotation) + "";
+                getMethodsMap.get(cls).put(featureName, m);
+            } else {
+                Object obj = getMethodsMap.get(cls).get(featureName).invoke(thisAnnotation);
+                if (obj instanceof FSArray) {
+                    value = serilizeFSArray((FSArray) obj);
 //					System.out.println(value);
-				} else {
-					value = obj + "";
-				}
-			}
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		}
-		return value;
-	}
+                } else {
+                    value = obj + "";
+                }
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return value;
+    }
 
-	private String serilizeFSArray(FSArray ary) {
-		StringBuilder sb = new StringBuilder();
-		int size = ary.size();
-		String[] values = new String[size];
-		ary.copyToArray(0, values, 0, size);
-		for (FeatureStructure fs : ary) {
-			List<Feature> features = fs.getType().getFeatures();
-			for (Feature feature : features) {
-				String domain = feature.getDomain().getShortName();
-				if (domain.equals("AnnotationBase") || domain.equals("Annotation"))
-					continue;
-				Type range = feature.getRange();
-				if (!range.isPrimitive()) {
-					FeatureStructure child = fs.getFeatureValue(feature);
-					sb.append(child + "");
-				} else {
-					sb.append("\t"+feature.getShortName() + ":" + fs.getFeatureValueAsString(feature)+"\n");
-				}
-			}
+    private String serilizeFSArray(FSArray ary) {
+        StringBuilder sb = new StringBuilder();
+        int size = ary.size();
+        String[] values = new String[size];
+        ary.copyToArray(0, values, 0, size);
+        for (FeatureStructure fs : ary) {
+            List<Feature> features = fs.getType().getFeatures();
+            for (Feature feature : features) {
+                String domain = feature.getDomain().getShortName();
+                if (domain.equals("AnnotationBase") || domain.equals("Annotation"))
+                    continue;
+                Type range = feature.getRange();
+                if (!range.isPrimitive()) {
+                    FeatureStructure child = fs.getFeatureValue(feature);
+                    sb.append(child + "");
+                } else {
+                    sb.append("\t" + feature.getShortName() + ":" + fs.getFeatureValueAsString(feature) + "\n");
+                }
+            }
 
-		}
-		return sb.toString();
-	}
+        }
+        return sb.toString();
+    }
 
 }

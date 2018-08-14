@@ -67,9 +67,10 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
                 hbox.setPrefWidth(snippetLength + 20);
                 int postCut = cutTail(sentence, begin, end);
                 int preCut = cutHeader(postCut, begin, end);
-                if (preCut > 3 && preCut < begin)
+                if (preCut > 3 && preCut+3 < begin) {
+                    System.out.println(preCut+"\t"+begin+"\t"+sentence.length());
                     pre = "..." + sentence.substring(preCut + 3, begin);
-                else
+                } else
                     pre = sentence.substring(preCut, begin);
 
                 marker = sentence.substring(begin, end);
