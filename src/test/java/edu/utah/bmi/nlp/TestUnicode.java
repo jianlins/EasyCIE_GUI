@@ -44,4 +44,13 @@ public class TestUnicode {
         System.out.println(Character.isAlphabetic('1'));
         System.out.println("a- b-".replaceAll("-", "_"));
     }
+
+    @Test
+    public void printchars(){
+        String input="\n" +
+                " Allergies                \n";
+        for (char ch:input.toCharArray()){
+            System.out.println(ch+" "+(int)ch);
+        }
+    }
 }

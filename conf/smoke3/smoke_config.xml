@@ -36,7 +36,7 @@
     <pipeLineSetting> 
       <CpeDescriptor memo="location of CPE descriptor" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.RunCpmFrame">desc/cpe/smoke_cpe.xml</CpeDescriptor>  
       <Section_Detector> 
-        <RuleFileOrStr memo="section detector rule file" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">conf/smoke3/smoke_section.xlsx</RuleFileOrStr> 
+        <RuleFileOrStr memo="section detector rule file" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">conf/smoke3/00_Section_Detector_R_AE.tsv</RuleFileOrStr> 
       </Section_Detector>  
       <RuSH> 
         <RuleFileOrStr memo="sentence segmentation rules" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">conf/smoke3/smoke_rush.xlsx</RuleFileOrStr> 
@@ -86,7 +86,7 @@
   </compare>  
   <debug> 
     <log> 
-      <Section_Detector memo="display types of sections">SectionBody</Section_Detector>  
+      <Section_Detector memo="display types of sections">SectionBody,SectionHeader</Section_Detector>  
       <RuSH memo="display types of RuSH (sentence segmentor and tokenizer) output">Sentence</RuSH>  
       <FastNER memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastNER>  
       <FastContext memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastContext>  

@@ -318,6 +318,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
     public JCas process(String inputStr, String... metaStr) {
         AnnotationLogger.reset();
         jCas.reset();
+        inputStr=inputStr.replaceAll("  "," ");
         jCas.setDocumentText(inputStr);
         RecordRow recordRow = new RecordRow();
         if (metaStr != null && metaStr.length > 0)
