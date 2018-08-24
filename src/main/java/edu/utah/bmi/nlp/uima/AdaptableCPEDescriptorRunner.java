@@ -946,6 +946,15 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     }
 
     public void reInitTypeSystem(String customTypeDescXml, String srcPath) {
+        if (customTypeDescXmlDir==null)
+            customTypeDescXmlDir = new File("target/generated-test-sources/uima-descripters");
+        if (!customTypeDescXmlDir.exists()) {
+            try {
+                FileUtils.forceMkdir(customTypeDescXmlDir);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         if (customTypeDescXml == null || customTypeDescXml.trim().length() == 0) {
             if (customTypeDescXmlLoc == null) {
                 customTypeDescXmlLoc = new File(customTypeDescXmlDir, cpeDescripterFileName + "_Types.xml");
@@ -955,13 +964,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
             customTypeDescXmlLoc = new File(customTypeDescXml);
             customTypeDescXmlDir = customTypeDescXmlLoc.getParentFile();
         }
-        if (!customTypeDescXmlDir.exists()) {
-            try {
-                FileUtils.forceMkdir(customTypeDescXmlDir);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+
         TreeSet<String> importedTypes = getImportedTypeNames();
         TreeSet<String> redundant = new TreeSet<>();
         for (String typeFullName : conceptTypeDefinitions.keySet()) {
