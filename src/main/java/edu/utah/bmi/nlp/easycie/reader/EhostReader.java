@@ -240,6 +240,8 @@ public class EhostReader extends AbFileCollectionReader {
                             idAttr = startElement.getAttributeByName(new QName("id"));
                             if (idAttr != null) {
                                 typeName = idAttr.getValue();
+                                if (typeName.indexOf(" ") != -1)
+                                    typeName = typeName.replaceAll(" +", "_");
                                 try {
                                     addAnnotation(jcas, typeName, attributes);
                                     attributes.clear();

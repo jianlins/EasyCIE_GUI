@@ -56,6 +56,8 @@ public class EhostXMLParser {
                             idAttr = startElement.getAttributeByName(new QName("id"));
                             if (idAttr != null) {
                                 typeName = idAttr.getValue();
+                                if (typeName.indexOf(" ") != -1)
+                                    typeName = typeName.replaceAll(" +", "_");
                                 if (!types.containsKey(typeName)) {
                                     types.put(typeName, (HashSet<String>) attributes.clone());
                                 }
@@ -74,10 +76,11 @@ public class EhostXMLParser {
         LinkedHashMap<String, HashSet<String>> types = new LinkedHashMap<>();
         getTypesFromSchema(types, xmlContent);
         for (Map.Entry<String, HashSet<String>> entry : types.entrySet()) {
-            if (entry.getKey().toLowerCase().endsWith("_doc")) {
-                typeDefinitions.put(entry.getKey(), new TypeDefinition(entry.getKey(), Doc_Base.class.getCanonicalName(), entry.getValue()));
+            String typeName = entry.getKey().replaceAll(" +", "_");
+            if (typeName.toLowerCase().endsWith("_doc")) {
+                typeDefinitions.put(typeName, new TypeDefinition(typeName, Doc_Base.class.getCanonicalName(), entry.getValue()));
             } else
-                typeDefinitions.put(entry.getKey(), new TypeDefinition(entry.getKey(), Concept.class.getCanonicalName(), entry.getValue()));
+                typeDefinitions.put(typeName, new TypeDefinition(typeName, Concept.class.getCanonicalName(), entry.getValue()));
         }
     }
 
