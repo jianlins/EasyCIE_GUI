@@ -72,7 +72,9 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
                     pre = "..." + sentence.substring(preCut + 3, begin);
                 } else
                     pre = sentence.substring(preCut, begin);
-
+                if(end>sentenceLength){
+                    end=sentenceLength;
+                }
                 marker = sentence.substring(begin, end);
                 if (postCut > 3 + end && postCut < sentenceLength)
                     post = sentence.substring(end, postCut - 3) + "...";
