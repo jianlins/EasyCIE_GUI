@@ -51,9 +51,6 @@ public class CellFactories {
                         String html = cell.generateHTML();
                         TasksOverviewController.currentTasksOverviewController.updateHTMLEditor(html, item);
 
-//                            if (item instanceof RecordRow)
-//                                updateHTMLEditor((RecordRow) item);
-                        // do something with id...
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
                         TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;

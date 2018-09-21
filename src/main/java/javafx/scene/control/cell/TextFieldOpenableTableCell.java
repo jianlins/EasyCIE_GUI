@@ -5,12 +5,14 @@ import edu.utah.bmi.simple.gui.entry.TaskFX;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Cell;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -26,7 +28,6 @@ public class TextFieldOpenableTableCell<S, T> extends TableCell<S, T> {
     private TaskFX currentTask;
     private Object[] item;
     private Setting setting;
-
 
 
     public static <S> Callback<TableColumn<S, String>, TableCell<S, String>> forTableColumn() {
@@ -84,6 +85,13 @@ public class TextFieldOpenableTableCell<S, T> extends TableCell<S, T> {
         setConverter(converter);
     }
 
+    public void startClear() {
+        super.startEdit();
+        if (textField == null)
+            textField = createTextField(this, getConverter());
+        startEdit(this, getConverter(), null, null, textField);
+    }
+
     /***************************************************************************
      *                                                                         *
      * Properties                                                              *
@@ -115,6 +123,7 @@ public class TextFieldOpenableTableCell<S, T> extends TableCell<S, T> {
      * Public API                                                              *
      *                                                                         *
      **************************************************************************/
+
 
     /**
      * {@inheritDoc}

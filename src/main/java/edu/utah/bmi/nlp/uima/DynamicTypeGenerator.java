@@ -238,8 +238,8 @@ public class DynamicTypeGenerator {
                         superTypefeatureNamesCache.get(superTypeName).add(featureName);
                     }
                 }
-            }else {
-                System.out.println(superTypeName);
+            } else {
+                logger.warning(superTypeName + " has not been initiated or loaded into memory.");
             }
         }
         for (String featureName : featureNames) {

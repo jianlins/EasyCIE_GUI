@@ -159,9 +159,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param annotator             annotator name
      * @param externalRuleConfigMap external configuration values
      * @param options               0~3 parameters:
-     *                      1. The location of auto-gen type descriptor
-     *                      2. The location of compiled classes for auto-gen type systems
-     *                      3. The location of class source files for auto-gen type systems
+     *                              1. The location of auto-gen type descriptor
+     *                              2. The location of compiled classes for auto-gen type systems
+     *                              3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
     public static AdaptableCPEDescriptorRunner getInstance(String cpeDescriptor, String annotator, LinkedHashMap<String, String> externalRuleConfigMap, String... options) {
@@ -183,9 +183,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param logger            logger to track the pipeline running log (can be null)
      * @param externalConfigMap external configurations
      * @param options           0~3 parameters:
-     *                      1. The location of auto-gen type descriptor
-     *                      2. The location of compiled classes for auto-gen type systems
-     *                      3. The location of class source files for auto-gen type systems
+     *                          1. The location of auto-gen type descriptor
+     *                          2. The location of compiled classes for auto-gen type systems
+     *                          3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
     public static AdaptableCPEDescriptorRunner getInstance(String cpeDescriptor, String annotator,
@@ -236,9 +236,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param logger            logger to track the pipeline running log (can be null)
      * @param externalConfigMap external configurations (AE name -: (  configuration name-: value))
      * @param options           0~3 parameters:
-     *                      1. The location of auto-gen type descriptor
-     *                      2. The location of compiled classes for auto-gen type systems
-     *                      3. The location of class source files for auto-gen type systems
+     *                          1. The location of auto-gen type descriptor
+     *                          2. The location of compiled classes for auto-gen type systems
+     *                          3. The location of class source files for auto-gen type systems
      */
     public AdaptableCPEDescriptorRunner(String cpeDescriptor, String annotator, UIMALogger logger,
                                         LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap,
@@ -601,9 +601,8 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         int numRemoved = 0;
         for (int i = 0; i < cpeCasProcessorsArray.length; i++) {
             CpeCasProcessor cp = cpeCasProcessorsArray[i];
-
-
             String processorName = cp.getName();
+            classLogger.finest("Update configurations for processor: " + processorName);
             File descFile = new File(rootFolder + File.separator + cp.getCpeComponentDescriptor().getImport().getLocation());
             AnalysisEngineDescription aed = UIMAFramework.getXMLParser().parseAnalysisEngineDescription(new XMLInputSource(descFile));
             ConfigurationParameterDeclarations aeparas = aed.getMetaData().getConfigurationParameterDeclarations();
@@ -628,6 +627,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
             Object aeVersionValue = aed.getMetaData().getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_VERSION);
 
             if (RuleBasedAEInf.class.isAssignableFrom(aeClass)) {
+                classLogger.finest("Read the rules for rule processor: " + processorName);
                 ruleBasedAE = true;
                 if (externalConfigMap.containsKey(processorName)
                         && externalConfigMap.get(processorName).containsKey(DeterminantValueSet.PARAM_RULE_STR)
@@ -680,12 +680,13 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
             }
             addAeTypes(aed, typeSystems);
             if (ruleBasedAE) {
-
                 CasProcessorConfigurationParameterSettings settings = cp.getConfigurationParameterSettings();
                 if (settings.getParameterValue(DeterminantValueSet.PARAM_RULE_STR) == null)
                     for (NameValuePair namevalue : settings.getParameterSettings()) {
-                        if (namevalue.getName().equals(DeterminantValueSet.PARAM_RULE_STR))
+                        if (namevalue.getName().equals(DeterminantValueSet.PARAM_RULE_STR)) {
+                            classLogger.finest("Automatically generate types for rule processor: " + processorName);
                             addAutoGenTypesForAE((Class<? extends RuleBasedAEInf>) aeClass, namevalue.getValue().toString());
+                        }
                     }
                 else
                     addAutoGenTypesForAE((Class<? extends RuleBasedAEInf>) aeClass, cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_RULE_STR).toString());
@@ -946,7 +947,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     }
 
     public void reInitTypeSystem(String customTypeDescXml, String srcPath) {
-        if (customTypeDescXmlDir==null)
+        if (customTypeDescXmlDir == null)
             customTypeDescXmlDir = new File("target/generated-test-sources/uima-descripters");
         if (!customTypeDescXmlDir.exists()) {
             try {

@@ -332,7 +332,15 @@ public class TasksOverviewController {
 
 
         Callback<TableColumn<Map.Entry<String, Setting>, Object>, TableCell<Map.Entry<String, Setting>, Object>> openClickableCellFactory =
-                p -> new TextFieldOpenableTableCell(new SettingValueConverter());
+                p -> {
+                    TextFieldOpenableTableCell cell = new TextFieldOpenableTableCell(new SettingValueConverter());
+                    cell.setOnMouseClicked(ke -> {
+                        if (ke.getButton().equals(MouseButton.SECONDARY))
+                            cell.startClear();
+
+                    });
+                    return cell;
+                };
 
 
         settingValueColumn.setCellFactory(openClickableCellFactory);
@@ -380,8 +388,7 @@ public class TasksOverviewController {
             } else {
                 newValue = "";
             }
-            Map.Entry<String, Setting> entry = event.getRowValue();
-            Setting setting = entry.getValue();
+            Setting setting = (Setting) ((Object[]) value)[1];
             String openApp = setting.getOpenClick();
             currentTask.setValue(setting.getSettingName(), newValue, setting.getSettingDesc(), setting.getDoubleClick(), openApp);
             Main.valueChanges.put("//" + currentTask.getTaskName() + "/" + setting.getSettingName(), newValue);
@@ -897,7 +904,7 @@ public class TasksOverviewController {
                     }
                 }
             } else {
-                    if (buttons.length > 0) {
+                if (buttons.length > 0) {
                     try {
                         taskConstructor = c.getConstructor(TasksFX.class, Button.class);
                         thisTask = taskConstructor.newInstance(mainApp.tasks, buttons[0]);
