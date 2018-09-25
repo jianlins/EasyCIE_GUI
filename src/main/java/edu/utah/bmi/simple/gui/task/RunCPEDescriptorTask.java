@@ -97,7 +97,7 @@ public class RunCPEDescriptorTask extends GUITask {
         String pipelineName = new File(cpeDescriptor).getName();
         pipelineName = pipelineName.substring(0, pipelineName.length() - 4);
         runner = AdaptableCPEDescriptorRunner.getInstance(cpeDescriptor, annotator, new NLPDBLogger(writerDBConfigFileName, annotator),
-                componentsSettings, "classes", "desc/type/" + pipelineName + "_" + annotator + "_Type.xml");
+                componentsSettings, "desc/type/" + pipelineName + "_" + annotator + "_Type.xml", "classes");
         ((NLPDBLogger) runner.getLogger()).setReportable(report);
         ((NLPDBLogger) runner.getLogger()).setTask(this);
         updateReaderConfigurations(runner);
@@ -125,14 +125,14 @@ public class RunCPEDescriptorTask extends GUITask {
 //            }
 //        } else {
 //        changed to the compiled processors will be handled in cached CPEFactory
-            for (int writerId : runner.getWriterIds().values()) {
-                runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, writerDBConfigFileName);
-                runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
-                runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_ANNOTATOR, annotator);
-                runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable);
-                runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable);
-                runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable);
-            }
+        for (int writerId : runner.getWriterIds().values()) {
+            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, writerDBConfigFileName);
+            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
+            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_ANNOTATOR, annotator);
+            runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, snippetResultTable);
+            runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, docResultTable);
+            runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, bunchResultTable);
+        }
 //        }
     }
 

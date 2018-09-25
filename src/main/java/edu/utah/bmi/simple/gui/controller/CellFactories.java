@@ -62,8 +62,8 @@ public class CellFactories {
                             if (cell.getItem() instanceof RecordRow) {
                                 RecordRow recordRow = (RecordRow) cell.getItem();
                                 String text = "";
-                                if (recordRow.getValueByColumnName("TEXT") != null) {
-                                    text = recordRow.getStrByColumnName("TEXT");
+                                if (recordRow.getValueByColumnName("SNIPPET") != null) {
+                                    text = recordRow.getStrByColumnName("SNIPPET");
                                 }
                                 final String docText = text;
                                 new Thread(() -> process(recordRow, docText)).start();

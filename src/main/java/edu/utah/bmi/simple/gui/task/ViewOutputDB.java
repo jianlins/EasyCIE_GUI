@@ -194,7 +194,8 @@ public class ViewOutputDB extends GUITask {
                     sourceQuery = modifyQuery(sourceQuery, otherConditions);
                 }
                 dao.close();
-                res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, outputDB, ColorAnnotationCell.colorOutput, TasksOverviewController.AnnoView);
+                res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, outputDB,
+                        ColorAnnotationCell.colorOutput, TasksOverviewController.AnnoView);
 
                 if (res)
                     updateMessage("data loaded");

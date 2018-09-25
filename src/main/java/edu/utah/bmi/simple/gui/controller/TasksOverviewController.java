@@ -648,7 +648,8 @@ public class TasksOverviewController {
                         col.setCellFactory(colorCellFactory);
                         col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>) param -> {
                             Object record = param.getValue().get(j);
-                            if (record != null && record instanceof RecordRow && !((RecordRow) record).getStrByColumnName("SNIPPET").equals("") && !((RecordRow) record).getStrByColumnName("SNIPPET").equals("null"))
+                            if (record != null && record instanceof RecordRow && !((RecordRow) record).getStrByColumnName("SNIPPET").equals("")
+                                    && !((RecordRow) record).getStrByColumnName("SNIPPET").equals("null"))
                                 return new SimpleObjectProperty<>(record);
                             else
                                 return new SimpleObjectProperty<>("");
