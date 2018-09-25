@@ -68,7 +68,7 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
                 int postCut = cutTail(sentence, begin, end);
                 int preCut = cutHeader(postCut, begin, end);
                 if (preCut > 3 && preCut+3 < begin) {
-                    System.out.println(preCut+"\t"+begin+"\t"+sentence.length());
+//                    System.out.println(preCut+"\t"+begin+"\t"+sentence.length());
                     pre = "..." + sentence.substring(preCut + 3, begin);
                 } else
                     pre = sentence.substring(preCut, begin);
