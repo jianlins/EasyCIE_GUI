@@ -67,13 +67,13 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
                 hbox.setPrefWidth(snippetLength + 20);
                 int postCut = cutTail(sentence, begin, end);
                 int preCut = cutHeader(postCut, begin, end);
-                if (preCut > 3 && preCut+3 < begin) {
+                if (preCut > 3 && preCut + 3 < begin) {
 //                    System.out.println(preCut+"\t"+begin+"\t"+sentence.length());
                     pre = "..." + sentence.substring(preCut + 3, begin);
                 } else
                     pre = sentence.substring(preCut, begin);
-                if(end>sentenceLength){
-                    end=sentenceLength;
+                if (end > sentenceLength) {
+                    end = sentenceLength;
                 }
                 marker = sentence.substring(begin, end);
                 if (postCut > 3 + end && postCut < sentenceLength)
@@ -181,7 +181,7 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         if (value instanceof RecordRow) {
             RecordRow recordRow = (RecordRow) value;
             if (recordRow.getValueByColumnName("BEGIN") == null) {
-                if(recordRow.getValueByColumnName("SNIPPET") == null)
+                if (recordRow.getValueByColumnName("SNIPPET") == null)
                     html = recordRow.getStrByColumnName("TEXT");
                 else
                     html = recordRow.getStrByColumnName("SNIPPET");
@@ -189,8 +189,8 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
                 html = recordRow.getStrByColumnName("SNIPPET");
                 String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
                 html = ColorAnnotationCell.generateHTML(html,
-                        (int) recordRow.getValueByColumnName("BEGIN"),
-                        (int) recordRow.getValueByColumnName("END"),
+                        getIntValue(recordRow.getValueByColumnName("BEGIN")),
+                        getIntValue(recordRow.getValueByColumnName("END")),
                         color);
             }
             html = html.replaceAll("\\n", "<br>");
@@ -202,5 +202,11 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
 
     }
 
-
+    public static int getIntValue(Object value) {
+        if (value instanceof Long) {
+            return ((Long) value).intValue();
+        } else {
+            return (int) value;
+        }
+    }
 }
