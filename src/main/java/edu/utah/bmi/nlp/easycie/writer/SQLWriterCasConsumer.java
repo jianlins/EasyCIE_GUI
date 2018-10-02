@@ -71,8 +71,8 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
         this.sqlFile = new File(readConfigureString(cont, PARAM_DB_CONFIG_FILE, null));
         this.snippetTableName = readConfigureString(cont, PARAM_SNIPPET_TABLENAME, "RESULT_SNIPPET");
         this.docTableName = readConfigureString(cont, PARAM_DOC_TABLENAME, "RESULT_DOC");
-
-        overwriteTable = (Boolean) readConfigureObject(cont, PARAM_OVERWRITETABLE, false);
+        Object value = readConfigureObject(cont, PARAM_OVERWRITETABLE, false);
+        overwriteTable = (Boolean) value ? value instanceof Boolean : value.toString().toLowerCase().startsWith("t");
         useAnnotationsAnnotator = (Boolean) readConfigureObject(cont, PARAM_USE_ANNOTATIONS_ANNOTATOR, false);
         batchSize = (Integer) readConfigureObject(cont, PARAM_BATCHSIZE, 15);
         minTextLength = (Integer) readConfigureObject(cont, PARAM_MIN_LENGTH, 0);
@@ -288,10 +288,10 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
                     snippetEnd = sentenceList.get(sentenceId + 1).getEnd();
                 else
                     snippetEnd = thisAnnotation.getEnd();
-                record.addCell("SNIPPET", docText.substring(snippetBegin,snippetEnd));
+                record.addCell("SNIPPET", docText.substring(snippetBegin, snippetEnd));
                 record.addCell("SNIPPET_BEGIN", snippetBegin);
                 record.addCell("SNIPPET_END", snippetEnd);
-                record.addCell("BEGIN", thisAnnotation.getBegin()-snippetBegin);
+                record.addCell("BEGIN", thisAnnotation.getBegin() - snippetBegin);
                 record.addCell("END", thisAnnotation.getEnd() - snippetBegin);
             } else {
                 record.addCell("SNIPPET", thisAnnotation.getCoveredText());
