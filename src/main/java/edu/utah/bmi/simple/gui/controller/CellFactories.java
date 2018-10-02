@@ -62,11 +62,8 @@ public class CellFactories {
                             if (cell.getItem() instanceof RecordRow) {
                                 RecordRow recordRow = (RecordRow) cell.getItem();
                                 String text = "";
-                                if (recordRow.getValueByColumnName("SNIPPET") != null) {
-                                    text = recordRow.getStrByColumnName("SNIPPET");
-                                }
-                                final String docText = text;
-                                new Thread(() -> process(recordRow, docText)).start();
+                                recordRow.addCell("TEXT", recordRow.getStrByColumnName("SNIPPET"));
+                                new Thread(() -> process(recordRow)).start();
                             }
                         }
 
@@ -118,8 +115,8 @@ public class CellFactories {
                                 } else {
                                     text = recordRow.getStrByColumnName("DOC_TEXT");
                                 }
-                                final String docText = text;
-                                process(recordRow, docText);
+                                recordRow.addCell("TEXT", text);
+                                process(recordRow);
 //                                new Thread(() -> process(recordRow, docText)).start();
 //                            new Thread(() -> fastDebugPipe.run()).start();
                             }
@@ -215,14 +212,11 @@ public class CellFactories {
         return clsName;
     }
 
-    public static void process(RecordRow recordRow, String doctext) {
+    public static void process(RecordRow recordRow) {
         String clsName = "";
         clsName = initDBdebugger();
         if (debugRunner != null) {
-            if (recordRow.getValueByColumnName("DOC_TEXT") == null) {
-                recordRow.addCell("DOC_TEXT", doctext);
-            }
-            debugRunner.process(recordRow, "DOC_TEXT", "FEATURES", "COMMENTS", "ANNOTATOR", "TEXT", "DOC_TEXT",
+            debugRunner.process(recordRow, "TEXT", "FEATURES", "COMMENTS", "ANNOTATOR", "DOC_TEXT",
                     "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
             debugRunner.showResults();
         } else {
