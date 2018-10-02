@@ -48,7 +48,7 @@
             <nameValuePair>
                 <name>AnnotatePosition</name>
                 <value>
-                    <string>conf/docInference_rule.csv</string>
+                    <string>FIRSTWORD</string>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
