@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -72,7 +73,10 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
         this.snippetTableName = readConfigureString(cont, PARAM_SNIPPET_TABLENAME, "RESULT_SNIPPET");
         this.docTableName = readConfigureString(cont, PARAM_DOC_TABLENAME, "RESULT_DOC");
         Object value = readConfigureObject(cont, PARAM_OVERWRITETABLE, false);
-        overwriteTable = (Boolean) value ? value instanceof Boolean : value.toString().toLowerCase().startsWith("t");
+        if (value instanceof Boolean)
+            overwriteTable = ((Boolean) value);
+        else
+            overwriteTable = value.toString().toLowerCase().startsWith("t");
         useAnnotationsAnnotator = (Boolean) readConfigureObject(cont, PARAM_USE_ANNOTATIONS_ANNOTATOR, false);
         batchSize = (Integer) readConfigureObject(cont, PARAM_BATCHSIZE, 15);
         minTextLength = (Integer) readConfigureObject(cont, PARAM_MIN_LENGTH, 0);
@@ -301,7 +305,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
                 record.addCell("END", thisAnnotation.getEnd() - thisAnnotation.getBegin());
             }
             try {
-                System.out.println(dao.con.isClosed());
+                classLogger.finest(dao.con.isClosed() + "");
             } catch (SQLException e) {
                 e.printStackTrace();
             }

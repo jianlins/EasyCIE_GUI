@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import org.apache.log4j.BasicConfigurator;
 
 
 /**
@@ -55,6 +56,7 @@ public class Main extends Application {
     private static String conf = "conf/config.xml";
 
     public static void main(String[] args) {
+        BasicConfigurator.configure();
         if (args.length > 0) {
             logFile = new File(args[0]);
         }

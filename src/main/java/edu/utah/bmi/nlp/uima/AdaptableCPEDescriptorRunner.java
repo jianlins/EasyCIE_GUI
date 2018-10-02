@@ -486,61 +486,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
             String configName = externalConfigs.getKey();
             String valueStr = externalConfigs.getValue();
             String valueType = paraTypes.get(configName);
-            switch (valueType) {
-                case "Integer":
-                    try {
-                        int value = Integer.parseInt(valueStr);
-                        collReader.getConfigurationParameterSettings().setParameterValue(configName, value);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "Float":
-                    try {
-                        float value = Float.parseFloat(valueStr);
-                        collReader.getConfigurationParameterSettings().setParameterValue(configName, value);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "Boolean":
-                    try {
-                        boolean value = Boolean.parseBoolean(valueStr);
-                        collReader.getConfigurationParameterSettings().setParameterValue(configName, value);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "Double":
-                    try {
-                        double value = Double.parseDouble(valueStr);
-                        collReader.getConfigurationParameterSettings().setParameterValue(configName, value);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "Long":
-                    try {
-                        long value = Long.parseLong(valueStr);
-                        collReader.getConfigurationParameterSettings().setParameterValue(configName, value);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "Short":
-                    try {
-                        short value = Short.parseShort(valueStr);
-                        collReader.getConfigurationParameterSettings().setParameterValue(configName, value);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "String":
-                    collReader.getConfigurationParameterSettings().setParameterValue(configName, valueStr);
-                    break;
-
-            }
+            collReader.getConfigurationParameterSettings().setParameterValue(configName, convertValueType(valueStr, valueType));
         }
         try {
             collReader.setConfigurationParameterSettings(collReader.getConfigurationParameterSettings());
@@ -793,69 +739,85 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 String valueStr = externalConfigs.getValue();
                 String valueType = aeparas.get(configName);
                 try {
-                    switch (valueType) {
-                        case "Integer":
-                            try {
-                                int value = Integer.parseInt(valueStr);
-                                cp.getConfigurationParameterSettings().setParameterValue(configName, value);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case "Float":
-                            try {
-                                float value = Float.parseFloat(valueStr);
-                                cp.getConfigurationParameterSettings().setParameterValue(configName, value);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case "Boolean":
-                            try {
-                                char ch = valueStr.toLowerCase().charAt(0);
-                                boolean value = ch == 't' || ch == '1';
-                                cp.getConfigurationParameterSettings().setParameterValue(configName, value);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case "Double":
-                            try {
-                                double value = Double.parseDouble(valueStr);
-                                cp.getConfigurationParameterSettings().setParameterValue(configName, value);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case "Long":
-                            try {
-                                long value = Long.parseLong(valueStr);
-                                cp.getConfigurationParameterSettings().setParameterValue(configName, value);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case "Short":
-                            try {
-                                short value = Short.parseShort(valueStr);
-                                cp.getConfigurationParameterSettings().setParameterValue(configName, value);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case "String":
-                            cp.getConfigurationParameterSettings().setParameterValue(configName, valueStr);
-                            break;
-
-                    }
+                    cp.getConfigurationParameterSettings().setParameterValue(configName, convertValueType(valueStr, valueType));
                 } catch (Exception e) {
                     classLogger.warning("Incorrect format of configuration value for AE: " + processorName
                             + " parameter: " + configName + " value: " + valueStr + ". Cannot be parsed to type: "
                             + valueType);
-
                 }
             }
         }
+    }
+
+    public static Object convertValueType(Object value, String valueType) {
+        switch (valueType) {
+            case "Integer":
+                try {
+                    if (value instanceof String) {
+                        String valueStr = (String) value;
+                        value = Integer.parseInt(valueStr);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "Float":
+                try {
+                    if (value instanceof String) {
+                        String valueStr = (String) value;
+                        value = Float.parseFloat(valueStr);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "Boolean":
+                try {
+                    if (value instanceof String) {
+                        String valueStr = (String) value;
+                        char ch = valueStr.toLowerCase().charAt(0);
+                        value = ch == 't' || ch == '1';
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "Double":
+                try {
+                    if (value instanceof String) {
+                        String valueStr = (String) value;
+                        value = Double.parseDouble(valueStr);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "Long":
+                try {
+                    if (value instanceof String) {
+                        String valueStr = (String) value;
+                        value = Long.parseLong(valueStr);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "Short":
+                try {
+                    if (value instanceof String) {
+                        String valueStr = (String) value;
+                        value = Short.parseShort(valueStr);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "String":
+                if (!(value instanceof String))
+                    value = value + "";
+                break;
+        }
+        return value;
     }
 
     private void addAeTypes(AnalysisEngineDescription aed, ArrayList<TypeSystemDescription> typeSystems) {
@@ -1033,10 +995,12 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 if (processor instanceof PrimitiveAnalysisEngine_impl) {
                     PrimitiveAnalysisEngine_impl ae = (PrimitiveAnalysisEngine_impl) processor;
                     UimaContext uimaContext = ae.getUimaContext();
+                    LinkedHashMap<String, String> configTypes = aeConfigTypeMap.get(processorName);
                     if (uimaContext instanceof ChildUimaContext_impl) {
                         ChildUimaContext_impl uimaContext_impl = (ChildUimaContext_impl) uimaContext;
                         for (Object configName : configurations.keySet()) {
                             Object value = configurations.get(configName);
+                            value = convertValueType(value, configTypes.get(configName));
                             uimaContext_impl.setSharedParam("/" + processorName + "/" + configName, value);
                             AnalysisComponent aeEngine = ae.getAnalysisComponent();
                             if (configName.equals(DeterminantValueSet.PARAM_RULE_STR) && RuleBasedAEInf.class.isAssignableFrom(aeEngine.getClass())) {
@@ -1083,6 +1047,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 CPMEngine cpeEngine = ((CollectionProcessingEngine_impl) mCPE).getCPM().getCpEngine();
                 CpeCasProcessor cpeProcessor = currentCpeDesc.getCpeCasProcessors().getCpeCasProcessor(cpeId);
                 String processorName = cpeProcessor.getName();
+                LinkedHashMap<String, String> configTypes = aeConfigTypeMap.get(processorName);
                 if (processor instanceof PrimitiveAnalysisEngine_impl) {
                     PrimitiveAnalysisEngine_impl ae = (PrimitiveAnalysisEngine_impl) processor;
                     UimaContext uimaContext = ae.getUimaContext();
@@ -1094,6 +1059,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                             classLogger.warning("parameter \"" + obj + "\" to set for cpeprocess " + cpeId + " is not a string");
                         String parameter = (String) configs[i];
                         Object value = configs[i + 1];
+                        value = convertValueType(value, configTypes.get(parameter));
                         if (uimaContext instanceof ChildUimaContext_impl) {
                             ChildUimaContext_impl uimaContext_impl = (ChildUimaContext_impl) uimaContext;
                             uimaContext_impl.setSharedParam("/" + processorName + "/" + parameter, value);
