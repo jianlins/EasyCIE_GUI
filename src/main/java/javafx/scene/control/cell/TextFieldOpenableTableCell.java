@@ -4,15 +4,13 @@ import edu.utah.bmi.simple.gui.entry.Setting;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
+import javafx.concurrents.Task;
 import javafx.scene.Node;
 import javafx.scene.control.Cell;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -140,11 +138,11 @@ public class TextFieldOpenableTableCell<S, T> extends TableCell<S, T> {
 
         if (openApp != null && openApp.length() > 0) {
             File file = new File(setting.getSettingValue());
-            javafx.concurrent.Task thisTask = null;
-            Class<? extends javafx.concurrent.Task> c = null;
+            Task thisTask = null;
+            Class<? extends Task> c = null;
             try {
 //                System.out.println(openApp);
-                c = Class.forName(openApp).asSubclass(javafx.concurrent.Task.class);
+                c = Class.forName(openApp).asSubclass(Task.class);
                 Constructor<? extends Task> taskConstructor;
                 if (file.exists()) {
                     taskConstructor = c.getConstructor(TaskFX.class, Setting.class);

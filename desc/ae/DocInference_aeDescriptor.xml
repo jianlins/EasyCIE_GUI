@@ -31,10 +31,22 @@
                 <multiValued>false</multiValued>
                 <mandatory>true</mandatory>
             </configurationParameter>
+            <configurationParameter>
+                <name>AnnotatePosition</name>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
+            </configurationParameter>
         </configurationParameters>
         <configurationParameterSettings>
             <nameValuePair>
                 <name>RuleFileOrStr</name>
+                <value>
+                    <string>conf/docInference_rule.csv</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>AnnotatePosition</name>
                 <value>
                     <string>conf/docInference_rule.csv</string>
                 </value>

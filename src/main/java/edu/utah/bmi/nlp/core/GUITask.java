@@ -17,23 +17,34 @@
 package edu.utah.bmi.nlp.core;
 
 import javafx.application.Platform;
-import javafx.scene.Node;
+import javafx.concurrents.Task;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 /**
- * Extend javafx.concurrent.Task  to open updateMessage and updateProgress methods.
+ * Extend Task  to open updateMessage and updateProgress methods.
  *
  * @author Jianlin Shi
  * Created on 2/24/17.
  */
-public abstract class GUITask extends javafx.concurrent.Task {
+public abstract class GUITask<V> extends Task<V> {
+
 
     public boolean guiEnabled = true;
     public boolean print = false;
+
+    public GUITask() {
+        this(new TaskCallable<V>());
+    }
+
+    public GUITask(TaskCallable<V> callableAdapter) {
+        super(callableAdapter);
+        callableAdapter.task = this;
+    }
 
     public void updateGUIMessage(String msg) {
         if (guiEnabled)
@@ -110,4 +121,5 @@ public abstract class GUITask extends javafx.concurrent.Task {
             e.printStackTrace();
         }
     }
+
 }

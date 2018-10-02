@@ -5,6 +5,7 @@ import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.entry.Setting;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import javafx.application.Platform;
+import javafx.concurrents.Task;
 import javafx.stage.DirectoryChooser;
 
 import java.io.File;
@@ -14,7 +15,7 @@ import java.io.File;
  *
  * @author Jianlin Shi on 4/10/17.
  */
-public class ConfigDirectoryChooser extends javafx.concurrent.Task {
+public class ConfigDirectoryChooser extends Task {
     private TaskFX currentTask;
     private Setting setting;
 

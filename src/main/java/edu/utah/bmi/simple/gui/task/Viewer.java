@@ -1,9 +1,9 @@
 package edu.utah.bmi.simple.gui.task;
 
-import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.uima.MyAnnotationViewerPlain;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
+import javafx.concurrents.Task;
 
 import javax.swing.*;
 import java.io.File;
@@ -14,7 +14,7 @@ import java.util.Arrays;
 /**
  * Created by Jianlin Shi on 9/25/16.
  */
-public class Viewer extends javafx.concurrent.Task {
+public class Viewer extends Task {
     protected String xmiDir = null;
     protected ArrayList<String> types = new ArrayList();
     protected String annotator;

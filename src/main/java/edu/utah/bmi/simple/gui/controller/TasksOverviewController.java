@@ -9,14 +9,13 @@ import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.entry.*;
-import edu.utah.bmi.simple.gui.task.FastDebugPipe;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
+import javafx.concurrents.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -44,7 +43,6 @@ import java.io.File;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -351,12 +349,12 @@ public class TasksOverviewController {
 //            String openApp = setting.getOpenClick();
 //            if (openApp.length() > 0) {
 //                File file = new File(setting.getSettingValue());
-//                javafx.concurrent.Task thisTask = null;
-//                Class<? extends javafx.concurrent.Task> c = null;
+//                Task thisTask = null;
+//                Class<? extends Task> c = null;
 //                try {
 //                    System.out.println(openApp);
-//                    c = Class.forName(openApp).asSubclass(javafx.concurrent.Task.class);
-//                    Constructor<? extends javafx.concurrent.Task> taskConstructor;
+//                    c = Class.forName(openApp).asSubclass(Task.class);
+//                    Constructor<? extends Task> taskConstructor;
 //                    if (file.exists()) {
 //                        taskConstructor = c.getConstructor(TaskFX.class, Setting.class);
 //                        thisTask = taskConstructor.newInstance(currentTask, setting);
@@ -860,7 +858,7 @@ public class TasksOverviewController {
     }
 
     private Thread executeTaskClass(String taskClassName, Button... buttons) {
-        javafx.concurrent.Task thisTask = getTaskFromString(taskClassName, buttons);
+        Task thisTask = getTaskFromString(taskClassName, buttons);
         if (thisTask instanceof GUITask)
             currentGUITask = (GUITask) thisTask;
         mainApp.bottomViewController.progressBar.progressProperty().bind(thisTask.progressProperty());
@@ -873,7 +871,7 @@ public class TasksOverviewController {
         return thisThread;
     }
 
-    public javafx.concurrent.Task getTaskFromString(String taskString, Button... buttons) {
+    public Task getTaskFromString(String taskString, Button... buttons) {
         String para = "", taskClassName = "";
         int splitter = taskString.indexOf(" ");
         if (splitter != -1) {
@@ -882,10 +880,10 @@ public class TasksOverviewController {
         } else {
             taskClassName = taskString;
         }
-        javafx.concurrent.Task thisTask = null;
-        Class<? extends javafx.concurrent.Task> c = null;
+        Task thisTask = null;
+        Class<? extends Task> c = null;
         try {
-            c = Class.forName(taskClassName).asSubclass(javafx.concurrent.Task.class);
+            c = Class.forName(taskClassName).asSubclass(Task.class);
             Constructor<? extends Task> taskConstructor = null;
             if (para.length() > 0) {
                 if (buttons.length > 0) {

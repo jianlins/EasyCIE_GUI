@@ -3,7 +3,7 @@ package edu.utah.bmi.simple.gui.controller;
 import edu.utah.bmi.simple.gui.entry.Setting;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
+import javafx.concurrents.Task;
 import javafx.scene.control.TableCell;
 
 import java.lang.reflect.Constructor;
@@ -76,12 +76,12 @@ public class DoubleClickableCell extends TableCell<ObservableList, Object> {
         String taskClassName = setting.getDoubleClick().trim();
         String para = setting.getSettingValue();
         String settingName = setting.getSettingName();
-        javafx.concurrent.Task thisTask = null;
-        Class<? extends javafx.concurrent.Task> c = null;
+        Task thisTask = null;
+        Class<? extends Task> c = null;
         try {
             System.out.println(taskClassName);
-            c = Class.forName(taskClassName).asSubclass(javafx.concurrent.Task.class);
-            Constructor<? extends javafx.concurrent.Task> taskConstructor;
+            c = Class.forName(taskClassName).asSubclass(Task.class);
+            Constructor<? extends Task> taskConstructor;
             if (para.length() > 0 || taskClassName.endsWith("Chooser")) {
                 taskConstructor = c.getConstructor(TaskFX.class, Setting.class);
                 thisTask = taskConstructor.newInstance(currentTask, setting);

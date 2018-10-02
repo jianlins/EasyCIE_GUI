@@ -2,11 +2,8 @@ package edu.utah.bmi.simple.gui.task;
 
 
 import edu.utah.bmi.nlp.core.IOUtil;
-import edu.utah.bmi.nlp.fastcontext.uima.FastContext_General_AE;
-import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
-import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
-import javafx.application.Platform;
+import javafx.concurrents.Task;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 
 import java.io.BufferedReader;
@@ -19,7 +16,7 @@ import java.util.logging.Logger;
  * @author Jianlin Shi
  * Created on 2/13/17.
  */
-public class ExecuteOsCommand extends javafx.concurrent.Task {
+public class ExecuteOsCommand extends Task {
     protected String command;
     public static Logger logger = IOUtil.getLogger(ExecuteOsCommand.class);
 

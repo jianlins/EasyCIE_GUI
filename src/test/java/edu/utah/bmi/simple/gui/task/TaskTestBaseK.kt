@@ -41,7 +41,7 @@ class TaskTestBaseK {
     }
 
 
-    private fun testTask(task: GUITask, seconds: Int = 5000) {
+    private fun testTask(task: GUITask<Object>, seconds: Int = 5000) {
         val latch = CountDownLatch(1)
         val r = {
             task.guiCall()
@@ -57,72 +57,72 @@ class TaskTestBaseK {
     }
 
 
-    @Test
-    fun test1Import() {
-        val runImport = Import(tasks, "txt")
-        testTask(runImport)
-
-    }
-
-    @Test
-    fun test2Runv1() {
-        tasks!!.getTask(ConfigKeys.maintask).setValue(ConfigKeys.annotator, "v1")
-        val task = RunEasyCIE(tasks)
-        testTask(task)
-    }
-
-    @Test
-    fun test2Runv2() {
-        tasks!!.getTask(ConfigKeys.maintask).setValue(ConfigKeys.annotator, "v2")
-        val task = RunEasyCIE(tasks)
-        testTask(task)
-    }
-
-    @Test
-    fun test3CompareTask() {
-        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.targetAnnotator, "v2")
-        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.targetRunId, "")
-        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.referenceAnnotator, "v1")
-        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.referenceRunId, "")
-        val task = CompareTask(tasks)
-        task.print = true
-        testTask(task)
-    }
-
-    @Test
-    fun test4Debug() {
-        val task = RunEasyCIEDebugger(tasks)
-
-        task.debugRunner.addReader("Resp: sats 94-99 3L NC, lungs coarse upper, diminished lower. strong non-productive cough, coughing reduced in frequency, prn robitussin w/ codeine prn, nebs via resp therapy. pt states no SOB.")
-        task.debugRunner.run()
-    }
-
-    @Test
-    fun test5ExportEhost() {
-        val task = RunEasyCIE(tasks, "ehost")
-        testTask(task)
-    }
-
-    @Test
-    fun test6ExportBrat() {
-        val task = RunEasyCIE(tasks, "brat")
-        testTask(task)
-    }
-
-    @Test
-    fun test6ExportXMI() {
-        val task = RunEasyCIE(tasks, "xmi")
-        testTask(task)
-    }
-
-    @Test
-    fun test6ExportExcel() {
-        for ((i, color) in tasks!!.getTask("settings")!!.getValue("viewer/color_pool").split("|").withIndex()) {
-            StaticVariables.colorPool.put(i, color.trim({ it <= ' ' }))
-        }
-        val task = Export2Excel(tasks)
-        testTask(task)
-    }
+//    @Test
+//    fun test1Import() {
+//        val runImport = Import(tasks, "txt")
+//        testTask(runImport)
+//
+//    }
+//
+//    @Test
+//    fun test2Runv1() {
+//        tasks!!.getTask(ConfigKeys.maintask).setValue(ConfigKeys.annotator, "v1")
+//        val task = RunEasyCIE(tasks)
+//        testTask(task)
+//    }
+//
+//    @Test
+//    fun test2Runv2() {
+//        tasks!!.getTask(ConfigKeys.maintask).setValue(ConfigKeys.annotator, "v2")
+//        val task = RunEasyCIE(tasks)
+//        testTask(task)
+//    }
+//
+//    @Test
+//    fun test3CompareTask() {
+//        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.targetAnnotator, "v2")
+//        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.targetRunId, "")
+//        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.referenceAnnotator, "v1")
+//        tasks!!.getTask(ConfigKeys.comparetask).setValue(ConfigKeys.referenceRunId, "")
+//        val task = CompareTask(tasks)
+//        task.print = true
+//        testTask(task)
+//    }
+//
+//    @Test
+//    fun test4Debug() {
+//        val task = RunEasyCIEDebugger(tasks)
+//
+//        task.debugRunner.addReader("Resp: sats 94-99 3L NC, lungs coarse upper, diminished lower. strong non-productive cough, coughing reduced in frequency, prn robitussin w/ codeine prn, nebs via resp therapy. pt states no SOB.")
+//        task.debugRunner.run()
+//    }
+//
+//    @Test
+//    fun test5ExportEhost() {
+//        val task = RunEasyCIE(tasks, "ehost")
+//        testTask(task)
+//    }
+//
+//    @Test
+//    fun test6ExportBrat() {
+//        val task = RunEasyCIE(tasks, "brat")
+//        testTask(task)
+//    }
+//
+//    @Test
+//    fun test6ExportXMI() {
+//        val task = RunEasyCIE(tasks, "xmi")
+//        testTask(task)
+//    }
+//
+//    @Test
+//    fun test6ExportExcel() {
+//        for ((i, color) in tasks!!.getTask("settings")!!.getValue("viewer/color_pool").split("|").withIndex()) {
+//            StaticVariables.colorPool.put(i, color.trim({ it <= ' ' }))
+//        }
+//        val task = Export2Excel(tasks)
+//        testTask(task)
+//    }
 
 }
 
