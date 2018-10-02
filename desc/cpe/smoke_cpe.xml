@@ -28,7 +28,7 @@
         </collectionIterator>
     </collectionReader>
     <casProcessors casPoolSize="2" processingUnitThreadCount="1">
-    <casProcessor deployment="integrated" name="Section_Detector_R_AE">
+    <casProcessor deployment="integrated" name="Section_Detector">
         <descriptor>
             <import location="../ae/SectionDetectorR_aeDescriptor.xml"/>
         </descriptor>
@@ -48,7 +48,7 @@
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="RuSH_AE">
+    <casProcessor deployment="integrated" name="RuSH">
         <descriptor>
             <import location="../ae/RuSH_AE.xml"/>
         </descriptor>
@@ -68,7 +68,7 @@
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="FastNER_AE">
+    <casProcessor deployment="integrated" name="FastNER">
         <descriptor>
             <import location="../ae/FastNER_aeDescriptor.xml"/>
         </descriptor>
@@ -88,7 +88,7 @@
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="FastContext_AE">
+    <casProcessor deployment="integrated" name="FastContext">
         <descriptor>
             <import location="../ae/FastContext_aeDescriptor.xml"/>
         </descriptor>
@@ -108,7 +108,7 @@
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="TemporalContext_AE">
+    <casProcessor deployment="integrated" name="TemporalContext">
         <descriptor>
             <import location="../ae/TemporalContext_aeDescriptor.xml"/>
         </descriptor>
@@ -128,7 +128,7 @@
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="FeatureInference_AE">
+    <casProcessor deployment="integrated" name="FeatureInferencer">
         <descriptor>
             <import location="../ae/FeatureInference_aeDescriptor.xml"/>
         </descriptor>
@@ -148,7 +148,7 @@
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="SentenceInference_AE">
+    <casProcessor deployment="integrated" name="SentenceInferencer">
         <descriptor>
             <import location="../ae/SentenceInferencer_aeDescriptor.xml"/>
         </descriptor>

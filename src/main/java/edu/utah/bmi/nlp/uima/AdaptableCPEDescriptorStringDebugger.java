@@ -20,6 +20,7 @@ package edu.utah.bmi.nlp.uima;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
+import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
@@ -99,7 +100,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
 
     /**
      * @param cpeDescriptor location of cpe descripter xml file
-     * @param annotator annotator name
+     * @param annotator     annotator name
      * @param options       0~3 parameters:
      *                      1. The location of auto-gen type descriptor
      *                      2. The location of compiled classes for auto-gen type systems
@@ -115,11 +116,11 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
      * @param cpeDescriptor      location of cpe descripter xml file
      * @param annotator          annotator's name
      * @param externalSettingMap external configuration values
-     * @param logTypes type names to be logged for each AE
+     * @param logTypes           type names to be logged for each AE
      * @param options            0~3 parameters:
-     *                      1. The location of auto-gen type descriptor
-     *                      2. The location of compiled classes for auto-gen type systems
-     *                      3. The location of class source files for auto-gen type systems
+     *                           1. The location of auto-gen type descriptor
+     *                           2. The location of compiled classes for auto-gen type systems
+     *                           3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
     public static AdaptableCPEDescriptorStringDebugger getInstance(String cpeDescriptor, String annotator,
@@ -129,6 +130,13 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
         String cpeName = FilenameUtils.getBaseName(cpeDescriptor) + "_" + annotator;
         LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap = AdaptableCPEDescriptorRunner.parseExternalConfigMap(externalSettingMap);
         ArrayList<String> modifiedAes = AdaptableCPEDescriptorRunner.modifiedChecker.checkModifiedAEs(cpeDescriptor, externalConfigMap);
+//      make sure to avoid overwrite tables
+        for (String aeName : externalConfigMap.keySet()) {
+            String lowerName = aeName.toLowerCase();
+            if (lowerName.contains("reader") || lowerName.contains("writer")) {
+                externalConfigMap.get(aeName).put(SQLWriterCasConsumer.PARAM_OVERWRITETABLE, "false");
+            }
+        }
         ArrayList<String> modifiedLoggers = AdaptableCPEDescriptorRunner.modifiedChecker.checkModifiedLoggers(logTypes);
         AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance(cpeDescriptor, annotator, new ConsoleLogger(), modifiedAes,
                 externalConfigMap, options);
@@ -190,7 +198,8 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
 
     /**
      * Try to update the configuration after mCPE is compiled--handy for debugging--reduce recompile time
-     * @param  aes a list of AEs
+     *
+     * @param aes            a list of AEs
      * @param cpeName        processor name
      * @param configurations configurations
      */
@@ -319,7 +328,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
         AnnotationLogger.reset();
         jCas.reset();
 //        temp solution to replace char 160
-        inputStr=inputStr.replaceAll(" "," ");
+        inputStr = inputStr.replaceAll(" ", " ");
         jCas.setDocumentText(inputStr);
         RecordRow recordRow = new RecordRow();
         if (metaStr != null && metaStr.length > 0)

@@ -20,6 +20,7 @@ package edu.utah.bmi.nlp.uima;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.TypeDefinition;
+import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
 import edu.utah.bmi.simple.gui.entry.SettingAb;
@@ -903,6 +904,13 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         this.logger = logger;
         if (logger != null)
             runId = logger.getRunid() + "";
+        if (writerIds.size() > 0) {
+            if (mCPE != null && mCPE.getCasProcessors().length > 0) {
+                for (int writerId : writerIds.values()) {
+                    updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runId);
+                }
+            }
+        }
     }
 
 
