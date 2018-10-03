@@ -6,6 +6,7 @@ import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.easycie.reader.SQLTextReader;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.sql.ColumnInfo;
+import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
 import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorStringDebugger;
@@ -40,8 +41,7 @@ import static java.lang.Thread.sleep;
 public class RunCPEDescriptorDebugTask extends GUITask {
     public static Logger logger = Logger.getLogger(RunCPEDescriptorDebugTask.class.getCanonicalName());
     public static Button button;
-    protected String readerDBConfigFileName, writerDBConfigFileName, inputTableName, snippetResultTable, docResultTable, bunchResultTable,
-            ehostDir, bratDir, xmiDir, annotator, datasetId;
+    protected String inputTableName, snippetResultTable, docResultTable, bunchResultTable, annotator, datasetId;
     public boolean report = false;
     public AdaptableCPEDescriptorStringDebugger runner;
     protected LinkedHashMap<String, String> componentsSettings;

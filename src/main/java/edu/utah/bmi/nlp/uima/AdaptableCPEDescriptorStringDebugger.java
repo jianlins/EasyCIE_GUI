@@ -129,14 +129,15 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
         AdaptableCPEDescriptorStringDebugger debugger;
         String cpeName = FilenameUtils.getBaseName(cpeDescriptor) + "_" + annotator;
         LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap = AdaptableCPEDescriptorRunner.parseExternalConfigMap(externalSettingMap);
-        ArrayList<String> modifiedAes = AdaptableCPEDescriptorRunner.modifiedChecker.checkModifiedAEs(cpeDescriptor, externalConfigMap);
-//      make sure to avoid overwrite tables
+        //      make sure to avoid overwrite tables
         for (String aeName : externalConfigMap.keySet()) {
             String lowerName = aeName.toLowerCase();
             if (lowerName.contains("reader") || lowerName.contains("writer")) {
                 externalConfigMap.get(aeName).put(SQLWriterCasConsumer.PARAM_OVERWRITETABLE, "false");
             }
         }
+        ArrayList<String> modifiedAes = AdaptableCPEDescriptorRunner.modifiedChecker.checkModifiedAEs(cpeDescriptor, externalConfigMap);
+
         ArrayList<String> modifiedLoggers = AdaptableCPEDescriptorRunner.modifiedChecker.checkModifiedLoggers(logTypes);
         AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance(cpeDescriptor, annotator, new ConsoleLogger(), modifiedAes,
                 externalConfigMap, options);
@@ -406,6 +407,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
                 }
 
                 TasksOverviewController.currentTasksOverviewController.refreshDebugView();
+
                 guiTask.updateGUIMessage("Process complete.");
                 guiTask.updateGUIProgress(1, 1);
 
