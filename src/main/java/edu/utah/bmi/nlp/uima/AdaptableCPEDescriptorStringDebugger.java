@@ -21,6 +21,8 @@ import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
+import edu.utah.bmi.nlp.rush.core.RuSH;
+import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
@@ -298,6 +300,10 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
                     types = logTypes.get(aeName).trim();
                 } else {
                     logTypes.put(aeName, "");
+                }
+                if (types.indexOf("Stbegin") != -1 || types.indexOf("Stend") != -1) {
+                    RuSH_AE.logger.setLevel(Level.FINEST);
+                    RuSH.logger.setLevel(Level.FINEST);
                 }
                 classLogger.finest("Add logger for AE:\"" + cpeName + "\". Will log annotation types: " + types);
                 logAes.add(createAnalysisEngine(AnnotationLogger.class, new Object[]{

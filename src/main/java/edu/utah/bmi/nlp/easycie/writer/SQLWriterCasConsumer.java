@@ -4,6 +4,7 @@ import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.Interval1D;
 import edu.utah.bmi.nlp.core.IntervalST;
+import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Concept;
@@ -43,6 +44,8 @@ import java.util.logging.Logger;
  */
 public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
     public static Logger classLogger = IOUtil.getLogger(SQLWriterCasConsumer.class);
+    //    allow to save sentence boundaries
+    public static Logger rushaeLogger = IOUtil.getLogger(RuSH_AE.class);
     public static final String PARAM_DB_CONFIG_FILE = DeterminantValueSet.PARAM_DB_CONFIG_FILE;
     public static final String PARAM_SNIPPET_TABLENAME = "SnippetTableName";
     public static final String PARAM_DOC_TABLENAME = "DocTableName";

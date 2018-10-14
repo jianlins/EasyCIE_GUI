@@ -613,15 +613,6 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 //                        only update to current run_id when cpe didn't configure run_id to a real value.
                 if (cpeVersionValue == null || cpeVersionValue.equals("")) {
                     versionedCpProcessorId.add(i - numRemoved);
-//                    if (runId.equals("-1")) {
-//                        Object dbConfigFile = cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_DB_CONFIG_FILE);
-//                        if (annotator.length() == 0)
-//                            annotator = cp.getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_ANNOTATOR).toString();
-//                        if (this.logger==null && dbConfigFile != null && dbConfigFile instanceof String && dbConfigFile.toString().trim().length() > 0) {
-//                            setUIMALogger(new NLPDBLogger(dbConfigFile.toString(), annotator));
-//                        }
-//                    }
-
                 }
                 cp.getConfigurationParameterSettings().setParameterValue(DeterminantValueSet.PARAM_ANNOTATOR, annotator);
             }
