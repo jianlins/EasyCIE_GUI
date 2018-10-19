@@ -20,6 +20,7 @@ import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
 import edu.utah.bmi.nlp.uima.writer.EhostConfigurator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.examples.SourceDocumentInformation;
@@ -67,6 +68,9 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
      * directory into which the output files will be written.
      */
 
+    public static String PARAM_COLOR_POOL = "ColorPool";
+    public static String PARMA_RANDOM_COLOR = "RandomColor";
+
     private boolean keepSubDir = false;
 
     private File xmlOutputDir, txtOutputDir, configDir;
@@ -76,7 +80,9 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
     private int mDocNum, docCounter = 0, subCorpusCounter = 0;
 
 
-    private int elementId = 0;
+    private int elementId = 0, randomColor = 2;
+
+    private String colorPool = "";
 
     protected static HashMap<Class, LinkedHashSet<Method>> typeMethods = new HashMap<>();
 
@@ -86,7 +92,18 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
 
     public void initialize(UimaContext cont) {
         String includeTypes = baseInit(cont, "data/output/ehost", "uima");
-
+        Object value = cont.getConfigParameterValue(PARAM_COLOR_POOL);
+        if (value != null && value instanceof String && ((String) value).length() > 0)
+            colorPool = ((String) value).trim();
+        value = cont.getConfigParameterValue(PARMA_RANDOM_COLOR);
+        if (value != null)
+            if (value instanceof Integer)
+                randomColor = (int) value;
+            else if (value instanceof String) {
+                value = NumberUtils.createInteger((String) value);
+                if (value != null)
+                    randomColor = (int) value;
+            }
         typeMethods = UIMATypeFunctions.getTypeMethods(includeTypes);
 
         mDocNum = 0;
@@ -300,16 +317,16 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
 
     public void collectionProcessComplete() {
         // no default behavior
-        HashMap<String,LinkedHashSet<String>>typeConfigs=new HashMap<>();
-        for(Class cls:typeMethods.keySet()){
-            String typeName=cls.getSimpleName();
-            typeConfigs.put(typeName,new LinkedHashSet<>());
-            for(Method method:typeMethods.get(cls)){
+        HashMap<String, LinkedHashSet<String>> typeConfigs = new HashMap<>();
+        for (Class cls : typeMethods.keySet()) {
+            String typeName = cls.getSimpleName();
+            typeConfigs.put(typeName, new LinkedHashSet<>());
+            for (Method method : typeMethods.get(cls)) {
                 typeConfigs.get(typeName).add(method.getName().substring(3));
             }
 
         }
-        EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeConfigs);
+        EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeConfigs,colorPool,randomColor);
 
     }
 

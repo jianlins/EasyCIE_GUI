@@ -1,18 +1,18 @@
 package edu.utah.bmi.simple.gui.core;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.Interval1D;
 import edu.utah.bmi.nlp.core.IntervalST;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.ConceptBASE;
 import edu.utah.bmi.nlp.type.system.Sentence;
+import edu.utah.bmi.nlp.type.system.Stbegin;
+import edu.utah.bmi.nlp.type.system.Stend;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
-import org.apache.uima.cas.CAS;
-import org.apache.uima.cas.Feature;
-import org.apache.uima.cas.FeatureStructure;
-import org.apache.uima.cas.Type;
+import org.apache.uima.cas.*;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.fit.util.CasUtil;
 import org.apache.uima.fit.util.JCasUtil;
@@ -133,6 +133,7 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
                                        ArrayList<Annotation> sentenceList, IntervalST sentenceTree) {
 
         Iterator<AnnotationFS> annoIter = CasUtil.iterator(cas, CasUtil.getType(cas, annotationType));
+        int docLength = docText.length();
         if (annotationType.indexOf("Sentence") != -1) {
             while (annoIter.hasNext()) {
                 Annotation thisAnnotation = (Annotation) annoIter.next();
@@ -141,7 +142,9 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
                 if (sentenceIdObj != null)
                     sentenceId = (int) sentenceIdObj;
                 int snippetBegin;
-                int snippetEnd = thisAnnotation.getEnd();
+                int snippetEnd;
+//              Because of looking at sentences, its context should be wider than itself, so extend the snippet to one
+//              sentence more before and after it.
                 if (sentenceId > 0)
                     snippetBegin = sentenceList.get(sentenceId - 1).getBegin();
                 else
@@ -155,11 +158,12 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
                 record.addCell("TYPE", thisAnnotation.getType().getShortName());
                 record.addCell("TEXT", thisAnnotation.getCoveredText());
                 record.addCell("FEATURES", "");
-                record.addCell("SNIPPET", docText.substring(snippetBegin,snippetEnd));
+                record.addCell("SNIPPET", docText.substring(snippetBegin, snippetEnd));
                 record.addCell("SNIPPET_BEGIN", snippetBegin);
                 record.addCell("SNIPPET_END", snippetEnd);
-                record.addCell("BEGIN", thisAnnotation.getBegin()-snippetBegin);
+                record.addCell("BEGIN", thisAnnotation.getBegin() - snippetBegin);
                 record.addCell("END", thisAnnotation.getEnd() - snippetBegin);
+                record.addCell("ABBEGIN", thisAnnotation.getBegin());
                 annotations.add(record);
             }
         } else {
@@ -212,33 +216,43 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
                             sentenceEnd = sentenceAnno.getEnd();
                         }
                         sentence = docText.substring(sentenceBegin, sentenceEnd);
+                        record.addCell("SNIPPET", sentence);
+                        record.addCell("SNIPPET_BEGIN", sentenceBegin);
+                        record.addCell("SNIPPET_END", sentenceBegin + sentence.length());
+                        record.addCell("BEGIN", thisAnnotation.getBegin() - sentenceBegin);
+                        record.addCell("END", thisAnnotation.getEnd() - sentenceBegin);
                     } else {
-                        int contBegin = thisAnnotation.getBegin() - 50;
-                        int contEnd = thisAnnotation.getEnd() + 50;
-                        if (contBegin < 0)
-                            contBegin = 0;
-                        if (contEnd > docText.length()) {
-                            contEnd = docText.length();
-                        }
-                        sentence = docText.substring(contBegin, contEnd);
-                        record.addCell("NOTE", record.getValueByColumnName("NOTE") + "<missed sentence>");
-                        sentenceBegin = contBegin;
+                        genFixWindowRecordRow(record, docText, docLength, thisAnnotation.getBegin(), thisAnnotation.getEnd(),
+                                50, record.getValueByColumnName("NOTE") + "<missed sentence>");
                     }
-                    record.addCell("SNIPPET", sentence);
-                    record.addCell("SNIPPET_BEGIN", sentenceBegin);
-                    record.addCell("SNIPPET_END", sentenceBegin + sentence.length());
-                    record.addCell("BEGIN", thisAnnotation.getBegin() - sentenceBegin);
-                    record.addCell("END", thisAnnotation.getEnd() - sentenceBegin);
                 } else {
-                    record.addCell("SNIPPET", thisAnnotation.getCoveredText());
-                    record.addCell("SNIPPET_BEGIN", thisAnnotation.getBegin());
-                    record.addCell("SNIPPET_END", thisAnnotation.getEnd());
-                    record.addCell("BEGIN", 0);
-                    record.addCell("END", thisAnnotation.getEnd() - thisAnnotation.getBegin());
+                    genFixWindowRecordRow(record, docText, docLength, thisAnnotation.getBegin(), thisAnnotation.getEnd(),
+                            8, null);
                 }
+                record.addCell("ABBEGIN", thisAnnotation.getBegin());
                 annotations.add(record);
             }
         }
+    }
+
+    private RecordRow genFixWindowRecordRow(RecordRow record, String docText, int docLength, int begin, int end, int windowSize, String note) {
+
+        int contBegin = begin - windowSize;
+        int contEnd = end + windowSize;
+        if (contBegin < 0)
+            contBegin = 0;
+        if (contEnd > docText.length()) {
+            contEnd = docText.length();
+        }
+        String snippet = docText.substring(contBegin, contEnd);
+        if (note != null && note.trim().length() > 0)
+            record.addCell("NOTE", record.getValueByColumnName("NOTE") + "<missed sentence>");
+        record.addCell("SNIPPET", snippet);
+        record.addCell("SNIPPET_BEGIN", contBegin);
+        record.addCell("SNIPPET_END", contBegin + snippet.length());
+        record.addCell("BEGIN", begin - contBegin);
+        record.addCell("END", end - contBegin);
+        return record;
     }
 
     private String getValue(Annotation thisAnnotation, String featureName) {
@@ -295,6 +309,49 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
 
         }
         return sb.toString();
+    }
+
+    public static ArrayList<RecordRow> getRecords(boolean... sorted) {
+        if (sorted.length > 0 && sorted[0] == true) {
+            LinkedHashMap<RecordRow, ArrayList<RecordRow>> groupedRecords = new LinkedHashMap<>();
+            RecordRow currentGroup = null;
+            for (RecordRow record : records) {
+                if (record.getValueByColumnName("ID") != null || currentGroup == null) {
+                    currentGroup = record;
+                    groupedRecords.put(currentGroup, new ArrayList<>());
+                } else
+                    groupedRecords.get(currentGroup).add(record);
+            }
+
+            ArrayList<RecordRow> sortedRecords = new ArrayList<>();
+            for (RecordRow header : groupedRecords.keySet()) {
+                sortedRecords.add(header);
+                ArrayList<RecordRow> oneGroupRecord = groupedRecords.get(header);
+                Collections.sort(oneGroupRecord, (Comparator<RecordRow>) (lhs, rhs) -> {
+                    //     return 1 if rhs should be before lhs
+                    //     return -1 if lhs should be before rhs
+                    //     return 0 otherwise
+
+                    int lbegin = (int) lhs.getValueByColumnName("ABBEGIN");
+                    int rbegin = (int) rhs.getValueByColumnName("ABBEGIN");
+                    int lend = (int) lhs.getValueByColumnName("END") - (int) lhs.getValueByColumnName("BEGIN");
+                    int rend = (int) rhs.getValueByColumnName("END") - (int) lhs.getValueByColumnName("BEGIN");
+                    if (rbegin < lbegin) {
+                        return 1;
+                    } else if (rbegin == lbegin) {
+                        if (rend < lend)
+                            return 1;
+                        else if (rend == lend)
+                            return 0;
+                    }
+                    return -1;
+                });
+                sortedRecords.addAll(oneGroupRecord);
+            }
+            records = sortedRecords;
+
+        }
+        return records;
     }
 
 }

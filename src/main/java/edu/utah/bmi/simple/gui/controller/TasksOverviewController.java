@@ -2,6 +2,7 @@ package edu.utah.bmi.simple.gui.controller;
 
 import com.sun.javafx.collections.ObservableMapWrapper;
 import edu.emory.mathcs.backport.java.util.Arrays;
+import edu.emory.mathcs.backport.java.util.Collections;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.ColumnInfo;
 import edu.utah.bmi.nlp.sql.EDAO;
@@ -43,10 +44,7 @@ import java.io.File;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import static edu.utah.bmi.simple.gui.controller.CellFactories.*;
 
@@ -427,7 +425,8 @@ public class TasksOverviewController {
     }
 
     public void refreshDebugView() {
-        showDBTable(AnnotationLogger.records.iterator(), columnInfo, "output", TasksOverviewController.DebugView);
+
+        showDBTable(AnnotationLogger.getRecords(true).iterator(), columnInfo, "output", TasksOverviewController.DebugView);
 
     }
 
@@ -677,6 +676,7 @@ public class TasksOverviewController {
 
                 i++;
             }
+            tableView.setRowFactory(new KeyboardNavRowFactory<>(null));
             ObservableList columns = tableView.getColumns();
             if (docNamePos > 0) {
                 TableColumn docNameColumn = (TableColumn) columns.get(docNamePos);

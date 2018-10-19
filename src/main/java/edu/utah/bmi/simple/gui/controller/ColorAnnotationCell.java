@@ -1,5 +1,6 @@
 package edu.utah.bmi.simple.gui.controller;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.simple.gui.entry.StaticVariables;
 import javafx.collections.ObservableList;
@@ -7,10 +8,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TableCell;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static edu.utah.bmi.simple.gui.entry.StaticVariables.snippetLength;
 
@@ -111,24 +112,51 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         return color;
     }
 
-    protected void renderHighlighter(String pre, String marker, String post, String color, Background background) {
-        pre = pre.replaceAll("\\n", " ");
-        marker = marker.replaceAll("\\n", " ");
-        post = post.replaceAll("\\n", " ");
+    protected void renderHighlighter(List<String> chunks, List<String> colors, Background background) {
+        ArrayList<Label> labels = new ArrayList<>();
         hbox.setAlignment(Pos.CENTER_LEFT);
         hbox.setBackground(background);
         hbox.getChildren().clear();
-        Label preLabel = new Label(pre);
-        preLabel.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
-        Label highlighter = new Label(marker);
-        highlighter.setStyle("-fx-background-color: #" + color + ";");
-        highlighter.setMinWidth(Region.USE_PREF_SIZE);
-        Label postLabel = new Label(post);
-        hbox.getChildren().addAll(preLabel, highlighter, postLabel);
-        HBox.setHgrow(preLabel, Priority.NEVER);
-        HBox.setHgrow(highlighter, Priority.NEVER);
-        HBox.setHgrow(postLabel, Priority.ALWAYS);
+        for (int i = 0; i < chunks.size(); i++) {
+            String chunk=chunks.get(i).replaceAll("[\\n\\r]", " ");
+            Label label = new Label(chunk);
+            if (i == 0) {
+                label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
+            }
+            if (colors.get(i).length() > 0) {
+                label.setStyle("-fx-background-color: #" + colors.get(i) + ";");
+                label.setMinWidth(Region.USE_PREF_SIZE);
+            }
+            labels.add(label);
+        }
+        hbox.getChildren().addAll(labels);
+        for(int i=0;i<labels.size()-1;i++){
+            HBox.setHgrow(labels.get(i),Priority.NEVER);
+        }
+        HBox.setHgrow(labels.get(labels.size()-1),Priority.ALWAYS);
         setGraphic(hbox);
+    }
+
+    protected void renderHighlighter(String pre, String marker, String post, String color, Background background) {
+        renderHighlighter(Arrays.asList(new String[]{pre,marker,post}),Arrays.asList(new String[]{"",color,""}),background);
+//        pre = pre.replaceAll("\\n", " ");
+//        marker = marker.replaceAll("\\n", " ");
+//        post = post.replaceAll("\\n", " ");
+//        hbox.setAlignment(Pos.CENTER_LEFT);
+//        hbox.setBackground(background);
+//        hbox.getChildren().clear();
+//        Label preLabel = new Label(pre);
+//        preLabel.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
+//        Label highlighter = new Label(marker);
+//        highlighter.setStyle("-fx-background-color: #" + color + ";");
+//        highlighter.setBackground(background);
+//        highlighter.setMinWidth(Region.USE_PREF_SIZE);
+//        Label postLabel = new Label(post);
+//        hbox.getChildren().addAll(preLabel, highlighter, postLabel);
+//        HBox.setHgrow(preLabel, Priority.NEVER);
+//        HBox.setHgrow(highlighter, Priority.NEVER);
+//        HBox.setHgrow(postLabel, Priority.ALWAYS);
+//        setGraphic(hbox);
     }
 
 
@@ -175,9 +203,13 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         return html;
     }
 
+
     public String generateHTML() {
+        return generateHTML(this.itemProperty().getValue());
+    }
+
+    public static String generateHTML(Object value) {
         String html;
-        Object value = this.itemProperty().getValue();
         if (value instanceof RecordRow) {
             RecordRow recordRow = (RecordRow) value;
             if (recordRow.getValueByColumnName("BEGIN") == null) {

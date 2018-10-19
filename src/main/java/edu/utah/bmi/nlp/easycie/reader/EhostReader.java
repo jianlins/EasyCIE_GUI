@@ -3,6 +3,7 @@ package edu.utah.bmi.nlp.easycie.reader;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
+import org.apache.commons.io.IOUtils;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.collection.CollectionException;
@@ -25,10 +26,10 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- *
  * @author Jianlin Shi on 5/20/16.
  */
 public class EhostReader extends AbFileCollectionReader {
@@ -39,7 +40,7 @@ public class EhostReader extends AbFileCollectionReader {
     protected HashMap<String, Class<? extends Annotation>> typeClasses = new HashMap<>();
     protected int id = 0;
     protected boolean print = false;
-    private String readTypes="";
+    private String readTypes = "";
 
     public void initialize() throws ResourceInitializationException {
         File directory = new File(((String) getConfigParameterValue(PARAM_INPUTDIR)).trim());
@@ -70,7 +71,7 @@ public class EhostReader extends AbFileCollectionReader {
         mCurrentIndex = 0;
         mEncoding = "UTF-8";
 
-        UIMATypeFunctions.getTypes(readTypes,typeClasses, typeConstructors, typeSetMethods);
+        UIMATypeFunctions.getTypes(readTypes, typeClasses, typeConstructors, typeSetMethods);
 //        String typeDescriptorFile = "desc/type/customized";
 //        if (!new File(typeDescriptorFile + ".xml").exists()) {
 //            typeDescriptorFile = "desc/type/All_Types";
@@ -92,8 +93,9 @@ public class EhostReader extends AbFileCollectionReader {
         if (print)
             System.out.print("Import annotations for file: " + file.getName() + "\t\t");
         fileName = file.getName();
-        text = readTextAsEhost(file);
+//        text = readTextAsEhost(file);
         // put document in CAS
+        text = org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8);
         jcas.setDocumentText(text);
 
 
@@ -205,7 +207,7 @@ public class EhostReader extends AbFileCollectionReader {
                             xmlEvent = xmlEventReader.nextEvent();
                             if (overWriteAnnotatorName.length() > 0)
                                 attributes.put("Annotator", overWriteAnnotatorName);
-                            else if(xmlEvent.isCharacters())
+                            else if (xmlEvent.isCharacters())
                                 attributes.put("Annotator", xmlEvent.asCharacters().getData());
                             break;
                         case "span":

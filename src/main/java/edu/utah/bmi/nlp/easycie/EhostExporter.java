@@ -22,13 +22,8 @@ import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.nlp.uima.writer.EhostConfigurator;
 import edu.utah.bmi.simple.gui.task.ViewOutputDB;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.uima.examples.SourceDocumentInformation;
-import org.apache.uima.fit.util.JCasUtil;
-import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.tcas.Annotation;
-import org.apache.uima.jcas.tcas.DocumentAnnotation;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -86,19 +81,28 @@ public class EhostExporter {
             "MM/dd/yy");
     private File outputDirectory;
     private EDAO ddao, adao;
+    private String colorPool;
+    private int randomColor;
 
     public EhostExporter(String outputDirectory, String annotator, String datasetId,
                          String docDBConfig, String annoDBconfig,
-                         String docTableName, String snippetResTableName, String docResTableName) {
-        initialize(new File(outputDirectory), annotator, datasetId, docDBConfig, annoDBconfig, docTableName, snippetResTableName, docResTableName);
+                         String docTableName, String snippetResTableName, String docResTableName,
+                         String colorPool, int randomColor) {
+        initialize(new File(outputDirectory), annotator, datasetId, docDBConfig, annoDBconfig, docTableName,
+                snippetResTableName, docResTableName, colorPool, randomColor);
 
     }
 
     public void initialize(File outputDirectory, String annotator, String datasetId,
                            String docDBConfig, String annoDBconfig,
-                           String docTableName, String snippetResTableName, String docResTableName) {
+                           String docTableName, String snippetResTableName, String docResTableName,
+                           String colorPool, int randomColor) {
         ddao = EDAO.getInstance(new File(docDBConfig));
         adao = EDAO.getInstance(new File(annoDBconfig));
+        this.colorPool = colorPool;
+        this.randomColor = randomColor;
+        if (this.colorPool.trim().length() == 0)
+            this.randomColor = 2;
         readDocs(docTableName, datasetId);
         readAnnos(snippetResTableName, annotator);
         readAnnos(docResTableName, annotator);
@@ -107,7 +111,7 @@ public class EhostExporter {
         System.out.println("Ehost annotations will be exported to: " + outputDirectory);
 
         outputDirectory = new File(outputDirectory, annotator);
-        if(!outputDirectory.exists()) {
+        if (!outputDirectory.exists()) {
             try {
                 FileUtils.forceMkdir(outputDirectory);
             } catch (IOException e) {
@@ -186,10 +190,10 @@ public class EhostExporter {
         FileOutputStream outputXmlStream = new FileOutputStream(outputXml);
         XMLStreamWriter xtw = initiateWritter(outputXmlStream, sourceFile);
         elementId = 0;
-        if(annotations!=null)
-        for (RecordRow annotation : annotations) {
-            writeEhostAnnotation(xtw, annotation);
-        }
+        if (annotations != null)
+            for (RecordRow annotation : annotations) {
+                writeEhostAnnotation(xtw, annotation);
+            }
         //		finish writing
         xtw.writeEndElement();
         xtw.writeEndDocument();
@@ -200,9 +204,9 @@ public class EhostExporter {
 
 
     private void writeEhostAnnotation(XMLStreamWriter xtw, RecordRow annotation) throws XMLStreamException {
-        int snippetBegin=Integer.parseInt(annotation.getStrByColumnName("SNIPPET_BEGIN"));
-        int begin = Integer.parseInt(annotation.getStrByColumnName("BEGIN"))+snippetBegin;
-        int end = Integer.parseInt(annotation.getStrByColumnName("END"))+snippetBegin;
+        int snippetBegin = Integer.parseInt(annotation.getStrByColumnName("SNIPPET_BEGIN"));
+        int begin = Integer.parseInt(annotation.getStrByColumnName("BEGIN")) + snippetBegin;
+        int end = Integer.parseInt(annotation.getStrByColumnName("END")) + snippetBegin;
         String type = annotation.getStrByColumnName("TYPE");
         if (!typeConfigs.containsKey(type)) {
             typeConfigs.put(type, new LinkedHashSet<>());
@@ -325,7 +329,7 @@ public class EhostExporter {
 
     public void setUpSchema() {
         // no default behavior
-        EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeConfigs);
+        EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeConfigs, colorPool, randomColor);
 
     }
 

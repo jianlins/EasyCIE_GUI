@@ -53,14 +53,17 @@ public class ModifiedChecker {
                     modifiedAEs.add(aeName);
                     break;
                 }
-                if (configName.equals(DeterminantValueSet.PARAM_RULE_STR)) {
-                    String file = externalConfigMap.get(aeName).get(configName);
-                    long lastModified = new File(file).lastModified();
-                    if (!aeRuleFileLastModified.containsKey(file) ||
-                            aeRuleFileLastModified.get(file) != lastModified) {
-                        modifiedAEs.add(aeName);
-                        aeRuleFileLastModified.put(file, lastModified);
-                        break;
+                if (configName.equals(DeterminantValueSet.PARAM_RULE_STR) || configName.toLowerCase().endsWith("file")) {
+                    String fileName = externalConfigMap.get(aeName).get(configName);
+                    File file = new File(fileName);
+                    if (file.exists()) {
+                        long lastModified = new File(fileName).lastModified();
+                        if (!aeRuleFileLastModified.containsKey(fileName) ||
+                                aeRuleFileLastModified.get(fileName) != lastModified) {
+                            modifiedAEs.add(aeName);
+                            aeRuleFileLastModified.put(fileName, lastModified);
+                            break;
+                        }
                     }
                 }
             }

@@ -22,6 +22,8 @@ public class DoubleClickableCell extends TableCell<ObservableList, Object> {
     protected final String activeColor = "-fx-background-color: darkseagreen";
     private Thread thisThread;
     private TaskFX currentTask;
+    private int clickTimes=0;
+    private long clickTimestamp=0l;
 
 
     public DoubleClickableCell() {
@@ -58,6 +60,7 @@ public class DoubleClickableCell extends TableCell<ObservableList, Object> {
             setStyle(functionalColor);
             setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2) {
+
                     Thread th = new Thread(executeCommand(currentTask, setting));
                     th.start();
                 }

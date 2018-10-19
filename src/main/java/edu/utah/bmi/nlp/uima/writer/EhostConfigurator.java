@@ -16,7 +16,9 @@
 
 package edu.utah.bmi.nlp.uima.writer;
 
+import edu.utah.bmi.simple.gui.entry.StaticVariables;
 import javafx.scene.paint.Color;
+
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -24,8 +26,6 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -35,13 +35,30 @@ import java.util.Map;
  * Created by Jianlin Shi on 9/26/16.
  */
 public class EhostConfigurator {
-    private static int seed=1234;
+    private static int seed = 1234;
     private static FileOutputStream outputStream;
-    public static void setUp(File outputFile, HashMap<String, LinkedHashSet<String>> typeMethods) {
+
+
+    /**
+     * @param outputFile  The ehost project configuration file
+     * @param typeMethods Type definitions
+     * @param colorPool   A list of colors
+     * @param randomColor integer of how to random pick 0: no random; 1: random in color pool; 2: completely random pick
+     */
+    public static void setUp(File outputFile, HashMap<String, LinkedHashSet<String>> typeMethods, String colorPool, int randomColor) {
+        if (randomColor < 2 && StaticVariables.colorPool.size() == 0 && colorPool.length() > 0) {
+            int i = 0;
+            for (String color : colorPool.split("\\|")) {
+                StaticVariables.colorPool.put(i, color.trim());
+                i++;
+            }
+            StaticVariables.resetColorPool();
+            StaticVariables.randomPick = randomColor == 1;
+        }
         XMLStreamWriter xtw = initXml(outputFile);
         try {
             for (Map.Entry<String, LinkedHashSet<String>> type : typeMethods.entrySet()) {
-                writeType(xtw, type);
+                writeType(xtw, type, randomColor);
             }
             xtw.writeEndElement();
             xtw.writeEndElement();
@@ -61,8 +78,8 @@ public class EhostConfigurator {
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         XMLStreamWriter xtw = null;
         try {
-            outputStream=new FileOutputStream(outputFile);
-            xtw = xof.createXMLStreamWriter(outputStream,"UTF-8");
+            outputStream = new FileOutputStream(outputFile);
+            xtw = xof.createXMLStreamWriter(outputStream, "UTF-8");
             //		System.out.println(outputPath			+ sourcefileName + ".knowtator.xml");
             xtw.writeStartDocument("UTF-8", "1.0");
             xtw.writeStartElement("eHOST_Project_Configure");
@@ -99,10 +116,19 @@ public class EhostConfigurator {
         xtw.writeEndElement();
     }
 
-    public static void writeType(XMLStreamWriter xtw, Map.Entry<String, LinkedHashSet<String>>type) throws XMLStreamException {
+    public static void writeType(XMLStreamWriter xtw, Map.Entry<String, LinkedHashSet<String>> type, int randomColor) throws XMLStreamException {
         xtw.writeStartElement("classDef");
         writeEle(xtw, "Name", type.getKey());
-        int[] colors = getRandomBeautifulColors();
+        int[] colors=new int[3];
+        if (randomColor == 2)
+            colors = getRandomBeautifulColors();
+        else {
+            java.awt.Color c = java.awt.Color.decode("#"+StaticVariables.pickColor(type.getKey()));
+            colors[0]=c.getRed();
+            colors[1]=c.getGreen();
+            colors[2]=c.getBlue();
+        }
+
         writeEle(xtw, "RGB_R", colors[0] + "");
         writeEle(xtw, "RGB_G", colors[1] + "");
         writeEle(xtw, "RGB_B", colors[2] + "");
@@ -119,18 +145,18 @@ public class EhostConfigurator {
 
 
     public static int[] getRandomBeautifulColors() {
-        String colorString=Integer.toHexString((int)Math.floor(Math.random()*16777215));
-        if(colorString.length()==5) {
+        String colorString = Integer.toHexString((int) Math.floor(Math.random() * 16777215));
+        if (colorString.length() == 5) {
             colorString = "0" + colorString;
 //            System.out.println(colorString);
         }
 
-        Color color =  Color.valueOf(colorString);
-        if(color.getSaturation()>0.78){
-            color=Color.hsb(color.getHue(),0.78,color.getBrightness());
+        Color color = Color.valueOf(colorString);
+        if (color.getSaturation() > 0.78) {
+            color = Color.hsb(color.getHue(), 0.78, color.getBrightness());
         }
-        if(color.getBrightness()<0.43){
-            color=Color.hsb(color.getHue(),color.getSaturation(),0.43);
+        if (color.getBrightness() < 0.43) {
+            color = Color.hsb(color.getHue(), color.getSaturation(), 0.43);
         }
 //        System.out.println(color.getRed());
 //        System.out.println(color.getGreen());

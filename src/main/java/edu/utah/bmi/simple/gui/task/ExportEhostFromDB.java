@@ -2,6 +2,7 @@ package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.easycie.EhostExporter;
+import edu.utah.bmi.simple.gui.entry.StaticVariables;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
@@ -40,10 +41,14 @@ public class ExportEhostFromDB extends GUITask {
         String writeConfigFileName = config.getValue(ConfigKeys.writeDBConfigFileName);
         String snippetResultTable = config.getValue(ConfigKeys.snippetResultTableName);
         String docResultTable = config.getValue(ConfigKeys.docResultTableName);
+        StaticVariables.randomPick = config.getValue("viewer/random_pick_color").toLowerCase().startsWith("t");
         TaskFX exportConfig = tasks.getTask("export");
+
+
         String ehostDir = exportConfig.getValue(ConfigKeys.outputEhostDir);
         exporter = new EhostExporter(ehostDir, annotator, dataSetId, readDBConfigFileName,
-                writeConfigFileName, docTableName, snippetResultTable, docResultTable);
+                writeConfigFileName, docTableName, snippetResultTable, docResultTable,
+                config.getValue("viewer/color_pool"), StaticVariables.randomPick ? 1 : 0);
 
 
     }

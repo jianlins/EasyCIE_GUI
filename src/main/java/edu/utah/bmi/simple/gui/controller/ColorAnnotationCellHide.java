@@ -44,11 +44,15 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
         renderHighlighter("", "", text, "000000", backgrounds[backgroundId]);
     }
 
-
     public String generateHTML() {
+        Object value = this.itemProperty().getValue();
+        return generateHTML(value);
+    }
+
+
+    public static String generateHTML(Object value) {
 //       when click DOC_NAME, show document text with snippet highlighted
         String html;
-        Object value = this.itemProperty().getValue();
         if (value instanceof RecordRow && ((RecordRow) value).getValueByColumnName("DOC_TEXT") != null) {
             RecordRow recordRow = (RecordRow) value;
             if (recordRow.getValueByColumnName("SNIPPET_BEGIN") == null ||
@@ -58,8 +62,15 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
             } else {
                 html = recordRow.getStrByColumnName("DOC_TEXT");
                 String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
-                int begin = getIntValue(recordRow.getValueByColumnName("SNIPPET_BEGIN"));
-                int end = begin + recordRow.getStrByColumnName("SNIPPET").length();
+                int begin, end;
+                if (recordRow.getStrByColumnName("TYPE").toLowerCase().startsWith("sentence")) {
+                    int snippetBegin = getIntValue(recordRow.getValueByColumnName("SNIPPET_BEGIN"));
+                    begin = getIntValue(recordRow.getValueByColumnName("BEGIN")) + snippetBegin;
+                    end = getIntValue(recordRow.getValueByColumnName("END")) + snippetBegin;
+                } else {
+                    begin = getIntValue(recordRow.getValueByColumnName("SNIPPET_BEGIN"));
+                    end = begin + recordRow.getStrByColumnName("SNIPPET").length();
+                }
                 html = ColorAnnotationCell.generateHTML(html,
                         begin, end,
                         color);
@@ -94,7 +105,7 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
         return html;
     }
 
-    public String queryDocContent(String docName) {
+    public static String queryDocContent(String docName) {
         String text = "";
         TaskFX task = TasksOverviewController.currentTasksOverviewController.mainApp.tasks.getTask("settings");
         String inputDB = task.getValue(ConfigKeys.readDBConfigFileName);

@@ -43,7 +43,7 @@
             <nameValuePair>
                 <name>RuleFileOrStr</name>
                 <value>
-                    <string>conf/smoke3/smoke_section.xlsx</string>
+                    <string/>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>
@@ -128,7 +128,7 @@
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="FeatureInferencer">
+    <casProcessor deployment="integrated" name="FeatureInference">
         <descriptor>
             <import location="../ae/FeatureInference_aeDescriptor.xml"/>
         </descriptor>
@@ -148,7 +148,7 @@
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="SentenceInferencer">
+    <casProcessor deployment="integrated" name="SentenceInference">
         <descriptor>
             <import location="../ae/SentenceInferencer_aeDescriptor.xml"/>
         </descriptor>
@@ -168,7 +168,7 @@
             </nameValuePair>
         </configurationParameterSettings>
     </casProcessor>
-    <casProcessor deployment="integrated" name="SQLWriter_AE">
+    <casProcessor deployment="integrated" name="SQLWriter">
         <descriptor>
             <import location="../ae/SQLWriterCasConsumer.xml"/>
         </descriptor>

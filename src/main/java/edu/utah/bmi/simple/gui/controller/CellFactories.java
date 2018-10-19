@@ -9,6 +9,7 @@ import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
 import edu.utah.bmi.simple.gui.task.FastDebugPipe;
 import edu.utah.bmi.simple.gui.task.ViewOutputDB;
+import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
@@ -21,6 +22,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class CellFactories {
 
@@ -57,7 +59,7 @@ public class CellFactories {
                         TabPane tabPane = tasksOverviewController.tabPane;
                         SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
                         if (selectModel.isSelected(1)) {
-                            System.out.println("Start debugging...");
+//                            System.out.println("Start debugging...");
                             TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                             if (cell.getItem() instanceof RecordRow) {
                                 RecordRow recordRow = (RecordRow) cell.getItem();
@@ -93,7 +95,7 @@ public class CellFactories {
                         // do something with id...
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
-                        System.out.println("Start debugging...");
+//                        System.out.println("Start debugging...");
                         TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
                         TabPane tabPane = tasksOverviewController.tabPane;
                         SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
