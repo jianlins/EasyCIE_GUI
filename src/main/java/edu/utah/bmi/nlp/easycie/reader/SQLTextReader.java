@@ -1,5 +1,6 @@
 package edu.utah.bmi.nlp.easycie.reader;
 
+import edu.utah.bmi.nlp.rush.core.Boundary;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
@@ -32,6 +33,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     public static final String PARAM_QUERY_SQL_NAME = "InputQueryName";
     public static final String PARAM_COUNT_SQL_NAME = "CountQueryName";
     public static final String PARAM_DOC_COLUMN_NAME = "DocColumnName";
+    public static final String PARMA_TRIM_TEXT = "TrimText";
     public static final String PARAM_DATASET_ID = "DatasetId";
     protected File dbConfigFile;
     protected String querySqlName, countSqlName, docColumnName, docTableName;
@@ -39,7 +41,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     protected int mCurrentIndex, totalDocs;
     protected RecordRowIterator recordIterator;
     @Deprecated
-    public static boolean debug = false;
+    public static boolean debug = false, trimText = false;
     private String datasetId;
 
 
@@ -66,6 +68,9 @@ public class SQLTextReader extends CollectionReader_ImplBase {
         docColumnName = readConfigureString(PARAM_DOC_COLUMN_NAME, "TEXT");
         docTableName = readConfigureString(PARAM_DOC_TABLE_NAME, "DOCUMENTS");
         datasetId = readConfigureString(PARAM_DATASET_ID, "0");
+        Object value = this.getConfigParameterValue(PARMA_TRIM_TEXT);
+        if (value != null && value instanceof Boolean)
+            trimText = (Boolean) value;
     }
 
     private String readConfigureString(String parameterName, String defaultValue) {
@@ -96,6 +101,12 @@ public class SQLTextReader extends CollectionReader_ImplBase {
         RecordRow currentRecord = recordIterator.next();
         String metaInfor = currentRecord.serialize(docColumnName);
         String text = (String) currentRecord.getValueByColumnName(docColumnName);
+        if(trimText){
+            text=text.replaceAll("(\\n[^\\w\\p{Punct}]+\\n)","\n\n")
+                    .replaceAll("(\\n\\s*)+(?:\\n)","\n\n")
+                    .replaceAll("^(\\n\\s*)+(?:\\n)","")
+                    .replaceAll("[^\\w\\p{Punct}\\s]"," ");
+        }
         logger.finest("Read document: " + currentRecord.getStrByColumnName("DOC_NAME"));
         if (text == null)
             text = "";

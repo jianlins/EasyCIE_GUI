@@ -1,6 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
+import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
@@ -13,6 +14,8 @@ import javafx.application.Platform;
 
 import java.io.File;
 import java.util.*;
+
+import static edu.utah.bmi.simple.gui.core.Compare.getIntegerValue;
 
 /**
  * Compare annotations against gold standard (based on SQLite, differentiate different annotators by "annotator")
@@ -33,6 +36,8 @@ public class CompareBDSTask extends GUITask {
     //  To record which type is snippet level, document level, or bunch level, based on from which table read the annotations of that type.
     private TreeMap<String, String> typeCategories = new TreeMap<>();
 
+    private LinkedHashMap<String, LinkedHashSet<String>> typeFeatures = new LinkedHashMap<>();
+
     public CompareBDSTask(TasksFX tasks) {
         initiate(tasks);
     }
@@ -42,21 +47,23 @@ public class CompareBDSTask extends GUITask {
             guiEnabled = false;
         }
         updateGUIMessage("Initiate configurations..");
-        TaskFX config = tasks.getTask(ConfigKeys.comparetask);
+        TaskFX compareConfig = tasks.getTask(ConfigKeys.comparetask);
 
-        targetAnnotator = config.getValue(ConfigKeys.targetAnnotator);
+        targetAnnotator = compareConfig.getValue(ConfigKeys.targetAnnotator);
         if (targetAnnotator.trim().length() == 0) {
             targetAnnotator = tasks.getTask(ConfigKeys.maintask).getValue(ConfigKeys.annotator);
         }
-        targetRunId = config.getValue(ConfigKeys.targetRunId);
+        targetRunId = compareConfig.getValue(ConfigKeys.targetRunId);
 
-        referenceAnnotator = config.getValue(ConfigKeys.referenceAnnotator);
-        referenceRunId = config.getValue(ConfigKeys.referenceRunId);
+        referenceAnnotator = compareConfig.getValue(ConfigKeys.referenceAnnotator);
+        referenceRunId = compareConfig.getValue(ConfigKeys.referenceRunId);
 
-        typeFilter = config.getValue(ConfigKeys.typeFilter).trim();
-        String compareMethodString = config.getValue(ConfigKeys.strictCompare).trim().toLowerCase();
+        typeFilter = compareConfig.getValue(ConfigKeys.typeFilter).trim();
+        String compareMethodString = compareConfig.getValue(ConfigKeys.strictCompare).trim().toLowerCase();
         strictCompare = compareMethodString.startsWith("t") || compareMethodString.startsWith("1");
-        compareReferenceTable = config.getValue(ConfigKeys.compareReferenceTable);
+        compareReferenceTable = compareConfig.getValue(ConfigKeys.compareReferenceTable);
+
+        typeFeatures = readCompareFeatures(compareConfig.getValue(ConfigKeys.typeFeatureFilter).trim());
 
 
         TaskFX settingConfig = tasks.getTask("settings");
@@ -114,13 +121,13 @@ public class CompareBDSTask extends GUITask {
         }
 
         if (wdao.checkTableExits(snippetResultTable))
-            readAnnotations(wdao, targetAnnotations, targetAnnotator, snippetResultTable, typeFilter, targetRunId);
+            readAnnotations(wdao, targetAnnotations, targetAnnotator, snippetResultTable, typeFilter, typeFeatures, targetRunId);
         if (wdao.checkTableExits(documentResultTable))
-            readAnnotations(wdao, targetAnnotations, targetAnnotator, documentResultTable, typeFilter, targetRunId);
+            readAnnotations(wdao, targetAnnotations, targetAnnotator, documentResultTable, typeFilter, typeFeatures, targetRunId);
         if (wdao.checkTableExits(bunchResultTable))
-            readAnnotations(wdao, targetAnnotations, targetAnnotator, bunchResultTable, typeFilter, targetRunId);
+            readAnnotations(wdao, targetAnnotations, targetAnnotator, bunchResultTable, typeFilter, typeFeatures, targetRunId);
 
-        readAnnotations(rdao, referenceAnnotations, referenceAnnotator, compareReferenceTable, typeFilter, referenceRunId);
+        readAnnotations(rdao, referenceAnnotations, referenceAnnotator, compareReferenceTable, typeFilter, typeFeatures, referenceRunId);
         updateGUIMessage("Start comparing...");
         updateGUIProgress(0, 1);
         HashMap<String, EvalCounter> evalCounters = comparior.eval(targetAnnotations, referenceAnnotations, typeCategories.keySet(), strictCompare);
@@ -137,11 +144,33 @@ public class CompareBDSTask extends GUITask {
     }
 
 
+    /**
+     * Read annotations from db.
+     * If typeFeatures is configured, typeFilter will be ignored
+     *
+     * @param dao            DAO object
+     * @param annotations    annotations ordered by names, annotation type (and feature values)
+     * @param annotator      annotator name
+     * @param annotatorTable which table to read from
+     * @param typeFilter     a string of type names separated by comma
+     * @param typeFeatures   a configuration file
+     * @param runId          run id
+     * @see edu.utah.bmi.simple.gui.task.CompareBDSTask#readCompareFeatures(String)
+     */
     public void readAnnotations(EDAO dao, HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations,
-                                String annotator, String annotatorTable, String typeFilter, String runId) {
+                                String annotator, String annotatorTable, String typeFilter,
+                                LinkedHashMap<String, LinkedHashSet<String>> typeFeatures, String runId) {
         updateGUIMessage("Read the annotations of \"" + annotator + "\" from table \"" + annotatorTable + "\"....");
         ArrayList<String> conditions = new ArrayList<>();
-        if (typeFilter != null && typeFilter.trim().length() > 0) {
+        if (typeFeatures.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("(");
+            for (String type : typeFeatures.keySet()) {
+                sb.append("type='" + type + "' OR ");
+
+            }
+                conditions.add(sb.substring(0, sb.length() - 4) + ")");
+            } else if (typeFilter != null && typeFilter.trim().length() > 0) {
             StringBuilder sb = new StringBuilder();
             sb.append("(");
             for (String type : typeFilter.split(",")) {
@@ -166,11 +195,13 @@ public class CompareBDSTask extends GUITask {
         while (recordIterator.hasNext()) {
             RecordRow record = recordIterator.next();
             String type = record.getValueByColumnName("TYPE") + "";
+            int snippetBegin = getIntegerValue(record.getValueByColumnName("SNIPPET_BEGIN"));
 
-            int begin = (int) record.getValueByColumnName("BEGIN") + (int) record.getValueByColumnName("SNIPPET_BEGIN");
+            int begin = getIntegerValue(record.getValueByColumnName("BEGIN")) + snippetBegin;
             record.addCell("ABEGIN", begin);
-            int end = (int) record.getValueByColumnName("END") + (int) record.getValueByColumnName("SNIPPET_BEGIN");
+            int end = getIntegerValue(record.getValueByColumnName("END")) + snippetBegin;
             record.addCell("AEND", end);
+
 
             if (annotatorTable.equals(snippetResultTable))
                 typeCategories.put(type, "SNIPPET");
@@ -178,11 +209,16 @@ public class CompareBDSTask extends GUITask {
                 typeCategories.put(type, "DOCUMENT");
             else
                 typeCategories.put(type, "BUNCH");
-
-            if (!annotations.containsKey(type)) {
-                annotations.put(type, new HashMap<>());
+            String key = type;
+            if (typeFeatures.size() > 0) {
+                if (typeFeatures.containsKey(type) && (typeFeatures.get(type).size() > 0)) {
+                    key = aggregateFeatureValues(type, record, typeFeatures.get(type));
+                }
             }
-            HashMap<String, ArrayList<RecordRow>> fileMap = annotations.get(type);
+            if (!annotations.containsKey(key)) {
+                annotations.put(key, new HashMap<>());
+            }
+            HashMap<String, ArrayList<RecordRow>> fileMap = annotations.get(key);
             String docName = (String) record.getValueByColumnName("DOC_NAME");
             if (!fileMap.containsKey(docName))
                 fileMap.put(docName, new ArrayList<>());
@@ -190,6 +226,28 @@ public class CompareBDSTask extends GUITask {
             updateGUIProgress(count, total);
             count++;
         }
+
+    }
+
+    private String aggregateFeatureValues(String type, RecordRow record, LinkedHashSet<String> featureNames) {
+        StringBuilder sb = new StringBuilder();
+
+        if (record.getStrByColumnName("FEATURES").length() > 0)
+            for (String nameValue : record.getStrByColumnName("FEATURES").split("\n")) {
+                String[] pair = nameValue.split(":");
+                String featureName = pair[0].trim();
+                if (featureNames.contains(featureName)) {
+                    sb.append(pair[1]);
+                    sb.append(",");
+                }
+            }
+        if (sb.length() > 0) {
+            sb.insert(0, type + ":");
+            sb.deleteCharAt(sb.length() - 1);
+        } else {
+            sb.append(type);
+        }
+        return sb.toString();
     }
 
 
@@ -207,7 +265,7 @@ public class CompareBDSTask extends GUITask {
                     sql.append(" AND");
             }
         }
-        sql.append(";");
+//        sql.append(";");
 
         RecordRowIterator recordIterator = dao.queryRecords(sql.toString());
         if (recordIterator.hasNext()) {
@@ -219,6 +277,28 @@ public class CompareBDSTask extends GUITask {
                 count = (int) recordRow.getValueByColumnId(1);
         }
         return count;
+    }
+
+    /**
+     * Read from a configuration file that list the types and corresponding features that need to be compared
+     * For each row, the 1st column is for the type name, the second and the rest are for the feature names
+     *
+     * @param typeFeatureConfigFile location of the configuration file
+     * @return a map that using type name as the key, a list of feature names as the value
+     */
+    private LinkedHashMap<String, LinkedHashSet<String>> readCompareFeatures(String typeFeatureConfigFile) {
+        LinkedHashMap<String, LinkedHashSet<String>> typeFeatures = new LinkedHashMap<>();
+        if (typeFeatureConfigFile == null || typeFeatureConfigFile.trim().length() == 0)
+            return typeFeatures;
+        IOUtil ioUtil = new IOUtil(typeFeatureConfigFile,false);
+        ArrayList<ArrayList<String>> rows = ioUtil.getRuleCells();
+        for (ArrayList<String> row : rows) {
+            if (!typeFeatures.containsValue(row.get(0))) {
+                typeFeatures.put(row.get(0), new LinkedHashSet<>());
+            }
+            typeFeatures.get(row.get(0)).addAll(row.subList(1, row.size()));
+        }
+        return typeFeatures;
     }
 
 

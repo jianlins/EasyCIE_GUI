@@ -141,6 +141,10 @@ public class EhostExporter {
             RecordRow recordRow = recordIterator.next();
             String docName = recordRow.getStrByColumnName("DOC_NAME");
             String content = recordRow.getStrByColumnName("TEXT");
+            content=content.replaceAll("(\\n[^\\w\\p{Punct}]+\\n)","\n\n")
+                    .replaceAll("(\\n\\s*)+(?:\\n)","\n\n")
+                    .replaceAll("^(\\n\\s*)+(?:\\n)","")
+                    .replaceAll("[^\\w\\p{Punct}\\s]"," ");
             docs.put(docName, content);
         }
     }

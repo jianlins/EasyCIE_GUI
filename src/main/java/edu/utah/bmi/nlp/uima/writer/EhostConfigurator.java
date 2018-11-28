@@ -26,9 +26,7 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Write out eHOST configuration xml file
@@ -56,9 +54,15 @@ public class EhostConfigurator {
             StaticVariables.randomPick = randomColor == 1;
         }
         XMLStreamWriter xtw = initXml(outputFile);
+        ArrayList<String> sortedTypes = new ArrayList<>();
+        sortedTypes.addAll(typeMethods.keySet());
+        Collections.sort(sortedTypes);
         try {
+            for (String typeName : sortedTypes) {
+                writeType(xtw, typeName, typeMethods.get(typeName), randomColor);
+            }
             for (Map.Entry<String, LinkedHashSet<String>> type : typeMethods.entrySet()) {
-                writeType(xtw, type, randomColor);
+
             }
             xtw.writeEndElement();
             xtw.writeEndElement();
@@ -116,24 +120,24 @@ public class EhostConfigurator {
         xtw.writeEndElement();
     }
 
-    public static void writeType(XMLStreamWriter xtw, Map.Entry<String, LinkedHashSet<String>> type, int randomColor) throws XMLStreamException {
+    public static void writeType(XMLStreamWriter xtw, String typeName, LinkedHashSet<String> type, int randomColor) throws XMLStreamException {
         xtw.writeStartElement("classDef");
-        writeEle(xtw, "Name", type.getKey());
-        int[] colors=new int[3];
+        writeEle(xtw, "Name", typeName);
+        int[] colors = new int[3];
         if (randomColor == 2)
             colors = getRandomBeautifulColors();
         else {
-            java.awt.Color c = java.awt.Color.decode("#"+StaticVariables.pickColor(type.getKey()));
-            colors[0]=c.getRed();
-            colors[1]=c.getGreen();
-            colors[2]=c.getBlue();
+            java.awt.Color c = java.awt.Color.decode("#" + StaticVariables.pickColor(typeName));
+            colors[0] = c.getRed();
+            colors[1] = c.getGreen();
+            colors[2] = c.getBlue();
         }
 
         writeEle(xtw, "RGB_R", colors[0] + "");
         writeEle(xtw, "RGB_G", colors[1] + "");
         writeEle(xtw, "RGB_B", colors[2] + "");
         writeEle(xtw, "InHerit_Public_Attributes", "true");
-        for (String attr : type.getValue()) {
+        for (String attr : type) {
             xtw.writeStartElement("attributeDef");
             writeEle(xtw, "Name", attr);
             writeEle(xtw, "isCode", "false");

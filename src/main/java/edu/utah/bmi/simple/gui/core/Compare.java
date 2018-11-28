@@ -7,8 +7,10 @@ import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.sqlite.SQLiteException;
 
 import java.io.File;
@@ -386,10 +388,11 @@ public class Compare {
         while (recordIterator.hasNext()) {
             RecordRow record = recordIterator.next();
             String type = record.getValueByColumnName("TYPE") + "";
+            int snippetBegin = getIntegerValue(record.getValueByColumnName("SNIPPET_BEGIN"));
 
-            int begin = (int) record.getValueByColumnName("BEGIN") + (int) record.getValueByColumnName("SNIPPET_BEGIN");
+            int begin = getIntegerValue(record.getValueByColumnName("BEGIN")) + snippetBegin;
             record.addCell("ABEGIN", begin);
-            int end = (int) record.getValueByColumnName("END") + (int) record.getValueByColumnName("SNIPPET_BEGIN");
+            int end = getIntegerValue(record.getValueByColumnName("END")) + snippetBegin;
             record.addCell("AEND", end);
 
 
@@ -403,6 +406,17 @@ public class Compare {
                 fileMap.put(docName, new ArrayList<>());
             fileMap.get(docName).add(record);
         }
+    }
+
+    public static int getIntegerValue(Object value) {
+        int intValue = 0;
+        if (value instanceof Integer)
+            intValue = (int) value;
+        else if (value instanceof Long)
+            intValue = ((Long) value).intValue();
+        else
+            throw new ValueException(value + "(type: " + value.getClass() + ")" + " cannot be converted to Integer.");
+        return intValue;
     }
 
     public RecordRowIterator queryRecords(EDAO dao, String tableName, String[] conditions) {
@@ -421,7 +435,7 @@ public class Compare {
             }
         }
         sql.append(" ORDER BY DOC_NAME ");
-        sql.append(";");
+//        sql.append(";");
 
         RecordRowIterator recordIterator = dao.queryRecords(sql.toString());
         return recordIterator;

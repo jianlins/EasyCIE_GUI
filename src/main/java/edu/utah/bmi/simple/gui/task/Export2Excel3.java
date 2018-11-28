@@ -104,7 +104,7 @@ public class Export2Excel3 extends GUITask {
                 sql = sql + " WHERE ( " + filter + " ) ";
             }
         }
-
+        sql=sql.replaceAll("\\n+"," ");
         String tmp = sql.toLowerCase();
         count = "SELECT COUNT(*) " + sql.substring(tmp.indexOf(" from "));
 

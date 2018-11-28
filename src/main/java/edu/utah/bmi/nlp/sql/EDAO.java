@@ -17,6 +17,7 @@
 package edu.utah.bmi.nlp.sql;
 
 import edu.utah.bmi.nlp.core.IOUtil;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.File;
 import java.sql.*;
@@ -212,9 +213,7 @@ public class EDAO {
 
         }
 
-        if (configReader.getValue("updateStatements") != null)
-
-        {
+        if (configReader.getValue("updateStatements") != null) {
             for (Map.Entry<String, Object> entry : ((HashMap<String, Object>) configReader.getValue("updateStatements")).entrySet()) {
                 String tableName = entry.getKey();
                 String sql = (String) ((HashMap<String, Object>) entry.getValue()).get("sql");
@@ -261,8 +260,8 @@ public class EDAO {
             con.setAutoCommit(false);
             this.isClosed = false;
         } catch (SQLException e) {
-            logger.finest("server: "+server);
-            logger.finest("username: "+username);
+            logger.finest("server: " + server);
+            logger.finest("username: " + username);
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -755,13 +754,13 @@ public class EDAO {
                 String columnName = columnNameType.getKey();
                 int columnId = columnInfo.getColumnId(columnName);
                 String type = columnNameType.getValue();
-                Object value=recordRow.getValueByColumnName(columnName);
+                Object value = recordRow.getValueByColumnName(columnName);
 //                System.out.println(columnName + "\t" + type+"\t"+(value!=null?value.getClass():null));
                 switch (type) {
                     case "number":
                     case "long":
                         if (value != null)
-                            updatePstmt.setLong(columnId, Long.parseLong(value+""));
+                            updatePstmt.setLong(columnId, NumberUtils.createLong(value + ""));
                         else
                             updatePstmt.setObject(columnId, null);
                         break;
@@ -770,8 +769,8 @@ public class EDAO {
                         updatePstmt.setString(columnId, recordRow.getStrByColumnName(columnName));
                         break;
                     case "date":
-                        if(value instanceof Date)
-                            value=new java.sql.Date(((Date)value).getTime());
+                        if (value instanceof Date)
+                            value = new java.sql.Date(((Date) value).getTime());
                         updatePstmt.setDate(columnId, (java.sql.Date) value);
                         break;
                     default:
@@ -847,9 +846,11 @@ public class EDAO {
                 for (String tableName : tableNames)
                     insertPreparedStatements.get(tableName).executeBatch();
             } else {
-                for (PreparedStatement sts : insertPreparedStatements.values()) {
-                    sts.executeBatch();
-                }
+                if (!con.getAutoCommit())
+                    for (PreparedStatement sts : insertPreparedStatements.values()) {
+                        if (!sts.isClosed() && !sts.isCloseOnCompletion())
+                            sts.executeBatch();
+                    }
             }
             if (!con.getAutoCommit())
                 con.commit();

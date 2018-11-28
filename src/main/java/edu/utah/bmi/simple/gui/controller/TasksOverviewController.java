@@ -663,9 +663,27 @@ public class TasksOverviewController {
                         } else {
                             col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, Object>, ObservableValue<Object>>) param -> {
                                 Object record = param.getValue().get(j);
-                                if (record != null)
-                                    return new SimpleObjectProperty<>(record);
-                                else
+                                if (record != null) {
+//                                  cleaner display of features
+                                    if (columnName.endsWith("_FEATURES")) {
+                                        String features = (String) record;
+                                        int featuresPointer = features.toLowerCase().indexOf("features:");
+                                        if (featuresPointer > 0) {
+                                            if (features.toLowerCase().indexOf("features: null") == -1) {
+                                                features = features.substring(featuresPointer + 9);
+                                                features = features.replaceAll("\t\t", "");
+                                            } else {
+                                                features = features.substring(0, featuresPointer) +
+                                                        features.substring(features.indexOf("\n", featuresPointer) + 1);
+                                                features = features.replaceAll("Note: null\n", "");
+                                                features = features.replaceAll("Topic:[^\\n]+\n", "");
+                                            }
+                                        }
+                                        return new SimpleObjectProperty<>(features);
+                                    } else
+                                        return new SimpleObjectProperty<>(record);
+
+                                } else
                                     return new SimpleObjectProperty<>("");
                             });
                         }
@@ -797,7 +815,22 @@ public class TasksOverviewController {
             features = "\t" + features.substring(5);
         }
         ObservableList<String[]> data = FXCollections.observableArrayList();
-        for (String featureNameValue : features.split("\\n")) {
+        String[] featurelines = features.split("\\n");
+        for (int i = 0; i < featurelines.length; i++) {
+            String featureNameValue = featurelines[i];
+            if (featureNameValue.startsWith("Features: \t\t")) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(featureNameValue.substring(12));
+                i++;
+                while (i < featurelines.length && featurelines[i].startsWith("\t\t")) {
+                    sb.append("\n");
+                    sb.append(featurelines[i].substring(3));
+                    i++;
+                }
+                ObservableList<Object> row = FXCollections.observableArrayList();
+                data.add(new String[]{"Features", sb.toString()});
+                continue;
+            }
             ObservableList<Object> row = FXCollections.observableArrayList();
             data.add(featureNameValue.split(":"));
         }

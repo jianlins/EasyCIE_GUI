@@ -74,9 +74,17 @@
             </configurationParameter>
             <configurationParameter>
                 <name>DatasetId</name>
-                <description>The Id of dataset
+                <description>The Dataset id
                 </description>
                 <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>TrimText</name>
+                <description>If trim the document text, remove line breaks >2 or in the header or tail
+                </description>
+                <type>Boolean</type>
                 <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>
@@ -116,6 +124,12 @@
                 <name>DatasetId</name>
                 <value>
                     <string>0</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>TrimText</name>
+                <value>
+                    <boolean>false</boolean>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>

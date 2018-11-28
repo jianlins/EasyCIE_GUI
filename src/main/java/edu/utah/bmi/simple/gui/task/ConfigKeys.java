@@ -76,6 +76,7 @@ public class ConfigKeys {
     public static final String referenceRunId = "compare/referenceRunId";
     public static final String strictCompare = "compare/strictCompare";
     public static final String typeFilter = "compare/typeFilter";
+    public static final String typeFeatureFilter = "compare/typeFeatureFilters";
     public static final String categoryFilter = "compare/categoryFilter";
 
 
