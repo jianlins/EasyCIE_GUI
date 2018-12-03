@@ -917,9 +917,9 @@ public class EDAO {
 
 
     public void close() {
+        this.isClosed = true;
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("pseudo close ldao...");
-            this.isClosed = true;
             return;
         }
         try {
@@ -930,7 +930,6 @@ public class EDAO {
                 }
                 stmt.close();
                 con.close();
-                this.isClosed = true;
             }
         } catch (SQLException e) {
             e.printStackTrace();

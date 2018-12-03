@@ -16,7 +16,6 @@
 
 package edu.utah.bmi.nlp.uima;
 
-import edu.utah.bmi.nlp.compiler.MemoryClassLoader;
 import edu.utah.bmi.nlp.compiler.MemoryJavaCompiler;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
@@ -194,6 +193,7 @@ public class DynamicTypeGenerator {
 //                type.addFeature(featureName, "Automatic generated feature", "uima.cas.String");
                     if (featureTypes.containsKey(featureName) && featureTypes.get(featureName) != null && featureTypes.get(featureName).trim().length() > 0) {
                         String featureType = featureTypes.get(featureName);
+
                         if (featureType.indexOf(":") == -1)
                             aFeatures[i] = new FeatureDescription_impl(featureName, "Automatic generated Type", featureType);
                         else {
@@ -230,11 +230,12 @@ public class DynamicTypeGenerator {
         ArrayList<String> filteredFeatureNames = new ArrayList<>();
         if (!superTypefeatureNamesCache.containsKey(superTypeName)) {
             superTypefeatureNamesCache.put(superTypeName, new HashSet<>());
-            Class<? extends Annotation> evidenceTypeClass = AnnotationOper.getTypeClass(superTypeName);
-            if (evidenceTypeClass != null) {
-                for (Method method : evidenceTypeClass.getMethods()) {
-                    if (method.getName().startsWith("get") && method.getParameterCount() == 0) {
-                        String featureName = method.getName().substring(3);
+            Class<? extends Annotation> superTypeClass = AnnotationOper.getTypeClass(superTypeName);
+            if (superTypeClass != null) {
+                for (String featureName : featureNames) {
+                    if (AnnotationOper.getDefaultGetMethod(superTypeClass, featureName) != null) {
+                        if (featureName.startsWith("get"))
+                            featureName = featureName.substring(3);
                         superTypefeatureNamesCache.get(superTypeName).add(featureName);
                     }
                 }
