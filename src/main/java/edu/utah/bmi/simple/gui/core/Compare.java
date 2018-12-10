@@ -10,11 +10,7 @@ import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.sqlite.SQLiteException;
 
-import java.io.File;
-import java.sql.SQLException;
 import java.util.*;
 
 import static edu.utah.bmi.simple.gui.core.CommonFunc.addOption;
@@ -199,8 +195,8 @@ public class Compare {
     protected HashMap<String, EvalCounter> evalAnnotators(String annotator1, String annotator1Table, String runId1,
                                                           String annotator2, String annotator2Table, String runId2,
                                                           String typeFilter) {
-        HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations1 = new HashMap<>();
-        HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations2 = new HashMap<>();
+        HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> annotations1 = new HashMap<>();
+        HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> annotations2 = new HashMap<>();
         readAnnotations(dao1, annotations1, annotator1, annotator1Table, typeFilter, runId1);
         readAnnotations(daor, annotations2, annotator2, annotator2Table, typeFilter, runId2);
 
@@ -210,8 +206,8 @@ public class Compare {
         return evalCounters;
     }
 
-    public HashMap<String, EvalCounter> eval(HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations1,
-                                             HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations2,
+    public HashMap<String, EvalCounter> eval(HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> annotations1,
+                                             HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> annotations2,
                                              Set<String> types, boolean strictCompare) {
         evalCounters = new LinkedHashMap<>();
         for (String type : types) {
@@ -228,7 +224,9 @@ public class Compare {
                     String fileName = annoPerFile.getKey();
 //                            System.out.println("Compare annotations for file: " + fileName);
                     HashMap<String, Object> res = new HashMap<>();
-                    if (annotations2.containsKey(type) && annotations2.get(type).containsKey(fileName)) {
+                    if (type.toLowerCase().endsWith("_doc") || type.toLowerCase().indexOf("_doc:")!=-1) {
+                        docCompare(evalCounter, totalCounter, type, fileName, annotations2);
+                    } else if (annotations2.containsKey(type) && annotations2.get(type).containsKey(fileName)) {
                         if (strictCompare)
                             strictCompare(evalCounter, totalCounter, annoPerFile.getValue(), annotations2.get(type).get(fileName));
                         else
@@ -258,6 +256,24 @@ public class Compare {
         }
         return evalCounters;
     }
+
+    private void docCompare(EvalCounter evalCounter, EvalCounter totalCounter, String type,
+                            String fileName, HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> annotations2) {
+        if (annotations2.containsKey(type)) {
+            if (annotations2.get(type).containsKey(fileName)) {
+                evalCounter.addTp();
+                totalCounter.addTp();
+                annotations2.get(type).remove(fileName);
+            }else{
+                evalCounter.addFp();
+                totalCounter.addFp();
+            }
+        } else {
+            evalCounter.addFp();
+            totalCounter.addFp();
+        }
+    }
+
 
     public void strictCompare(EvalCounter evalCounter, EvalCounter totalCounter, Collection<RecordRow> inputAnnos, Collection<RecordRow> goldAnnos) {
         TreeMap<Integer, RecordRow> sortedAnnos1 = sortOnAbsoluteBegin(inputAnnos);
@@ -362,7 +378,7 @@ public class Compare {
         return sortedAnnos;
     }
 
-    public void readAnnotations(EDAO dao, HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations,
+    public void readAnnotations(EDAO dao, HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> annotations,
                                 String annotator, String annotatorTable, String typeFilter, String runId) {
 
         ArrayList<String> conditions = new ArrayList<>();
@@ -398,7 +414,7 @@ public class Compare {
 
             types.add(type);
             if (!annotations.containsKey(type)) {
-                annotations.put(type, new HashMap<>());
+                annotations.put(type, new LinkedHashMap<>());
             }
             HashMap<String, ArrayList<RecordRow>> fileMap = annotations.get(type);
             String docName = (String) record.getValueByColumnName("DOC_NAME");

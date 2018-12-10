@@ -160,6 +160,8 @@ public class ViewOutputDB extends GUITask {
                     viewAnnotator = referenceAnnotator;
                     currentViewQueryName = "";
                 }
+                if(dao.isClosed())
+                    dao=EDAO.getInstance(new File(outputDB));
                 values = buildQuery(dao, currentViewQueryName, viewAnnotator, snippetTable, docResultTable, bunchResultTable, inputTable);
                 sourceQuery = values[0];
                 String filter = values[1];

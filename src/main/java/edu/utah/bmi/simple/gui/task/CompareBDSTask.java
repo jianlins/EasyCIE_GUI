@@ -2,10 +2,10 @@ package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
-import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
+import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import edu.utah.bmi.simple.gui.core.Compare;
 import edu.utah.bmi.simple.gui.core.EvalCounter;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
@@ -100,8 +100,8 @@ public class CompareBDSTask extends GUITask {
 
     @Override
     protected Object call() throws Exception {
-        HashMap<String, HashMap<String, ArrayList<RecordRow>>> targetAnnotations = new HashMap<>();
-        HashMap<String, HashMap<String, ArrayList<RecordRow>>> referenceAnnotations = new HashMap<>();
+        HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> targetAnnotations = new LinkedHashMap<>();
+        HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> referenceAnnotations = new LinkedHashMap<>();
         typeCategories.clear();
 
         logger.logStartTime();
@@ -130,7 +130,7 @@ public class CompareBDSTask extends GUITask {
         readAnnotations(rdao, referenceAnnotations, referenceAnnotator, compareReferenceTable, typeFilter, typeFeatures, referenceRunId);
         updateGUIMessage("Start comparing...");
         updateGUIProgress(0, 1);
-        HashMap<String, EvalCounter> evalCounters = comparior.eval(targetAnnotations, referenceAnnotations, typeCategories.keySet(), strictCompare);
+        HashMap<String, EvalCounter> evalCounters = comparior.eval(targetAnnotations, referenceAnnotations, referenceAnnotations.keySet(), strictCompare);
         updateGUIProgress(1, 1);
         updateGUIMessage("Compare complete.");
         popDialog("Note", "Report: ", comparior.getScores(evalCounters));
@@ -157,7 +157,7 @@ public class CompareBDSTask extends GUITask {
      * @param runId          run id
      * @see edu.utah.bmi.simple.gui.task.CompareBDSTask#readCompareFeatures(String)
      */
-    public void readAnnotations(EDAO dao, HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations,
+    public void readAnnotations(EDAO dao, HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> annotations,
                                 String annotator, String annotatorTable, String typeFilter,
                                 LinkedHashMap<String, LinkedHashSet<String>> typeFeatures, String runId) {
         updateGUIMessage("Read the annotations of \"" + annotator + "\" from table \"" + annotatorTable + "\"....");
@@ -216,7 +216,7 @@ public class CompareBDSTask extends GUITask {
                 }
             }
             if (!annotations.containsKey(key)) {
-                annotations.put(key, new HashMap<>());
+                annotations.put(key, new LinkedHashMap<>());
             }
             HashMap<String, ArrayList<RecordRow>> fileMap = annotations.get(key);
             String docName = (String) record.getValueByColumnName("DOC_NAME");
@@ -237,6 +237,8 @@ public class CompareBDSTask extends GUITask {
                 String[] pair = nameValue.split(":");
                 String featureName = pair[0].trim();
                 if (featureNames.contains(featureName)) {
+                    sb.append(pair[0]);
+                    sb.append("_");
                     sb.append(pair[1]);
                     sb.append(",");
                 }

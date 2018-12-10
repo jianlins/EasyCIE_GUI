@@ -13,10 +13,7 @@ import javafx.application.Platform;
 
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * Compare annotations against gold standard (based on SQLite, differentiate different annotators by "annotator")
@@ -90,8 +87,8 @@ public class CompareTask extends GUITask {
 
     @Override
     protected Object call() throws Exception {
-        HashMap<String, HashMap<String, ArrayList<RecordRow>>> targetAnnotations = new HashMap<>();
-        HashMap<String, HashMap<String, ArrayList<RecordRow>>> referenceAnnotations = new HashMap<>();
+        HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> targetAnnotations = new HashMap<>();
+        HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> referenceAnnotations = new HashMap<>();
         types.clear();
         logger = new NLPDBLogger(wdao, "LOG", "RUN_ID", targetAnnotator + "_vs_" + referenceAnnotator);
         logger.logStartTime();
@@ -129,7 +126,7 @@ public class CompareTask extends GUITask {
     }
 
 
-    public void readAnnotations(EDAO dao, HashMap<String, HashMap<String, ArrayList<RecordRow>>> annotations,
+    public void readAnnotations(EDAO dao, HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> annotations,
                                 String annotator, String annotatorTable, String typeFilter, String runId) {
         updateGUIMessage("Read the annotations of \"" + annotator + "\" from table \"" + annotatorTable + "\"....");
         ArrayList<String> conditions = new ArrayList<>();
@@ -167,7 +164,7 @@ public class CompareTask extends GUITask {
 
             types.add(type);
             if (!annotations.containsKey(type)) {
-                annotations.put(type, new HashMap<>());
+                annotations.put(type, new LinkedHashMap<>());
             }
             HashMap<String, ArrayList<RecordRow>> fileMap = annotations.get(type);
             String docName = (String) record.getValueByColumnName("DOC_NAME");
