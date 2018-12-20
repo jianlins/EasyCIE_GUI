@@ -30,8 +30,8 @@ import java.util.*;
 public class BratReader extends AbFileCollectionReader {
 
     public static final String PARAM_READ_TYPES = "ReadTypes";
-    protected HashMap<Class, LinkedHashMap<String, Method>> typeSetMethods = new HashMap<>();
-    protected HashMap<Class<? extends Annotation>, Constructor<? extends Annotation>> typeConstructors = new HashMap<>();
+    protected HashMap<Class, HashMap<String, Method>> typeSetMethods = new HashMap<>();
+    protected HashMap<String, Constructor<? extends Annotation>> typeConstructors = new HashMap<>();
     protected HashMap<String, Class<? extends Annotation>> typeClasses = new HashMap<>();
     protected int id = 0;
     protected static final String beginOffset = "<begin>";
@@ -172,7 +172,7 @@ public class BratReader extends AbFileCollectionReader {
         if (!contain)
             return;
 
-        Annotation annotation = typeConstructors.get(typeClasses.get(typeName)).newInstance(jcas);
+        Annotation annotation = typeConstructors.get(typeName).newInstance(jcas);
         annotation.setBegin(begin);
         annotation.setEnd(end);
 
@@ -181,7 +181,7 @@ public class BratReader extends AbFileCollectionReader {
             String featureName = attribute.getKey();
             String value = attribute.getValue();
             String methodName = "set" + featureName.substring(0, 1).toUpperCase() + featureName.substring(1);
-            if (typeClasses.containsKey(typeName) && typeSetMethods.get(typeClasses.get(typeName)).containsKey(methodName)) {
+            if (typeClasses.containsKey(typeName) && typeSetMethods.get(typeName).containsKey(methodName)) {
                 Method featureMethod = typeSetMethods.get(typeClasses.get(typeName)).get(methodName);
                 featureMethod.invoke(annotation, value);
             } else {

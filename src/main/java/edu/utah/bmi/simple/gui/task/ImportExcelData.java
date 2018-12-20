@@ -120,50 +120,46 @@ public class ImportExcelData extends Import {
         HashMap<String, Integer> duplicateNames = new HashMap<>();
 
         int rowCounter = 0, counter = 1;
-        try {
-            Workbook workbook = WorkbookFactory.create(inputFile);
-            Sheet sheet = workbook.getSheet(sheetName);
-            int total = sheet.getLastRowNum();
+        Workbook workbook = WorkbookFactory.create(inputFile);
+        Sheet sheet = workbook.getSheet(sheetName);
+        int total = sheet.getLastRowNum();
 
-            for (Row row : sheet) {
-                rowCounter++;
-                if (rowCounter >= startRowNum) {
-                    row.getCell(docNameColumnPos - 1).setCellType(CellType.STRING);
-                    String docName = row.getCell(docNameColumnPos - 1).getStringCellValue();
-                    if (duplicateNames.containsKey(docName)) {
-                        duplicateNames.put(docName, duplicateNames.get(docName) + 1);
-                        docName += "_" + duplicateNames.get(docName);
-                    } else {
-                        duplicateNames.put(docName, 0);
-                    }
-                    RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
-                            .addCell("DOC_NAME", docName)
-                            .addCell("TEXT", row.getCell(txtColumnPos - 1));
-                    Cell cell;
-                    if (dateColumnPos != -1) {
-                        cell = row.getCell(dateColumnPos - 1);
-                        if (cell.getCellTypeEnum() == CellType.STRING) {
-                            recordRow.addCell("DATE", parseDateString(cell.getStringCellValue()));
-                        } else if (cell.getCellTypeEnum() == CellType.NUMERIC) {
-                            recordRow.addCell("DATE", cell.getDateCellValue());
-                        }
-                    }
-                    dao.insertRecord(importDocTable, recordRow);
-                    if (conclusionColumnPos != -1) {
-                        dao.insertRecord(referenceTable, new RecordRow()
-                                .addCell("DOC_NAME", docName)
-                                .addCell("TYPE", row.getCell(conclusionColumnPos - 1))
-                        );
-                    }
-                    counter++;
-                    updateGUIProgress(rowCounter, total);
-                    rowCounter++;
+        for (Row row : sheet) {
+            rowCounter++;
+            if (rowCounter >= startRowNum) {
+                row.getCell(docNameColumnPos - 1).setCellType(CellType.STRING);
+                String docName = row.getCell(docNameColumnPos - 1).getStringCellValue();
+                if (duplicateNames.containsKey(docName)) {
+                    duplicateNames.put(docName, duplicateNames.get(docName) + 1);
+                    docName += "_" + duplicateNames.get(docName);
+                } else {
+                    duplicateNames.put(docName, 0);
                 }
+                RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
+                        .addCell("DOC_NAME", docName)
+                        .addCell("TEXT", row.getCell(txtColumnPos - 1));
+                Cell cell;
+                if (dateColumnPos != -1) {
+                    cell = row.getCell(dateColumnPos - 1);
+                    if (cell.getCellTypeEnum() == CellType.STRING) {
+                        recordRow.addCell("DATE", parseDateString(cell.getStringCellValue()));
+                    } else if (cell.getCellTypeEnum() == CellType.NUMERIC) {
+                        recordRow.addCell("DATE", cell.getDateCellValue());
+                    }
+                }
+                dao.insertRecord(importDocTable, recordRow);
+                if (conclusionColumnPos != -1) {
+                    dao.insertRecord(referenceTable, new RecordRow()
+                            .addCell("DOC_NAME", docName)
+                            .addCell("TYPE", row.getCell(conclusionColumnPos - 1))
+                    );
+                }
+                counter++;
+                updateGUIProgress(rowCounter, total);
+                rowCounter++;
             }
-
-        } catch (InvalidFormatException e) {
-            e.printStackTrace();
         }
+
         System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
     }
 }

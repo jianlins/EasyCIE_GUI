@@ -7,9 +7,7 @@ import edu.utah.bmi.nlp.uima.Processable;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
-import edu.utah.bmi.simple.gui.task.FastDebugPipe;
 import edu.utah.bmi.simple.gui.task.ViewOutputDB;
-import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
@@ -19,10 +17,8 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 
 public class CellFactories {
 
@@ -171,6 +167,12 @@ public class CellFactories {
         String snippetResultTable = config.getValue(ConfigKeys.snippetResultTableName);
         String docResultTable = config.getValue(ConfigKeys.docResultTableName);
         String bunchResultTable = config.getValue(ConfigKeys.bunchResultTableName);
+        String bunchColumnName = config.getValue("bunchColumnName");
+        if (bunchColumnName.trim().length() == 0)
+            bunchColumnName = "BUNCH_ID";
+        String docIdColumnName = config.getValue("docIdColumnName");
+        if (docIdColumnName.trim().length() == 0)
+            docIdColumnName = "DOC_NAME";
         config = tasks.getTask(ConfigKeys.maintask);
         String annotator = config.getValue(ConfigKeys.annotator);
         String viewQueryName = config.getValue(ConfigKeys.viewQueryName);
@@ -178,7 +180,10 @@ public class CellFactories {
 
         String[] values = ViewOutputDB.buildQuery(dao, viewQueryName, annotator, snippetResultTable, docResultTable, bunchResultTable, inputTable);
         String sourceQuery = values[0];
-        String filter = values[1] + " AND BUNCH_ID=" + bunchId;
+
+        String filter = values[1] + " AND " + bunchColumnName + "=" + bunchId;
+        if (values[1].startsWith("RD"))
+            filter = values[1] + " AND RD." + docIdColumnName + "='" + bunchId + "'";
         String annotatorLastRunid = values[2];
         String lastLogRunId = values[3];
         sourceQuery = ViewOutputDB.modifyQuery(sourceQuery, filter);

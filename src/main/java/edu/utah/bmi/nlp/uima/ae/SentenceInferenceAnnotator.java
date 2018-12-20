@@ -27,7 +27,7 @@ public class SentenceInferenceAnnotator extends JCasAnnotator_ImplBase implement
 
     private HashMap<String, HashMap<String, Method>> evidenceConceptGetFeatures = new LinkedHashMap<>();
 
-    private HashMap<String, Class> conceptClassMap = new HashMap<>();
+    private HashMap<String, Class<? extends Annotation>> conceptClassMap = new HashMap<>();
 
     private HashMap<String, Constructor<? extends Concept>> sentenceTypeConstructorMap = new HashMap<>();
 
