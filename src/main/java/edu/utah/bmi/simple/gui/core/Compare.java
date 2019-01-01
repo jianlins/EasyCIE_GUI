@@ -29,7 +29,7 @@ public class Compare {
     protected HashSet<String> types = new HashSet<>();
     protected Boolean strictCompare = false;
     public final String total = "OVERALL";
-    private HashMap<String, EvalCounter> evalCounters;
+    public HashMap<String, EvalCounter> evalCounters;
 
 
     public static void main(String[] args) {
@@ -146,7 +146,7 @@ public class Compare {
 
     public void logDiff(EDAO dao, NLPDBLogger logger, boolean strictCompare, EvalCounter evalCounter, String annotator, String annotator2, String diffTable) {
         String compareName = annotator + "_vs_" + annotator2;
-        System.out.println("\n" + compareName + " comparision finished. Saving the difference to SQLite...");
+//        System.out.println("\n" + compareName + " comparision finished. Saving the difference to SQLite...");
         logAnnoDifferenceWSentence(dao, logger, compareName, "fn", evalCounter.fns, diffTable);
         logAnnoDifferenceWSentence(dao, logger, compareName, "fp", evalCounter.fps, diffTable);
         logger.logCompletToDB(evalCounter.total(), strictCompare ? "strict compare" : "relax compare");

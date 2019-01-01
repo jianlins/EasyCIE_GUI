@@ -36,7 +36,7 @@ public class RunCPEDescriptorTask extends GUITask {
     public AdaptableCPEDescriptorRunner runner;
     protected LinkedHashMap<String, String> componentsSettings;
     private String cpeDescriptor;
-    private TasksFX tasks;
+    protected TasksFX tasks;
 
 
     public RunCPEDescriptorTask() {
@@ -51,13 +51,11 @@ public class RunCPEDescriptorTask extends GUITask {
     }
 
     public RunCPEDescriptorTask(TasksFX tasks) {
-        initiate(tasks, "db");
+        this.tasks = tasks;
     }
 
     public RunCPEDescriptorTask(TasksFX tasks, String paras) {
-        if (paras == null || paras.length() == 0)
-            initiate(tasks, "db");
-        initiate(tasks, paras);
+        this.tasks = tasks;
     }
 
     protected void initiate(TasksFX tasks, String option) {
