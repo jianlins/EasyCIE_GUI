@@ -1,5 +1,6 @@
 package edu.utah.bmi.simple.gui.controller;
 
+import edu.utah.bmi.nlp.sql.RecordRow;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
@@ -7,6 +8,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static edu.utah.bmi.simple.gui.controller.CellFactories.colorCellFactory;
@@ -41,10 +43,8 @@ public class KeyboardNavRowFactory<T> implements
                     Object value = col.getCellData(rowId);
                     Callback cellFactory = col.getCellFactory();
                     String html;
-                    if (cellFactory == colorCellFactory) {
-                        html = ColorAnnotationCell.generateHTML(value);
-                    } else if (cellFactory == colorCellHidenFactory) {
-                        html = ColorAnnotationCellHide.generateHTML(value);
+                    if (cellFactory == colorCellFactory || cellFactory == colorCellHidenFactory) {
+                        html = ColorAnnotationCell.generateHTMLFromUnKnownType(value);
                     } else {
                         html = value.toString();
                     }

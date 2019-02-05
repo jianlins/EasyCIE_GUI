@@ -118,7 +118,7 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
         hbox.setBackground(background);
         hbox.getChildren().clear();
         for (int i = 0; i < chunks.size(); i++) {
-            String chunk=chunks.get(i).replaceAll("[\\n\\r]", " ");
+            String chunk = chunks.get(i).replaceAll("[\\n\\r]", " ");
             Label label = new Label(chunk);
             if (i == 0) {
                 label.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
@@ -130,15 +130,15 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
             labels.add(label);
         }
         hbox.getChildren().addAll(labels);
-        for(int i=0;i<labels.size()-1;i++){
-            HBox.setHgrow(labels.get(i),Priority.NEVER);
+        for (int i = 0; i < labels.size() - 1; i++) {
+            HBox.setHgrow(labels.get(i), Priority.NEVER);
         }
-        HBox.setHgrow(labels.get(labels.size()-1),Priority.ALWAYS);
+        HBox.setHgrow(labels.get(labels.size() - 1), Priority.ALWAYS);
         setGraphic(hbox);
     }
 
     protected void renderHighlighter(String pre, String marker, String post, String color, Background background) {
-        renderHighlighter(Arrays.asList(new String[]{pre,marker,post}),Arrays.asList(new String[]{"",color,""}),background);
+        renderHighlighter(Arrays.asList(new String[]{pre, marker, post}), Arrays.asList(new String[]{"", color, ""}), background);
 //        pre = pre.replaceAll("\\n", " ");
 //        marker = marker.replaceAll("\\n", " ");
 //        post = post.replaceAll("\\n", " ");
@@ -205,33 +205,42 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
 
 
     public String generateHTML() {
-        return generateHTML(this.itemProperty().getValue());
+        Object value = this.itemProperty().getValue();
+        return generateHTMLFromUnKnownType(value);
     }
 
-    public static String generateHTML(Object value) {
-        String html;
+    public static String generateHTMLFromUnKnownType(Object value) {
         if (value instanceof RecordRow) {
-            RecordRow recordRow = (RecordRow) value;
-            if (recordRow.getValueByColumnName("BEGIN") == null) {
-                if (recordRow.getValueByColumnName("SNIPPET") == null)
-                    html = recordRow.getStrByColumnName("TEXT");
-                else
-                    html = recordRow.getStrByColumnName("SNIPPET");
-            } else {
-                html = recordRow.getStrByColumnName("SNIPPET");
-                String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
-                html = ColorAnnotationCell.generateHTML(html,
-                        getIntValue(recordRow.getValueByColumnName("BEGIN")),
-                        getIntValue(recordRow.getValueByColumnName("END")),
-                        color);
-            }
-            html = html.replaceAll("\\n", "<br>");
+            return generateHTML((RecordRow) value);
         } else {
-            html = value + "";
-            html = html.replaceAll("\\n", "<br>");
+            return generateHTML(value.toString());
         }
-        return html;
+    }
 
+    public static String generateHTML(String value) {
+        String html = value + "";
+        html = html.replaceAll("\\n", "<br>");
+        return html;
+    }
+
+
+    public static String generateHTML(RecordRow recordRow) {
+        String html;
+        if (recordRow.getValueByColumnName("BEGIN") == null) {
+            if (recordRow.getValueByColumnName("SNIPPET") == null)
+                html = recordRow.getStrByColumnName("TEXT");
+            else
+                html = recordRow.getStrByColumnName("SNIPPET");
+        } else {
+            html = recordRow.getStrByColumnName("SNIPPET");
+            String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
+            html = ColorAnnotationCell.generateHTML(html,
+                    getIntValue(recordRow.getValueByColumnName("BEGIN")),
+                    getIntValue(recordRow.getValueByColumnName("END")),
+                    color);
+        }
+        html = html.replaceAll("\\n", "<br>");
+        return html;
     }
 
     public static int getIntValue(Object value) {
