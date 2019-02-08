@@ -8,15 +8,18 @@ import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ImportExcelData extends Import {
     public static Logger logger = IOUtil.getLogger(ImportExcelData.class);
@@ -120,7 +123,8 @@ public class ImportExcelData extends Import {
         HashMap<String, Integer> duplicateNames = new HashMap<>();
 
         int rowCounter = 0, counter = 1;
-        Workbook workbook = WorkbookFactory.create(inputFile);
+        FileInputStream  fileIn = new FileInputStream(inputFile);
+        Workbook workbook =new XSSFWorkbook(fileIn);
         Sheet sheet = workbook.getSheet(sheetName);
         int total = sheet.getLastRowNum();
 
