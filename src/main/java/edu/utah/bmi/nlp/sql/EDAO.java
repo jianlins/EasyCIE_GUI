@@ -17,9 +17,11 @@
 package edu.utah.bmi.nlp.sql;
 
 import edu.utah.bmi.nlp.core.IOUtil;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -121,8 +123,23 @@ public class EDAO {
 
         this.configFile = configFile;
         configReader = ConfigReaderFactory.createConfigReader(configFile);
-
         server = (String) configReader.getValue("server");
+        if (server.startsWith("jdbc:sqlite:")) {
+            String sqlitePath = server.substring(12);
+            int argsIndicator = sqlitePath.indexOf("?");
+            if (argsIndicator > 0)
+                sqlitePath = sqlitePath.substring(0, argsIndicator);
+            File sqliteFile=new File(sqlitePath);
+            if(!sqliteFile.exists() && !sqliteFile.getParentFile().exists()){
+                logger.info(sqliteFile.getAbsolutePath()+" and its parent directory don't exist. \n" +
+                        "Create the directory and the sqlite db file automatically.");
+                try {
+                    FileUtils.forceMkdir(sqliteFile.getParentFile());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         username = (String) configReader.getValue("username");
         password = (String) configReader.getValue("password");
         databaseName = (String) configReader.getValue("databaseName");

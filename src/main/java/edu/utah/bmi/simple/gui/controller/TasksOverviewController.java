@@ -55,6 +55,10 @@ public class TasksOverviewController {
     protected static final ColumnInfo columnInfo = new ColumnInfo();
     public static final String DocView = "DocView", AnnoView = "AnnoView", DebugView = "DebugView", CompareView = "CompareView";
 
+    public static final HashMap<String, Integer> tableMemoRowId = new HashMap<>();
+
+    public static String currentViewName = DocView;
+
     public static TasksOverviewController currentTasksOverviewController;
 
     @FXML
@@ -530,7 +534,7 @@ public class TasksOverviewController {
                 currentDBFileName.put(DebugView, dbName);
                 break;
         }
-        return showDBTable(recordRowIter, columnInfo, colorDifferential, tableView);
+        return showDBTable(recordRowIter, columnInfo, colorDifferential, tableView, tableViewName);
     }
 
     private String[] splitCondition(String sql) {
@@ -585,10 +589,10 @@ public class TasksOverviewController {
                 tableView = debugTableView;
                 break;
         }
-        return showDBTable(rs, columanInfo, colorDifferential, tableView);
+        return showDBTable(rs, columanInfo, colorDifferential, tableView, tableViewName);
     }
 
-    public boolean showDBTable(Iterator rs, ColumnInfo columanInfo, String colorDifferential, TableView tableView) {
+    public boolean showDBTable(Iterator rs, ColumnInfo columanInfo, String colorDifferential, TableView tableView, String tableViewName) {
         dbPanel.setVisible(true);
 //      magic: tabPane won't show without following line
         tabPane.setPrefSize(600, 500);
@@ -694,7 +698,8 @@ public class TasksOverviewController {
 
                 i++;
             }
-            tableView.setRowFactory(new KeyboardNavRowFactory<>(null));
+            tableView.setRowFactory(new KeyboardNavRowFactory(null, tableViewName));
+
             ObservableList columns = tableView.getColumns();
             if (docNamePos > 0) {
                 TableColumn docNameColumn = (TableColumn) columns.get(docNamePos);
@@ -769,7 +774,15 @@ public class TasksOverviewController {
             dao.close();
         tableView.setItems(data);
         tableView.refresh();
+
         showing = false;
+        if (tableMemoRowId.containsKey(tableViewName)) {
+            tableView.getSelectionModel().clearSelection();
+            tableView.requestFocus();
+            System.out.println(tableMemoRowId.get(tableViewName));
+            tableView.getSelectionModel().select(tableMemoRowId.get(tableViewName));
+            tableView.getFocusModel().focus(tableMemoRowId.get(tableViewName));
+        }
         return haveRead;
     }
 

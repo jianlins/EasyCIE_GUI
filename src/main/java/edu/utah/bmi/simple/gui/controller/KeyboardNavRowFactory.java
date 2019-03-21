@@ -17,11 +17,12 @@ import static edu.utah.bmi.simple.gui.controller.CellFactories.colorCellHidenFac
 
 public class KeyboardNavRowFactory<T> implements
         Callback<TableView<T>, TableRow<T>> {
-
     private final Callback<TableView<T>, TableRow<T>> baseFactory;
+    public String viewName;
 
-    public KeyboardNavRowFactory(Callback<TableView<T>, TableRow<T>> baseFactory) {
+    public KeyboardNavRowFactory(Callback<TableView<T>, TableRow<T>> baseFactory, String viewName) {
         this.baseFactory = baseFactory;
+        this.viewName = viewName;
     }
 
     @Override
@@ -36,9 +37,11 @@ public class KeyboardNavRowFactory<T> implements
             if (!isNowFocused) {
                 ObservableList<TablePosition> positions = tableView.getSelectionModel().getSelectedCells();
                 if (positions.size() > 0) {
-                    TablePosition position = tableView.getSelectionModel().getSelectedCells().get(0);
+                    TablePosition position;
+                    position = tableView.getSelectionModel().getSelectedCells().get(0);
                     int colId = position.getColumn();
                     int rowId = position.getRow();
+                    TasksOverviewController.tableMemoRowId.put(viewName, rowId);
                     TableColumn col = position.getTableColumn();
                     Object value = col.getCellData(rowId);
                     Callback cellFactory = col.getCellFactory();
