@@ -68,7 +68,7 @@ public class RootLayoutController {
     private void openURL(String url, String hint) {
         HostServicesDelegate hostServices = HostServicesFactory.getInstance(mainApp);
         if (url.length() == 0) {
-            System.out.println(hint);
+            Main.logger.warning(hint);
         } else {
             hostServices.showDocument(url);
             mainApp.bottomViewController.msg.setText("Navigate to EasyCIE wiki.");

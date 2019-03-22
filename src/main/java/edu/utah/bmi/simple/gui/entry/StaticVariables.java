@@ -1,5 +1,7 @@
 package edu.utah.bmi.simple.gui.entry;
 
+import edu.utah.bmi.simple.gui.controller.Main;
+
 import java.util.*;
 
 /**
@@ -30,7 +32,7 @@ public class StaticVariables {
             if (availableColor.size() > 0) {
                 colorId = availableColor.pop();
             } else {
-                System.out.println("not enough colors in the color pool, randomly pick a used one.");
+                Main.logger.info("not enough colors in the color pool, randomly pick a used one.");
                 colorId = (int) new Random().nextDouble() * availableColor.size();
             }
             color = colorPool.get(colorId);

@@ -7,18 +7,16 @@ import org.apache.commons.io.FileUtils;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
-import org.apache.uima.cas.FSIterator;
-import org.apache.uima.cas.Feature;
-import org.apache.uima.cas.FeatureStructure;
-import org.apache.uima.cas.Type;
+import org.apache.uima.cas.*;
 import org.apache.uima.examples.SourceDocumentInformation;
-import org.apache.uima.fit.util.CasIOUtil;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.tcas.Annotation;
+import org.apache.uima.util.CasIOUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -86,7 +84,7 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
     @Override
     public void process(JCas jCas) throws AnalysisEngineProcessException {
 
-        String FileName = readFileIDName(jCas,nameWId);
+        String FileName = readFileIDName(jCas, nameWId);
         if (uimaTypes.size() > 0 && !uimaTypes.containsKey("")) {
             Iterator<Annotation> iterator = JCasUtil.iterator(jCas, Annotation.class);
             while (iterator.hasNext()) {
@@ -100,7 +98,7 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
         }
 
         try {
-            CasIOUtil.writeXmi(jCas, new File(outputDirectory, FileName + ".xmi"));
+            CasIOUtils.save(jCas.getCas(), new FileOutputStream(new File(outputDirectory, FileName + ".xmi")), SerialFormat.XMI);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -163,7 +161,7 @@ public class XMIWritter_AE extends JCasAnnotator_ImplBase {
                     FeatureStructure child = fs.getFeatureValue(feature);
                     sb.append(child + "");
                 } else {
-                    sb.append("\t"+feature.getShortName() + ":" + fs.getFeatureValueAsString(feature)+"\n");
+                    sb.append("\t" + feature.getShortName() + ":" + fs.getFeatureValueAsString(feature) + "\n");
                 }
             }
 

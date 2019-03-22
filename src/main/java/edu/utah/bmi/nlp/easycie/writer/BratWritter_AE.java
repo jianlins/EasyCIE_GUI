@@ -1,6 +1,7 @@
 package edu.utah.bmi.nlp.easycie.writer;
 
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
 import org.apache.commons.io.FileUtils;
 import org.apache.uima.UimaContext;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -30,7 +32,6 @@ public class BratWritter_AE extends XMIWritter_AE {
 
     public void initialize(UimaContext cont) {
         String includeTypes = baseInit(cont, "data/output/ehost", "uima");
-        typeMethods = UIMATypeFunctions.getTypeMethods(includeTypes);
         attributeToConcepts = new HashMap<>();
         attributeToValues = new HashMap<>();
     }
@@ -45,8 +46,10 @@ public class BratWritter_AE extends XMIWritter_AE {
         Iterator annoIter = annoIndex.iterator();
         while (annoIter.hasNext()) {
             Annotation con = (Annotation) annoIter.next();
-            if (!typeMethods.containsKey(con.getClass()))
-                continue;
+            if (!typeMethods.containsKey(con.getClass())) {
+                typeMethods.put(con.getClass(),new LinkedHashSet<>());
+                AnnotationOper.getMethods(con.getClass(), typeMethods.get(con.getClass()));
+            }
             LinkedHashSet<Method> methods = typeMethods.get(con.getClass());
 
 //            System.out.println(con.getType().getName() + "\t" + con.getCoveredText());
@@ -59,7 +62,7 @@ public class BratWritter_AE extends XMIWritter_AE {
         File outputFile = new File(outputDirectory, fileName + ".ann");
         try {
             FileUtils.writeLines(outputFile, bratAnnotations);
-            FileUtils.writeStringToFile(new File(outputDirectory, fileName + ".txt"), jCas.getDocumentText());
+            FileUtils.writeStringToFile(new File(outputDirectory, fileName + ".txt"), jCas.getDocumentText(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,7 +82,7 @@ public class BratWritter_AE extends XMIWritter_AE {
                 } else {
                     value = valueObj + "";
                 }
-                if(value.trim().length()==0)
+                if (value.trim().length() == 0)
                     continue;
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -128,7 +131,7 @@ public class BratWritter_AE extends XMIWritter_AE {
             }
             config.append("[relations]\n[events]");
             try {
-                FileUtils.writeStringToFile(configFile, config.toString());
+                FileUtils.writeStringToFile(configFile, config.toString(), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 e.printStackTrace();
             }

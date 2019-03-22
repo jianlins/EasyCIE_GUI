@@ -779,7 +779,7 @@ public class TasksOverviewController {
         if (tableMemoRowId.containsKey(tableViewName)) {
             tableView.getSelectionModel().clearSelection();
             tableView.requestFocus();
-            System.out.println(tableMemoRowId.get(tableViewName));
+            Main.logger.info("Retrieve table "+tableViewName+"'s memo row id: "+tableMemoRowId.get(tableViewName));
             tableView.getSelectionModel().select(tableMemoRowId.get(tableViewName));
             tableView.getFocusModel().focus(tableMemoRowId.get(tableViewName));
         }

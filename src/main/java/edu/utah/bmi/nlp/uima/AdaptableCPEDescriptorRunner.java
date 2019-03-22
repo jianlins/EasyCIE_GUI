@@ -20,7 +20,6 @@ package edu.utah.bmi.nlp.uima;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.TypeDefinition;
-import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
 import edu.utah.bmi.simple.gui.entry.SettingAb;
@@ -29,7 +28,10 @@ import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.uima.*;
+import org.apache.uima.CompositeResourceFactory;
+import org.apache.uima.UIMAException;
+import org.apache.uima.UIMAFramework;
+import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.AnalysisComponent;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
@@ -71,7 +73,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static edu.utah.bmi.nlp.core.DeterminantValueSet.defaultSuperTypeName;
-import static org.apache.uima.collection.impl.metadata.cpe.CpeDescriptorFactory.produceCollectionReader;
 
 /**
  * @author Jianlin Shi
@@ -335,7 +336,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         customTypeDescXmlDir = new File(customTypeDescXmlDir, cpeDescripterFileName + "_" + Math.abs(new Random().nextInt()));
         try {
             currentCpeDesc = UIMAFramework.getXMLParser().parseCpeDescription(new XMLInputSource(cpeDescriptor));
-            removeFailedDescriptors(currentCpeDesc, new File(cpeDescriptor));
+
             rootFolder = new File(currentCpeDesc.getSourceUrl().getFile()).getParentFile();
             CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
             for (CpeCollectionReader collReader : collRdrs) {
@@ -349,7 +350,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
             }
             CpeCasProcessors cpeCasProcessors = currentCpeDesc.getCpeCasProcessors();
             updateProcessorsDescriptorConfigurations(cpeCasProcessors, annotator, typeSystems, externalConfigMap);
-
+            removeFailedDescriptors(currentCpeDesc, new File(cpeDescriptor));
         } catch (InvalidXMLException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -16,6 +16,9 @@
 
 package edu.utah.bmi.nlp.easycie.writer;
 
+import edu.utah.bmi.nlp.core.IOUtil;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
+import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
 import edu.utah.bmi.nlp.uima.writer.EhostConfigurator;
 import org.apache.commons.io.FileUtils;
@@ -43,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * This XMIWriter is derived from the simple CAS consumer provided by apache
@@ -67,6 +71,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
      * Name of configuration parameter that must be set to the path of a
      * directory into which the output files will be written.
      */
+    public static Logger logger = IOUtil.getLogger(EhostWriter_AE.class);
 
     public static String PARAM_COLOR_POOL = "ColorPool";
     public static String PARMA_RANDOM_COLOR = "RandomColor";
@@ -104,10 +109,10 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
                 if (value != null)
                     randomColor = (int) value;
             }
-        typeMethods = UIMATypeFunctions.getTypeMethods(includeTypes);
+
 
         mDocNum = 0;
-        System.out.println("Ehost annotations will be exported to: " + outputDirectory);
+        logger.info("Ehost annotations will be exported to: " + outputDirectory);
 
         outputDirectory = new File(outputDirectory, annotator);
 
@@ -188,7 +193,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
             if (typeMethods.size() == 0)
                 writeEhostAnnotation(xtw, annotation);
             else if (typeMethods.containsKey(annotation.getClass())) {
-                System.out.println(annotation.getCoveredText());
+                logger.info(annotation.getCoveredText());
                 writeEhostAnnotation(xtw, annotation);
             }
         }
@@ -235,7 +240,11 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
         xtw.writeEndElement();
         int attributeIds = 0;
 //        System.out.println(annotation.getType().getName() + "\t" + annotation.getCoveredText());
-        for (Method method : getMethods(annotation)) {
+        if (!typeMethods.containsKey(annotation.getClass())) {
+            typeMethods.put(annotation.getClass(), new LinkedHashSet<>());
+            AnnotationOper.getMethods(annotation.getClass(), typeMethods.get(annotation.getClass()));
+        }
+        for (Method method : typeMethods.get(annotation.getClass())) {
             xtw.writeStartElement("stringSlotMention");
             xtw.writeAttribute("id", "EHOST_Instance_" + (elementId + attributeIds));
             attributeIds++;
@@ -326,7 +335,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
             }
 
         }
-        EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeConfigs,colorPool,randomColor);
+        EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeConfigs, colorPool, randomColor);
 
     }
 

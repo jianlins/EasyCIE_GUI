@@ -100,7 +100,7 @@ public class EhostReader extends AbFileCollectionReader {
         fileName = file.getName();
 //        text = readTextAsEhost(file);
         // put document in CAS
-        text = org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        text = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
         jcas.setDocumentText(text);
 
 

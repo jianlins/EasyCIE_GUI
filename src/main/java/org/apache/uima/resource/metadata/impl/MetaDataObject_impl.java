@@ -572,7 +572,6 @@ public abstract class MetaDataObject_impl implements MetaDataObject {
      * multi-core: could be cloning while another thread is modifying?
      */
     public Object clone() {
-        // System.out.println("MetaDataObject_impl: clone");
         MetaDataObject_impl clone = null;
         try {
             // do the default cloning

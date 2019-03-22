@@ -1,6 +1,8 @@
 package edu.utah.bmi.simple.gui.controller;
 
 
+import edu.utah.bmi.nlp.core.IOUtil;
+import edu.utah.bmi.nlp.easycie.writer.EhostWriter_AE;
 import edu.utah.bmi.simple.gui.core.SettingOper;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -29,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javafx.scene.image.Image;
 import org.apache.log4j.BasicConfigurator;
@@ -38,7 +41,7 @@ import org.apache.log4j.BasicConfigurator;
  * @author Jianlin Shi
  */
 public class Main extends Application {
-
+    public static Logger logger = IOUtil.getLogger(Main.class);
     private Stage primaryStage;
     private BorderPane rootLayout;
     private ObservableList<TaskFX> taskParameters = FXCollections.observableArrayList();
