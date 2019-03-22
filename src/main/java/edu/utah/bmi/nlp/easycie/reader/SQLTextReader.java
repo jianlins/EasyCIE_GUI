@@ -41,7 +41,8 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     protected int mCurrentIndex, totalDocs;
     protected RecordRowIterator recordIterator;
     @Deprecated
-    public static boolean debug = false, trimText = false;
+    public static boolean debug = false;
+    public boolean trimText = false;
     private String datasetId;
 
 
@@ -101,11 +102,11 @@ public class SQLTextReader extends CollectionReader_ImplBase {
         RecordRow currentRecord = recordIterator.next();
         String metaInfor = currentRecord.serialize(docColumnName);
         String text = (String) currentRecord.getValueByColumnName(docColumnName);
-        if(trimText){
-            text=text.replaceAll("(\\n[^\\w\\p{Punct}]+\\n)","\n\n")
-                    .replaceAll("(\\n\\s*)+(?:\\n)","\n\n")
-                    .replaceAll("^(\\n\\s*)+(?:\\n)","")
-                    .replaceAll("[^\\w\\p{Punct}\\s]"," ");
+        if (trimText) {
+            text = text.replaceAll("(\\n[^\\w\\p{Punct}]+\\n)", "\n\n")
+                    .replaceAll("(\\n\\s*)+(?:\\n)", "\n\n")
+                    .replaceAll("^(\\n\\s*)+(?:\\n)", "")
+                    .replaceAll("[^\\w\\p{Punct}\\s]", " ");
         }
         logger.finest("Read document: " + currentRecord.getStrByColumnName("DOC_NAME"));
         if (text == null)
@@ -132,7 +133,7 @@ public class SQLTextReader extends CollectionReader_ImplBase {
     }
 
     public Progress[] getProgress() {
-        return new Progress[]{new ProgressImpl(this.mCurrentIndex, totalDocs, "docs")};
+        return new Progress[]{new ProgressImpl(this.mCurrentIndex, totalDocs, Progress.ENTITIES)};
     }
 
     public int getNumberOfDocuments() {

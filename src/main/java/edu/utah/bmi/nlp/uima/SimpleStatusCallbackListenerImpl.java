@@ -10,6 +10,7 @@ import org.apache.uima.cas.CAS;
 import org.apache.uima.collection.CollectionProcessingEngine;
 import org.apache.uima.collection.EntityProcessStatus;
 import org.apache.uima.collection.StatusCallbackListener;
+import org.apache.uima.collection.base_cpm.BaseCollectionReader;
 import org.apache.uima.util.ProcessTraceEvent;
 import org.apache.uima.util.Progress;
 
@@ -65,7 +66,8 @@ public class SimpleStatusCallbackListenerImpl implements StatusCallbackListener 
             return;
         }
         int totalDocs = 0;
-        Progress[] progress = this.mCPE.getCollectionReader().getProgress();
+        BaseCollectionReader reader = this.mCPE.getCollectionReader();
+        Progress[] progress = reader.getProgress();
         if (progress != null) {
             for (int i = 0; i < progress.length; ++i) {
                 if (progress[i].getUnit().equals(this.logger.getUnit())) {

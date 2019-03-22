@@ -77,6 +77,8 @@ public class EhostXMLParser {
         getTypesFromSchema(types, xmlContent);
         for (Map.Entry<String, HashSet<String>> entry : types.entrySet()) {
             String typeName = entry.getKey().replaceAll(" +", "_");
+            if(typeName.trim().length()==0)
+                continue;
             if (typeName.toLowerCase().endsWith("_doc")) {
                 typeDefinitions.put(typeName, new TypeDefinition(typeName, Doc_Base.class.getCanonicalName(), entry.getValue()));
             } else
@@ -89,7 +91,6 @@ public class EhostXMLParser {
         HashSet<String> attributes = new HashSet();
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         LinkedHashSet<Method> methods = new LinkedHashSet<>();
-        UIMATypeFunctions.getMethods(Concept.class, methods);
         HashSet<String> commonAttribs = new HashSet<>();
         for (Method method : methods) {
             commonAttribs.add(method.getName().substring(3));

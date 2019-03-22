@@ -22,6 +22,7 @@ import org.apache.uima.cas.CAS;
 import org.apache.uima.collection.EntityProcessStatus;
 import org.apache.uima.resource.ResourceManager;
 import org.apache.uima.util.Level;
+import org.apache.uima.util.Progress;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -41,7 +42,7 @@ public class ConsoleLogger implements UIMALogger {
     protected long size = 0L;
     protected int entityCount = 0;
     protected LinkedHashMap<String, Object> loggedItems = new LinkedHashMap();
-    protected String unit = "docs";
+    protected String unit = Progress.ENTITIES;
     protected boolean report = true;
     protected DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
@@ -258,7 +259,7 @@ public class ConsoleLogger implements UIMALogger {
                 syslogger.log(java.util.logging.Level.ALL, aMessage);
                 break;
             case Level.CONFIG_INT:
-                syslogger.log(java.util.logging.Level.CONFIG,aMessage);
+                syslogger.log(java.util.logging.Level.CONFIG, aMessage);
             default:
                 break;
         }

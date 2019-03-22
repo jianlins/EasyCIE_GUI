@@ -1,9 +1,12 @@
 package edu.utah.bmi.nlp.easycie.reader;
 
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
+import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.NameFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.collection.CollectionException;
@@ -12,8 +15,6 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.ResourceConfigurationException;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.apache.uima.util.FileUtils;
-import org.apache.uima.util.Progress;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -28,12 +29,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.logging.Logger;
+
+import static edu.utah.bmi.nlp.uima.common.AnnotationOper.initSetReflections;
 
 /**
  * @author Jianlin Shi on 5/20/16.
  */
 public class EhostReader extends AbFileCollectionReader {
 
+    public static Logger logger = IOUtil.getLogger(EhostReader.class);
     public static final String PARAM_READ_TYPES = "ReadTypes";
     protected HashMap<Class, HashMap<String, Method>> typeSetMethods = new HashMap<>();
     protected HashMap<String, Constructor<? extends Annotation>> typeConstructors = new HashMap<>();
@@ -66,12 +71,13 @@ public class EhostReader extends AbFileCollectionReader {
             print = (Boolean) para;
         }
 
-        mFiles = new ArrayList<>();
-        mFiles = UIMATypeFunctions.addFilesFromDir(directory, "txt", true);
+        mFiles = new ArrayList<>(FileUtils.listFiles(directory, new String[]{"txt"}, true));
+
         mCurrentIndex = 0;
         mEncoding = "UTF-8";
 
-        UIMATypeFunctions.getTypes(readTypes, typeClasses, typeConstructors, typeSetMethods);
+        LinkedHashMap<String, TypeDefinition> typeDefinitions = getTypeDefinitionMap(directory.getAbsolutePath());
+        initSetReflections(typeDefinitions, typeClasses, typeConstructors, typeSetMethods);
 //        String typeDescriptorFile = "desc/type/customized";
 //        if (!new File(typeDescriptorFile + ".xml").exists()) {
 //            typeDescriptorFile = "desc/type/All_Types";
@@ -90,8 +96,7 @@ public class EhostReader extends AbFileCollectionReader {
 
         // open input stream to file
         File file = mFiles.get(mCurrentIndex++);
-        if (print)
-            System.out.print("Import annotations for file: " + file.getName() + "\t\t");
+        logger.fine("Import annotations for file: " + file.getName() + "\t\t");
         fileName = file.getName();
 //        text = readTextAsEhost(file);
         // put document in CAS
@@ -105,7 +110,7 @@ public class EhostReader extends AbFileCollectionReader {
         }
 
         File xmlFile = new File(file.getParentFile().getParentFile(), "saved/" + fileName + ".knowtator.xml");
-        xmlContent = FileUtils.file2String(xmlFile);
+        xmlContent = FileUtils.readFileToString(xmlFile, mEncoding);
         // Also store location of source document in CAS. This information is critical
         // if CAS Consumers will need to know where the original document contents are located.
         // For example, the Semantic Search CAS Indexer writes this information into the
@@ -118,8 +123,7 @@ public class EhostReader extends AbFileCollectionReader {
         srcDocInfo.setLastSegment(mCurrentIndex == mFiles.size());
         srcDocInfo.addToIndexes();
         parseXML(jcas, text, xmlContent, fileName);
-        if (print)
-            System.out.println("Success!");
+        logger.fine("Success!");
 
     }
 
@@ -267,27 +271,26 @@ public class EhostReader extends AbFileCollectionReader {
 
     protected void addAnnotation(JCas jcas, String typeName, LinkedHashMap<String, String> attributes)
             throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        typeName = DeterminantValueSet.checkNameSpace(typeName);
+        typeName = DeterminantValueSet.getShortName(typeName);
         int begin = Integer.parseInt(attributes.get("Begin"));
         int end = Integer.parseInt(attributes.get("End"));
         attributes.remove("Begin");
         attributes.remove("End");
         if (!typeClasses.containsKey(typeName))
             return;
-        Annotation annotation = typeConstructors.get(typeName).newInstance(jcas);
-        annotation.setBegin(begin);
-        annotation.setEnd(end);
+        Annotation annotation = typeConstructors.get(typeName).newInstance(jcas, begin, end);
 
 //      Set feature values
         for (Map.Entry<String, String> attribute : attributes.entrySet()) {
             String featureName = attribute.getKey();
             String value = attribute.getValue();
             String methodName = "set" + featureName.substring(0, 1).toUpperCase() + featureName.substring(1);
-            if (typeClasses.containsKey(typeName) && typeSetMethods.get(typeName).containsKey(methodName)) {
+            if (typeClasses.containsKey(typeName)
+                    && typeSetMethods.get(typeClasses.get(typeName)).containsKey(methodName)) {
                 Method featureMethod = typeSetMethods.get(typeClasses.get(typeName)).get(methodName);
                 featureMethod.invoke(annotation, value);
             } else {
-                System.out.println(methodName + "doesn't exist in " + typeName);
+                logger.info(methodName + "  was defined in Java class name, but doesn't exist in Ehost annotation type " + typeName);
             }
         }
         annotation.addToIndexes();
@@ -295,30 +298,31 @@ public class EhostReader extends AbFileCollectionReader {
 
 
     @Override
-    public Progress[] getProgress() {
-        return new Progress[0];
-    }
-
-    @Override
     public void close() {
 
     }
 
-    public static Collection<TypeDefinition> getTypeDefinitions(String projectDir) {
+    public static LinkedHashMap<String, TypeDefinition> getTypeDefinitionMap(String projectDir) {
         LinkedHashMap<String, TypeDefinition> typeDefinition = new LinkedHashMap<>();
         File inputDir = new File(projectDir);
         if (!inputDir.exists() || inputDir.isFile()) {
             System.err.println("Project Directory " + projectDir + " does not exist.");
             return null;
         }
-        ArrayList<File> schemaFiles = UIMATypeFunctions.addFilesFromDir(inputDir, "projectschema.xml", true);
+        Collection<File> schemaFiles = FileUtils.listFiles(inputDir, new NameFileFilter("projectschema.xml"), TrueFileFilter.INSTANCE);
+
         for (File schemaFile : schemaFiles) {
             try {
-                EhostXMLParser.getTypesFromSchema(typeDefinition, FileUtils.file2String(schemaFile));
+                EhostXMLParser.getTypesFromSchema(typeDefinition, FileUtils.readFileToString(schemaFile, StandardCharsets.UTF_8));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        return typeDefinition;
+    }
+
+    public static Collection<TypeDefinition> getTypeDefinitions(String projectDir) {
+        LinkedHashMap<String, TypeDefinition> typeDefinition = getTypeDefinitionMap(projectDir);
         return typeDefinition.values();
     }
 }
