@@ -131,7 +131,7 @@ public class EDAO {
                 sqlitePath = sqlitePath.substring(0, argsIndicator);
             File sqliteFile=new File(sqlitePath);
             if(!sqliteFile.exists() && !sqliteFile.getParentFile().exists()){
-                logger.info(sqliteFile.getAbsolutePath()+" and its parent directory don't exist. \n" +
+                logger.fine(sqliteFile.getAbsolutePath()+" and its parent directory don't exist. \n" +
                         "Create the directory and the sqlite db file automatically.");
                 try {
                     FileUtils.forceMkdir(sqliteFile.getParentFile());

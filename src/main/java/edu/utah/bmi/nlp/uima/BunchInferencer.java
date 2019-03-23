@@ -93,7 +93,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase implements RuleBased
 				for (int i = 3; i < initRow.size(); i++) {
 					String value = initRow.get(i);
 					if (valueFeatureMap.containsKey(value)) {
-						logger.info("You have more than one features have the value: " + value +
+						logger.fine("You have more than one features have the value: " + value +
 								". You won't be able to use the value alone to define the conditions." +
 								"Instead, you will need to use 'FeatureName:value' format.");
 					} else {

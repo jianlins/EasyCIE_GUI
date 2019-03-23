@@ -451,7 +451,7 @@ public class AggregateAEsRunner {
                         aed.getMetaData().getConfigurationParameterSettings().setParameterValue(name, Double.parseDouble(valueStr));
                         break;
                     default:
-                        logger.info("Uima type: " + type + " is not supported in the current configuration setting.");
+                        logger.fine("Uima type: " + type + " is not supported in the current configuration setting.");
                         break;
                 }
             }
@@ -475,7 +475,7 @@ public class AggregateAEsRunner {
                     Class<?> aeCls = Class.forName(className);
                     if (RuleBasedAEInf.class.isAssignableFrom(aeCls)) {
                         String ruleStr = (String) aed.getMetaData().getConfigurationParameterSettings().getParameterValue(DeterminantValueSet.PARAM_RULE_STR);
-                        logger.info("Add type system for " + aed.getMetaData().getName() + "\t from file: " + ruleStr);
+                        logger.fine("Add type system for " + aed.getMetaData().getName() + "\t from file: " + ruleStr);
                         this.runner.addConceptTypes(((RuleBasedAEInf) aeCls.newInstance()).getTypeDefs(ruleStr).values());
                     }
                 } catch (InvalidXMLException e) {

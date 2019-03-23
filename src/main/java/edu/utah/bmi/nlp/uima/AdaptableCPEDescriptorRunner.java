@@ -1210,7 +1210,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public void run() {
         try {
             if (status == 1) {
-                classLogger.info("Pipeline is running. Please wait till finish.");
+                classLogger.fine("Pipeline is running. Please wait till finish.");
                 return;
             }
 

@@ -3,7 +3,7 @@
 <configurations> 
   <import> 
     <documents> 
-      <corpusDir memo="The directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/sample_txts</corpusDir>  
+      <corpusDir memo="The directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">../../HAI/Ajudication/Batch_1</corpusDir>  
       <includeFileTypes memo="Filter files by extension names (separate by comma). If not filter defined, all files will be read">txt</includeFileTypes> 
     </documents>  
     <excelData> 
@@ -15,7 +15,7 @@
       <startRowNum memo="Start to import from row #(you need to skip header columns, if there is any)">2</startRowNum> 
     </excelData>  
     <annotations memo="support Brat and eHOST format, the format will be automatically detected."> 
-      <projectDir memo="the directory that hosts the eHOST project" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/n2c2/train</projectDir>  
+      <projectDir memo="the directory that hosts the eHOST project" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">../../HAI/Ajudication/Batch_1</projectDir>  
       <includeAnnotationTypes>Concept, Doc_Base</includeAnnotationTypes>  
       <enableSentenceSnippet>true</enableSentenceSnippet>  
       <overWriteAnnotatorName memo="if a name is set, all the annotations' annotator will be overwritten by this name">gold</overWriteAnnotatorName> 
@@ -64,6 +64,9 @@
     <annotators> 
       <current memo="Mark current annotations with annotator: ">v5</current> 
     </annotators>  
+    <view> 
+      <queryName>DocSnippet</queryName> 
+    </view>  
     <executes> 
       <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunEasyCIE>  
       <ViewOutputInDB memo="View the output in database">edu.utah.bmi.simple.gui.task.ViewOutputDB</ViewOutputInDB> 
@@ -151,7 +154,7 @@
       <color_pool>ffa94d|efdecd|ffbf00|00ffff|9966cc|ed872d|a3c13d|a4c659|8db600|89cff0|fb8e51|7fffd4|e9d66b|87a96b|ff9966|21abcd|deb887|848482|f4c2c2|ff2052|a1caf1|007fff|b2beb5|5d8aa8</color_pool>  
       <width memo="The column width in view table"> 
         <ID>50</ID>  
-        <DOC_NAME>50</DOC_NAME>  
+        <DOC_NAME>150</DOC_NAME>  
         <BUNCH_TYPE>140</BUNCH_TYPE>  
         <DOC_TYPE>100</DOC_TYPE>  
         <TYPE>140</TYPE>  

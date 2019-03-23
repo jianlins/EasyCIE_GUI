@@ -43,6 +43,8 @@ public class KeyboardNavRowFactory<T> implements
                     int rowId = position.getRow();
                     TasksOverviewController.tableMemoRowId.put(viewName, rowId);
                     TableColumn col = position.getTableColumn();
+                    if (col == null)
+                        col = tableView.getColumns().get(0);
                     Object value = col.getCellData(rowId);
                     Callback cellFactory = col.getCellFactory();
                     String html;

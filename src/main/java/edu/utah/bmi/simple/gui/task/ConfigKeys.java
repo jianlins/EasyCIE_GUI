@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 public class ConfigKeys {
 
     public static String mainBasePath = null;
+    public static final String imporTask="import";
     public static final String importDir = "documents/corpusDir";
     //    import excel configs
     public static final String importExcel = "excelData/filePath";
@@ -29,6 +30,8 @@ public class ConfigKeys {
 
     public static final String owlFile = "ontology/owlFile";
     public static final String owlExportDir = "ontology/exportDir";
+
+    public static final String easycieTask="easycie";
 
     public static final String sectionRule = "pipeLineSetting/sectionRule";
     public static final String tRuleFile = "pipeLineSetting/tRule";
@@ -51,6 +54,7 @@ public class ConfigKeys {
     public static final String featureMergerRule = "pipeLineSetting/featureMergerRule";
     public static final String bunchInfRule = "pipeLineSetting/bunchInfRule";
 
+    public static final String exportTask="export";
     public static final String outputEhostDir = "format/ehost";
     public static final String outputBratDir = "format/brat";
     public static final String outputXMIDir = "format/uima";

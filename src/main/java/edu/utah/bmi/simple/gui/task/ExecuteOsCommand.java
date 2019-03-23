@@ -1,6 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 
+import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.concurrents.Task;
@@ -72,42 +73,55 @@ public class ExecuteOsCommand extends Task {
     @Override
     protected Object call() throws Exception {
         updateMessage("execute: " + command);
+        String stb = execute(command, true);
+        updateProgress(1, 1);
+        if (logger.isLoggable(Level.FINE)) {
+            updateMessage("Execute Results:|Command \"" + command + "\":|" + stb + "|Execute complete.");
+        }
+        return null;
+    }
+
+    public static String execute(String command, boolean wait, GUITask... tasks) {
         java.lang.Runtime rt = java.lang.Runtime.getRuntime();
         // Start a new process: UNIX command ls
         Process p = null;
         StringBuilder stb = new StringBuilder();
+        GUITask task = tasks.length > 0 ? tasks[0] : null;
         try {
             p = rt.exec(command);
 
             // Show exit code of process
-
-            BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line ;
-            while ((line = b.readLine()) != null) {
-                if (line.startsWith("prg:")) {
-                    String[] progressNums = line.substring(4).trim().split(",");
-                    Long workDone = Long.parseLong(progressNums[0]);
-                    Long max = Long.parseLong(progressNums[1]);
-                    updateProgress(workDone, max);
-                } else if (line.startsWith("msg:")) {
-                    updateMessage(line.substring(4));
-                } else {
-                    stb.append(line);
-                    stb.append("\n");
+            if (wait) {
+                BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line;
+                while ((line = b.readLine()) != null) {
+                    if (task != null) {
+                        if (line.startsWith("prg:")) {
+                            String[] progressNums = line.substring(4).trim().split(",");
+                            Long workDone = Long.parseLong(progressNums[0]);
+                            Long max = Long.parseLong(progressNums[1]);
+                            task.updateGUIProgress(workDone, max);
+                        } else if (line.startsWith("msg:")) {
+                            task.updateGUIMessage(line.substring(4));
+                        } else {
+                            stb.append(line);
+                            stb.append("\n");
+                        }
+                    } else {
+                        stb.append(line);
+                        stb.append("\n");
+                    }
                 }
+
+                p.waitFor();
+                b.close();
             }
-            p.waitFor();
-            b.close();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        updateProgress(1, 1);
-        if (logger.isLoggable(Level.FINE)) {
-            updateMessage("Execute Results:|Command \"" + command + "\":|" + stb.toString() + "|Execute complete.");
-        }
-        return null;
+        return stb.toString();
     }
 
 }

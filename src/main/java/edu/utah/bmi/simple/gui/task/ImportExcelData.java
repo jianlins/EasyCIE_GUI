@@ -164,6 +164,6 @@ public class ImportExcelData extends Import {
             }
         }
 
-        logger.info("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
+        logger.fine("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
     }
 }

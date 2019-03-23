@@ -1,9 +1,11 @@
 package edu.utah.bmi.simple.gui.controller;
 
+import edu.utah.bmi.nlp.sql.ColumnInfo;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorStringDebugger;
 import edu.utah.bmi.nlp.uima.Processable;
+import edu.utah.bmi.simple.gui.doubleclick.OpenEhost;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
@@ -35,33 +37,37 @@ public class CellFactories {
         return contextMenu;
     }
 
-    public static Processable debugRunner;
-
 
     public static Callback<TableColumn, TableCell> colorCellFactory =
             p -> {
                 ColorAnnotationCell cell = new ColorAnnotationCell();
                 cell.setOnMouseClicked(e -> {
+                    TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
+                    TabPane tabPane = tasksOverviewController.tabPane;
+                    SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
+                    int selectedTabIdx = selectModel.getSelectedIndex();
                     if (!cell.isEmpty()) {
                         Object item = cell.getItem();
                         Color color = Color.LIGHTGREY;
                         cell.setBackground(new Background(new BackgroundFill(color, null, null)));
                         String html = cell.generateHTML();
                         TasksOverviewController.currentTasksOverviewController.updateHTMLEditor(html, item);
-
+                        if (e.getClickCount() == 2 &&
+                                (selectedTabIdx == 1 || selectedTabIdx == 2 || selectedTabIdx == 3)) {
+                            if (item instanceof RecordRow) {
+                                CellActions.showInEhost((RecordRow) item);
+                            }
+                        }
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
-                        TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
-                        TabPane tabPane = tasksOverviewController.tabPane;
-                        SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
-                        if (selectModel.isSelected(1)) {
+                        if (selectedTabIdx == 2 || selectedTabIdx == 1) {
 //                            System.out.println("Start debugging...");
                             TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                             if (cell.getItem() instanceof RecordRow) {
                                 RecordRow recordRow = (RecordRow) cell.getItem();
                                 String text = "";
                                 recordRow.addCell("TEXT", recordRow.getStrByColumnName("SNIPPET"));
-                                new Thread(() -> process(recordRow)).start();
+                                CellActions.process(recordRow);
                             }
                         }
 
@@ -95,10 +101,10 @@ public class CellFactories {
                         TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
                         TabPane tabPane = tasksOverviewController.tabPane;
                         SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
-                        if (selectModel.isSelected(2)) {
+                        if (selectModel.isSelected(3)) {
                             RecordRow recordRow = (RecordRow) cell.getItem();
                             String bunchId = recordRow.getStrByColumnName("DOC_NAME");
-                            selectModel.select(1);
+                            selectModel.select(2);
                             viewBunchId(bunchId);
 //                            int rowNum=tasksOverviewController.docIdRowPosMap.get(1).get(bunchId);
 //                            tasksOverviewController.annoTableView.scrollTo(rowNum);
@@ -114,7 +120,7 @@ public class CellFactories {
                                     text = recordRow.getStrByColumnName("DOC_TEXT");
                                 }
                                 recordRow.addCell("TEXT", text);
-                                process(recordRow);
+                                CellActions.process(recordRow);
 //                                new Thread(() -> process(recordRow, docText)).start();
 //                            new Thread(() -> fastDebugPipe.run()).start();
                             }
@@ -192,42 +198,5 @@ public class CellFactories {
         return res;
     }
 
-    public static String initDBdebugger() {
-        String clsName = "";
-        if (TasksOverviewController.currentTasksOverviewController != null) {
-            TasksFX tasks = TasksOverviewController.currentTasksOverviewController.mainApp.tasks;
-            clsName = tasks.getTask("settings").getValue("debug/class");
-            try {
-                Class debuggerCls = Class.forName(clsName);
-                Method getInstanceMethod = debuggerCls.getMethod("getInstance", TasksFX.class);
-                Object debugger = getInstanceMethod.invoke(null, tasks);
-                if (debugger.getClass().isAssignableFrom(Processable.class)) {
-                    debugRunner = (Processable) debugger;
-                } else if (Processable.class.isAssignableFrom(debugger.getClass())) {
-                    debugRunner = (Processable) debugger;
-                }
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
-        }
-        return clsName;
-    }
 
-    public static void process(RecordRow recordRow) {
-        String clsName = "";
-        clsName = initDBdebugger();
-        if (debugRunner != null) {
-            debugRunner.process(recordRow, "TEXT", "FEATURES", "COMMENTS", "ANNOTATOR", "DOC_TEXT",
-                    "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
-            debugRunner.showResults();
-        } else {
-            AdaptableCPEDescriptorStringDebugger.classLogger.warning("Class not found: " + clsName);
-        }
-    }
 }

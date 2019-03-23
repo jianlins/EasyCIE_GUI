@@ -290,7 +290,7 @@ public class EhostReader extends AbFileCollectionReader {
                 Method featureMethod = typeSetMethods.get(typeClasses.get(typeName)).get(methodName);
                 featureMethod.invoke(annotation, value);
             } else {
-                logger.info(methodName + "  was defined in Java class name, but doesn't exist in Ehost annotation type " + typeName);
+                logger.fine(methodName + "  was defined in Java class name, but doesn't exist in Ehost annotation type " + typeName);
             }
         }
         annotation.addToIndexes();

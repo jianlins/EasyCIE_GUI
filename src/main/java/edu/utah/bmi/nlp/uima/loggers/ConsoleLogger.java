@@ -247,7 +247,7 @@ public class ConsoleLogger implements UIMALogger {
                 syslogger.fine(aMessage);
                 break;
             case Level.INFO_INT:
-                syslogger.info(aMessage);
+                syslogger.fine(aMessage);
                 break;
             case Level.WARNING_INT:
                 syslogger.warning(aMessage);

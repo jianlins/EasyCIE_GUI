@@ -32,7 +32,7 @@ public class StaticVariables {
             if (availableColor.size() > 0) {
                 colorId = availableColor.pop();
             } else {
-                Main.logger.info("not enough colors in the color pool, randomly pick a used one.");
+                Main.logger.fine("not enough colors in the color pool, randomly pick a used one.");
                 colorId = (int) new Random().nextDouble() * availableColor.size();
             }
             color = colorPool.get(colorId);

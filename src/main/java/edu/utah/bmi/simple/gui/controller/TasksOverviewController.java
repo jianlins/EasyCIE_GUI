@@ -53,7 +53,10 @@ import static edu.utah.bmi.simple.gui.controller.CellFactories.*;
  */
 public class TasksOverviewController {
     protected static final ColumnInfo columnInfo = new ColumnInfo();
-    public static final String DocView = "DocView", AnnoView = "AnnoView", DebugView = "DebugView", CompareView = "CompareView";
+    public static final String DocView = "DocView", AnnoView = "AnnoView",
+            DebugView = "DebugView", CompareView = "CompareView", RefView = "RefView";
+
+    protected HashMap<String, Integer> selectedRows = new HashMap<>();
 
     public static final HashMap<String, Integer> tableMemoRowId = new HashMap<>();
 
@@ -85,7 +88,7 @@ public class TasksOverviewController {
     private TableView docTableView, compareTableView, debugTableView;
 
     @FXML
-    public TableView annoTableView;
+    public TableView annoTableView, refTableView;
 
     @FXML
     public TabPane tabPane;
@@ -101,10 +104,10 @@ public class TasksOverviewController {
 
 
     @FXML
-    public Button annoTableRefresh, docTableRefresh, compareTableRefresh;
+    public Button annoTableRefresh, docTableRefresh, compareTableRefresh, refTableRefresh;
 
     @FXML
-    public TextField annoSqlFilter, docSqlFilter, compareSqlFilter;
+    public TextField annoSqlFilter, docSqlFilter, compareSqlFilter, refSqlFilter;
 
 
     private TaskFX currentTask;
@@ -264,6 +267,23 @@ public class TasksOverviewController {
                 }
             }
         });
+
+        refTableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent ke) {
+                refreshTableView(RefView, refSqlFilter);
+            }
+        });
+
+        refSqlFilter.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent ke) {
+                if (ke.getCode().equals(KeyCode.ENTER)) {
+                    refreshTableView(RefView, refSqlFilter);
+                }
+            }
+        });
+
         compareTableRefresh.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -280,36 +300,51 @@ public class TasksOverviewController {
             }
         });
 
-        tabPane.getSelectionModel().selectedItemProperty().addListener((ov, oldTab, newTab) -> {
-            String tabName = newTab.getText();
-            switch (tabName) {
-                case DocView:
-                    if (currentSQLs.containsKey(DocView)) {
-                        refreshTableView(DocView, docSqlFilter);
-                    } else {
-                        executeTaskClass("edu.utah.bmi.simple.gui.task.ViewImportDB");
-                    }
-                    break;
-                case AnnoView:
-                    if (currentSQLs.containsKey(AnnoView)) {
-                        refreshTableView(AnnoView, annoSqlFilter);
-                    } else {
-                        executeTaskClass("edu.utah.bmi.simple.gui.task.ViewOutputDB");
-                    }
-                    break;
-                case CompareView:
-                    if (currentSQLs.containsKey(CompareView)) {
-                        refreshTableView(CompareView, compareSqlFilter);
-                    } else {
-                        executeTaskClass("edu.utah.bmi.simple.gui.task.ViewDiffDB");
-                    }
-                    break;
-                case DebugView:
-                    refreshDebugView();
-                    break;
 
-            }
-        });
+        tabPane.getSelectionModel().selectedItemProperty().addListener(
+                new ChangeListener<Tab>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Tab> ov, Tab oldTab, Tab newTab) {
+                        logCurrentSelectedRow(oldTab.getText());
+                        String tabName = newTab.getText();
+                        switch (tabName) {
+                            case DocView:
+                                if (currentSQLs.containsKey(DocView)) {
+                                    refreshTableView(DocView, docSqlFilter);
+                                } else {
+                                    executeTaskClass("edu.utah.bmi.simple.gui.task.ViewImportDB");
+                                }
+                                break;
+                            case RefView:
+                                if (currentSQLs.containsKey(RefView)) {
+                                    refreshTableView(RefView, refSqlFilter);
+                                } else {
+                                    executeTaskClass("edu.utah.bmi.simple.gui.task.ViewOutputDB ref");
+                                }
+                                break;
+                            case AnnoView:
+                                if (currentSQLs.containsKey(AnnoView)) {
+                                    refreshTableView(AnnoView, annoSqlFilter);
+                                } else {
+                                    executeTaskClass("edu.utah.bmi.simple.gui.task.ViewOutputDB");
+                                }
+                                break;
+                            case CompareView:
+                                if (currentSQLs.containsKey(CompareView)) {
+                                    refreshTableView(CompareView, compareSqlFilter);
+                                } else {
+                                    executeTaskClass("edu.utah.bmi.simple.gui.task.ViewDiffDB");
+                                }
+                                break;
+                            case DebugView:
+                                refreshDebugView();
+                                break;
+
+                        }
+                    }
+                }
+
+        );
 
 
         Callback<TableColumn, TableCell> doubleClickableCellFactory =
@@ -413,6 +448,47 @@ public class TasksOverviewController {
         });
     }
 
+    private void logCurrentSelectedRow(String tablName) {
+        switch (tablName) {
+            case DocView:
+                selectedRows.put(DocView, docTableView.getSelectionModel().getSelectedIndex());
+                System.out.println(docTableView.getSelectionModel().getSelectedIndex());
+                break;
+            case RefView:
+                selectedRows.put(RefView, refTableView.getSelectionModel().getSelectedIndex());
+                break;
+            case AnnoView:
+                selectedRows.put(AnnoView, annoTableView.getSelectionModel().getSelectedIndex());
+                break;
+            case CompareView:
+                selectedRows.put(CompareView, compareTableView.getSelectionModel().getSelectedIndex());
+                break;
+            case DebugView:
+                selectedRows.put(DebugView, debugTableView.getSelectionModel().getSelectedIndex());
+                break;
+        }
+    }
+
+    private void resumeSelectedRow(String tableName) {
+        switch (tableName) {
+            case DocView:
+                docTableView.getSelectionModel().clearAndSelect(selectedRows.get(DocView));
+                break;
+            case RefView:
+                refTableView.getSelectionModel().clearAndSelect(selectedRows.get(RefView));
+                break;
+            case AnnoView:
+                annoTableView.getSelectionModel().clearAndSelect(selectedRows.get(AnnoView));
+                break;
+            case CompareView:
+                compareTableView.getSelectionModel().clearAndSelect(selectedRows.get(CompareView));
+                break;
+            case DebugView:
+                debugTableView.getSelectionModel().clearAndSelect(selectedRows.get(DebugView));
+                break;
+        }
+    }
+
 
     public void refreshTableView(String viewName, TextField sqlFilter) {
         if (!showing) {
@@ -425,6 +501,7 @@ public class TasksOverviewController {
             }
             String sql = currentSQLs.get(viewName) + condition;
             showDBTable(sql, currentDBFileName.get(viewName), ColorAnnotationCell.colorDifferential, viewName);
+            resumeSelectedRow(viewName);
         }
     }
 
@@ -516,10 +593,17 @@ public class TasksOverviewController {
                 docSqlFilter.setText(filter);
                 currentDBFileName.put(DocView, dbName);
                 break;
+            case RefView:
+                tableView = refTableView;
+                currentSQLs.put(RefView, core);
+                refSqlFilter.setText(filter);
+                currentDBFileName.put(RefView, dbName);
+                break;
             case AnnoView:
                 tableView = annoTableView;
                 currentSQLs.put(AnnoView, core);
                 annoSqlFilter.setText(filter);
+
                 currentDBFileName.put(AnnoView, dbName);
                 break;
             case CompareView:
@@ -579,6 +663,9 @@ public class TasksOverviewController {
             case DocView:
                 tableView = docTableView;
                 break;
+            case RefView:
+                tableView = refTableView;
+                break;
             case AnnoView:
                 tableView = annoTableView;
                 break;
@@ -593,6 +680,8 @@ public class TasksOverviewController {
     }
 
     public boolean showDBTable(Iterator rs, ColumnInfo columanInfo, String colorDifferential, TableView tableView, String tableViewName) {
+
+        currentTableName = tableViewName;
         dbPanel.setVisible(true);
 //      magic: tabPane won't show without following line
         tabPane.setPrefSize(600, 500);
@@ -779,7 +868,7 @@ public class TasksOverviewController {
         if (tableMemoRowId.containsKey(tableViewName)) {
             tableView.getSelectionModel().clearSelection();
             tableView.requestFocus();
-            Main.logger.info("Retrieve table "+tableViewName+"'s memo row id: "+tableMemoRowId.get(tableViewName));
+            Main.logger.fine("Retrieve table " + tableViewName + "'s memo row id: " + tableMemoRowId.get(tableViewName));
             tableView.getSelectionModel().select(tableMemoRowId.get(tableViewName));
             tableView.getFocusModel().focus(tableMemoRowId.get(tableViewName));
         }

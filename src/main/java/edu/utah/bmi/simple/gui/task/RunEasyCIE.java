@@ -426,7 +426,7 @@ public class RunEasyCIE extends GUITask {
 		}
 
 		if (dateRule.length() > 0) {
-			logger.info("add engine TemporalContext_AE_General");
+			logger.fine("add engine TemporalContext_AE_General");
 			runner.addAnalysisEngine(TemporalContext_AE_General.class, new Object[]{
 					TemporalContext_AE_General.PARAM_RULE_STR, dateRule,
 					TemporalContext_AE_General.PARAM_MARK_PSEUDO, false,

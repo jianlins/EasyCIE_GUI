@@ -121,9 +121,9 @@ public class BratReader extends AbFileCollectionReader {
         parseAnn(jcas, text, annoContent);
         if (mCurrentIndex >= mFiles.size()) {
             if (logger.isLoggable(Level.INFO)) {
-                logger.info("The following types are not configured in Brat annotation.conf files");
+                logger.fine("The following types are not configured in Brat annotation.conf files");
                 for (String type : unconfiguredAnnotationTypes.keySet()) {
-                    logger.info(type + "\t" + unconfiguredAnnotationTypes.get(type));
+                    logger.fine(type + "\t" + unconfiguredAnnotationTypes.get(type));
                 }
             }
         }
@@ -202,7 +202,7 @@ public class BratReader extends AbFileCollectionReader {
                 Method featureMethod = typeSetMethods.get(typeClasses.get(typeName)).get(methodName);
                 featureMethod.invoke(annotation, value);
             } else {
-                logger.info(methodName + "doesn't exist in " + typeName);
+                logger.fine(methodName + "doesn't exist in " + typeName);
             }
         }
         annotation.addToIndexes();

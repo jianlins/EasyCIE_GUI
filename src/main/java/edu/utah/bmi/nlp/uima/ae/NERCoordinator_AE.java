@@ -35,7 +35,7 @@ public class NERCoordinator_AE extends JCasAnnotator_ImplBase implements RuleBas
 					Class annoCls = Class.forName(inclusionTypeName).asSubclass(Annotation.class);
 					inclusions.add(annoCls);
 				} catch (ClassNotFoundException e) {
-					logger.info(" NERCoordinator_AE rules contain undefined annotation type: " + row.get(1) + " at row " + row.get(0));
+					logger.fine(" NERCoordinator_AE rules contain undefined annotation type: " + row.get(1) + " at row " + row.get(0));
 				}
 			}
 		}

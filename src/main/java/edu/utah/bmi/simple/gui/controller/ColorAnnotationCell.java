@@ -196,7 +196,11 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
 
     public static String generateHTML(String text, int begin, int end, String color) {
         String html;
+        if(begin<1)
+            return "";
         String pre = text.substring(0, begin);
+        if(end>text.length())
+            return "";
         String txt = text.substring(begin, end);
         String post = text.substring(end);
         html = StaticVariables.preTag + pre + StaticVariables.htmlMarker0.toLowerCase().replaceAll("ffffff", color) + txt + StaticVariables.htmlMarker1 + post + StaticVariables.postTag;

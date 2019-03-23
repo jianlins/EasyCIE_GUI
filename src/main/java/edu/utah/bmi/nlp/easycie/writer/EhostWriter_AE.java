@@ -112,7 +112,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
 
 
         mDocNum = 0;
-        logger.info("Ehost annotations will be exported to: " + outputDirectory);
+        logger.fine("Ehost annotations will be exported to: " + outputDirectory);
 
         outputDirectory = new File(outputDirectory, annotator);
 
@@ -193,7 +193,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
             if (typeMethods.size() == 0)
                 writeEhostAnnotation(xtw, annotation);
             else if (typeMethods.containsKey(annotation.getClass())) {
-                logger.info(annotation.getCoveredText());
+                logger.fine(annotation.getCoveredText());
                 writeEhostAnnotation(xtw, annotation);
             }
         }

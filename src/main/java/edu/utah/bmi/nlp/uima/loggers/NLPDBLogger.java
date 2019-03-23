@@ -190,9 +190,9 @@ public class NLPDBLogger extends GUILogger {
     @Override
     public void logString(String msg) {
         if (task == null)
-            classLogger.info(msg);
+            classLogger.fine(msg);
         else {
-            classLogger.info(msg);
+            classLogger.fine(msg);
             task.updateGUIMessage(msg);
         }
     }
@@ -209,16 +209,16 @@ public class NLPDBLogger extends GUILogger {
 
     public void initializationComplete(int totalDocs) {
         logString("Initialization complete.");
-        classLogger.info("Total " + totalDocs + " documents to process.");
+        classLogger.fine("Total " + totalDocs + " documents to process.");
         this.initCompleteTime = System.currentTimeMillis();
-        classLogger.info(this.df.format(new Date()) + "\tCPM Initialization Complete");
+        classLogger.fine(this.df.format(new Date()) + "\tCPM Initialization Complete");
         this.totaldocs = totalDocs;
     }
 
     @Override
     public void collectionProcessComplete(String reportContent) {
         logCompleteTime();
-        classLogger.info(this.df.format(completeTime) + "\tProcessing Complete");
+        classLogger.fine(this.df.format(completeTime) + "\tProcessing Complete");
         logString("Processing Complete.");
         long initTime = this.initCompleteTime - startTime;
         long processingTime = completeTime - initCompleteTime;

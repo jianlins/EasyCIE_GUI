@@ -85,6 +85,26 @@
                                             </BorderPane>
                                         </content>
                                     </Tab>
+                                    <Tab closable="false" text="RefView">
+                                        <content>
+                                            <BorderPane>
+                                                <center>
+                                                    <TableView fx:id="refTableView" editable="false">
+                                                    </TableView>
+                                                </center>
+                                                <top>
+                                                    <BorderPane prefHeight="30.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                                        <center>
+                                                            <TextField fx:id="refSqlFilter" promptText="input sql conditions to filter results (don't need to include 'WHERE')" BorderPane.alignment="CENTER" />
+                                                        </center>
+                                                        <right>
+                                                            <Button fx:id="refTableRefresh" mnemonicParsing="false" text="Refresh" BorderPane.alignment="CENTER" />
+                                                        </right>
+                                                    </BorderPane>
+                                                </top>
+                                            </BorderPane>
+                                        </content>
+                                    </Tab>
                                     <Tab closable="false" text="AnnoView">
                                         <content>
                                             <BorderPane>
