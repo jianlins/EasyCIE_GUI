@@ -4,6 +4,7 @@ package edu.utah.bmi.simple.gui.controller;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.easycie.writer.EhostWriter_AE;
 import edu.utah.bmi.simple.gui.core.SettingOper;
+import edu.utah.bmi.simple.gui.doubleclick.OpenEhost;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
@@ -311,7 +312,8 @@ public class Main extends Application {
 
     public void stop() {
         saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()));
-        System.out.println(currentTaskName);
+        OpenEhost.closeEhost();
+        logger.fine(currentTaskName);
         System.exit(0);
     }
 
