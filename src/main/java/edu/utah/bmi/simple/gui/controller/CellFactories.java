@@ -85,12 +85,22 @@ public class CellFactories {
             p -> {
                 ColorAnnotationCellHide cell = new ColorAnnotationCellHide();
                 cell.setOnMouseClicked(e -> {
+                    TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
+                    TabPane tabPane = tasksOverviewController.tabPane;
+                    SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
+                    int selectedTabIdx=selectModel.getSelectedIndex();
                     if (!cell.isEmpty()) {
                         Object item = cell.getItem();
                         Color color = Color.LIGHTGREY;
                         cell.setBackground(new Background(new BackgroundFill(color, null, null)));
                         String html = cell.generateHTML();
                         TasksOverviewController.currentTasksOverviewController.updateHTMLEditor(html, item);
+                        if (e.getClickCount() == 2 &&
+                                (selectedTabIdx == 1 || selectedTabIdx == 2 || selectedTabIdx == 3)) {
+                            if (item instanceof RecordRow) {
+                                CellActions.showInEhost((RecordRow) item);
+                            }
+                        }
 
 //                            if (item instanceof RecordRow)
 //                                updateHTMLEditor((RecordRow) item);
@@ -98,10 +108,8 @@ public class CellFactories {
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
 //                        System.out.println("Start debugging...");
-                        TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
-                        TabPane tabPane = tasksOverviewController.tabPane;
-                        SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
-                        if (selectModel.isSelected(3)) {
+
+                        if (selectedTabIdx==3) {
                             RecordRow recordRow = (RecordRow) cell.getItem();
                             String bunchId = recordRow.getStrByColumnName("DOC_NAME");
                             selectModel.select(2);
