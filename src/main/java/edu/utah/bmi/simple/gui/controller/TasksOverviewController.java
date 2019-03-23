@@ -310,28 +310,40 @@ public class TasksOverviewController {
                         switch (tabName) {
                             case DocView:
                                 if (currentSQLs.containsKey(DocView)) {
-                                    refreshTableView(DocView, docSqlFilter);
+                                    if (docTableView.getItems().size() == 0)
+                                        refreshTableView(DocView, docSqlFilter);
+                                    else
+                                        resumeSelectedRow(DocView);
                                 } else {
                                     executeTaskClass("edu.utah.bmi.simple.gui.task.ViewImportDB");
                                 }
                                 break;
                             case RefView:
                                 if (currentSQLs.containsKey(RefView)) {
-                                    refreshTableView(RefView, refSqlFilter);
+                                    if (refTableView.getItems().size() == 0)
+                                        refreshTableView(RefView, refSqlFilter);
+                                    else
+                                        resumeSelectedRow(RefView);
                                 } else {
                                     executeTaskClass("edu.utah.bmi.simple.gui.task.ViewOutputDB ref");
                                 }
                                 break;
                             case AnnoView:
                                 if (currentSQLs.containsKey(AnnoView)) {
-                                    refreshTableView(AnnoView, annoSqlFilter);
+                                    if (annoTableView.getItems().size() == 0)
+                                        refreshTableView(AnnoView, annoSqlFilter);
+                                    else
+                                        resumeSelectedRow(AnnoView);
                                 } else {
                                     executeTaskClass("edu.utah.bmi.simple.gui.task.ViewOutputDB");
                                 }
                                 break;
                             case CompareView:
                                 if (currentSQLs.containsKey(CompareView)) {
-                                    refreshTableView(CompareView, compareSqlFilter);
+                                    if (compareTableView.getItems().size() == 0)
+                                        refreshTableView(CompareView, compareSqlFilter);
+                                    else
+                                        resumeSelectedRow(CompareView);
                                 } else {
                                     executeTaskClass("edu.utah.bmi.simple.gui.task.ViewDiffDB");
                                 }
@@ -452,7 +464,6 @@ public class TasksOverviewController {
         switch (tablName) {
             case DocView:
                 selectedRows.put(DocView, docTableView.getSelectionModel().getSelectedIndex());
-                System.out.println(docTableView.getSelectionModel().getSelectedIndex());
                 break;
             case RefView:
                 selectedRows.put(RefView, refTableView.getSelectionModel().getSelectedIndex());
@@ -603,7 +614,6 @@ public class TasksOverviewController {
                 tableView = annoTableView;
                 currentSQLs.put(AnnoView, core);
                 annoSqlFilter.setText(filter);
-
                 currentDBFileName.put(AnnoView, dbName);
                 break;
             case CompareView:
