@@ -58,7 +58,7 @@ public class OpenEhost extends GUITask {
         }
         File txtFile = new File(new File(projectRoot, "corpus"), fileName);
         if (!txtFile.exists()) {
-            logger.warning("File not find: " + txtFile.getAbsolutePath());
+            logger.fine("File not find: " + txtFile.getAbsolutePath());
         }
         String[] configs = readEhostServerConfig();
         server = configs[0];
