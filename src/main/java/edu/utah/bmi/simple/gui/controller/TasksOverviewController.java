@@ -483,19 +483,19 @@ public class TasksOverviewController {
     private void resumeSelectedRow(String tableName) {
         switch (tableName) {
             case DocView:
-                docTableView.getSelectionModel().clearAndSelect(selectedRows.get(DocView));
+                docTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(DocView,0));
                 break;
             case RefView:
-                refTableView.getSelectionModel().clearAndSelect(selectedRows.get(RefView));
+                refTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(RefView,0));
                 break;
             case AnnoView:
-                annoTableView.getSelectionModel().clearAndSelect(selectedRows.get(AnnoView));
+                annoTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(AnnoView,0));
                 break;
             case CompareView:
-                compareTableView.getSelectionModel().clearAndSelect(selectedRows.get(CompareView));
+                compareTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(CompareView,0));
                 break;
             case DebugView:
-                debugTableView.getSelectionModel().clearAndSelect(selectedRows.get(DebugView));
+                debugTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(DebugView,0));
                 break;
         }
     }
