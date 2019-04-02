@@ -1,18 +1,13 @@
 package edu.utah.bmi.simple.gui.controller;
 
-import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
 import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
-import edu.utah.bmi.simple.gui.task.FastDebugPipe;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import org.apache.uima.collection.impl.cpm.container.CPEFactory;
 
 
@@ -66,7 +61,7 @@ public class RootLayoutController {
     }
 
     private void openURL(String url, String hint) {
-        HostServicesDelegate hostServices = HostServicesFactory.getInstance(mainApp);
+        HostServicesDelegate hostServices = HostServicesDelegate.getInstance(mainApp);
         if (url.length() == 0) {
             Main.logger.warning(hint);
         } else {

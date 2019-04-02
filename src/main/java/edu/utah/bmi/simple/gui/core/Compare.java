@@ -7,7 +7,6 @@ import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
-import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
@@ -431,7 +430,11 @@ public class Compare {
         else if (value instanceof Long)
             intValue = ((Long) value).intValue();
         else
-            throw new ValueException(value + "(type: " + value.getClass() + ")" + " cannot be converted to Integer.");
+            try {
+                throw new Exception(value + "(type: " + value.getClass() + ")" + " cannot be converted to Integer.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         return intValue;
     }
 

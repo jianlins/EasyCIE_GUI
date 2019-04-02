@@ -134,7 +134,7 @@ public class OpenEhost extends GUITask {
     }
 
     public static void closeEhost(String server, String port) {
-        if (checkEhostStatus(6, server, port)) {
+        if (checkEhostStatus(1, server, port)) {
             sendRequest(String.format("http://%s:%s/shutdown", server, port));
         }
     }
