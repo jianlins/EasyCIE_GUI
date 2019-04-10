@@ -65,7 +65,7 @@
       <current memo="Mark current annotations with annotator: ">v5</current> 
     </annotators>  
     <view> 
-      <queryName>DocSnippet</queryName> 
+      <queryName>Snippet</queryName> 
     </view>  
     <executes> 
       <RunEasyCIE memo="Run Preannotator using current rules">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunEasyCIE>  

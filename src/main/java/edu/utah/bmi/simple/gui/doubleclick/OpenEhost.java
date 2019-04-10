@@ -75,16 +75,18 @@ public class OpenEhost extends GUITask {
 
     @Override
     protected Object call() throws Exception {
-        if (!checkEhostStatus(1, server, port)) {
+        if (!checkEhostStatus(3, server, port)) {
             logger.fine("eHOST is not ready, try open it");
             openEhost();
-        }
-        logger.fine("Check ehost status after open it...");
-        if (checkEhostStatus(10, server, port)) {
-            showFile(projectRoot.getName(), fileName);
-        } else {
+            if (checkEhostStatus(10, server, port)) {
+                showFile(projectRoot.getName(), fileName);
+            } else {
 //            updateGUIMessage("Ehost is not ready. Check if ehost jar is added and ehost configurations in side 'lib' directory.");
 //            updateGUIProgress(0, 0);
+            }
+        } else {
+            logger.fine("Check ehost status after open it...");
+            showFile(projectRoot.getName(), fileName);
         }
 //        Unirest.shutdown();
         return null;
@@ -101,7 +103,7 @@ public class OpenEhost extends GUITask {
         while (count < timeout) {
             try {
                 logger.fine("Check status: " + count);
-                String status =getRequest(String.format("http://%s:%s/status", server, port));
+                String status = getRequest(String.format("http://%s:%s/status", server, port));
                 logger.fine("Responded status: " + status);
                 if (status != null && status.length() > 0 && status.startsWith("true"))
                     return true;
@@ -122,6 +124,7 @@ public class OpenEhost extends GUITask {
         HttpResponse<String> response;
         String status = "";
         try {
+            logger.fine(String.format("http://%s:%s/ehost/%s/%s", server, port, projectName, fileName));
             status = getRequest(String.format("http://%s:%s/ehost/%s/%s", server, port, projectName, fileName));
 //            updateGUIProgress(1, 1);
             return true;
@@ -159,7 +162,8 @@ public class OpenEhost extends GUITask {
                 logger.fine("Read server config: " + configs[0]);
                 logger.fine("Read port config: " + configs[1]);
             } catch (FileNotFoundException e) {
-                e.printStackTrace(); e.printStackTrace();
+                e.printStackTrace();
+                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -199,7 +203,7 @@ public class OpenEhost extends GUITask {
             yc.setConnectTimeout(timeout);
             Object in = yc.getContent();
             if (in instanceof InputStream)
-                ((InputStream)in).close();
+                ((InputStream) in).close();
         } catch (Exception e) {
             logger.fine(e.toString());
         }
