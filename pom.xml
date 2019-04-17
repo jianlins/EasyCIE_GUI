@@ -10,10 +10,10 @@
         <!--for packaging without jdk version-->
         <java.path>java</java.path>
         <java.win.path>java</java.win.path>
-        <current.version>3.0.1</current.version>
+        <current.version>3.0.2-SNAPSHOT</current.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <nlp.core.version>1.3.1.9</nlp.core.version>
-        <kotlin.version>1.3.21</kotlin.version>
+        <nlp.core.version>1.3.2.0-SNAPSHOT</nlp.core.version>
+        <kotlin.version>1.3.30</kotlin.version>
     </properties>
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
