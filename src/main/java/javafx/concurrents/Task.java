@@ -181,6 +181,8 @@ public abstract class Task<V> extends FutureTask<V> implements Worker<V>, EventT
         return state.get();
     }
 
+
+
     @Override
     public final ReadOnlyObjectProperty<State> stateProperty() {
         checkThread();
@@ -955,13 +957,7 @@ public abstract class Task<V> extends FutureTask<V> implements Worker<V>, EventT
         }
     }
 
-    /**
-     * TaskCallable actually implements the Callable contract as defined for
-     * the FutureTask class, and is necessary so as to allow us to intercept
-     * the call() operation to update state on the Task as appropriate.
-     *
-     * @param <V>
-     */
+
     public static final class TaskCallable<V> implements Callable<V> {
         /**
          * The Task that is going to use this TaskCallable

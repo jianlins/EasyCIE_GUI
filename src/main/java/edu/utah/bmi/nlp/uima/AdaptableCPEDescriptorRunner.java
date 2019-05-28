@@ -183,6 +183,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
      * @param cpeDescriptor     location of cpe descripter xml file
      * @param annotator         annotator name
      * @param logger            logger to track the pipeline running log (can be null)
+     * @param modifiedAes       a list of modified Ae names
      * @param externalConfigMap external configurations
      * @param options           0~3 parameters:
      *                          1. The location of auto-gen type descriptor

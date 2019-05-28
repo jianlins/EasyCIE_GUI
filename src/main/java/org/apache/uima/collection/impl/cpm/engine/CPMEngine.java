@@ -259,6 +259,8 @@ public class CPMEngine extends Thread {
      *                        instance of the ProcessTrace where the CPM accumulates stats
      * @param aCheckpointData -
      *                        checkpoint object facillitating restart from the last known point
+     *
+     * @throws Exception all exceptions
      */
     public CPMEngine(CPMThreadGroup aThreadGroup, CPEFactory aCpeFactory, ProcessTrace aProcTr,
                      CheckpointData aCheckpointData) throws Exception {
@@ -922,7 +924,7 @@ public class CPMEngine extends Thread {
      * @param aCpName    -
      *                   name of the CP
      * @return - true if CP is parallelizable, false otherwise
-     * @throws Exception -
+     * @throws Exception -all exceptions
      */
     public boolean isParallizable(CasProcessor aProcessor, String aCpName) throws Exception {
         boolean isConsumer = false;

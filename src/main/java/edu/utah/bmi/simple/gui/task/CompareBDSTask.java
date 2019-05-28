@@ -171,7 +171,7 @@ public class CompareBDSTask extends GUITask {
      * @param comparingTypeFeatures matching configurations
      * @param sysorref              System output or reference annotation
      * @param runId                 run id
-     * @see edu.utah.bmi.simple.gui.task.CompareBDSTask#readCompareFeatures(String, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, ArrayList<Integer>>>>)
+     * @see CompareBDSTask#readCompareFeatures
      */
     public void readAnnotations(EDAO dao, HashMap<String, LinkedHashMap<String, ArrayList<RecordRow>>> annotations,
                                 String annotator, String annotatorTable, String runId,
@@ -295,6 +295,7 @@ public class CompareBDSTask extends GUITask {
      * TypeA in reference can be considered as the join annotations of TypeB and TypeC in system output.
      *
      * @param typeFeatureConfigFile location of the configuration file
+     * @param configIndices the map of type --- feature_value_pair_String --- configuration id
      * @return a map that using type name as the key, a list of feature names as the value
      */
     protected ArrayList<ArrayList<Object>> readCompareFeatures(String typeFeatureConfigFile,
