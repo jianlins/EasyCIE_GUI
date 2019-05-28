@@ -1,4 +1,4 @@
 @version:2
 ConceptA	F1:V1;F2:V2	ConceptB	F3:V3;F4:V4
 ConceptC	F3:V3;F4:V4	ConceptD	F5:V5;F6:V6
-ConceptE		ConceptD	F5:V5;F6:V6
+ConceptC	F3:V3;F4:V4	ConceptF	F5:V5;F6:V6

@@ -226,11 +226,11 @@ public class CompareBDSTask extends GUITask {
                 ArrayList<String> FeatureValuePairs;
                 boolean featureMatched = true;
                 if (sysorref.equals(SYS)) {
-                    FeatureValuePairs = (ArrayList<String>) comparingTypeFeatures.get(matchId).get(1);
+                    FeatureValuePairs = (ArrayList<String>) comparingTypeFeatures.get(matchId).get(3);
 //                  get corresponding reference type_feature_values
                     key = comparingTypeFeatures.get(matchId).get(0) + "_" + getFeatureValuePairsString((ArrayList<String>) comparingTypeFeatures.get(matchId).get(1));
                 } else
-                    FeatureValuePairs = (ArrayList<String>) comparingTypeFeatures.get(matchId).get(3);
+                    FeatureValuePairs = (ArrayList<String>) comparingTypeFeatures.get(matchId).get(1);
                 for (String featureValue : FeatureValuePairs) {
                     if (features.indexOf(featureValue) == -1) {
                         featureMatched = false;
@@ -319,14 +319,14 @@ public class CompareBDSTask extends GUITask {
             config.add(row.get(0));
             ArrayList<String> pairs = getFeatureValuePairs(row.get(1));
             config.add(pairs);
-            updateIndex(configIndices.get(SYS), row.get(0), row.get(1), id);
+            updateIndex(configIndices.get(REF), row.get(0), row.get(1), id);
             config.add(row.get(2));
             if (row.size() < 4) {
                 config.add(new ArrayList<String>());
-                updateIndex(configIndices.get(REF), row.get(2), "", id);
+                updateIndex(configIndices.get(SYS), row.get(2), "", id);
             } else {
                 config.add(getFeatureValuePairs(row.get(3)));
-                updateIndex(configIndices.get(REF), row.get(2), row.get(3), id);
+                updateIndex(configIndices.get(SYS), row.get(2), row.get(3), id);
             }
             comparingTypeFeatures.add(config);
             id++;
