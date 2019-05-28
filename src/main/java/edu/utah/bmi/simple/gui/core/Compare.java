@@ -223,7 +223,7 @@ public class Compare {
                     String fileName = annoPerFile.getKey();
 //                            System.out.println("Compare annotations for file: " + fileName);
                     HashMap<String, Object> res = new HashMap<>();
-                    if (type.toLowerCase().endsWith("_doc") || type.toLowerCase().indexOf("_doc:")!=-1) {
+                    if (type.toLowerCase().indexOf("_doc_")!=-1 || type.toLowerCase().endsWith("_doc") || type.toLowerCase().indexOf("_doc:")!=-1) {
                         docCompare(evalCounter, totalCounter, type, fileName, annotations2);
                     } else if (annotations2.containsKey(type) && annotations2.get(type).containsKey(fileName)) {
                         if (strictCompare)
