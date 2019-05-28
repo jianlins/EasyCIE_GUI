@@ -312,7 +312,7 @@ public class Main extends Application {
 
     public void stop() {
         saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()));
-        OpenEhost.closeEhost();
+//        OpenEhost.closeEhost();
         logger.fine(currentTaskName);
         System.exit(0);
     }

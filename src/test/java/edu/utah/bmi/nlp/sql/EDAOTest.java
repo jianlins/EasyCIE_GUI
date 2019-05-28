@@ -3,6 +3,7 @@ package edu.utah.bmi.nlp.sql;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.LinkedHashMap;
 
 import static org.junit.Assert.*;
 
@@ -15,5 +16,15 @@ public class EDAOTest {
         edao2.queryRecordsFromPstmt("test1",0);
 
     }
+
+    @Test
+    public void testMapKeys(){
+        LinkedHashMap<String, String>map=new LinkedHashMap<>();
+        map.put("red","red");
+        map.put("blue","blue");
+        map.put("green","green");
+        System.out.println(map.keySet());
+    }
+
 
 }

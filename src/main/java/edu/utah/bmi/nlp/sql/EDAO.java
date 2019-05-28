@@ -120,7 +120,6 @@ public class EDAO {
 
     protected void initConnection(File configFile, boolean initiateTables, boolean overwriteExistingTables, boolean concurUpdatable) {
 
-
         this.configFile = configFile;
         configReader = ConfigReaderFactory.createConfigReader(configFile);
         server = (String) configReader.getValue("server");
