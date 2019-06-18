@@ -20,7 +20,7 @@ public class CoordinateNERResults_AE extends JCasAnnotator_ImplBase {
 
 
     @Override
-    public void process(JCas jCas) {
+    public void process(JCas jCas) throws AnalysisEngineProcessException{
 
         ArrayList<ConceptBASE> concepts = new ArrayList<>();
 

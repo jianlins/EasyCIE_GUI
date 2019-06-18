@@ -4,6 +4,7 @@ import edu.utah.bmi.nlp.core.*;
 import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
+import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
@@ -43,7 +44,7 @@ public class NERCoordinator_AE extends JCasAnnotator_ImplBase implements RuleBas
 
 
 	@Override
-	public void process(JCas jCas) {
+	public void process(JCas jCas) throws AnalysisEngineProcessException {
 		for (Class annoCls : inclusions) {
 			IntervalST<Annotation> existingTree = new IntervalST();
 			for(Object annoObj:JCasUtil.select(jCas,annoCls)){

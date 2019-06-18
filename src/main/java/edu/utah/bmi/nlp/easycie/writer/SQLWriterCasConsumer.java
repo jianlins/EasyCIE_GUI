@@ -15,6 +15,7 @@ import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UIMA_IllegalArgumentException;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
+import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.*;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.examples.SourceDocumentInformation;
@@ -105,7 +106,7 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
         }
     }
 
-    public void process(JCas jcas) {
+    public void process(JCas jcas) throws AnalysisEngineProcessException {
         String fileName = null;
         if (jcas.getDocumentText().length() < minTextLength)
             return;

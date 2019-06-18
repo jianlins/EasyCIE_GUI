@@ -163,7 +163,7 @@ public class OpenNLPSentDetector extends JCasAnnotator_ImplBase {
 
 	}
 
-	public void process(JCas jCas) {
+	public void process(JCas jCas) throws AnalysisEngineProcessException{
 		for (Class sectionClass : sectionClasses) {
 			FSIndex annoIndex = jCas.getAnnotationIndex(sectionClass);
 			Iterator annoIter = annoIndex.iterator();

@@ -147,7 +147,7 @@ public class BunchInferencer extends JCasAnnotator_ImplBase implements RuleBased
 
 	}
 
-	public void process(JCas jCas) {
+	public void process(JCas jCas) throws AnalysisEngineProcessException{
 		CAS cas = jCas.getCas();
 		String serializedString;
 		RecordRow recordRow = new RecordRow();

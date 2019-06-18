@@ -9,6 +9,7 @@ import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
+import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.cas.Type;
@@ -125,7 +126,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
 
 	}
 
-	public void process(JCas jCas) {
+	public void process(JCas jCas) throws AnalysisEngineProcessException {
 		CAS cas = jCas.getCas();
 		if (typeMap.size() == 0) {
 			initMaps(cas);

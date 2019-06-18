@@ -135,7 +135,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
     }
 
 
-    public void process(JCas jcas) {
+    public void process(JCas jcas) throws AnalysisEngineProcessException {
         Collection<Annotation> annotations = JCasUtil.select(jcas, Annotation.class);
         File[] files = initialOutputXml(jcas);
         File outputXml = files[1];

@@ -24,6 +24,7 @@ import edu.utah.bmi.nlp.fastner.FastNER;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Concept;
 import org.apache.uima.UimaContext;
+import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.fit.util.JCasUtil;
@@ -111,7 +112,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 	}
 
 
-	public void process(JCas jcas) {
+	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		DateTime recordDate = readReferenceDate(jcas, recordDateColumnName);
 		referenceDate = readReferenceDate(jcas, referenceDateColumnName);
 		if (referenceDate == null)

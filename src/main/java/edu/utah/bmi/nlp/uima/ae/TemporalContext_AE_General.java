@@ -26,6 +26,7 @@ import edu.utah.bmi.nlp.type.system.Concept;
 import edu.utah.bmi.nlp.type.system.ConceptBASE;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UimaContext;
+import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.FSIndex;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.examples.SourceDocumentInformation;
@@ -142,7 +143,7 @@ public class TemporalContext_AE_General extends FastCNER_AE_General {
 	}
 
 
-	public void process(JCas jcas) {
+	public void process(JCas jcas)throws AnalysisEngineProcessException {
 		ArrayList<Annotation> sentences = new ArrayList<>();
 		ArrayList<ConceptBASE> targetConcepts = new ArrayList<>();
 		referenceDate = readReferenceDate(jcas, referenceDateColumnName);

@@ -37,7 +37,7 @@ public class BratWritter_AE extends XMIWritter_AE {
     }
 
     @Override
-    public void process(JCas jCas) {
+    public void process(JCas jCas) throws AnalysisEngineProcessException{
 
         String fileName = readFileIDName(jCas, nameWId);
         ArrayList<String> bratAnnotations = new ArrayList<>();
