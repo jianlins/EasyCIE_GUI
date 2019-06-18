@@ -86,7 +86,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
 	}
 
 
-	private void parseRuleStr(String ruleStr) {
+	protected void parseRuleStr(String ruleStr) {
 		IOUtil ioUtil = new IOUtil(ruleStr, true);
 		for (ArrayList<String> initRow : ioUtil.getInitiations()) {
 			if (initRow.get(1).startsWith("@DefaultBunchConclusion") || initRow.get(1).startsWith("&DefaultBunchConclusion")) {
@@ -172,7 +172,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
 
 	}
 
-	private void evaluateVisitCounts(RecordRow previousRecordRow) {
+	protected void evaluateVisitCounts(RecordRow previousRecordRow) {
 		for (String topic : inferenceMap.keySet()) {
 			ArrayList<ArrayList<Object>> rules = inferenceMap.get(topic);
 			boolean matched = true;
@@ -195,7 +195,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
 
 	}
 
-	private void addBunchConclusion(RecordRow previousRecordRow, List<Object> rule) {
+	protected void addBunchConclusion(RecordRow previousRecordRow, List<Object> rule) {
 		String typeName = (String) rule.get(1);
 		if (runId == -2 && previousRecordRow.getValueByColumnName("RUN_ID") != null)
 			runId = Integer.parseInt(previousRecordRow.getStrByColumnName("RUN_ID"));
@@ -222,7 +222,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
 	 *
 	 * @param cas UIMA CAS object
 	 */
-	private void initMaps(CAS cas) {
+	protected void initMaps(CAS cas) {
 		for (String typeName : typeCounter.keySet()) {
 			Type type = CasUtil.getAnnotationType(cas, DeterminantValueSet.checkNameSpace(typeName));
 			if (!typeMap.containsKey(typeName))
@@ -230,7 +230,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
 		}
 	}
 
-	private void clearCounter() {
+	protected void clearCounter() {
 		for (String typeName : typeCounter.keySet()) {
 			typeCounter.put(typeName, 0);
 		}
