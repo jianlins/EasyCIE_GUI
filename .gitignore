@@ -11,3 +11,4 @@ conf/.log
 desc/type/pipeline*.xml
 desc/type/*TypesStyleMap.xml
 data/input/*
+*.iml
