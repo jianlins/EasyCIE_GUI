@@ -224,6 +224,21 @@
                 <version>1.6</version>
                 <executions>
                     <execution>
+                        <id>update-version-in-gui</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <target>
+                                <exec executable="bash">
+                                    <arg value="script/update_version_in_src.sh"/>
+                                    <arg value="${current.version}}"/>
+                                </exec>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <id>compile-jfx</id>
                         <phase>compile</phase>
                         <configuration>
