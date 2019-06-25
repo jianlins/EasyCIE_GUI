@@ -261,6 +261,9 @@
                                 <copy todir="${project.build.directory}/deploy/lib">
                                     <fileset dir="${project.basedir}/lib"></fileset>
                                 </copy>
+                                <copy todir="${project.build.directory}/deploy/licenses">
+                                    <fileset dir="${project.basedir}/licenses"></fileset>
+                                </copy>
                                 <copy file="${project.build.directory}/jfx/app/easycie-gui-${current.version}-jfx.jar" tofile="${project.build.directory}/deploy/easycie-gui.jar"/>
 
                                 <chmod file="${project.build.directory}/deploy/run_gui" perm="755"/>
