@@ -230,7 +230,7 @@
                             <target>
                                 <exec executable="bash">
                                     <arg value="script/update_version_in_src.sh"/>
-                                    <arg value="${current.version}}"/>
+                                    <arg value="${current.version}"/>
                                 </exec>
                             </target>
                         </configuration>
