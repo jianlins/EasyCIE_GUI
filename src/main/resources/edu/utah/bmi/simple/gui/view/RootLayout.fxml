@@ -15,6 +15,11 @@
             <menus>
                 <Menu mnemonicParsing="true" text="_File">
                     <items>
+                        <MenuItem mnemonicParsing="true" text="_CreateNewProject" onAction="#createnew">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                            </accelerator>
+                        </MenuItem>
                         <MenuItem mnemonicParsing="true" text="_OpenConfigFile" onAction="#open">
                             <accelerator>
                                 <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />

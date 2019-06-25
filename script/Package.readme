@@ -1,0 +1,5 @@
+Run the Main class
+run maven plugin jfx:build-jar in IDE or mvn clean compile jfx:package
+run maven package or mvn package
+remove unnecessary files
+run zipper.sh

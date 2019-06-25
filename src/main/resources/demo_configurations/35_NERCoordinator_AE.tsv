@@ -1,0 +1,3 @@
+#list all the annotation types that need to be coordinated
+#The coordinator will check the overlapped annotations with the same type, and leave the widest annotation, remove the other overlapped ones.
+edu.utah.bmi.nlp.type.system.Concept

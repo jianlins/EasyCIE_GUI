@@ -1,0 +1,106 @@
+@fastcner
+##############
+[\w|\p|\b]([\d|0\d|1\d|2\d|30|31]/[19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\b][On|on|since|Since|until|Until|till|Till|scheduled|Scheduled|Before|before|after|After|In|in] +([\d|0\d|1\d|2\d|30|31]/\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\b][Appoint|appointment|appoint|Appointment|Service|service][|.][|:]\w+([\d|0\d|1\d|2\d|30|31]/\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\b][Appoint|appointment|appoint|Appointment|Service|service][|.][|:]\w+([19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\b][hospitalized|Hospitalized|hospital][|.][|:]\w+([\d|0\d|1\d|2\d|30|31]/\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\b]([\d|0\d|1\d|2\d|30|31]/\d\d) at \d[|\d]:\d\d	1	Date
+[\w|\p]age[|s] +([\d|0\d|1\d|2\d|30|31]/\d\d)[\w|\p|\c|\C]	2	Date	PSEUDO
+
+[\w|\p|\b]([\d|0\d|1\d]/[\d|0\d|1\d|2\d|30|31])[\w|\p|\e|\c|\C]	1	Date
+[\w|\p|\b]([\d|0\d|1\d]/[\d|0\d|1\d|2\d|30|31]/\d\d	1	Date
+2/2	2	Date	PSEUDO
+[\w|\p|\b]([1|2|3|4|5]/5) in	2	Date	PSEUDO
+strength ([1|2|3|4|5]/5	2	Date	PSEUDO
+strength ([1|2|3|4|5]-[1|2|3|4|5]/5)	2	Date	PSEUDO
+str ([1|2|3|4|5]/5	2	Date	PSEUDO
+str ([1|2|3|4|5]-[1|2|3|4|5]/5)	2	Date	PSEUDO
+[\w|\p|\b]([\d|0\d|1\d]/[\d|0\d|1\d|2\d|30|31]/\d\d)\w+mm[HG|Hg|hg]	2	Date	PSEUDO
+[\w|\p|\b](0/5)	2	Date	PSEUDO
+
+[\w|\p|\b]([\d|0\d|10|11|12]/[\d|0\d|1\d|2\d|30|31]/[19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\b]([\d|0\d|10|11|12]-[\d|0\d|1\d|2\d|30|31]-[19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\b]([\d|0\d|10|11|12].[\d|0\d|1\d|2\d|30|31].[19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+
+[\w|\p|\b]([LMP|lmp]\s+[\d|0\d|10|11|12]/[\d|0\d|1\d|2\d|30|31]/[19|20|21]\d\d)[\w|\p|\c|\C]	2	Date	PSEUDO
+
+[\w|\p|\b]([\d|0\d|10|11|12][/|-|.][\d|0\d|1\d|2\d|30|31][/|-|.]\d\d.\d	2	Date	PSEUDO
+\d.[|\s+][\w|\p|\b]([\d|0\d|10|11|12][/|-|.][\d|0\d|1\d|2\d|30|31][/|-|.]\d\d[|.\d]	2	Date	PSEUDO
+
+[\w|\p|\b][\d|0\d|10|11|12][/|-|.][\d|0\d|1\d|2\d|30|31][/|-|.]\d\d\w+(\d\d\d\d	2	Date	PSEUDO
+[\w|\p|\b][\d|0\d|10|11|12][/|-|.][\d|0\d|1\d|2\d|30|31][/|-|.][19|20|21]\d\d\w+(\d\d\d\d	2	Date	PSEUDO
+#[\w|\p]([Spring|Summer|Autumn|Winder|Fall|spring|summer|autumn|winter|fall] +[|of +|semester +][19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+#[\w|\p]([Spring|Summer|Autumn|Winder|Fall|spring|summer|autumn|winter|fall][| +],[| +][19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\c|\C|\b]([\d|0\d|1\d|2\d|30|31] +[Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec][| +of|, +|,][ +19\d\d| +20\d\d| +21\d\d])[\w|\p]	1	Date
+#[\w|\p|\b]([Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec][| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p]	1	Date
+#[\w|\p|\b]([Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec] +[and|or] +([Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+[\w|\p|\b][in|since|In|Since|until|Until|Till|till|Before|before|after|After] [|mid |early |late |about ]([January|February|March|April|May|June|July|August|September|October|Ocober|November|December][| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+[\w|\p|\b][in|since|In|Since|until|Until|Till|till|Before|before|after|After] [|mid |early |late |about ][January|February|March|April|May|June|July|August|September|October|Ocober|November|December] +[and|or] +([January|February|March|April|May|June|July|August|September|October|Ocober|November|December][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+([January|February|March|April|May|June|July|August|September|October|Ocober|November|December] +[\d|0\d|1\d|2\d|30|31][| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+([January|February|March|April|May|June|July|August|September|October|Ocober|November|December] +[\d|1\d|2\d|30|31]th[| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+([january|february|march|april|june|july|august|september|October|Ocober|november|december] +[\d|0\d|1\d|2\d|30|31][| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+([january|february|march|april|june|july|august|september|October|Ocober|november|december] +[\d|1\d|2\d|30|31]th[| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+([January|February|March|April|May|June|July|August|September|October|Ocober|November|December][| +of][ +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+([january|february|march|april|june|july|august|september|October|Ocober|november|december][| +of][ +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+([Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec] +[\d|0\d|1\d|2\d|30|31][| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+[\w|\p]([jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec] +[\d|0\d|1\d|2\d|30|31][| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+([Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec] +[\d|1\d|2\d|30|31]th[| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+[\w|\p]([jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec] +[\d|1\d|2\d|30|31]th[| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+#[this|last|on|since|This|Last|On|Since|until|Until|Till|till|Before|before|after|After] +([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday])[\w|\p]	1	Date
+#last +[|\c+ +]([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday])[\w|\p]	1	Date
+#[this|last|on|since|This|Last|On|Since|until|Until|Till|till|Before|before|after|After] +[Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday] +[and|or] +([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday])[\w|\p]	1	Date
+#[Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday][| ][and|or] +([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday])[\w|\p]	1	Date
+#([Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday])[| ][and|or] +[Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday][\w|\p]	1	Date
+#[this|past|last] ([January|February|March|April|May|June|July|August|September|October|Ocober|November|December])	1	Date
+#[this|past|last] ([Spring|Summer|Autumn|Winder|Fall|spring|summer|autumn|winter|fall])	1	Date
+[in|since|In|Since|Before|before|after|After|on|On] +\c+ +([January|February|March|April|May|June|July|August|September|October|Ocober|November|December])	1	Date
+[in|since|In|Since|Before|before|after|After|on|On] +\c+ +([Spring|Summer|Autumn|Winder|Fall|spring|summer|autumn|winter|fall])	1	Date
+[in|since|In|Since|Before|before|after|After|on|On] +\c+ +[Spring|Summer|Autumn|Winder|Fall|spring|summer|autumn|winter|fall] +[and|or] +([Spring|Summer|Autumn|Winder|Fall|spring|summer|autumn|winter|fall])	1	Date
+[\w|\p|\b]([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday][| +][|,][| +][January|February|March|April|May|June|July|August|September|October|Ocober|November|December] +[\d|0\d|1\d|2\d|30|31][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+[\w|\p|\b]([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday][| +][|,][| +][Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec] +[\d|0\d|1\d|2\d|30|31][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C]	1	Date
+#Hannukah	1	Date
+#Christmas	1	Date
+#[\w|\p][in|since|In|Since|until|Until|Till|till|Before|before|after|After] [|mid |early |late |~|~ |about ]([19|20|21]\d\ds)[\w|\p|\c|\C]	1	Date
+#[\w|\p][in|since|In|Since|until|Until|Till|till|Before|before|after|After] [|mid |early |late |~|~ |about ]([19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+#[\w|\p][in|since|In|Since|until|Until|Till|till|Before|before|after|After] [|mid |early |late |~|~ |about ][19|20|21]\d\d +[and|or] +([19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+
+#change it to context rules
+#[\w|\p]in [mid |early |late ]([4|5|6|7|8|9]\ds)[\w|\p|\c|\C]	1	Date
+#[mother|father|grandma|grandpa|passed away|diagnosed|dxed|died|diied][| +]\(([19|20|21]\d\d)\)	1	Date
+#[mother|father|grandma|grandpa|passed away|diagnosed|dxed|died|diied] +[|\c+ +]([19|20|21]\d\d)[\w|\p]	1	Date
+#([19|20|21]\d\d)[| +][-|~][| +][19|20|21]\d\d	1	Date
+#[19|20|21]\d\d[| +][-|~][| +]([19|20|21]\d\d)	1	Date
+#from ([19|20|21]\d\d)[| +]to[| +][19|20|21]\d\d	1	Date
+#from [19|20|21]\d\d[| +]to[| +]([19|20|21]\d\d)	1	Date
+#between ([19|20|21]\d\d)[| +]and[| +][19|20|21]\d\d	1	Date
+#between [19|20|21]\d\d[| +]and[| +]([19|20|21]\d\d)	1	Date
+#[\w|\p]([summer|autumn|winter|Summer|Autumn|Winter])[\w|\p]	1	Date
+#=[| +][\d|\d\d|\d\d\d][|.\d][| +]\(([19|20|21]\d\d)\)	1	Date
+#=[| +][\d|\d\d|\d\d\d][|.\d][| +]\(([19|20|21]\d\d)\)	1	Date
+#[\w|\p]([summer|autumn|winter|Summer|Autumn|Winter]) +[|\c+ +][reports|represents|is a|was|house|school|holiday|homes|time|presents|has][\w|\p]	2	Date	PSEUDO
+#[\w|\p]([May|MAY]) +[is a|was|\C\c+][\w|\p]	2	Date	PSEUDO
+#[\w|\p]([May|MAY]) +[report|represent|house|school|holiday|homes|time|present|need|consider|feel|felt]	2	Date	PSEUDO
+#[\w|\p]([Summer|Autumn]) +\C\C+	2	Date	PSEUDO
+#[Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday][|s])[\w|\p]	1	Date
+
+[\w|\p|\b][hospitalized|Hospitalized|hospital][| +]\(([\d|0\d|1\d|2\d|30|31]/\d\d)\)	1	Date
+last date[| +\c+][| +\c+][| +\c+][| +\c+][|:]\w+([\d|0\d|1\d|2\d|30|31]/\d\d)	1	Date
+[date|Date] +of +\c+[| +\c+]	1	Date
+\n([\d|0\d|1\d|2\d|30|31]/\d\d)[| +][:|-][| +][\C|\c]\c+	1	Date
+#in (may)	1	Date
+[\w|\p|\c|\C|\b]([19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\b]([\d|0\d|10|11|12][/|-|.][19|20|21]\d\d)[\w|\p|\c|\C]	1	Date
+[\w|\p|\c|\C|\b]([19|20|21]\d\d)[| +][mg|MG|UNIT|unit|ml]	2	Date	PSEUDO
+[\w|\p|\c|\C|\b]([19|20|21]\d\d.\d+)[| +][mg|MG|UNIT|unit|ml|mcg]	2	Date	PSEUDO
+\d\d\d[-| |.]\d\d\d[-| |.]([19|20|21]\d\d)	2	Date	PSEUDO
+[\w|\p|\c|\C|\b]([19|20|21]\d\d)[| +][/|-][| +][\d|0\d|10|11|12]	1	Date
+
+#[mother|father|grandma|grandpa|passed away|diagnosed|dxed|died|diied][| +]\(([\d|0\d|10|11|12][/|-|.]\d\d)\)	1	Date
+#[mother|father|grandma|grandpa|passed away|diagnosed|dxed|died|diied] +[|\c+ +]([\d|0\d|10|11|12][/|-|.]\d\d)[\w|\p]	1	Date
+#[\w|\p][dxed|died|diied|dx] +[|\c+ +][|\c+ +]([\d|0\d|10|11|12][/|-|.]\d\d)[\w|\p]	1	Date
+#[\w|\p][dxed|died|diied|dx] +[|\C\c+ +][|\C\c+ +]([\d|0\d|10|11|12][/|-|.]\d\d)[\w|\p]	1	Date
+
+1/[2|3|4|5]\s+NS	2	Date	PSEUDO
+2/[3|4|5]\s+NS	2	Date	PSEUDO
+3/[4|5]\s+NS	2	Date	PSEUDO

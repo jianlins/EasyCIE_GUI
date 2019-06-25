@@ -7,6 +7,7 @@ import edu.utah.bmi.simple.gui.core.SettingOper;
 import edu.utah.bmi.simple.gui.doubleclick.OpenEhost;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
+import edu.utah.bmi.simple.gui.menu_acts.AddNewPipeline;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -15,6 +16,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -32,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.scene.image.Image;
@@ -82,8 +85,8 @@ public class Main extends Application {
         this.primaryStage = primaryStage;
 
 //        System.out.println(Paths.get(Thread.currentThread().getContextClassLoader().getResource("edu/utah/bmi/simple/gui/view/big.png").toURI()).toString());
-//        Image anotherIcon = new Image(Paths.get(getClass().getClassLoader().getResource("edu/utah/bmi/simple/gui/view/big.png").toURI()).toString());
-        Image anotherIcon = new Image("edu/utah/bmi/simple/gui/view/transbig.png");
+        Image anotherIcon = new Image(Thread.currentThread().getContextClassLoader().getResourceAsStream("edu/utah/bmi/simple/gui/view/big.png"));
+//        Image anotherIcon = new Image("edu/utah/bmi/simple/gui/view/transbig.png");
         primaryStage.getIcons().add(anotherIcon);
         initRootLayout();
         String configFile = getLastConfigFile();
@@ -105,32 +108,51 @@ public class Main extends Application {
     }
 
     public void openConfigFile() {
-        Platform.runLater(new Runnable() {
-            public void run() {
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Choose project configuration file: ");
-                File oldParentDir;
-                if (!currentConfigFile.exists())
-                    oldParentDir = new File("./");
-                else {
-                    oldParentDir = currentConfigFile.getParentFile();
-                }
-                if (oldParentDir.exists())
-                    fileChooser.setInitialDirectory(oldParentDir);
-                if (currentConfigFile.exists())
-                    fileChooser.setInitialFileName(currentConfigFile.getName());
-                File file = fileChooser.showOpenDialog(null);
-                if (file != null) {
-                    currentConfigFile = file;
-                    primaryStage.setTitle("EasyCIE(__" + file.getName() + "__)");
+        Platform.runLater(() -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Choose project configuration file: ");
+            File oldParentDir;
+            if (!currentConfigFile.exists())
+                oldParentDir = new File("./");
+            else {
+                oldParentDir = currentConfigFile.getParentFile();
+            }
+            if (oldParentDir.exists())
+                fileChooser.setInitialDirectory(oldParentDir);
+            if (currentConfigFile.exists())
+                fileChooser.setInitialFileName(currentConfigFile.getName());
+            File file = fileChooser.showOpenDialog(null);
+            if (file != null) {
+                currentConfigFile = file;
+                primaryStage.setTitle("EasyCIE(__" + file.getName() + "__)");
 
-                    refreshSettings();
-                    saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()) + "\n" + currentTaskName);
-                }
+                refreshSettings();
+                saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()) + "\n" + currentTaskName);
             }
         });
     }
 
+
+    public void createNew() {
+        Platform.runLater(() -> {
+            TextInputDialog dialog = new TextInputDialog("");
+            dialog.setTitle("New Project Setup");
+            dialog.setHeaderText("Set up the new EasyCIE project configuration");
+            dialog.setContentText("Please enter your project name:");
+            Optional<String> result = dialog.showAndWait();
+            String projectName = result.get();
+            new AddNewPipeline(new String[]{"-1", projectName}).gen();
+//            InitiateNewConfig.main(new String[]{"-1", "conf/" + projectName, projectName + "_config", projectName + "_sql_config"});
+            File file = new File("conf/" + projectName + "/" + projectName + "_config.xml");
+            if (file != null && file.exists()) {
+                currentConfigFile = file;
+                primaryStage.setTitle("EasyCIE(__" + file.getName() + "__)");
+
+                refreshSettings();
+                saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()) + "\n" + currentTaskName);
+            }
+        });
+    }
 
     private void saveOpenLog(String filePath) {
         List<String> lines = new ArrayList<>();

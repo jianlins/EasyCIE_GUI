@@ -33,6 +33,11 @@ public class RootLayoutController {
     }
 
     @FXML
+    private void createnew() {
+        mainApp.createNew();
+    }
+
+    @FXML
     private void save() {
         mainApp.saveSetting();
     }
@@ -327,6 +332,6 @@ public class RootLayoutController {
 
     public void resetPipeline(ActionEvent actionEvent) {
         CPEFactory.reset();
-        AdaptableCPEDescriptorRunner.lastRunner=null;
+        AdaptableCPEDescriptorRunner.lastRunner = null;
     }
 }

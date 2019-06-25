@@ -17,7 +17,7 @@
     </properties>
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
-    <version>${current.version}</version>
+    <version>3.0.2-SNAPSHOT</version>
     <name>EasyCIE Project</name>
     <url>https://github.com/jianlins/EasyCIE_GUI</url>
     <description>The library of EasyCIE.</description>
@@ -186,55 +186,39 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                            <excludeGroupIds>org.apache.maven.plugins</excludeGroupIds>
-                            <excludeGroupIds>junit</excludeGroupIds>
-                            <excludeGroupIds>org.apache.maven</excludeGroupIds>
-                            <excludeGroupIds>ch.vorburger.mariaDB4j</excludeGroupIds>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>
-                </configuration>
-            </plugin>
-            <!--<plugin>-->
-                <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                <!--<version>3.0.0</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>single</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<configuration>-->
-                    <!--<descriptorRefs>-->
-                        <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
-                    <!--</descriptorRefs>-->
-                    <!--<outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
+
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-dependency-plugin</artifactId>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>copy-dependencies</id>-->
+<!--                        <phase>prepare-package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-dependencies</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
+<!--                            <overWriteReleases>false</overWriteReleases>-->
+<!--                            <overWriteSnapshots>false</overWriteSnapshots>-->
+<!--                            <overWriteIfNewer>true</overWriteIfNewer>-->
+<!--                            <excludeGroupIds>org.apache.maven.plugins</excludeGroupIds>-->
+<!--                            <excludeGroupIds>junit</excludeGroupIds>-->
+<!--                            <excludeGroupIds>org.apache.maven</excludeGroupIds>-->
+<!--                            <excludeGroupIds>ch.vorburger.mariaDB4j</excludeGroupIds>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-jar-plugin</artifactId>-->
+<!--                <version>2.3.1</version>-->
+<!--                <configuration>-->
+<!--                    <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.0.1</version>
@@ -242,17 +226,33 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
                 <executions>
+<!--                    <execution>-->
+<!--                        <id>copy-conf</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-resources</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <outputDirectory>${project.build.directory}/deploy/conf</outputDirectory>-->
+<!--                            <resources>-->
+<!--                                <resource>-->
+<!--                                    <directory>conf</directory>-->
+<!--                                </resource>-->
+<!--                            </resources>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                     <execution>
-                        <id>copy-conf</id>
+                        <id>copy-jars</id>
                         <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/deploy/conf</outputDirectory>
+                            <outputDirectory>${project.build.directory}/deploy/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>conf</directory>
+                                    <directory>${project.build.directory}/jfx/app</directory>
+                                    <filtering>false</filtering>
                                 </resource>
                             </resources>
                         </configuration>
@@ -272,6 +272,7 @@
                                     <excludes>
                                         <exclude>run.*</exclude>
                                         <exclude>help.*</exclude>
+                                        <exclude>*.bk</exclude>
                                         <exclude>run</exclude>
                                         <exclude>help</exclude>
                                         <exclude>*.xml</exclude>
@@ -298,6 +299,10 @@
                                     <excludes>
                                         <exclude>**/customized*.xml</exclude>
                                         <exclude>**/pipeline_*.xml</exclude>
+                                        <exclude>**/ae/*</exclude>
+                                        <exclude>**/type/demo_*</exclude>
+                                        <exclude>**/type/import_*</exclude>
+                                        <exclude>**/type/gold*</exclude>
                                     </excludes>
                                 </resource>
                             </resources>
@@ -344,7 +349,7 @@
             <plugin>
                 <groupId>com.zenjava</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>8.6.0</version>
+                <version>8.8.3</version>
                 <configuration>
                     <mainClass>edu.utah.bmi.simple.gui.controller.Main</mainClass>
                 </configuration>
@@ -376,6 +381,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -400,6 +406,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>

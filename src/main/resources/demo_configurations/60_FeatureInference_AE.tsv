@@ -1,0 +1,33 @@
+@processer:	featureinferencer										
+@splitter:											
+@version:2											
+@casesensitive:	true										
+#keep this comment for documentation purpose											
+#The following inference rules will follow this format:											
+#To define a conclusion annotation with features and corresponding default values:											
+#@ConclusionConcept	SuperTypeName	Feature1:defaultValue1	Feature2:defaultValue2...								
+&CONCEPT_FEATURES	NEGA_CONDITION	Concept	Section:DocumentAnnotation	Note:null	Negation:affirm	Certainty:certain	Temporality:present	Experiencer:patient
+&CONCEPT_FEATURES	HIST_CONDITION	Concept	Section:DocumentAnnotation	Note:null	Negation:affirm	Certainty:certain	Temporality:historical	Experiencer:patient
+&CONCEPT_FEATURES	POSS_CONDITION	Concept	Section:DocumentAnnotation	Note:null	Negation:affirm	Certainty:certain	Temporality:present	Experiencer:patient
+&CONCEPT_FEATURES	HYPO_CONDITION	Concept	Section:DocumentAnnotation	Note:null	Negation:affirm	Certainty:certain	Temporality:present	Experiencer:patient
+&CONCEPT_FEATURES	PLANNED_TREATMENT	Concept	Section:DocumentAnnotation	Note:null	Negation:affirm	Certainty:certain	Temporality:present	Experiencer:patient
+
+
+
+@FEATURE_VALUES	Negation	affirm	negated								
+@FEATURE_VALUES	Certainty	certain	uncertain								
+@FEATURE_VALUES	Temporality	present	historical	hypothetical							
+@FEATURE_VALUES	Experiencer	patient	nonpatient
+											
+#To define an inference rule:
+#TOPIC	CONCLUSION	COPY_ATTRIB	EVIDENCE_ANNO	CONDITION	SCOPE_ANNO
+											
+CONDITION	NEGA_CONDITION	Note,Certainty,Temporality	DISEASE	negated	SourceDocumentInformation
+CONDITION	HIST_CONDITION	Note,Certainty,Temporality	DISEASE	historical	SourceDocumentInformation
+CONDITION	HYPO_CONDITION	Note,Certainty,Temporality,Anatomic,Surgery	DISEASE	hypothetical	SourceDocumentInformation
+CONDITION	POSS_CONDITION	Note,Certainty,Temporality,Anatomic,Surgery	DISEASE	affirm,uncertain	SourceDocumentInformation
+
+TREATMENT	NEGA_CONDITION	Note,Certainty,Temporality	TREATMENT	negated	SourceDocumentInformation
+TREATMENT	HIST_CONDITION	Note,Certainty,Temporality	TREATMENT	historical	SourceDocumentInformation
+TREATMENT	PLANNED_TREATMENT	Note,Certainty,Temporality	TREATMENT	hypothetical	SourceDocumentInformation
+TREATMENT	PLANNED_TREATMENT	Note,Certainty,Temporality	TREATMENT	affirm	Plan

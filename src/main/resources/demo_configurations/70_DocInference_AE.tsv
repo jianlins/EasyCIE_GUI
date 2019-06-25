@@ -1,0 +1,19 @@
+#Example rules for docinferencer				
+#The rule format:				
+#Question_Group	Answer(Doc_Conclusion)	Mention_Evidence1, Mention_Evidence2...	Scope	
+"#The rule above means if """"""""Mention_Evidence1"""""""" and """"""""Mention_Evidence2"""""""" coexist in the same scope of """"""""Scope"""""""","""""""				
+"#then draw a document level conclusion Doc_Conclusion for the question """"""""Question_Group""""""""."""""""				
+#The rule will be executed in order				
+@aggregate:false				
+@CONCLUSION_Doc	Neg_Doc
+
+
+&CONCEPT_FEATURES	Neg_Doc	Doc_Base
+&CONCEPT_FEATURES	DIS_TREAT_Doc	Doc_Base
+&CONCEPT_FEATURES	DIS_Doc	Doc_Base
+&CONCEPT_FEATURES	TREAT_Doc	Doc_Base
+
+				
+CONCLUSION_Doc	DIS_TREAT_Doc	Note:-DISEASE+TREATMENT	DISEASE,TREATMENT	SourceDocumentInformation
+CONCLUSION_Doc	DIS_Doc	Note:-DISEASE	DISEASE	SourceDocumentInformation
+CONCLUSION_Doc	TREAT_Doc	Note:-TREATMENT	TREATMENT	SourceDocumentInformation

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright  2017  Department of Biomedical Informatics, University of Utah
+  ~ <p>
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~ <p>
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~ <p>
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
+    <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
+    <primitive>true</primitive>
+    <annotatorImplementationName>edu.utah.bmi.nlp.uima.ae.TemporalContext_AE_General</annotatorImplementationName>
+    <analysisEngineMetaData>
+        <name>TemporalContext_AE</name>
+        <description>Detect temporal mentions in the context, and compare them with reference datetime to assert the context as historical or present</description>
+        <version>1.3</version>
+        <vendor/>
+        <configurationParameters>
+            <configurationParameter>
+                <name>RuleFileOrStr</name>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>SentenceTypeName</name>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>IntervalDaysBeforeReferenceDate</name>
+                <description>The days before the reference date that will be inferred as historical, default is 14</description>
+                <type>Integer</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>TargetConceptTypeName</name>
+                <description>Which type of concept will apply the temporal inference</description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>true</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>InferTemporalStatusForAllTargetConcept</name>
+                <description>When there is no date time mentions, whether infer the temporal status based on report date and reference date</description>
+                <type>Boolean</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>RecordDateColumnName</name>
+                <description>The column name that contains the note date information, default is DATE</description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>ReferenceDateColumnName</name>
+                <description>The column name that contains the reference date information, default is REF_DTM</description>
+                <type>String</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
+                <name>SaveDateAnnotations</name>
+                <description>Whether save teh date time mentions as annotations</description>
+                <type>Boolean</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+        </configurationParameters>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>RuleFileOrStr</name>
+                <value>
+                    <string>conf/date_rule.csv</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>SentenceTypeName</name>
+                <value>
+                    <string>edu.utah.bmi.nlp.type.system.Sentence</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>IntervalDaysBeforeReferenceDate</name>
+                <value>
+                    <integer>14</integer>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>TargetConceptTypeName</name>
+                <value>
+                    <string>edu.utah.bmi.nlp.type.system.Concept</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>InferTemporalStatusForAllTargetConcept</name>
+                <value>
+                    <boolean>true</boolean>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>RecordDateColumnName</name>
+                <value>
+                    <string>DATE</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>ReferenceDateColumnName</name>
+                <value>
+                    <string>REF_DTM</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>SaveDateAnnotations</name>
+                <value>
+                    <boolean>false</boolean>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>
+        <typeSystemDescription>
+            <imports>
+                <import location="../type/All_Types.xml"/>
+            </imports>
+        </typeSystemDescription>
+        <typePriorities/>
+        <fsIndexCollection/>
+        <capabilities/>
+        <operationalProperties>
+            <modifiesCas>true</modifiesCas>
+            <multipleDeploymentAllowed>true</multipleDeploymentAllowed>
+            <outputsNewCASes>false</outputsNewCASes>
+        </operationalProperties>
+    </analysisEngineMetaData>
+    <resourceManagerConfiguration/>
+</analysisEngineDescription>

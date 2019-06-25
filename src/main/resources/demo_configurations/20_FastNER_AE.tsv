@@ -1,0 +1,18 @@
+@fastner		
+@CONCEPT_FEATURES	DISEASE	Concept
+@CONCEPT_FEATURES	TREATMENT	Concept
+
+#Abdominal incision packed with WTD gauze, erythema appears to be resolving.
+congestive heart failure	DISEASE
+heart failure	DISEASE
+pancreatic cysts	DISEASE
+subdural hematoma	DISEASE
+diabetes	DISEASE
+hematuria	DISEASE
+hypertension	DISEASE
+subdural bleed	DISEASE
+feeding tube	TREATMENT
+crystalloids	TREATMENT
+IV fluid	TREATMENT
+Diltiazem	TREATMENT
+Lopressor	TREATMENT

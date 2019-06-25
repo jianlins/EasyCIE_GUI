@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * Created by
  *
- * @Author Jianlin Shi on 4/8/17.
+ * @author Jianlin Shi on 4/8/17.
  */
 public class GenericAdaptableCPERunnerTest {
     @Test
