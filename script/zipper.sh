@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-version="2.0.8"
+
 cd ..
 base="$PWD"
 if [ ! -d "$base/target/release" ]; then
@@ -7,6 +7,15 @@ if [ ! -d "$base/target/release" ]; then
 fi
 jdkbase=$base/../../../Downloads/jdks
 
+value=`cat pom.xml`
+find_version() {
+  local s=$1 regex=$2
+  if [[ $s =~ $regex ]]
+    then
+      echo "${BASH_REMATCH[1]}"
+  fi
+}
+version=$(find_version "$value" "current.version>([^<]+)")
 
 
 cd target/deploy

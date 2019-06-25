@@ -109,8 +109,8 @@
       <queryName>DocSnippet</queryName> 
     </view>  
     <executes> 
-      <RunHai_cpe memo="run Pipeline hai_cpe">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunHai_cpe>  
-      <ViewOutputInDB memo="View the output in database">edu.utah.bmi.simple.gui.task.ViewOutputDB</ViewOutputInDB> 
+      <RunEasyCIE memo="run Pipeline hai_cpe">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunEasyCIE>
+      <ViewOutputInDB memo="View the output in database">edu.utah.bmi.simple.gui.task.ViewOutputDB</ViewOutputInDB>
     </executes> 
   </easycie>  
   <debug> 

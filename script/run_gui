@@ -1,2 +1,3 @@
 cd "$( dirname "$0" )";
-${java.path} -jar easycie-gui-3.0.2-SNAPSHOT-jfx.jar
+echo "Welcome to EasyCIE ${current.version}"
+${java.path} -jar easycie-gui.jar
