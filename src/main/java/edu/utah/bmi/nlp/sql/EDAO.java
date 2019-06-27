@@ -1057,4 +1057,8 @@ public class EDAO {
     public File getConfigFile() {
         return configFile;
     }
+
+    public String toString(){
+        return server+"\n"+configFile.getAbsolutePath();
+    }
 }
