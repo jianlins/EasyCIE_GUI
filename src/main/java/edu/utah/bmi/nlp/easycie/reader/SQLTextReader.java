@@ -1,6 +1,6 @@
 package edu.utah.bmi.nlp.easycie.reader;
 
-import edu.utah.bmi.nlp.rush.core.Boundary;
+import edu.utah.bmi.nlp.easycie.MetaDataCommonFunctions;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
@@ -11,7 +11,6 @@ import org.apache.uima.collection.CollectionException;
 import org.apache.uima.collection.CollectionReader_ImplBase;
 import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.Progress;
 import org.apache.uima.util.ProgressImpl;
 
@@ -100,7 +99,6 @@ public class SQLTextReader extends CollectionReader_ImplBase {
 
     public void getNext(CAS aCAS) throws CollectionException {
         RecordRow currentRecord = recordIterator.next();
-        String metaInfor = currentRecord.serialize(docColumnName);
         String text = (String) currentRecord.getValueByColumnName(docColumnName);
         if (trimText) {
             text = text.replaceAll("(\\n[^\\w\\p{Punct}]+\\n)", "\n\n")
@@ -118,10 +116,8 @@ public class SQLTextReader extends CollectionReader_ImplBase {
             throw new CollectionException(var6);
         }
         jcas.setDocumentText(text);
-        SourceDocumentInformation srcDocInfo = new SourceDocumentInformation(jcas, 0, text.length());
-        srcDocInfo.setUri(metaInfor);
-        srcDocInfo.setOffsetInSource(0);
-        srcDocInfo.setDocumentSize(text.length());
+        SourceDocumentInformation srcDocInfo = MetaDataCommonFunctions.genSourceDocumentInformationAnno(jcas, currentRecord, docColumnName, text.length());
+
         srcDocInfo.setLastSegment(this.mCurrentIndex == this.totalDocs);
         srcDocInfo.addToIndexes();
         mCurrentIndex++;

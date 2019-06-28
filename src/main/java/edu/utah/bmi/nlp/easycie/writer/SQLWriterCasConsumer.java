@@ -4,6 +4,7 @@ import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.Interval1D;
 import edu.utah.bmi.nlp.core.IntervalST;
+import edu.utah.bmi.nlp.easycie.MetaDataCommonFunctions;
 import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
@@ -115,18 +116,12 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
         IntervalST sentenceTree = new IntervalST();
         ArrayList<Sentence> sentenceList = new ArrayList<>();
 
-        RecordRow baseRecordRow = new RecordRow();
-        FSIterator it = jcas.getAnnotationIndex(SourceDocumentInformation.type).iterator();
-        if (it.hasNext()) {
-            SourceDocumentInformation e = (SourceDocumentInformation) it.next();
-            String serializedString = new File(e.getUri()).getName();
-            baseRecordRow.deserialize(serializedString);
-        }
+        RecordRow baseRecordRow = MetaDataCommonFunctions.getMetaData(jcas);
         baseRecordRow.addCell("RUN_ID", version);
 
         classLogger.finest("Write annotations for doc: " + baseRecordRow.getStrByColumnName("DOC_NAME"));
 
-        it = jcas.getAnnotationIndex(Sentence.type).iterator();
+        FSIterator<Annotation> it = jcas.getAnnotationIndex(Sentence.type).iterator();
         while (it.hasNext()) {
             Sentence thisSentence = (Sentence) it.next();
             sentenceList.add(thisSentence);
