@@ -22,7 +22,7 @@ public class ViewOutputDB extends GUITask {
     private EDAO dao;
     public boolean joinDocTable = true;
     public static String sourceQuery;
-    public boolean viewReference = false;
+    public boolean viewReference = false, sep_db = false;
 
 
     protected ViewOutputDB() {
@@ -160,8 +160,12 @@ public class ViewOutputDB extends GUITask {
                     viewAnnotator = referenceAnnotator;
                     currentViewQueryName = "";
                 }
-                if(dao.isClosed())
-                    dao=EDAO.getInstance(new File(outputDB));
+                if (dao.isClosed())
+                    dao = EDAO.getInstance(new File(outputDB));
+                if (!readDBConfigFileName.equals(writeConfigFileName)) {
+                    currentViewQueryName += "Sep";
+                    sep_db = true;
+                }
                 values = buildQuery(dao, currentViewQueryName, viewAnnotator, snippetTable, docResultTable, bunchResultTable, inputTable);
                 sourceQuery = values[0];
                 String filter = values[1];
@@ -196,12 +200,20 @@ public class ViewOutputDB extends GUITask {
                     sourceQuery = modifyQuery(sourceQuery, otherConditions);
                 }
                 dao.close();
-                if(viewReference) {
-                    res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, outputDB,
-                            ColorAnnotationCell.colorOutput, TasksOverviewController.RefView);
-                }else{
-                    res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, outputDB,
-                            ColorAnnotationCell.colorOutput, TasksOverviewController.AnnoView);
+                if (viewReference) {
+                    if (!sep_db)
+                        res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, outputDB,
+                                ColorAnnotationCell.colorOutput, TasksOverviewController.RefView);
+                    else
+                        res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, new String[]{readDBConfigFileName, writeConfigFileName},
+                                ColorAnnotationCell.colorOutput, TasksOverviewController.RefView);
+                } else {
+                    if (!sep_db)
+                        res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, outputDB,
+                                ColorAnnotationCell.colorOutput, TasksOverviewController.AnnoView);
+                    else
+                        res = TasksOverviewController.currentTasksOverviewController.showDBTable(sourceQuery, new String[]{readDBConfigFileName, writeConfigFileName},
+                                ColorAnnotationCell.colorOutput, TasksOverviewController.AnnoView);
                 }
                 if (res)
                     updateMessage("data loaded");

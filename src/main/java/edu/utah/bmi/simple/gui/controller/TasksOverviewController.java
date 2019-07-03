@@ -2,7 +2,6 @@ package edu.utah.bmi.simple.gui.controller;
 
 import com.sun.javafx.collections.ObservableMapWrapper;
 import edu.emory.mathcs.backport.java.util.Arrays;
-import edu.emory.mathcs.backport.java.util.Collections;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.sql.ColumnInfo;
 import edu.utah.bmi.nlp.sql.EDAO;
@@ -138,7 +137,7 @@ public class TasksOverviewController {
     private WebEngine webEngine;
 
     private int limitRecords = 300;
-    private EDAO dao;
+    private EDAO rdao, wdao;
 
     public GUITask currentGUITask;
 
@@ -483,19 +482,19 @@ public class TasksOverviewController {
     private void resumeSelectedRow(String tableName) {
         switch (tableName) {
             case DocView:
-                docTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(DocView,0));
+                docTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(DocView, 0));
                 break;
             case RefView:
-                refTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(RefView,0));
+                refTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(RefView, 0));
                 break;
             case AnnoView:
-                annoTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(AnnoView,0));
+                annoTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(AnnoView, 0));
                 break;
             case CompareView:
-                compareTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(CompareView,0));
+                compareTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(CompareView, 0));
                 break;
             case DebugView:
-                debugTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(DebugView,0));
+                debugTableView.getSelectionModel().clearAndSelect(selectedRows.getOrDefault(DebugView, 0));
                 break;
         }
     }
@@ -579,17 +578,70 @@ public class TasksOverviewController {
         }
     }
 
-    public boolean showDBTable(String sql, String dbName, String colorDifferential, String tableViewName, Object... values) {
+    public boolean showDBTable(String sql, String[] dbNames, String colorDifferential, String tableViewName, Object... values) {
         if (sql == null || sql.length() == 0 || sql.equals("null"))
             return false;
-        dao = EDAO.getInstance(new File(dbName));
+        rdao = EDAO.getInstance(new File(dbNames[0]));
+        wdao = EDAO.getInstance(new File(dbNames[1]));
         RecordRowIterator recordRowIter;
         ColumnInfo columnInfo;
         Object[] res;
         if (sql.toLowerCase().startsWith("select ")) {
-            res = dao.queryRecordsNMeta(sql);
+            res = wdao.queryRecordsNMeta(sql);
         } else {
-            res = dao.queryRecordsNMetaFromPstmt(sql, values);
+            res = wdao.queryRecordsNMetaFromPstmt(sql, values);
+        }
+        recordRowIter = (RecordRowIterator) res[0];
+        columnInfo = (ColumnInfo) res[1];
+        TableView tableView = null;
+        String[] splitCondition = splitCondition(sql);
+        String core = splitCondition[0];
+        String filter = splitCondition[1];
+        switch (tableViewName) {
+            case DocView:
+                tableView = docTableView;
+                currentSQLs.put(DocView, core);
+                docSqlFilter.setText(filter);
+                currentDBFileName.put(DocView, dbNames[1]);
+                break;
+            case RefView:
+                tableView = refTableView;
+                currentSQLs.put(RefView, core);
+                refSqlFilter.setText(filter);
+                currentDBFileName.put(RefView, dbNames[1]);
+                break;
+            case AnnoView:
+                tableView = annoTableView;
+                currentSQLs.put(AnnoView, core);
+                annoSqlFilter.setText(filter);
+                currentDBFileName.put(AnnoView, dbNames[1]);
+                break;
+            case CompareView:
+                tableView = compareTableView;
+                currentSQLs.put(CompareView, core);
+                compareSqlFilter.setText(filter);
+                currentDBFileName.put(CompareView, dbNames[1]);
+                break;
+            case DebugView:
+                tableView = debugTableView;
+                currentSQLs.put(DebugView, core);
+                currentDBFileName.put(DebugView, dbNames[1]);
+                break;
+        }
+        return showDBTable(recordRowIter, columnInfo, colorDifferential, tableView, tableViewName);
+    }
+
+    public boolean showDBTable(String sql, String dbName, String colorDifferential, String tableViewName, Object... values) {
+        if (sql == null || sql.length() == 0 || sql.equals("null"))
+            return false;
+        rdao = EDAO.getInstance(new File(dbName));
+        RecordRowIterator recordRowIter;
+        ColumnInfo columnInfo;
+        Object[] res;
+        if (sql.toLowerCase().startsWith("select ")) {
+            res = rdao.queryRecordsNMeta(sql);
+        } else {
+            res = rdao.queryRecordsNMetaFromPstmt(sql, values);
         }
         recordRowIter = (RecordRowIterator) res[0];
         columnInfo = (ColumnInfo) res[1];
@@ -869,8 +921,8 @@ public class TasksOverviewController {
             data.add(row);
             haveRead = true;
         }
-        if (dao != null && !dao.isClosed())
-            dao.close();
+        if (rdao != null && !rdao.isClosed())
+            rdao.close();
         tableView.setItems(data);
         tableView.refresh();
 

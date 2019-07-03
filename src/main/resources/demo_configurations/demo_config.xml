@@ -97,10 +97,11 @@
         <WriteConcepts memo="">Concept,Doc_Base</WriteConcepts>  
         <MinTextLength memo="">0</MinTextLength> 
       </SQLWriter>
-      <PatInferencer>
+      <PatInferenceWriter>
         <RuleFileOrStr memo="" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">{configDir}/90_PatInference_AE.tsv</RuleFileOrStr>
+        <BunchColumnName>PAT_ID</BunchColumnName>
         <DBConfigFile  doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">{configDir}/{dbPrefix}{batchId}.xml</DBConfigFile>
-      </PatInferencer>
+      </PatInferenceWriter>
     </pipeLineSetting>  
     <annotators memo="Mark current annotations with annotator: "> 
       <current>{annotator}</current>

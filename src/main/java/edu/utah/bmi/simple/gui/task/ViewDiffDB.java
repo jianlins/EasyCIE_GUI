@@ -121,8 +121,6 @@ public class ViewDiffDB extends GUITask {
                                         "Instead, EasyCIE Will display the last run of annotator \"" + annotator + "\" that has some output, which " +
                                         "RUN_ID=" + lastLogRunId);
                     }
-
-
                     TasksOverviewController.currentTasksOverviewController.compareSqlFilter.setText(filter);
                     if (filter.length() > 0) {
                         sourceQuery = ViewOutputDB.modifyQuery(sourceQuery, filter);

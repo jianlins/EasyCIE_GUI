@@ -1,5 +1,7 @@
 #Tag this default rule:	conclusion topic	default conclusion
-&DefaultBunchConclusion	SSI_PAT	NO_SSI_PAT
+&DefaultBunchConclusion	PAT	NO_DT_PAT
 #question name	conclusion type	evidence type		scope
-SSI_PAT	PATOS_PAT	SSI_Doc,IATOS_Doc
-SSI_PAT	SSI_PAT	SSI_Doc
+PAT	DT_PAT	DIS_TREAT_Doc
+PAT	DT_PAT	DIS_Doc,TREAT_Doc
+PAT	D_PAT	DIS_Doc
+PAT	T_PAT	TREAT_Doc
