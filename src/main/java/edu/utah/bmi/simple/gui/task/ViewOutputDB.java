@@ -125,16 +125,26 @@ public class ViewOutputDB extends GUITask {
     }
 
     public static String modifyQuery(String sourceQuery, String conditions) {
+        String limit = "";
+        if (sourceQuery.toLowerCase().indexOf(" limit ") > -1) {
+            int limitPos = sourceQuery.toLowerCase().indexOf(" limit ");
+            limit = sourceQuery.substring(limitPos);
+            sourceQuery = sourceQuery.substring(0, limitPos);
+        }
         if (conditions.length() > 0) {
             int limitPos = conditions.toLowerCase().indexOf(" limit ");
             int orderPos = conditions.toLowerCase().indexOf(" order ");
             if (orderPos > 0) {
                 sourceQuery = sourceQuery + " WHERE ( " + conditions.substring(0, orderPos) + " ) " + conditions.substring(orderPos);
             } else if (limitPos > 0) {
+                limit="";
                 sourceQuery = sourceQuery + " WHERE ( " + conditions.substring(0, limitPos) + " ) " + conditions.substring(limitPos);
             } else {
                 sourceQuery = sourceQuery + " WHERE ( " + conditions + " ) ";
             }
+        }
+        if (limit.length() > 0) {
+            sourceQuery = sourceQuery + limit;
         }
         return sourceQuery;
     }
