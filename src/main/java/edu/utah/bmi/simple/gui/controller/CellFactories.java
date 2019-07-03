@@ -21,6 +21,7 @@ import javafx.util.Callback;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 public class CellFactories {
 
@@ -88,7 +89,7 @@ public class CellFactories {
                     TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
                     TabPane tabPane = tasksOverviewController.tabPane;
                     SingleSelectionModel<Tab> selectModel = tabPane.getSelectionModel();
-                    int selectedTabIdx=selectModel.getSelectedIndex();
+                    int selectedTabIdx = selectModel.getSelectedIndex();
                     if (!cell.isEmpty()) {
                         Object item = cell.getItem();
                         Color color = Color.LIGHTGREY;
@@ -109,7 +110,7 @@ public class CellFactories {
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
 //                        System.out.println("Start debugging...");
 
-                        if (selectedTabIdx==3) {
+                        if (selectedTabIdx == 3) {
                             RecordRow recordRow = (RecordRow) cell.getItem();
                             String bunchId = recordRow.getStrByColumnName("DOC_NAME");
                             selectModel.select(2);
@@ -121,13 +122,14 @@ public class CellFactories {
                             TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                             if (cell.getItem() instanceof RecordRow) {
                                 RecordRow recordRow = (RecordRow) cell.getItem();
-                                String text = "";
-                                if (recordRow.getValueByColumnName("DOC_TEXT") == null) {
-                                    text = cell.queryDocContent(recordRow.getStrByColumnName("DOC_NAME"));
-                                } else {
-                                    text = recordRow.getStrByColumnName("DOC_TEXT");
+                                if (recordRow.getValueByColumnName("DOC_TEXT") == null && recordRow.getValueByColumnName("TEXT") == null) {
+                                    RecordRow record = cell.queryDocContent(recordRow.getStrByColumnName("DOC_NAME"));
+                                    for (Map.Entry<String, Object> entry : record.getColumnNameValues().entrySet()) {
+                                        recordRow.addCell(entry.getKey(), entry.getValue());
+                                    }
                                 }
-                                recordRow.addCell("TEXT", text);
+                                if (recordRow.getValueByColumnName("DOC_TEXT") == null && recordRow.getValueByColumnName("TEXT") == null)
+                                    recordRow.addCell("TEXT","");
                                 CellActions.process(recordRow);
 //                                new Thread(() -> process(recordRow, docText)).start();
 //                            new Thread(() -> fastDebugPipe.run()).start();

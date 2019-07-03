@@ -196,6 +196,9 @@ public class ColorAnnotationCell extends TableCell<ObservableList, Object> {
 
     public static String generateHTML(String text, int begin, int end, String color) {
         String html;
+        if(begin==end){
+            return text;
+        }
         if(begin<1)
             return "";
         String pre = text.substring(0, begin);

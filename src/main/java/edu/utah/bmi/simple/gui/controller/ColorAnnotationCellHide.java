@@ -80,7 +80,7 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
             RecordRow recordRow = (RecordRow) value;
             Object docName = recordRow.getValueByColumnName("DOC_NAME");
             if (!docName.equals(previousValue) || (recordRow.getValueByColumnName("SNIPPET_BEGIN") != null && getIntValue(recordRow.getValueByColumnName("SNIPPET_BEGIN")) != previousSnippetBegin)) {
-                html = queryDocContent(docName.toString());
+                html = queryDocContent(docName.toString()).getStrByColumnName("TEXT");
                 if (html.length() > 0 && recordRow.getValueByColumnName("SNIPPET_BEGIN") != null) {
                     String color = ColorAnnotationCell.pickColor(recordRow, ColorAnnotationCell.colorDifferential);
                     int begin = getIntValue(recordRow.getValueByColumnName("SNIPPET_BEGIN"));
@@ -105,19 +105,19 @@ public class ColorAnnotationCellHide extends ColorAnnotationCell {
         return html;
     }
 
-    public static String queryDocContent(String docName) {
-        String text = "";
+    public static RecordRow queryDocContent(String docName) {
         TaskFX task = TasksOverviewController.currentTasksOverviewController.mainApp.tasks.getTask("settings");
         String inputDB = task.getValue(ConfigKeys.readDBConfigFileName);
         EDAO dao = EDAO.getInstance(new File(inputDB));
         String docTableName = task.getValue(ConfigKeys.inputTableName);
         dao.initiateTableFromTemplate("DOCUMENTS_TABLE", docTableName, false);
         RecordRowIterator records = dao.queryRecordsFromPstmt(docTableName, docName);
+        RecordRow recordRow = null;
         if (records.hasNext()) {
-            text = records.next().getStrByColumnName("TEXT");
+            recordRow = records.next();
         }
         dao.close();
-        return text;
+        return recordRow;
     }
 
 
