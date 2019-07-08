@@ -77,8 +77,9 @@ public class SQLMetaTextReader extends SQLTextReader {
         }
         StringBuilder sb = new StringBuilder();
         for (String col : metaColumns) {
+            sb.append("<<");
             sb.append(currentRecord.getStrByColumnName(col));
-            sb.append("\n\n");
+            sb.append(">>\n\n");
         }
         if (appendPos.toLowerCase().equals("prefix")) {
             text = sb.toString() + text;
