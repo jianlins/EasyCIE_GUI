@@ -16,34 +16,23 @@ import org.apache.uima.util.ProgressImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
- * This class is  fixed to column names, record identifier is "filename", and the xmi column is "xmi"
+ * This read will append metadata string into document text for downstream NLP analyses.
  *
  * @author Jianlin Shi on 5/20/16.
  */
-public class SQLTextReader extends CollectionReader_ImplBase {
-    public static Logger logger = Logger.getLogger(SQLTextReader.class.getCanonicalName());
-    public static final String PARAM_DB_CONFIG_FILE = "DBConfigFile";
-    public static final String PARAM_DOC_TABLE_NAME = "DocTableName";
-    public static final String PARAM_QUERY_SQL_NAME = "InputQueryName";
-    public static final String PARAM_COUNT_SQL_NAME = "CountQueryName";
-    public static final String PARAM_DOC_COLUMN_NAME = "DocColumnName";
-    public static final String PARMA_TRIM_TEXT = "TrimText";
-    public static final String PARAM_DATASET_ID = "DatasetId";
-    protected File dbConfigFile;
-    protected String querySqlName, countSqlName, docColumnName, docTableName;
-    public static EDAO dao = null;
-    protected int mCurrentIndex, totalDocs;
-    protected RecordRowIterator recordIterator;
-    @Deprecated
-    public static boolean debug = false;
-    public boolean trimText = false;
-    protected String datasetId;
+public class SQLMetaTextReader extends SQLTextReader {
+    public static Logger logger = Logger.getLogger(SQLMetaTextReader.class.getCanonicalName());
 
+    public static final String PARAM_META_COLUMNS = "MetaColumns";
+    public static final String PARAM_APPEND_POS = "AppendPosition";
+    protected String appendPos = "prefix";
+    protected ArrayList<String> metaColumns = new ArrayList<>();
 
     public void initialize() {
         readConfigurations();
@@ -68,34 +57,14 @@ public class SQLTextReader extends CollectionReader_ImplBase {
         docColumnName = readConfigureString(PARAM_DOC_COLUMN_NAME, "TEXT");
         docTableName = readConfigureString(PARAM_DOC_TABLE_NAME, "DOCUMENTS");
         datasetId = readConfigureString(PARAM_DATASET_ID, "0");
+        String metaColumnString = readConfigureString(PARAM_META_COLUMNS, "");
+        for (String column : metaColumnString.split("[,; :]"))
+            metaColumns.add(column.trim());
         Object value = this.getConfigParameterValue(PARMA_TRIM_TEXT);
         if (value != null && value instanceof Boolean)
             trimText = (Boolean) value;
     }
 
-    protected String readConfigureString(String parameterName, String defaultValue) {
-        Object tmpObj = this.getConfigParameterValue(parameterName);
-        if (tmpObj == null) {
-            if (defaultValue == null) {
-                throw new UIMA_IllegalArgumentException("parameter not set", new Object[]{parameterName, this.getMetaData().getName()});
-            } else {
-                tmpObj = defaultValue;
-            }
-        }
-        return (tmpObj + "").trim();
-    }
-
-    protected void addDocs() {
-        totalDocs = dao.countRecords(countSqlName, docTableName, datasetId);
-        if (logger.isLoggable(Level.INFO))
-            System.out.println("Total documents need to be processed: " + totalDocs);
-        recordIterator = dao.queryRecordsFromPstmt(querySqlName, docTableName, datasetId);
-    }
-
-    public boolean hasNext() {
-
-        return recordIterator != null && recordIterator.hasNext();
-    }
 
     public void getNext(CAS aCAS) throws CollectionException {
         RecordRow currentRecord = recordIterator.next();
@@ -106,6 +75,17 @@ public class SQLTextReader extends CollectionReader_ImplBase {
                     .replaceAll("^(\\n\\s*)+(?:\\n)", "")
                     .replaceAll("[^\\w\\p{Punct}\\s]", " ");
         }
+        StringBuilder sb = new StringBuilder();
+        for (String col : metaColumns) {
+            sb.append(currentRecord.getStrByColumnName(col));
+            sb.append("\n\n");
+        }
+        if (appendPos.toLowerCase().equals("prefix")) {
+            text = sb.toString() + text;
+        } else {
+            text = text + sb.toString();
+        }
+        
         logger.finest("Read document: " + currentRecord.getStrByColumnName("DOC_NAME"));
         if (text == null)
             text = "";
@@ -123,16 +103,4 @@ public class SQLTextReader extends CollectionReader_ImplBase {
         mCurrentIndex++;
     }
 
-
-    public void close() {
-        dao.close();
-    }
-
-    public Progress[] getProgress() {
-        return new Progress[]{new ProgressImpl(this.mCurrentIndex, totalDocs, Progress.ENTITIES)};
-    }
-
-    public int getNumberOfDocuments() {
-        return this.totalDocs;
-    }
 }

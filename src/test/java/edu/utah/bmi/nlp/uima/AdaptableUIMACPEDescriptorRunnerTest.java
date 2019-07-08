@@ -8,7 +8,10 @@ import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.nlp.sql.TDAO;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import org.apache.uima.collection.base_cpm.CasProcessor;
+import org.apache.uima.collection.impl.CollectionReaderDescription_impl;
 import org.apache.uima.collection.metadata.CpeCasProcessor;
+import org.apache.uima.collection.metadata.CpeCollectionReader;
+import org.apache.uima.collection.metadata.CpeComponentDescriptor;
 import org.apache.uima.collection.metadata.CpeDescriptorException;
 import org.junit.Test;
 
@@ -43,6 +46,28 @@ public class AdaptableUIMACPEDescriptorRunnerTest {
         }
     }
 
+    @Test
+    public void testMetaReader() throws CpeDescriptorException {
+        LinkedHashMap<String, String> configs = new LinkedHashMap<>();
+        configs.put("FastNER/RuleFileOrStr", "@fastner\n" +
+                "@splitter:|\n" +
+                "very concept|ConceptA\n" +
+                "tee|ConceptB");
+        configs.put("SQL_Meta_Text_Reader/MetaColumns", "Code,Label");
+
+        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/demo_meta_cpe.xml", null, configs);
+        LinkedHashMap<String, LinkedHashMap<String, String>> configMap = new LinkedHashMap<>();
+        CpeCollectionReader[] readers = runner.currentCpeDesc.getAllCollectionCollectionReaders();
+        for (CpeCollectionReader reader : readers) {
+            System.out.println(reader instanceof CollectionReaderDescription_impl);
+            System.out.println(reader.getDescriptor().getSourceUrlString());
+            System.out.println(reader.getClass().getSimpleName());
+            CpeComponentDescriptor desc = reader.getCollectionIterator().getDescriptor();
+            System.out.println(desc.getImport().getLocation());
+        }
+
+
+    }
 //
 //    public static void main(String[] args) {
 //        LinkedHashMap<String, String> configs = new LinkedHashMap<>();
