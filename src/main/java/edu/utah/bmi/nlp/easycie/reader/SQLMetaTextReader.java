@@ -31,8 +31,10 @@ public class SQLMetaTextReader extends SQLTextReader {
 
     public static final String PARAM_META_COLUMNS = "MetaColumns";
     public static final String PARAM_APPEND_POS = "AppendPosition";
+    public static final String PARAM_DECORATOR = "Decorator";
     protected String appendPos = "prefix";
     protected ArrayList<String> metaColumns = new ArrayList<>();
+    protected String[] decorator = new String[]{"{{", "}}"};
 
     public void initialize() {
         readConfigurations();
@@ -60,6 +62,11 @@ public class SQLMetaTextReader extends SQLTextReader {
         String metaColumnString = readConfigureString(PARAM_META_COLUMNS, "");
         for (String column : metaColumnString.split("[,; :]"))
             metaColumns.add(column.trim());
+        String decoratorString = readConfigureString(PARAM_DECORATOR, "{{,}}");
+        decorator = decoratorString.split("[,; :]");
+        if (decorator.length < 2) {
+            decorator = new String[]{"{{", "}}"};
+        }
         Object value = this.getConfigParameterValue(PARMA_TRIM_TEXT);
         if (value != null && value instanceof Boolean)
             trimText = (Boolean) value;
@@ -77,16 +84,16 @@ public class SQLMetaTextReader extends SQLTextReader {
         }
         StringBuilder sb = new StringBuilder();
         for (String col : metaColumns) {
-            sb.append("<<");
+            sb.append(decorator[0]);
             sb.append(currentRecord.getStrByColumnName(col));
-            sb.append(">>\n\n");
+            sb.append(decorator[1] + "\n\n");
         }
         if (appendPos.toLowerCase().equals("prefix")) {
             text = sb.toString() + text;
         } else {
             text = text + sb.toString();
         }
-        
+
         logger.finest("Read document: " + currentRecord.getStrByColumnName("DOC_NAME"));
         if (text == null)
             text = "";
