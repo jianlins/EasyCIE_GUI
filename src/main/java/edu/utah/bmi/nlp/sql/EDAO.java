@@ -128,9 +128,9 @@ public class EDAO {
             int argsIndicator = sqlitePath.indexOf("?");
             if (argsIndicator > 0)
                 sqlitePath = sqlitePath.substring(0, argsIndicator);
-            File sqliteFile=new File(sqlitePath);
-            if(!sqliteFile.exists() && !sqliteFile.getParentFile().exists()){
-                logger.fine(sqliteFile.getAbsolutePath()+" and its parent directory don't exist. \n" +
+            File sqliteFile = new File(sqlitePath);
+            if (!sqliteFile.exists() && !sqliteFile.getParentFile().exists()) {
+                logger.fine(sqliteFile.getAbsolutePath() + " and its parent directory don't exist. \n" +
                         "Create the directory and the sqlite db file automatically.");
                 try {
                     FileUtils.forceMkdir(sqliteFile.getParentFile());
@@ -565,7 +565,11 @@ public class EDAO {
             int columnCount = metaData.getColumnCount();
             for (int i = 1; i <= columnCount; i++) {
 //                System.out.println(metaData.getColumnName(i)+'\t'+metaData.getColumnLabel(i));
-                columnInfo.addColumnInfo(metaData.getColumnName(i), metaData.getColumnTypeName(i).toLowerCase());
+                String type=metaData.getColumnTypeName(i).toLowerCase();
+                if (con.getMetaData().getDriverName().toLowerCase().contains("oracle") && type.toLowerCase().equals("date")) {
+                    type = "datetime";
+                }
+                columnInfo.addColumnInfo(metaData.getColumnName(i), type);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -588,6 +592,13 @@ public class EDAO {
             if (recordRow.getValueByColumnId(1) instanceof Integer)
                 offset = 1;
             String type = recordRow.getValueByColumnId(offset + 2) + "";
+            try {
+                if (con.getMetaData().getDriverName().toLowerCase().contains("oracle") && type.toLowerCase().equals("date")) {
+                    type = "datetime";
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             if (type.indexOf("(") != -1) {
                 type = type.substring(0, type.indexOf("("));
             }
@@ -1058,7 +1069,7 @@ public class EDAO {
         return configFile;
     }
 
-    public String toString(){
-        return server+"\n"+configFile.getAbsolutePath();
+    public String toString() {
+        return server + "\n" + configFile.getAbsolutePath();
     }
 }
