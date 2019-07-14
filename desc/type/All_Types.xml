@@ -27,6 +27,9 @@
         <import location="FastContext_Types.xml"></import>
         <import location="Section_Types.xml"></import>
         <import location="Doc_Types.xml"></import>
+        <import location="Bunch_Types.xml"></import>
+        <import location="Relation_Types.xml"></import>
+        <import location="Paragraph_Types.xml"></import>
         <import name="org.apache.uima.examples.SourceDocumentInformation"/>
     </imports>
 </typeSystemDescription>
