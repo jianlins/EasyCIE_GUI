@@ -28,9 +28,11 @@ public class BunchMixInferenceWriterTest {
     JCas jCas;
     CAS cas;
     AnalysisEngine bunchInferer;
+    String db = "src/main/resources/demo_configurations/demo_sqlite_config.xml";
 
 
     private void init(String... ruleStr) {
+
         String typeDescriptor = "desc/type/customized";
         if (!new File(typeDescriptor + ".xml").exists()) {
             typeDescriptor = "desc/type/All_Types";
@@ -49,22 +51,9 @@ public class BunchMixInferenceWriterTest {
         runner.reInitTypeSystem("target/generated-test-sources/customized");
 //        jCas = runner.initJCas();
         EDAO.logger.setLevel(Level.FINEST);
+        EDAO.instances.put(new File(db).getAbsolutePath(), new TDAO());
     }
 
-    @Test
-    public void test() throws ResourceInitializationException, AnalysisEngineProcessException {
-        init();
-        Concept concept = new Concept(jCas, 1, 2);
-        concept.setNegation("negated");
-        concept.addToIndexes();
-//        runner.addAnalysisEngine(AnnotationEvaluator.class, new Object[]{AnnotationEvaluator.PARAM_TYPE_NAME, "Concept",
-//                AnnotationEvaluator.PARAM_ANNO_IND, 0, AnnotationEvaluator.PARAM_FEATURE_NAME, "Negation", AnnotationEvaluator.PARAM_FEATURE_VALUE, "negated"});
-        AnalysisEngine evaluator = AnalysisEngineFactory.createEngine(AnnotationEvaluator.class,
-                AnnotationEvaluator.PARAM_TYPE_NAME, "ASP_FOR_MI_MET",
-                AnnotationEvaluator.PARAM_ANNO_IND, 0);
-        evaluator.process(jCas);
-        System.out.println(AnnotationEvaluator.pass);
-    }
 
     private void addMeta(JCas jCas, int bunchId) {
         RecordRow recordRow = new RecordRow().addCell("BUNCH_ID", bunchId).addCell("RUN_ID", 999);
@@ -77,16 +66,19 @@ public class BunchMixInferenceWriterTest {
 
     @Test
     public void process() throws AnalysisEngineProcessException, ClassNotFoundException, ResourceInitializationException {
+        init();
         String ruleStr = "&DefaultBunchConclusion\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC";
-        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class, BunchMixInferenceWriter.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
+        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class,
+                BunchMixInferenceWriter.PARAM_SQLFILE, "src/main/resources/demo_configurations/demo_sqlite_config.xml",
                 BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
                 BunchMixInferenceWriter.PARAM_RULE_STR, ruleStr);
-        BunchMixInferenceWriter.dao = new TDAO();
         processDoc(11, "MI_DOC");
         processDoc(11, "ASP_DOC");
         processDoc(11, "Neg_MI_DOC");
         processDoc(12, "Neg_MI_DOC");
+        assert (TDAO.getInstance(new File(db)).getLastStatement().contains("ASP_FOR_MI_MET"));
+
     }
 
     @Test
@@ -95,7 +87,7 @@ public class BunchMixInferenceWriterTest {
         String ruleStr = "&DefaultBunchConclusion\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC,Neg_MI_DOC";
         bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class,
-                BunchMixInferenceWriter.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
+                BunchMixInferenceWriter.PARAM_SQLFILE, "src/main/resources/demo_configurations/demo_sqlite_config.xml",
                 BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
                 BunchMixInferenceWriter.PARAM_RULE_STR, ruleStr);
         BunchMixInferenceWriter.dao = new TDAO();
@@ -103,6 +95,7 @@ public class BunchMixInferenceWriterTest {
         processDoc(11, "ASP_DOC");
         processDoc(11, "Neg_MI_DOC");
         processDoc(12, "Neg_MI_DOC");
+        assert (TDAO.getInstance(new File(db)).getLastStatement().contains("ASP_FOR_MI_MET"));
     }
 
     @Test
@@ -110,13 +103,15 @@ public class BunchMixInferenceWriterTest {
         init();
         String ruleStr = "&DEFAULT_DOC_TYPE\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC";
-        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class, BunchMixInferenceWriter.PARAM_SQLFILE, "conf/asp/sqliteconfig.xml",
+        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class,
+                BunchMixInferenceWriter.PARAM_SQLFILE, "src/main/resources/demo_configurations/demo_sqlite_config.xml",
                 BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
                 BunchMixInferenceWriter.PARAM_RULE_STR, ruleStr);
-        BunchMixInferenceWriter.dao = new TDAO();
         processDoc(11, "MI_DOC");
         processDoc(11, "Neg_MI_DOC");
         processDoc(12, "Neg_MI_DOC");
+        assert (TDAO.getInstance(new File(db)).getLastStatement().contains("ASP_FOR_MI_NOT_MET"));
+
     }
 
     @Test
@@ -125,7 +120,8 @@ public class BunchMixInferenceWriterTest {
         String ruleStr = "&DEFAULT_BUNCH_TYPE\tASP_FOR_MI_MET\tASP_FOR_MI_NOT_MET\n" +
                 "ASP_FOR_MI_MET\tASP_FOR_MI_MET\tMI_DOC,ASP_DOC";
         init(ruleStr);
-        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class, BunchMixInferenceWriter.PARAM_WRITE_TO_JCAS, true,
+        bunchInferer = AnalysisEngineFactory.createEngine(BunchMixInferenceWriter.class,
+                BunchMixInferenceWriter.PARAM_WRITE_TO_JCAS, true,
                 BunchMixInferenceWriter.PARAM_BUNCH_COLUMN_NAME, "BUNCH_ID",
                 BunchMixInferenceWriter.PARAM_RULE_STR, ruleStr);
         BunchMixInferenceWriter.dao = new TDAO();

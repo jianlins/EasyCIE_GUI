@@ -80,6 +80,8 @@ public class EDAO {
     public static EDAO getInstance(File configFile, boolean initiateTables, boolean overwriteExistingTables, boolean concurUpdatable) {
         String key = configFile.getAbsolutePath();
         try {
+            EDAO t=instances.get(key);
+            System.out.println(t.isClosed+"\t"+t.con+"\t");
             if (!instances.containsKey(key)
                     || instances.get(key).isClosed()
                     || instances.get(key).con.isClosed()) {
