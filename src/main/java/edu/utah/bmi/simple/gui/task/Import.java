@@ -3,6 +3,7 @@ package edu.utah.bmi.simple.gui.task;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
+import edu.utah.bmi.nlp.core.TestGUITask;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
@@ -11,6 +12,7 @@ import edu.utah.bmi.nlp.easycie.reader.EhostReader;
 import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
 import edu.utah.bmi.nlp.uima.BunchMixInferenceWriter;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
+import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.core.CommonFunc;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
@@ -134,7 +136,13 @@ public class Import extends GUITask {
                     if (overWriteAnnotatorName.length() == 0)
                         overWriteAnnotatorName = "brat_import";
                     importBrat(inputDir, datasetId, overWriteAnnotatorName, referenceTable, rushRule, includeTypes, overwrite);
-                    runner.run();
+                    Platform.runLater(() -> {
+                        TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
+                        new ViewOutputDB(tasksOverviewController.mainApp.tasks, overWriteAnnotatorName).run();
+                        updateGUIProgress(1, 1);
+                        updateGUIMessage("Import annotation complete.");
+
+                    });
                     break;
                 case ehost:
                     if (overWriteAnnotatorName.length() == 0)
@@ -256,29 +264,14 @@ public class Import extends GUITask {
 
     protected void importBrat(File inputDir, String datasetId, String annotator, String tableName, String rush, String includeTypes,
                               boolean overWrite) {
-        if (overWrite)
-            dao.initiateTableFromTemplate("ANNOTATION_TABLE", tableName, overWrite);
-
-        if (annotator.length() == 0)
-            annotator = "brat_import";
-        runner = new AdaptableCPEDescriptorRunner("desc/cpe/import_cpe.xml", annotator, new NLPDBLogger(dao.getConfigFile().getAbsolutePath(), annotator));
-        ((NLPDBLogger) runner.getLogger()).setReportable(report);
-        ((NLPDBLogger) runner.getLogger()).setTask(this);
-        for (int writerId : runner.getWriterIds().values()) {
-            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_DB_CONFIG_FILE, dbConfigFile);
-            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runner.getLogger().getRunid() + "");
-            runner.updateDescriptorConfiguration(writerId, DeterminantValueSet.PARAM_ANNOTATOR, annotator);
-            runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_SNIPPET_TABLENAME, referenceTable);
-            runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, referenceTable);
-            runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, referenceTable);
-        }
-        runner.setCollectionReaderDescriptor("desc/ae/BratReader.xml", BratReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
-                BratReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, BratReader.PARAM_READ_TYPES, includeTypes,
-                BratReader.PARAM_PRINT, print);
-        runner.addConceptTypes(BratReader.getTypeDefinitions(inputDir.getAbsolutePath()));
-        runner.reInitTypeSystem("desc/type/" + annotator + ".xml");
-        runner.attachTypeDescriptorToReader();
-
+        ImportBrat importBrat = new ImportBrat(dbConfigFile, this, overWrite);
+        NLPDBLogger dblogger = new NLPDBLogger(dbConfigFile, annotator);
+        Object runId = dblogger.getRunid();
+        dblogger.logStartTime();
+        int total = importBrat.run(inputDir.getAbsolutePath(), annotator, runId, tableName, rush, includeTypes);
+        dblogger.logCompletToDB(total, "Annotations of " + total + "  documents imported.");
+        dblogger.collectionProcessComplete("");
+        dao.close();
     }
 
     protected boolean checkDirExist(File inputDir, String relativePath, String paraName) {
@@ -303,7 +296,7 @@ public class Import extends GUITask {
                     return xmi;
                 if (fileName.endsWith(".ann"))
                     return brat;
-                if (fileName.endsWith(".knowtator.xml")|| fileName.equals("projectschema.xml"))
+                if (fileName.endsWith(".knowtator.xml") || fileName.equals("projectschema.xml"))
                     return ehost;
                 if (fileName.endsWith(".xml"))
                     return n2c2;

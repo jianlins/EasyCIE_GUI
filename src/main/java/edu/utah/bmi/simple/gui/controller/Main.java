@@ -2,9 +2,7 @@ package edu.utah.bmi.simple.gui.controller;
 
 
 import edu.utah.bmi.nlp.core.IOUtil;
-import edu.utah.bmi.nlp.easycie.writer.EhostWriter_AE;
 import edu.utah.bmi.simple.gui.core.SettingOper;
-import edu.utah.bmi.simple.gui.doubleclick.OpenEhost;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.menu_acts.AddNewPipeline;
@@ -17,28 +15,25 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.BasicConfigurator;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
-
-import javafx.scene.image.Image;
-import org.apache.log4j.BasicConfigurator;
 
 
 /**
@@ -186,7 +181,7 @@ public class Main extends Application {
         } else {
             System.out.println(logFile.getAbsolutePath() + " does not exists, please choose another one.");
             setMsg(getRelativePath(logFile.getAbsolutePath()) + " does not exists");
-            openConfigFile();
+//            openConfigFile();
         }
         return conf;
     }

@@ -5,6 +5,7 @@ import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.type.system.Concept;
 import edu.utah.bmi.nlp.type.system.Doc_Base;
+import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.NameFileFilter;
@@ -33,7 +34,7 @@ import static edu.utah.bmi.nlp.uima.common.AnnotationOper.initSetReflections;
 /**
  * @author Jianlin Shi on 5/20/16.
  */
-public class BratReader extends AbFileCollectionReader {
+public class BratReader extends AbFileCollectionReader implements RuleBasedAEInf {
 
     public static Logger logger = IOUtil.getLogger(BratReader.class);
 
@@ -230,6 +231,7 @@ public class BratReader extends AbFileCollectionReader {
         return typeDefinitions;
     }
 
+
     public static Collection<TypeDefinition> getTypeDefinitions(String projectDir) {
         LinkedHashMap<String, TypeDefinition> typeDefinitions = getTypeDefinitionMap(projectDir);
         return typeDefinitions.values();
@@ -283,6 +285,11 @@ public class BratReader extends AbFileCollectionReader {
             }
         }
         return types;
+    }
+
+    @Override
+    public LinkedHashMap<String, TypeDefinition> getTypeDefs(String projectDir) {
+        return BratReader.getTypeDefinitionMap(projectDir);
     }
 }
 

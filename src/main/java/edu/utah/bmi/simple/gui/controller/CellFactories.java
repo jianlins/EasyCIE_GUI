@@ -129,7 +129,9 @@ public class CellFactories {
                                     }
                                 }
                                 if (recordRow.getValueByColumnName("DOC_TEXT") == null && recordRow.getValueByColumnName("TEXT") == null)
-                                    recordRow.addCell("TEXT","");
+                                    recordRow.addCell("TEXT", "");
+                                if (recordRow.getValueByColumnName("TEXT") == null)
+                                    recordRow.addCell("TEXT", recordRow.getValueByColumnName("DOC_TEXT"));
                                 CellActions.process(recordRow);
 //                                new Thread(() -> process(recordRow, docText)).start();
 //                            new Thread(() -> fastDebugPipe.run()).start();
