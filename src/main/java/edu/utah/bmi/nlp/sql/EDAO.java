@@ -565,7 +565,7 @@ public class EDAO {
             int columnCount = metaData.getColumnCount();
             for (int i = 1; i <= columnCount; i++) {
 //                System.out.println(metaData.getColumnName(i)+'\t'+metaData.getColumnLabel(i));
-                String type=metaData.getColumnTypeName(i).toLowerCase();
+                String type = metaData.getColumnTypeName(i).toLowerCase();
                 if (con.getMetaData().getDriverName().toLowerCase().contains("oracle") && type.toLowerCase().equals("date")) {
                     type = "datetime";
                 }
@@ -783,6 +783,9 @@ public class EDAO {
                 String type = columnNameType.getValue();
                 Object value = recordRow.getValueByColumnName(columnName);
 //                System.out.println(columnName + "\t" + type+"\t"+(value!=null?value.getClass():null));
+                if (con.getMetaData().getDriverName().toLowerCase().contains("oracle") && type.toLowerCase().equals("datetime")) {
+                    type = "date";
+                }
                 switch (type) {
                     case "number":
                     case "long":
