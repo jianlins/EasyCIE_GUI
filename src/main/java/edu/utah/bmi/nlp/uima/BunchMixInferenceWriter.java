@@ -5,6 +5,7 @@ import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.uima.ae.BunchMixInferencer;
 import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import org.apache.uima.UimaContext;

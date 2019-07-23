@@ -1,11 +1,10 @@
-package edu.utah.bmi.nlp.uima;
+package edu.utah.bmi.nlp.uima.ae;
 
 import edu.utah.bmi.nlp.core.*;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Bunch_Base;
 import edu.utah.bmi.nlp.type.system.Sentence;
 import edu.utah.bmi.nlp.type.system.Token;
-import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
 import org.apache.uima.UimaContext;
@@ -24,6 +23,7 @@ import org.apache.uima.jcas.tcas.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,8 +89,8 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBa
     }
 
 
-    protected static void parseRuleStr(String ruleStr, HashMap<String, String> defaultBunchType,
-                                       LinkedHashMap<String, ArrayList<ArrayList<Object>>> inferenceMap, HashMap<String, Integer> typeCounter) {
+    public static void parseRuleStr(String ruleStr, HashMap<String, String> defaultBunchType,
+                                    LinkedHashMap<String, ArrayList<ArrayList<Object>>> inferenceMap, HashMap<String, Integer> typeCounter) {
         IOUtil ioUtil = new IOUtil(ruleStr, true);
         for (ArrayList<String> initRow : ioUtil.getInitiations()) {
             if (initRow.get(1).endsWith("DefaultBunchConclusion") || initRow.get(1).endsWith(DEFAULT_BUNCH_TYPE1.substring(1))) {
@@ -204,6 +204,9 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBa
         Span position = getAnnotationPosition(previousJCas);
         AnnotationDefinition annoDef = new AnnotationDefinition(typeDefinitions.get(typeName));
         if (saveEvidences) {
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.finest("Add bunch conclusion annotation: " + previousRecordRow.getValueByColumnName(bunchColumnName) + "---" + previousRecordRow.getValueByColumnName("TYPE"));
+            }
             annoDef.setFeatureValue("Note", String.join("+", ((HashMap) rule.get(2)).keySet()));
         }
         Annotation conclusion = AnnotationOper.createAnnotation(previousJCas, annoDef, this.bunchTypeConstructorMap.get(typeName),

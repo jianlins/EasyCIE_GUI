@@ -1,8 +1,7 @@
 package edu.utah.bmi.nlp.uima;
 
-import edu.utah.bmi.nlp.sql.EDAO;
-import edu.utah.bmi.nlp.sql.TDAO;
 import edu.utah.bmi.nlp.type.system.Bunch_Base;
+import edu.utah.bmi.nlp.uima.ae.BunchMixInferencer;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CAS;
@@ -13,10 +12,8 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.logging.Level;
 
 import static edu.utah.bmi.nlp.uima.BunchMixInferenceWriterTest.processDoc;
-import static org.junit.Assert.*;
 
 public class BunchMixInferencerTest {
     protected AdaptableUIMACPERunner runner;
