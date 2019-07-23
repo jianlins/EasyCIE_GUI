@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static edu.utah.bmi.nlp.core.DeterminantValueSet.*;
+import static edu.utah.bmi.nlp.core.DeterminantValueSet.checkNameSpace;
 import static edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator.*;
 
 /**
@@ -348,7 +348,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
         if (ioUtil.getInitiations().size() > 0) {
 //          check format of previous version, if the rules are from previous version, skip this function
             for (ArrayList<String> row : ioUtil.getInitiations()) {
-                if (row.get(1).equals(DEFAULT_BUNCH_TYPE1) || row.get(1).equals(DEFAULT_BUNCH_TYPE2)) {
+                if (row.get(1).endsWith("DefaultBunchConclusion")) {
                     return new LinkedHashMap<>();
                 }
             }
