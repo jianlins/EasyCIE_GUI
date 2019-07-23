@@ -32,34 +32,22 @@
                 <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
-                <name>WriteToJCas</name>
-                <type>Boolean</type>
-                <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
-                <name>AnnotatePosition</name>
-                <type>String</type>
-                <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
-            </configurationParameter>
-            <configurationParameter>
                 <name>DBConfigFile</name>
                 <type>String</type>
                 <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
+                <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
                 <name>ResultTableName</name>
                 <type>String</type>
                 <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
+                <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
                 <name>AutoIdEnabled</name>
                 <type>Boolean</type>
                 <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
+                <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
                 <name>BunchColumnName</name>
@@ -71,13 +59,13 @@
                 <name>Annotator</name>
                 <type>String</type>
                 <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
+                <mandatory>true</mandatory>
             </configurationParameter>
             <configurationParameter>
                 <name>Version</name>
                 <type>String</type>
                 <multiValued>false</multiValued>
-                <mandatory>false</mandatory>
+                <mandatory>true</mandatory>
             </configurationParameter>
         </configurationParameters>
         <configurationParameterSettings>
@@ -85,18 +73,6 @@
                 <name>RuleFileOrStr</name>
                 <value>
                     <string>conf/featureInference_rule.csv</string>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>WriteToJCas</name>
-                <value>
-                    <boolean>false</boolean>
-                </value>
-            </nameValuePair>
-            <nameValuePair>
-                <name>AnnotatePosition</name>
-                <value>
-                    <string>FIRSTWORD</string>
                 </value>
             </nameValuePair>
             <nameValuePair>
