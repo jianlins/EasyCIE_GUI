@@ -17,7 +17,12 @@ import java.util.logging.Logger;
  * Find overlapped annotations with the same annotation type, choose the widest one
  *
  * @author Jianlin Shi
- * Created on 7/6/16.
+ * Created on 7/6/16.import sqlite3
+import pandas as pd
+
+conn = sqlite3.connect('n2c2fmx.sqlite')
+
+df = pd.read_sql_query("select * from RESULT_SNIPPET limit 5;", conn)
  */
 public class AnnotationCleaner extends JCasAnnotator_ImplBase implements RuleBasedAEInf {
 	private static Logger logger = IOUtil.getLogger(AnnotationCleaner.class);

@@ -1001,7 +1001,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                                 dynamicTypeGenerator.addConceptTypes(ruleAeEngine.getTypeDefs(value.toString()).values());
                                 dynamicTypeGenerator.reInitTypeSystem(customTypeDescXmlLoc.getAbsolutePath(), srcClassRootPath);
                                 aeEngine.initialize(uimaContext);
-                            }else if(((String)configName).toLowerCase().endsWith("file")){
+                            } else if (((String) configName).toLowerCase().endsWith("file")) {
                                 aeEngine.initialize(uimaContext);
                             }
                         }
