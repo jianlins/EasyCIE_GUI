@@ -62,6 +62,8 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBa
 
     protected String annotatePosition = FIRSTWORD, bunchColumnName;
     protected ArrayList<ArrayList<String>> ruleCells = new ArrayList<>();
+    protected HashMap<Integer, ArrayList<String>> ruleStore = new HashMap<>();
+
     protected LinkedHashMap<String, TypeDefinition> typeDefinitions = new LinkedHashMap<>();
     protected HashMap<String, Constructor<? extends Annotation>> bunchTypeConstructorMap = new HashMap<>();
     protected HashMap<String, Class<? extends Annotation>> conclucionClassMap = new HashMap<>();
@@ -83,14 +85,16 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBa
 
 
         String inferenceStr = (String) cont.getConfigParameterValue(PARAM_RULE_STR);
-        parseRuleStr(inferenceStr, defaultBunchTypes, inferenceMap, typeCounter);
+        parseRuleStr(inferenceStr, defaultBunchTypes, inferenceMap, typeCounter, ruleStore);
         this.typeDefinitions = getTypeDefs(inferenceStr);
         AnnotationOper.initSetReflections(typeDefinitions, conclucionClassMap, bunchTypeConstructorMap, conclusionAnnotationSetFeatures);
     }
 
 
     public static void parseRuleStr(String ruleStr, HashMap<String, String> defaultBunchType,
-                                    LinkedHashMap<String, ArrayList<ArrayList<Object>>> inferenceMap, HashMap<String, Integer> typeCounter) {
+                                    LinkedHashMap<String, ArrayList<ArrayList<Object>>> inferenceMap,
+                                    HashMap<String, Integer> typeCounter,
+                                    HashMap<Integer, ArrayList<String>> ruleStore) {
         IOUtil ioUtil = new IOUtil(ruleStr, true);
         for (ArrayList<String> initRow : ioUtil.getInitiations()) {
             if (initRow.get(1).endsWith("DefaultBunchConclusion") || initRow.get(1).endsWith(DEFAULT_BUNCH_TYPE1.substring(1))) {
@@ -105,6 +109,7 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBa
                         "\n\t" + row);
             }
             int ruleId = Integer.parseInt(row.get(0));
+            ruleStore.put(ruleId, row);
             String topic = row.get(1).trim();
             if (!inferenceMap.containsKey(topic))
                 inferenceMap.put(topic, new ArrayList<>());
@@ -188,26 +193,25 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBa
                         matched = false;
                 }
                 if (matched) {
-                    addBunchConclusion(previousRecordRow, rule);
+                    addBunchConclusion(previousRecordRow, (String) rule.get(1), ruleStore.get((int) rule.get(0)).get(3));
                     break;
                 }
             }
             if (!matched) {
-                addBunchConclusion(previousRecordRow, Arrays.asList(new String[]{"", defaultBunchTypes.get(topic), ""}));
+                addBunchConclusion(previousRecordRow, defaultBunchTypes.get(topic), "");
             }
         }
 
     }
 
-    protected void addBunchConclusion(RecordRow previousRecordRow, List<Object> rule) {
-        String typeName = (String) rule.get(1);
+    protected void addBunchConclusion(RecordRow previousRecordRow, String typeName, String evidence) {
         Span position = getAnnotationPosition(previousJCas);
         AnnotationDefinition annoDef = new AnnotationDefinition(typeDefinitions.get(typeName));
         if (saveEvidences) {
             if (logger.isLoggable(Level.FINEST)) {
                 logger.finest("Add bunch conclusion annotation: " + previousRecordRow.getValueByColumnName(bunchColumnName) + "---" + previousRecordRow.getValueByColumnName("TYPE"));
             }
-            annoDef.setFeatureValue("Note", String.join("+", ((HashMap) rule.get(2)).keySet()));
+            annoDef.setFeatureValue("Note", evidence.replaceAll(",", "+"));
         }
         Annotation conclusion = AnnotationOper.createAnnotation(previousJCas, annoDef, this.bunchTypeConstructorMap.get(typeName),
                 position.getBegin(), position.getEnd(), this.conclusionAnnotationSetFeatures.get(conclucionClassMap.get(typeName)));

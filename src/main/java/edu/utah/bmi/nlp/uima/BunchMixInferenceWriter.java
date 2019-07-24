@@ -50,6 +50,8 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
     //     type counter
     protected HashMap<String, Integer> typeCounter = new HashMap<>();
 
+    protected HashMap<Integer, ArrayList<String>> ruleStore = new HashMap<>();
+
     //  a bunch can be used to represent an encounter or a patient that have a bunch of documents bundled with.
     protected int previousBunchId = -1;
 
@@ -83,7 +85,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
         dao = EDAO.getInstance(new File(configFile));
 
         dao.initiateTableFromTemplate("ANNOTATION_TABLE", resultTableName, false);
-        BunchMixInferencer.parseRuleStr(inferenceStr, defaultBunchType, inferenceMap, typeCounter);
+        BunchMixInferencer.parseRuleStr(inferenceStr, defaultBunchType, inferenceMap, typeCounter, ruleStore);
     }
 
 //
