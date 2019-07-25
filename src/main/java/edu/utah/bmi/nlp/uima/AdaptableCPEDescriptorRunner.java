@@ -110,6 +110,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     protected int status = 0;
     private static final String ACTION_ON_MAX_ERROR = "terminate";
 
+
     protected AdaptableCPEDescriptorRunner() {
 
     }
@@ -618,6 +619,9 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 }
                 cp.getConfigurationParameterSettings().setParameterValue(DeterminantValueSet.PARAM_ANNOTATOR, annotator);
             }
+//          explicitly save type descriptor file path for clone JCas.
+            cp.getConfigurationParameterSettings().setParameterValue("typedescriptor", customTypeDescXmlDir.getAbsolutePath());
+
             addAeTypes(aed, typeSystems);
             if (ruleBasedAE) {
                 CasProcessorConfigurationParameterSettings settings = cp.getConfigurationParameterSettings();
@@ -1187,11 +1191,12 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
 
     public void compileCPE() {
         try {
+            if (runId.equals(previousRunId))
+                runId = logger.getRunid() + "";
             mCPE = UIMAFramework.produceCollectionProcessingEngine(currentCpeDesc);
             Class<CompositeResourceFactory> e = CompositeResourceFactory.class;
 
-            if (runId.equals(previousRunId))
-                runId = logger.getRunid() + "";
+
             for (int writerId : writerIds.values()) {
                 updateCpeProcessorConfiguration(writerId, DeterminantValueSet.PARAM_VERSION, runId);
             }
