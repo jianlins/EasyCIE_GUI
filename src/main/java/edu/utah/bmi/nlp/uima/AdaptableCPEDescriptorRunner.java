@@ -44,6 +44,7 @@ import org.apache.uima.collection.base_cpm.CasProcessor;
 import org.apache.uima.collection.impl.CollectionProcessingEngine_impl;
 import org.apache.uima.collection.impl.cpm.engine.CPMEngine;
 import org.apache.uima.collection.impl.metadata.CpeDefaultValues;
+import org.apache.uima.collection.impl.metadata.cpe.CasProcessorDeploymentParamImpl;
 import org.apache.uima.collection.impl.metadata.cpe.CpeDescriptorFactory;
 import org.apache.uima.collection.metadata.*;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
@@ -109,6 +110,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
     protected boolean refreshed = false;
     protected int status = 0;
     private static final String ACTION_ON_MAX_ERROR = "terminate";
+    private String typeXMLAbsolutPath = "";
 
 
     protected AdaptableCPEDescriptorRunner() {
@@ -510,6 +512,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         File inputFile = new File(readerxml);
         String fileName = cpeDescripterFileName + "_" + FilenameUtils.getBaseName(readerxml) + ".xml";
         File outputXmlFile = new File(customTypeDescXmlDir, fileName);
+        typeXMLAbsolutPath = outputXmlFile.getAbsolutePath();
         XMLInputFactory inFactory = XMLInputFactory.newInstance();
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
         XMLEventFactory eventFactory = XMLEventFactory.newInstance();
@@ -620,8 +623,6 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                 cp.getConfigurationParameterSettings().setParameterValue(DeterminantValueSet.PARAM_ANNOTATOR, annotator);
             }
 //          explicitly save type descriptor file path for clone JCas.
-            cp.getConfigurationParameterSettings().setParameterValue("typedescriptor", customTypeDescXmlDir.getAbsolutePath());
-
             addAeTypes(aed, typeSystems);
             if (ruleBasedAE) {
                 CasProcessorConfigurationParameterSettings settings = cp.getConfigurationParameterSettings();
@@ -1084,6 +1085,25 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         }
     }
 
+    protected void updateCasProcessor(CasProcessor processor, String param, Object value) {
+        try {
+            if (processor instanceof PrimitiveAnalysisEngine_impl) {
+                PrimitiveAnalysisEngine_impl ae = (PrimitiveAnalysisEngine_impl) processor;
+                UimaContext uimaContext = ae.getUimaContext();
+                AnalysisComponent aeEngine = ae.getAnalysisComponent();
+                ae.setmInitialized(false);
+                ;
+                ChildUimaContext_impl uimaContext_impl = (ChildUimaContext_impl) uimaContext;
+                uimaContext_impl.setSharedParam("/" + ae.getMetaData().getName() + "/" + param, value);
+                aeEngine.initialize(uimaContext_impl);
+            }
+        } catch (ResourceInitializationException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void addCpeProcessorDescriptor(Class aeClass, String name, Object... configs) {
         try {
@@ -1207,6 +1227,7 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
         int i = 0;
         for (CasProcessor casProcessor : mCPE.getCasProcessors()) {
             String name = casProcessor.getProcessingResourceMetaData().getName();
+//            updateCasProcessor(casProcessor, "typedescriptor", typeXMLAbsolutPath);
             cpeProcessorIds.put(name, i);
             i++;
         }

@@ -6,6 +6,7 @@ import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
 import edu.utah.bmi.nlp.sql.TDAO;
+import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import org.apache.uima.collection.base_cpm.CasProcessor;
 import org.apache.uima.collection.impl.CollectionReaderDescription_impl;
@@ -44,6 +45,9 @@ public class AdaptableUIMACPEDescriptorRunnerTest {
         for (CpeCasProcessor cpeCasProcessor : cpeCasProcessors) {
             System.out.println(cpeCasProcessor.getName());
         }
+        runner.setUIMALogger(new ConsoleLogger());
+        runner.compileCPE();
+
     }
 
     @Test
