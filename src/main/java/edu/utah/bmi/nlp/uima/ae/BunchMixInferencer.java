@@ -205,6 +205,7 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBa
     }
 
     protected void addBunchConclusion(RecordRow previousRecordRow, String typeName, String evidence) {
+        logger.finest("Add bunch conclusion: " + typeName + "\t" + previousRecordRow);
         Span position = getAnnotationPosition(previousJCas);
         AnnotationDefinition annoDef = new AnnotationDefinition(typeDefinitions.get(typeName));
         if (saveEvidences) {
@@ -251,7 +252,7 @@ public class BunchMixInferencer extends JCasAnnotator_ImplBase implements RuleBa
             return new Span(anno.getBegin(), anno.getEnd());
         else {
             String txt = jCas.getDocumentText();
-            Matcher matched = pattern.matcher(jCas.getDocumentText());
+            Matcher matched = pattern.matcher(txt);
             if (matched.find()) {
                 span = new Span(matched.start(1), matched.end(1));
             }
