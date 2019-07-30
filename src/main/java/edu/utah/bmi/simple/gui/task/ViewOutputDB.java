@@ -110,14 +110,6 @@ public class ViewOutputDB extends GUITask {
             }
             if (!runId.equals("-1")) {
                 filter = primeTable + ".RUN_ID=" + runId;
-                switch (primeTable) {
-                    case "RB":
-                        filter = filter + " AND RD.RUN_ID=" + runId + " AND (RS.RUN_ID=" + runId + " OR RS.RUN_ID IS NULL)";
-                        break;
-                    case "RD":
-                        filter = filter + " AND (RS.RUN_ID=" + annotatorLastRunid + " OR RS.RUN_ID IS NULL)";
-                        break;
-                }
             }
 
         }
@@ -137,7 +129,7 @@ public class ViewOutputDB extends GUITask {
             if (orderPos > 0) {
                 sourceQuery = sourceQuery + " WHERE ( " + conditions.substring(0, orderPos) + " ) " + conditions.substring(orderPos);
             } else if (limitPos > 0) {
-                limit="";
+                limit = "";
                 sourceQuery = sourceQuery + " WHERE ( " + conditions.substring(0, limitPos) + " ) " + conditions.substring(limitPos);
             } else {
                 sourceQuery = sourceQuery + " WHERE ( " + conditions + " ) ";
