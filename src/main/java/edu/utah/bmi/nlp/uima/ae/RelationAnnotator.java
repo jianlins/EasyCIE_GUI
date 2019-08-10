@@ -220,7 +220,8 @@ public class RelationAnnotator extends JCasAnnotator_ImplBase implements RuleBas
                     String scopeType = (String) scopeObj;
                     if (!annoIdx.containsKey(scopeType) || annoIdx.get(scopeType).size() == 0)
                         continue;
-                    int scopeId = annoIdx.get(scopeType).get(new Interval1D(ele1.getBegin(), ele1.getEnd()));
+                    int endScopeId = annoIdx.get(scopeType).get(new Interval1D(ele1.getEnd()-1, ele1.getEnd()));
+                    int beginScopeId = annoIdx.get(scopeType).get(new Interval1D(ele1.getBegin(), ele1.getBegin()+1));
                     HashMap scopetmp = (HashMap) ele1tmp.get(scopeObj);
                     for (Object scopeNumObj : scopetmp.keySet()) {
                         int scopeNum = (int) scopeNumObj;
@@ -235,7 +236,7 @@ public class RelationAnnotator extends JCasAnnotator_ImplBase implements RuleBas
                                 switch (direction) {
                                     case forward:
                                         int scopebegin = ele1.getEnd();
-                                        int scopeEndId = scopeId + scopeNum;
+                                        int scopeEndId = endScopeId + scopeNum;
                                         int total = annos.get(scopeType).size();
                                         if (scopeEndId >= total)
                                             scopeEndId = total - 1;
@@ -247,21 +248,28 @@ public class RelationAnnotator extends JCasAnnotator_ImplBase implements RuleBas
                                         break;
                                     case backward:
                                         scopeend = ele1.getBegin();
-                                        int scopeBeginId = scopeId - scopeNum;
+                                        int scopeBeginId = beginScopeId - scopeNum;
                                         if (scopeBeginId < 0)
                                             scopeBeginId = 0;
                                         scopebegin = annos.get(scopeType).get(scopeBeginId).getBegin();
+                                        if (scopebegin > scopeend) {
+                                            logger.warning(AnnotationOper.deserializeDocSrcInfor(aJCas).toString());
+                                            logger.warning(ele1.getType().getShortName()+"\t"+ele1.getCoveredText());
+                                            logger.warning(annos.get(scopeType).get(scopeBeginId).getCoveredText());
+                                            logger.warning(annos.get(scopeType).get(beginScopeId).getCoveredText());
+                                            logger.warning(scopebegin + "-" + scopeend);
+                                        }
                                         scopeInv = new Interval1D(scopebegin, scopeend);
                                         if (!annoIdx.containsKey(ele2Type))
                                             continue;
                                         ele2s = annoIdx.get(ele2Type).getAll(scopeInv);
                                         break;
                                     case both:
-                                        scopeBeginId = scopeId - scopeNum;
+                                        scopeBeginId = beginScopeId - scopeNum;
                                         if (scopeBeginId < 0)
                                             scopeBeginId = 0;
                                         scopebegin = annos.get(scopeType).get(scopeBeginId).getBegin();
-                                        scopeEndId = scopeId + scopeNum;
+                                        scopeEndId = endScopeId + scopeNum;
                                         total = annos.get(scopeType).size();
                                         if (scopeEndId >= total)
                                             scopeEndId = total - 1;
@@ -301,6 +309,10 @@ public class RelationAnnotator extends JCasAnnotator_ImplBase implements RuleBas
                                             int tokenScopeBegin = annoIdx.get("Token").get(new Interval1D(ele2.getEnd() - 1, ele2.getEnd())) + 1;
                                             int tokenScopeEnd = annoIdx.get("Token").get(new Interval1D(ele1.getBegin(), ele1.getBegin() + 1));
                                             logger.finest(String.format("%d: %s\t---\t%d: %s", tokenScopeBegin, annos.get("Token").get(tokenScopeBegin).getCoveredText(), tokenScopeEnd, annos.get("Token").get(tokenScopeEnd).getCoveredText()));
+                                            if (ele2.getEnd() > ele1.getBegin()) {
+                                                logger.warning(AnnotationOper.deserializeDocSrcInfor(aJCas).toString());
+                                                logger.warning(String.format("%d: %s\t---\t%d: %s", tokenScopeBegin, annos.get("Token").get(tokenScopeBegin).getCoveredText(), tokenScopeEnd, annos.get("Token").get(tokenScopeEnd).getCoveredText()));
+                                            }
                                             processRelationRules((HashMap) directiontmp.get(ele2Type), matches, new Interval1D(ele2.getEnd(), ele1.getBegin()), ele1Id, ele2Id, ele1Type, ele2Type, direction, tokenScopeBegin, tokenScopeEnd, true);
                                         }
                                     }
