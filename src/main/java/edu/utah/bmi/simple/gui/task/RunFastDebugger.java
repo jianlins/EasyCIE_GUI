@@ -16,6 +16,7 @@ import java.util.Optional;
 /**
  * Created by Jianlin Shi on 9/19/16.
  */
+@Deprecated
 public class RunFastDebugger extends GUITask {
 
     private TasksFX tasks;

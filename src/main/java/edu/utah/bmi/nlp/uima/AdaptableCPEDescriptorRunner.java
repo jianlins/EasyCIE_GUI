@@ -82,8 +82,8 @@ import static edu.utah.bmi.nlp.core.DeterminantValueSet.defaultSuperTypeName;
 public class AdaptableCPEDescriptorRunner implements StatusSetable {
     public static Logger classLogger = IOUtil.getLogger(AdaptableCPEDescriptorRunner.class);
     public static AdaptableCPEDescriptorRunner lastRunner = null;
-    protected String annotator, runnerName;
     protected static ModifiedChecker modifiedChecker = new ModifiedChecker();
+    protected String annotator, runnerName;
     protected CpeDescription currentCpeDesc;
     protected File rootFolder;
     protected LinkedHashMap<String, TypeDefinition> conceptTypeDefinitions = new LinkedHashMap<>();

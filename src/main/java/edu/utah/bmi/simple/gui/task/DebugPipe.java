@@ -29,6 +29,7 @@ import java.io.IOException;
 /**
  * Created by Jianlin Shi on 9/19/16.
  */
+@Deprecated
 public class DebugPipe extends RunEasyCIE {
 
     protected TasksFX tasks;

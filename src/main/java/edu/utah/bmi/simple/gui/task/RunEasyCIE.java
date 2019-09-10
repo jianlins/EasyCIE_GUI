@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 /**
  * Created by Jianlin Shi on 9/19/16.
  */
+@Deprecated
 public class RunEasyCIE extends GUITask {
 	public static Logger logger = Logger.getLogger(RunEasyCIE.class.getCanonicalName());
 	protected String readDBConfigFileName, writeConfigFileName, inputTableName, snippetResultTable, docResultTable, bunchResultTable,

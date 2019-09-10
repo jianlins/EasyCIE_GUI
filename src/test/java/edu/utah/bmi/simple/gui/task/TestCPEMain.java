@@ -8,7 +8,6 @@ public class TestCPEMain {
 //        MyCpmFrame.main(new String[]{"desc/cpe/Preannotator.xml"});
 //        org.apache.uima.tools.cpm.CpmFrame.main(new String[]{});
         GenericAdaptableCPERunner runner=new GenericAdaptableCPERunner("desc/cpe/Preannotator.xml");
-        runner.guiEnabled=false;
         runner.setLogger(new ConsoleLogger());
         runner.run();
     }

@@ -58,7 +58,7 @@ public class ViewImportDB extends GUITask {
                 }
 
                 String sql = dao.queries.get("queryDocs").replaceAll("\\{tableName}", corpusTable);
-                sql += " WHERE  DATASET_ID='" + datasetID + "'";
+                sql += " WHERE  DATASET_ID='" + datasetID + "' LIMIT 200";
                 res = TasksOverviewController.currentTasksOverviewController.showDBTable(sql, SQLFile, ColorAnnotationCell.colorOutput, TasksOverviewController.DocView);
                 if (res)
                     updateGUIMessage("data loaded");

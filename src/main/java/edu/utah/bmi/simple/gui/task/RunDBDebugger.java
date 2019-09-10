@@ -18,6 +18,7 @@ import java.io.File;
  *
  * @author Jianlin Shi on 9/19/16.
  */
+@Deprecated
 public class RunDBDebugger extends GUITask {
 
     //    protected String rushType, cNERType, tNERType, contextType, featureInfType, docInfType, inputStr;

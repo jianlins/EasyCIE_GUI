@@ -1,9 +1,8 @@
 package edu.utah.bmi.simple.gui.task;
 
-import edu.utah.bmi.nlp.uima.AdaptableUIMACPEDescriptorTaskRunner;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
 import edu.utah.bmi.nlp.uima.DynamicTypeGenerator;
 import edu.utah.bmi.nlp.uima.SimpleStatusCallbackListenerImpl;
-import edu.utah.bmi.nlp.uima.TaskStatusCallbackListenerImpl;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
 import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
 import edu.utah.bmi.simple.gui.entry.SettingAb;
@@ -32,11 +31,12 @@ import java.util.*;
  * @author Jianlin Shi
  * Created on 2/26/17.
  */
-public class GenericAdaptableCPERunner extends AdaptableUIMACPEDescriptorTaskRunner {
+@Deprecated
+public class GenericAdaptableCPERunner extends AdaptableCPEDescriptorRunner {
     public boolean debug = false;
 
     public GenericAdaptableCPERunner(String cpeDescriptor) {
-        super(cpeDescriptor);
+        super(cpeDescriptor, "g1", new ConsoleLogger());
     }
 
     public GenericAdaptableCPERunner(TasksFX tasks) {
@@ -57,59 +57,11 @@ public class GenericAdaptableCPERunner extends AdaptableUIMACPEDescriptorTaskRun
         TaskFX otherPiplinesConfig = tasks.getTask("otherPiplines");
         LinkedHashMap<String, SettingAb> customizedSettings = otherPiplinesConfig.getChildSettings(pipelineName);
         String cpeDescriptor = otherPiplinesConfig.getValue(pipelineName + "/" + ConfigKeys.cpeDescriptor);
-        super.init(cpeDescriptor);
-        if (reportable(customizedSettings)) {
-            logger = new ConsoleLogger();
-        }
-
-        File rootFolder = new File(currentCpeDesc.getSourceUrl().getFile()).getParentFile();
-        try {
-            CasProcessorConfigurationParameterSettings settings;
-            CpeCollectionReader[] collRdrs = currentCpeDesc.getAllCollectionCollectionReaders();
-            for (CpeCollectionReader collReader : collRdrs) {
-                File descFile = new File(rootFolder + System.getProperty("file.separator") + collReader.getDescriptor().getImport().getLocation());
-                CollectionReaderDescription crd = UIMAFramework.getXMLParser().parseCollectionReaderDescription(new XMLInputSource(descFile));
-                String collRdrsName = crd.getCollectionReaderMetaData().getName().replaceAll(" ", "_");
-                ProcessingResourceMetaData processingResourceMetaData = crd.getCollectionReaderMetaData();
-                settings = CpeDescriptorFactory
-                        .produceCasProcessorConfigurationParameterSettings();
-                debugging(collRdrsName);
-                updateParameters(collRdrsName, settings, processingResourceMetaData, customizedSettings);
-                collReader.setConfigurationParameterSettings(settings);
-            }
-
-            CpeCasProcessor[] cpeCasProcessors = currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors();
-            for (CpeCasProcessor casProc : cpeCasProcessors) {
-                File descFile = new File(rootFolder + System.getProperty("file.separator") + casProc.getCpeComponentDescriptor().getImport().getLocation());
-                AnalysisEngineDescription aed = UIMAFramework.getXMLParser().parseAnalysisEngineDescription(new XMLInputSource(descFile));
-                ProcessingResourceMetaData processingResourceMetaData = aed.getAnalysisEngineMetaData();
-                settings = CpeDescriptorFactory
-                        .produceCasProcessorConfigurationParameterSettings();
-                casProc.setConfigurationParameterSettings(settings);
-                String casProcName = casProc.getName().replaceAll(" ", "_");
-                updateParameters(casProcName, settings, processingResourceMetaData, customizedSettings);
-                casProc.setConfigurationParameterSettings(settings);
-            }
-        } catch (CpeDescriptorException e) {
-            e.printStackTrace();
-        } catch (InvalidXMLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (new File("desc/type/" + pipelineName + ".xml").exists()) {
-            dynamicTypeGenerator = new DynamicTypeGenerator("desc/type/" + pipelineName);
-        } else if (customizedSettings.containsKey(ConfigKeys.customizedTypes)) {
-            String types = customizedSettings.get(ConfigKeys.customizedTypes).getSettingValue().trim();
-            if (types.length() > 0) {
-                for (String type : customizedSettings.get(ConfigKeys.customizedTypes).getSettingValue().split(",")) {
-                    type = type.trim();
-                    addConceptType(type);
-                }
-                reInitTypeSystem("desc/type/" + pipelineName);
-            }
-        }
+        String annotator = tasks.getTask(ConfigKeys.maintask).getValue(ConfigKeys.annotator);
+        this.externalConfigMap = new LinkedHashMap<>();
+        this.annotator = annotator;
+        setUIMALogger(logger);
+        initCpe(cpeDescriptor, annotator, "");
 
     }
 

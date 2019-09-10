@@ -24,7 +24,6 @@ public class ViewDebugOutput extends GUITask {
     protected String rushRule = "", fastNERRule = "", fastCNERRule = "", contextRule = "",
             featureInfRule = "", docInfRule = "", annotator, exporttypes;
     protected boolean fastNerCaseSensitive;
-    protected DebugPipe debugRunner;
     protected GUITask guiTask;
 
     protected final ColumnInfo columnInfo = new ColumnInfo();
