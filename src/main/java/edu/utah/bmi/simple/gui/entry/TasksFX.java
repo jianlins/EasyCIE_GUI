@@ -36,4 +36,12 @@ public class TasksFX {
     public int getTaskId(String taskName) {
         return nameId.get(taskName);
     }
+
+    public TasksFX clone() {
+        TasksFX newTasksFX = new TasksFX();
+        for (TaskFX task : this.obtasks.values()) {
+            newTasksFX.addTask(task);
+        }
+        return newTasksFX;
+    }
 }

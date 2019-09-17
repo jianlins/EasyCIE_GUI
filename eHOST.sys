@@ -32,7 +32,7 @@ false
 NOPASSWORD
 
 [WORKSPACE_PATH]
-/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/../../HAI/Ajudication
+/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/target/generated-sources/ehost
 
 [OracleFunction]
 true

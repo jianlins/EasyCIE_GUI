@@ -62,27 +62,27 @@ public class EhostExporter {
      * Name of configuration parameter that must be set to the path of a
      * directory into which the output files will be written.
      */
-    private LinkedHashMap<String, String> docs = new LinkedHashMap<>();
-    private LinkedHashMap<String, ArrayList<RecordRow>> annos = new LinkedHashMap<>();
+    protected LinkedHashMap<String, String> docs = new LinkedHashMap<>();
+    protected LinkedHashMap<String, ArrayList<RecordRow>> annos = new LinkedHashMap<>();
     HashMap<String, LinkedHashSet<String>> typeConfigs = new HashMap<>();
 
-    private File xmlOutputDir, txtOutputDir, configDir;
+    protected File xmlOutputDir, txtOutputDir, configDir;
 
-    private String annotator = "uima";
+    protected String annotator = "uima";
 
-    private int mDocNum, docCounter = 0, subCorpusCounter = 0;
-
-
-    private int elementId = 0;
+    protected int mDocNum, docCounter = 0, subCorpusCounter = 0;
 
 
-    private SimpleDateFormat dateFormat = new SimpleDateFormat(
+    protected int elementId = 0;
+
+
+    protected SimpleDateFormat dateFormat = new SimpleDateFormat(
 //            "EEE MMM dd HH:mm:ss zzz yyyy");
             "MM/dd/yy");
-    private File outputDirectory;
-    private EDAO ddao, adao;
-    private String colorPool;
-    private int randomColor;
+    protected File outputDirectory;
+    protected EDAO ddao, adao;
+    protected String colorPool;
+    protected int randomColor;
 
     public EhostExporter(String outputDirectory, String annotator, String datasetId,
                          String docDBConfig, String annoDBconfig,
@@ -91,6 +91,9 @@ public class EhostExporter {
         initialize(new File(outputDirectory), annotator, datasetId, docDBConfig, annoDBconfig, docTableName,
                 snippetResTableName, docResTableName, colorPool, randomColor);
 
+    }
+
+    public EhostExporter() {
     }
 
     public void initialize(File outputDirectory, String annotator, String datasetId,
@@ -141,10 +144,10 @@ public class EhostExporter {
             RecordRow recordRow = recordIterator.next();
             String docName = recordRow.getStrByColumnName("DOC_NAME");
             String content = recordRow.getStrByColumnName("TEXT");
-            content=content.replaceAll("(\\n[^\\w\\p{Punct}]+\\n)","\n\n")
-                    .replaceAll("(\\n\\s*)+(?:\\n)","\n\n")
-                    .replaceAll("^(\\n\\s*)+(?:\\n)","")
-                    .replaceAll("[^\\w\\p{Punct}\\s]"," ");
+            content = content.replaceAll("(\\n[^\\w\\p{Punct}]+\\n)", "\n\n")
+                    .replaceAll("(\\n\\s*)+(?:\\n)", "\n\n")
+                    .replaceAll("^(\\n\\s*)+(?:\\n)", "")
+                    .replaceAll("[^\\w\\p{Punct}\\s]", " ");
             docs.put(docName, content);
         }
     }
@@ -207,7 +210,7 @@ public class EhostExporter {
     }
 
 
-    private void writeEhostAnnotation(XMLStreamWriter xtw, RecordRow annotation) throws XMLStreamException {
+    protected void writeEhostAnnotation(XMLStreamWriter xtw, RecordRow annotation) throws XMLStreamException {
         int snippetBegin = Integer.parseInt(annotation.getStrByColumnName("SNIPPET_BEGIN"));
         int begin = Integer.parseInt(annotation.getStrByColumnName("BEGIN")) + snippetBegin;
         int end = Integer.parseInt(annotation.getStrByColumnName("END")) + snippetBegin;
