@@ -20,11 +20,12 @@ package edu.utah.bmi.nlp.uima.ae;
 import edu.utah.bmi.nlp.core.*;
 import edu.utah.bmi.nlp.fastcner.FastCNER;
 import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
-import edu.utah.bmi.nlp.fastner.FastNER;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Concept;
+import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
+import org.apache.uima.cas.FSIndex;
 import org.apache.uima.cas.FSIterator;
 import org.apache.uima.examples.SourceDocumentInformation;
 import org.apache.uima.fit.util.JCasUtil;
@@ -38,8 +39,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-
-//import org.pojava.datetime.DateTime;
 
 
 /**
@@ -57,6 +56,11 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
     public static final String PARAM_REFERENCE_DATE_COLUMN_NAME = "ReferenceDateColumnName";
     public static final String PARAM_RECORD_DATE_COLUMN_NAME = "RecordDateColumnName";
 
+    //  Also try to identify the temporal mentions around the target concepts (within sentence boundary), if
+    //  not covered by inclusionSections
+    public static final String PARAM_AROUND_CONCEPTS = "AroundConcepts";
+
+    public static final String CATEGORY_VALUES = "CATEGORY_VALUES";
 
     protected String referenceDateColumnName, recordDateColumnName;
 
@@ -65,11 +69,15 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 
     protected HashMap<String, Integer> numberMap = new HashMap<>();
 
+    protected ArrayList<Class> targetConceptTypes = new ArrayList<>();
+
     protected Pattern[] patterns = new Pattern[5];
 
     protected DateTime referenceDate;
     protected boolean globalCertainty = false;
     protected boolean saveInferredRecordDate = false;
+
+    protected LinkedHashMap<Double, String> categories = new LinkedHashMap<>();
 
     public void initialize(UimaContext cont) {
         super.initialize(cont);
@@ -92,6 +100,38 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
         else
             recordDateColumnName = (String) obj;
 
+        obj = cont.getConfigParameterValue(PARAM_INCLUDE_SECTIONS);
+        if (obj != null && ((String) obj).trim().length() > 0) {
+            for (String sectionName : ((String) obj).split("[\\|,;]")) {
+                sectionName = sectionName.trim();
+                includeSectionClasses.add(AnnotationOper.getTypeClass(DeterminantValueSet.checkNameSpace(sectionName)));
+            }
+        }
+
+
+        obj = cont.getConfigParameterValue(PARAM_AROUND_CONCEPTS);
+        if (obj != null && ((String) obj).trim().length() > 0) {
+            for (String conceptName : ((String) obj).trim().split("[;, ]+")) {
+                Class typeCls = AnnotationOper.getTypeClass(DeterminantValueSet.checkNameSpace(conceptName));
+                if (typeCls != null)
+                    targetConceptTypes.add((Class<? extends Concept>) typeCls);
+                else
+                    logger.warning("Try to search temporal mentions around '" + conceptName + "', but this type is not defined and loaded, check the spelling and the NER rules.");
+            }
+        }
+//        if no section and concept classs is specified, process the whole document.
+        if (includeSectionClasses.size() == 0 && ConceptTypeClasses.size() == 0) {
+            includeSectionClasses.add(SourceDocumentInformation.class);
+        }
+
+        String ruleStr = (String) cont.getConfigParameterValue(DeterminantValueSet.PARAM_RULE_STR);
+        for (ArrayList<String> row : new IOUtil(ruleStr).getInitiations()) {
+            if (row.get(1).endsWith(CATEGORY_VALUES)) {
+                String value = row.get(2);
+                double upperBound = Double.parseDouble(row.get(3));
+                categories.put(upperBound, value);
+            }
+        }
 
     }
 
@@ -112,18 +152,89 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
     }
 
 
-    public void process(JCas jcas) throws AnalysisEngineProcessException {
-        DateTime recordDate = readReferenceDate(jcas, recordDateColumnName);
-        referenceDate = readReferenceDate(jcas, referenceDateColumnName);
+    public void process(JCas jCas) throws AnalysisEngineProcessException {
+        referenceDate = readReferenceDate(jCas, referenceDateColumnName);
+        DateTime recordDate = readReferenceDate(jCas, recordDateColumnName);
         if (referenceDate == null)
             referenceDate = new DateTime(System.currentTimeMillis());
 
         globalCertainty = recordDate != null;
         dateAnnos.clear();
-        String docText = jcas.getDocumentText();
-        HashMap<String, ArrayList<Span>> dates = ((FastCNER) fastNER).processString(docText);
-        ArrayList<Annotation> allDateMentions = parseDateMentions(jcas, dates, recordDate);
-        coordinateDateMentions(allDateMentions, jcas.getDocumentText().length());
+        String docText = jCas.getDocumentText();
+        IntervalST<Integer> sectionTree = new IntervalST<>();
+        ArrayList<Annotation> sections = indexSections(jCas, includeSectionClasses, sectionTree);
+        ArrayList<Annotation> sentences = indexSentences(jCas, targetConceptTypes, sectionTree);
+
+        ArrayList<Annotation> allDateMentions = processSegs(jCas, sections, recordDate);
+
+        allDateMentions.addAll(processSegs(jCas, sentences, recordDate));
+
+        coordinateDateMentions(allDateMentions, jCas.getDocumentText().length());
+    }
+
+    protected ArrayList<Annotation> processSegs(JCas jCas, ArrayList<Annotation> segs, DateTime recordDate) {
+        ArrayList<Annotation> allDateMentions = new ArrayList<>();
+        for (Annotation seg : segs) {
+            HashMap<String, ArrayList<Span>> dates = ((FastCNER) fastNER).processString(seg.getCoveredText());
+            allDateMentions = parseDateMentions(jCas, seg, dates, recordDate);
+        }
+        return allDateMentions;
+    }
+
+    protected ArrayList<Annotation> indexSections(JCas jCas,
+                                                  HashSet<Class> includeSectionClasses,
+                                                  IntervalST<Integer> sectionTree) {
+        ArrayList<Annotation> sections = new ArrayList<>();
+        for (Class sectionCls : includeSectionClasses) {
+            FSIndex annoIndex = jCas.getAnnotationIndex(sectionCls);
+            Iterator annoIter = annoIndex.iterator();
+            while (annoIter.hasNext()) {
+                Annotation section = (Annotation) annoIter.next();
+                Interval1D interval = new Interval1D(section.getBegin(), section.getEnd());
+                if (sectionTree.get(interval) != null) {
+                    int existingSectionId = sectionTree.get(interval);
+                    Annotation existingSection = sections.get(existingSectionId);
+                    if ((existingSection.getEnd() - existingSection.getBegin()) > (section.getEnd() - section.getBegin())) {
+                        continue;
+                    } else {
+                        sectionTree.remove(interval);
+                        sections.set(existingSectionId, section);
+                        sectionTree.put(interval, existingSectionId);
+                    }
+                } else {
+                    sections.add(section);
+                    sectionTree.put(interval, sections.size());
+                }
+            }
+        }
+        return sections;
+    }
+
+    protected ArrayList<Annotation> indexSentences(JCas jCas, ArrayList<Class> targetConceptTypes,
+                                                   IntervalST<Integer> sectionTree) {
+        IntervalST<Integer> conceptTree = new IntervalST<>();
+        ArrayList<Annotation> concepts = new ArrayList<>();
+        for (Class<? extends Concept> conceptType : targetConceptTypes) {
+            Iterator<? extends Concept> annoIter = JCasUtil.iterator(jCas, conceptType);
+            while (annoIter.hasNext()) {
+                Concept concept = annoIter.next();
+                Interval1D interval = new Interval1D(concept.getBegin(), concept.getEnd());
+                if (!sectionTree.contains(interval) && !conceptTree.contains(interval)) {
+                    concepts.add(concept);
+                    conceptTree.put(interval, concepts.size());
+                }
+            }
+        }
+        Iterator<? extends Annotation> annoIter = JCasUtil.iterator(jCas, SentenceType);
+        ArrayList<Annotation> sentences = new ArrayList<>();
+        while (annoIter.hasNext()) {
+            Annotation sentence = annoIter.next();
+            Interval1D interval = new Interval1D(sentence.getBegin(), sentence.getEnd());
+            if (conceptTree.contains(interval)) {
+                sentences.add(sentence);
+            }
+        }
+        return sentences;
     }
 
 
@@ -150,7 +261,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
             if (recordDate != null) {
                 utilDate = new org.pojava.datetime.DateTime(dateString, DateTimeConfig.getDateTimeConfig(recordDate.toDate())).toDate();
             } else {
-                utilDate = new org.pojava.datetime.DateTime(dateString, DateTimeConfig.getDateTimeConfig(referenceDate.toDate())).toDate();
+                utilDate = new org.pojava.datetime.DateTime(dateString, DateTimeConfig.getDateTimeConfig(this.referenceDate == null ? null : this.referenceDate.toDate())).toDate();
             }
 
         } catch (Exception e) {
@@ -167,14 +278,15 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
     /**
      * For parse date mentions and save as annotations.
      *
-     * @param jcas  JCas object
-     * @param dates   List of date spans grouped by types
-     * @param recordDate  document record date
+     * @param jcas       JCas object
+     * @param dates      List of date spans grouped by types
+     * @param recordDate document record date
      * @return a list of date mention annotations
      */
-    protected ArrayList<Annotation> parseDateMentions(JCas jcas, HashMap<String, ArrayList<Span>> dates,
-                                                    DateTime recordDate) {
-        String text = jcas.getDocumentText();
+    protected ArrayList<Annotation> parseDateMentions(JCas jcas, Annotation seg, HashMap<String, ArrayList<Span>> dates,
+                                                      DateTime recordDate) {
+        String text = seg.getCoveredText();
+        int offset = seg.getBegin();
         String latestDateMention = "";
         ArrayList<Annotation> allDateMentions = new ArrayList<>();
         if (recordDate == null) {
@@ -240,50 +352,58 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
                             dt = handleAmbiguousCase(dateMention, recordDate);
                         }
                         logger.finest("Parse '" + dateMention + "' as: '" + dt.toString() + "'");
+
+
                         addDateMentions(jcas, ConceptTypeConstructors, allDateMentions,
-                                typeOfDate, certainty, span, dt.toString(), getRuleInfo(span));
+                                typeOfDate, certainty, span, offset, dt, getRuleInfo(span));
                     }
                     break;
                 case "Yeard":
                     for (Span span : entry.getValue())
-                        inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 365);
+                        inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 365, offset);
                     break;
                 case "Monthd":
                     for (Span span : entry.getValue())
-                        inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 30);
+                        inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 30, offset);
                     break;
                 case "Weekd":
                     for (Span span : entry.getValue())
-                        inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 7);
+                        inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 7, offset);
                     break;
                 case "Dayd":
                     for (Span span : entry.getValue())
-                        inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 1);
+                        inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 1, offset);
                     break;
                 case "Yearw":
                     for (Span span : entry.getValue())
-                        inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 365);
+                        inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 365, offset);
                     break;
                 case "Monthw":
                     for (Span span : entry.getValue())
-                        inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 30);
+                        inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 30, offset);
                     break;
                 case "Weekw":
                     for (Span span : entry.getValue())
-                        inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 7);
+                        inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 7, offset);
                     break;
                 case "Dayw":
                     for (Span span : entry.getValue())
-                        inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 1);
+                        inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 1, offset);
                     break;
             }
         }
         return allDateMentions;
     }
 
+    protected long getDiffHours(DateTime dt, DateTime referenceDate) {
+        long diff = dt.getMillis() - referenceDate.getMillis();
+        diff = diff / 3600000;
+        return diff;
+    }
+
     protected void addDateMentions(JCas jcas, HashMap<String, Constructor<? extends Concept>> ConceptTypeConstructors,
-                                 ArrayList<Annotation> allDateMentions, String typeName,
-                                 String certainty, Span span, String dateStr, String... ruleInfo) {
+                                   ArrayList<Annotation> allDateMentions, String typeName,
+                                   String certainty, Span span, int offset, DateTime date, String... ruleInfo) {
         if (getSpanType(span) != DeterminantValueSet.Determinants.ACTUAL) {
             return;
         }
@@ -299,19 +419,29 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
             intervalST.put(interval1D, span);
         }
         try {
-            anno = ConceptTypeConstructors.get(typeName).newInstance(jcas, span.begin, span.end);
+            anno = ConceptTypeConstructors.get(typeName).newInstance(jcas, span.begin + offset, span.end + offset);
             anno.setCertainty(certainty);
-            if (dateStr != null)
-                anno.setCategory(dateStr);
+
             if (ruleInfo.length > 0) {
                 anno.setNote(String.join("\n", ruleInfo));
             }
+            if (anno instanceof edu.utah.bmi.nlp.type.system.Date) {
+                if (date != null) {
+                    ((edu.utah.bmi.nlp.type.system.Date) anno).setNormDate(date.toString());
+                    long diff = getDiffHours(date, referenceDate);
+                    ((edu.utah.bmi.nlp.type.system.Date) anno).setElapse(diff);
+                    if (categories.size() > 0) {
+                        for (double upperBound : categories.keySet()) {
+                            if (diff < upperBound) {
+                                anno.setTemporality(categories.get(upperBound));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
             allDateMentions.add(anno);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
 
@@ -319,7 +449,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 
 
     protected DateTime inferDateFromRelativeNumericTime(JCas jcas, ArrayList<Annotation> allDateMentions, String typeName, String text, Span span,
-                                                      DateTime recordDate, int unit) {
+                                                        DateTime recordDate, int unit, int offset) {
         DateTime dt = null;
         try {
 
@@ -331,7 +461,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
             if (unit > 7) {
                 certainty = "uncertain";
             }
-            addDateMentions(jcas, ConceptTypeConstructors, allDateMentions, typeName, certainty, span, dt.toString(), getRuleInfo(span));
+            addDateMentions(jcas, ConceptTypeConstructors, allDateMentions, typeName, certainty, span, offset, dt, getRuleInfo(span));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -339,7 +469,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
     }
 
     protected DateTime inferDateFromRelativeLiteralTime(JCas jcas, ArrayList<Annotation> allDateMentions, String typeName, String text, Span span,
-                                                      DateTime recordDate, int unit) {
+                                                        DateTime recordDate, int unit, int offset) {
         DateTime dt = null;
         try {
             String numWord = text.substring(span.begin, span.end).trim().toLowerCase();
@@ -352,7 +482,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
                 if (interval > 7) {
                     certainty = "uncertain";
                 }
-                addDateMentions(jcas, ConceptTypeConstructors, allDateMentions, typeName, certainty, span, dt.toString(), getRuleInfo(span));
+                addDateMentions(jcas, ConceptTypeConstructors, allDateMentions, typeName, certainty, span, offset, dt, getRuleInfo(span));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -406,10 +536,6 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
         return fastNER.getMatchedNEType(span);
     }
 
-    public static LinkedHashMap<String, TypeDefinition> getTypeDefinitions(String ruleFile, boolean caseSenstive) {
-        return new FastNER(ruleFile, caseSenstive, false).getTypeDefinitions();
-    }
-
     protected void coordinateDateMentions(ArrayList<Annotation> allDateMentions, int length) {
         IntervalST<Integer> checker = new IntervalST<>();
         HashSet<Integer> scheduleToRemoveIds = new HashSet<>();
@@ -446,6 +572,22 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
             }
         }
 
+    }
+
+    public LinkedHashMap<String, TypeDefinition> getTypeDefs(String ruleStr) {
+        LinkedHashMap<String, TypeDefinition> typeDefs = super.getTypeDefs(ruleStr);
+        typeDefs.remove(DeterminantValueSet.TEMPORAL_CATEGORIES1.substring(1));
+        for (String typeName : typeDefs.keySet()) {
+            TypeDefinition typeDef = typeDefs.get(typeName);
+            String superTypeName = typeDef.getFullSuperTypeName();
+//          force to use Date as super type to inherit its attributes.
+            if (superTypeName.equals(Concept.class.getCanonicalName())) {
+                typeDef.fullSuperTypeName = "edu.utah.bmi.nlp.type.system.Date";
+                typeDef.shortSuperTypeName = "Date";
+                typeDefs.put(typeName, typeDef);
+            }
+        }
+        return typeDefs;
     }
 
 
