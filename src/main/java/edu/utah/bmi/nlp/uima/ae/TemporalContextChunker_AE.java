@@ -41,7 +41,7 @@ import java.util.*;
  *
  * @author Jianlin Shi
  */
-public class TemporalContextChunker_AE_General extends TemporalContext_AE_General {
+public class TemporalContextChunker_AE extends TemporalContext_AE {
     public static final String PARAM_INCLUDE_SECTIONS = "IncludeSections";
     protected HashSet<Class<? extends Annotation>> includeSectionClasses = new LinkedHashSet<>();
 

@@ -18,7 +18,7 @@
 <analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
     <primitive>true</primitive>
-    <annotatorImplementationName>edu.utah.bmi.nlp.uima.ae.TemporalContext_AE_General</annotatorImplementationName>
+    <annotatorImplementationName>edu.utah.bmi.nlp.uima.ae.TemporalContext_AE</annotatorImplementationName>
     <analysisEngineMetaData>
         <name>TemporalContext_AE</name>
         <description>Detect temporal mentions in the context, and compare them with reference datetime to assert the context as historical or present</description>

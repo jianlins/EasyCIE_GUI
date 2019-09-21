@@ -266,7 +266,7 @@ public class RunEasyCIESampleSize extends GUITask {
             runner.addConceptTypes(FastContext_General_AE.getTypeDefinitions(contextRule, false).values());
 
         if (dateRule.length() > 0)
-            runner.addConceptTypes(TemporalContext_AE_General.getTypeDefinitions(dateRule, true).values());
+            runner.addConceptTypes(TemporalContext_AE.getTypeDefinitions(dateRule, true).values());
 
         if (featureInfRule.length() > 0)
             runner.addConceptTypes(FeatureInferenceAnnotator.getTypeDefinitions(featureInfRule).values());
@@ -430,14 +430,14 @@ public class RunEasyCIESampleSize extends GUITask {
 
         if (dateRule.length() > 0) {
             logger.fine("add engine TemporalContext_AE_General");
-            runner.addAnalysisEngine(TemporalContext_AE_General.class, new Object[]{
-                    TemporalContext_AE_General.PARAM_RULE_STR, dateRule,
-                    TemporalContext_AE_General.PARAM_MARK_PSEUDO, false,
-                    TemporalContext_AE_General.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
-                    TemporalContext_AE_General.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
-                    TemporalContext_AE_General.PARAM_INFER_ALL, inferAllTemporal,
-                    TemporalContext_AE_General.PARAM_INTERVAL_DAYS, dayInterval,
-                    TemporalContext_AE_General.PARAM_SAVE_DATE_ANNO, saveDateAnnotation});
+            runner.addAnalysisEngine(TemporalContext_AE.class, new Object[]{
+                    TemporalContext_AE.PARAM_RULE_STR, dateRule,
+                    TemporalContext_AE.PARAM_MARK_PSEUDO, false,
+                    TemporalContext_AE.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
+                    TemporalContext_AE.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
+                    TemporalContext_AE.PARAM_INFER_ALL, inferAllTemporal,
+                    TemporalContext_AE.PARAM_INTERVAL_DAYS, dayInterval,
+                    TemporalContext_AE.PARAM_SAVE_DATE_ANNO, saveDateAnnotation});
             if (logger.isLoggable(Level.FINE)) {
                 runner.addAnalysisEngine(AnnotationPrinter.class, new Object[]{AnnotationPrinter.PARAM_TYPE_NAME,
                         DeterminantValueSet.defaultNameSpace + "Concept",

@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  *
  * @author Jianlin Shi
  */
-public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implements RuleBasedAEInf {
+public class TemporalContext_AE extends JCasAnnotator_ImplBase implements RuleBasedAEInf {
 
     @Deprecated
     public static final Object PARAM_MARK_PSEUDO = "MarkPseudo";
@@ -59,7 +59,7 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
     @Deprecated
     public static final Object PARAM_LOG_RULE_INFO = "LogRuleInfo";
 
-    public static Logger logger = IOUtil.getLogger(TemporalContext_AE_General.class);
+    public static Logger logger = IOUtil.getLogger(TemporalContext_AE.class);
 
 
     public static final String PARAM_RULE_STR = DeterminantValueSet.PARAM_RULE_STR;

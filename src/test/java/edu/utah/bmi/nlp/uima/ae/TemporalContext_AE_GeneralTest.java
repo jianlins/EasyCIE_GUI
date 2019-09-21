@@ -51,7 +51,7 @@ class TemporalContext_AE_GeneralTest extends TemporalAnnotator_AETest {
         runner.addConceptTypes(new FastNER_AE_General().getTypeDefs(ruleStrs[0]).values());
         runner.addConceptTypes(new SectionDetectorR_AE().getTypeDefs(sectionRule).values());
         runner.addConceptTypes(new TemporalAnnotator_AE().getTypeDefs(ruleStrs[1]).values());
-        runner.addConceptTypes(new TemporalContext_AE_General().getTypeDefs(ruleStrs[2]).values());
+        runner.addConceptTypes(new TemporalContext_AE().getTypeDefs(ruleStrs[2]).values());
         runner.reInitTypeSystem("target/generated-test-sources/customized", "target/generated-test-sources/");
         sectionDetector = AnalysisEngineFactory.createEngine(SectionDetectorR_AE.class, SectionDetectorR_AE.PARAM_RULE_STR, sectionRule);
         sentenceSegmentor = AnalysisEngineFactory.createEngine(RuSH_AE.class, RuSH_AE.PARAM_RULE_STR, rushRule,
@@ -82,11 +82,11 @@ class TemporalContext_AE_GeneralTest extends TemporalAnnotator_AETest {
                 TemporalAnnotator_AE.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DTM",
                 TemporalAnnotator_AE.PARAM_INCLUDE_SECTIONS, "PresentHistory",
                 TemporalAnnotator_AE.PARAM_AROUND_CONCEPTS, "INFECTION");
-        temporalContextAE = AnalysisEngineFactory.createEngine(TemporalContext_AE_General.class,
-                TemporalContext_AE_General.PARAM_RULE_STR, tempContextRuleStr,
-                TemporalContext_AE_General.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
-                TemporalContext_AE_General.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DTM",
-                TemporalContext_AE_General.PARAM_SAVE_DATE_DIFF, true
+        temporalContextAE = AnalysisEngineFactory.createEngine(TemporalContext_AE.class,
+                TemporalContext_AE.PARAM_RULE_STR, tempContextRuleStr,
+                TemporalContext_AE.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
+                TemporalContext_AE.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DTM",
+                TemporalContext_AE.PARAM_SAVE_DATE_DIFF, true
         );
         jCas = addMeta(inputText, recordDate, referenceDate);
         sectionDetector.process(jCas);

@@ -11,7 +11,7 @@ import edu.utah.bmi.nlp.fastner.uima.FastNER_AE_General;
 import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.type.system.Doc_Base;
 import edu.utah.bmi.nlp.type.system.SentenceOdd;
-import edu.utah.bmi.nlp.uima.ae.TemporalContext_AE_General;
+import edu.utah.bmi.nlp.uima.ae.TemporalContext_AE;
 import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
 import edu.utah.bmi.nlp.uima.ae.DocInferenceAnnotator;
 import edu.utah.bmi.nlp.uima.ae.FeatureInferenceAnnotator;
@@ -323,13 +323,13 @@ public class DebugPipe extends RunEasyCIE {
 
         if (dateRule.length() > 0) {
             logger.fine("add engine TemporalContext_AE_General");
-            runner.addAnalysisEngine(TemporalContext_AE_General.class, new Object[]{
-                    TemporalContext_AE_General.PARAM_RULE_STR, dateRule,
-                    TemporalContext_AE_General.PARAM_MARK_PSEUDO, false,
-                    TemporalContext_AE_General.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
-                    TemporalContext_AE_General.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
-                    TemporalContext_AE_General.PARAM_INFER_ALL, inferAllTemporal,
-                    TemporalContext_AE_General.PARAM_INTERVAL_DAYS, dayInterval,});
+            runner.addAnalysisEngine(TemporalContext_AE.class, new Object[]{
+                    TemporalContext_AE.PARAM_RULE_STR, dateRule,
+                    TemporalContext_AE.PARAM_MARK_PSEUDO, false,
+                    TemporalContext_AE.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
+                    TemporalContext_AE.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DATE",
+                    TemporalContext_AE.PARAM_INFER_ALL, inferAllTemporal,
+                    TemporalContext_AE.PARAM_INTERVAL_DAYS, dayInterval,});
             if (dateType.length() > 0) {
                 if (guiEnabled)
                     runner.addAnalysisEngine(AnnotationLogger.class, new Object[]{
