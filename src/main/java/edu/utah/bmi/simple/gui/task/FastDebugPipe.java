@@ -34,6 +34,7 @@ import java.util.Map;
 /**
  * Created by Jianlin Shi on 9/19/16.
  */
+@Deprecated
 public class FastDebugPipe extends RunEasyCIE {
 
 

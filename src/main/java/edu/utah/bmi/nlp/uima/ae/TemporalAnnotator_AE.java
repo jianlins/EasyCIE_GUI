@@ -42,7 +42,10 @@ import java.util.regex.Pattern;
 
 
 /**
- * This is an AE to use FastCNER.java to identify the datetime mentions.
+ * This is an AE to use FastCNER.java to identify the datetime mentions within specified sections (inclusionSections)
+ * and/or the sentences that contain specified concepts (targetConceptTypes).
+ * Save the date mention annotation, normalize the date to a standard format (in NormDate attribute).
+ * Save the elapsed hours with respect to reference date (in Elapse attribute)
  *
  * @author Jianlin Shi
  */
@@ -60,12 +63,10 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
     //  not covered by inclusionSections
     public static final String PARAM_AROUND_CONCEPTS = "AroundConcepts";
 
-    public static final String CATEGORY_VALUES = "CATEGORY_VALUES";
-
     protected String referenceDateColumnName, recordDateColumnName;
 
 
-    protected HashMap<String, IntervalST<Span>> dateAnnos = new HashMap();
+    protected HashMap<String, IntervalST<Span>> dateAnnos = new HashMap<>();
 
     protected HashMap<String, Integer> numberMap = new HashMap<>();
 
@@ -113,10 +114,11 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
         if (obj != null && ((String) obj).trim().length() > 0) {
             for (String conceptName : ((String) obj).trim().split("[;, ]+")) {
                 Class typeCls = AnnotationOper.getTypeClass(DeterminantValueSet.checkNameSpace(conceptName));
-                if (typeCls != null)
+                if (typeCls != null && Concept.class.isAssignableFrom(typeCls))
                     targetConceptTypes.add((Class<? extends Concept>) typeCls);
                 else
-                    logger.warning("Try to search temporal mentions around '" + conceptName + "', but this type is not defined and loaded, check the spelling and the NER rules.");
+                    logger.warning("Try to search temporal mentions around '" + conceptName + "', but this type is not defined and loaded" +
+                            " (or not a subclass of Concept), check the spelling and the NER rules.");
             }
         }
 //        if no section and concept classs is specified, process the whole document.
@@ -126,7 +128,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
 
         String ruleStr = (String) cont.getConfigParameterValue(DeterminantValueSet.PARAM_RULE_STR);
         for (ArrayList<String> row : new IOUtil(ruleStr).getInitiations()) {
-            if (row.get(1).endsWith(CATEGORY_VALUES)) {
+            if (row.get(1).endsWith(DeterminantValueSet.TEMPORAL_CATEGORIES1.substring(1))) {
                 String value = row.get(2);
                 double upperBound = Double.parseDouble(row.get(3));
                 categories.put(upperBound, value);
@@ -202,8 +204,8 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
                         sectionTree.put(interval, existingSectionId);
                     }
                 } else {
-                    sections.add(section);
                     sectionTree.put(interval, sections.size());
+                    sections.add(section);
                 }
             }
         }
