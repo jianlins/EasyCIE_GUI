@@ -51,8 +51,6 @@ public class TemporalContextChunker_AE extends TemporalContext_AE {
     public void initialize(UimaContext cont) {
         super.initialize(cont);
         Object obj;
-        String ruleStr = (String) (cont
-                .getConfigParameterValue(PARAM_RULE_STR));
 
         obj = cont.getConfigParameterValue(PARAM_INCLUDE_SECTIONS);
         if (obj != null && ((String) obj).trim().length() > 0) {
