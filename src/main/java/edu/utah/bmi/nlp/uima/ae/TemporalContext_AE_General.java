@@ -72,7 +72,7 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
 
     protected LinkedHashMap<String, Method> setDiffMethods = new LinkedHashMap<>();
     protected LinkedHashMap<String, Class<? extends Annotation>> targetConceptClasses = new LinkedHashMap<>();
-    protected HashSet<Class> includeSectionClasses = new LinkedHashSet<>();
+
     //  read from record table, specify which column is the reference datetime, usually is set to admission datetime.
     public static final String PARAM_REFERENCE_DATE_COLUMN_NAME = "ReferenceDateColumnName";
     public static final String PARAM_RECORD_DATE_COLUMN_NAME = "RecordDateColumnName";
@@ -80,7 +80,7 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
     public static final String PARAM_DATE_PRIORITY = "DatePriority";
     public static final String EARLYFIRST = "EARLYFIRST", LATEFIRST = "LATEFIRST", CLOSEFIRST = "CLOSEFIRST";
 
-    private String referenceDateColumnName, recordDateColumnName;
+    protected String referenceDateColumnName, recordDateColumnName;
 
 
     // number of days before admission that still will be considered as current
@@ -164,7 +164,7 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
      * @param targetConceptClasses input type class name 2 Class map.
      * @return cleaned targetConceptClasses
      */
-    private LinkedHashMap<String, Class<? extends Annotation>> purgeTargetConceptClasses(
+    protected LinkedHashMap<String, Class<? extends Annotation>> purgeTargetConceptClasses(
             LinkedHashMap<String, Class<? extends Annotation>> targetConceptClasses) {
         ArrayList<String> classToRemove = new ArrayList<>();
         LinkedHashMap<String, Class<? extends Annotation>> newTargetConceptClasses = new LinkedHashMap<>();
@@ -187,8 +187,8 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
         return newTargetConceptClasses;
     }
 
-    private int checkOverlap(Class<? extends Annotation> newClass,
-                             LinkedHashMap<String, Class<? extends Annotation>> newTargetConceptClasses) {
+    protected int checkOverlap(Class<? extends Annotation> newClass,
+                               LinkedHashMap<String, Class<? extends Annotation>> newTargetConceptClasses) {
         for (String addedTypeName : newTargetConceptClasses.keySet()) {
             Class<? extends Annotation> addedCls = newTargetConceptClasses.get(addedTypeName);
             int value = classRelationShip(addedCls, newClass);
@@ -202,7 +202,7 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
         return 1;
     }
 
-    private int classRelationShip(Class<? extends Annotation> existingCls, Class<? extends Annotation> newClass) {
+    protected int classRelationShip(Class<? extends Annotation> existingCls, Class<? extends Annotation> newClass) {
         if (existingCls.isAssignableFrom(newClass)) {
             return 0;
         }
@@ -239,11 +239,11 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
 
         IntervalST<Integer> sentenceTree = new IntervalST<>();
         ArrayList<Annotation> sentences = new ArrayList<>();
-        indexSegments(jCas, Arrays.asList(Sentence.class), sentenceTree, sentences);
+        indexSegments(jCas, Arrays.asList(Sentence.class), sentenceTree, sentences, false, null);
 
         IntervalST<Integer> dateTree = new IntervalST<>();
         ArrayList<Annotation> dates = new ArrayList<>();
-        indexSegments(jCas, Arrays.asList(Date.class), dateTree, dates);
+        indexSegments(jCas, Arrays.asList(Date.class), dateTree, dates, true, null);
 
         if (referenceDate == null) {
             logger.fine("No value in Reference date column: '" + referenceDateColumnName + "'. Skip the TemporalConTextDetector.");
@@ -272,11 +272,11 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
 
     }
 
-    private void processCase(Concept concept, int sentenceId, Annotation sentence,
-                             HashMap<Integer, Long> sentenceTempDiffCache,
-                             HashMap<Integer, String> sentenceStatusCache,
-                             IntervalST<Integer> dateTree,
-                             ArrayList<Annotation> dates, long docElapse, String docTempStatus) {
+    protected void processCase(Concept concept, int sentenceId, Annotation sentence,
+                               HashMap<Integer, Long> sentenceTempDiffCache,
+                               HashMap<Integer, String> sentenceStatusCache,
+                               IntervalST<Integer> dateTree,
+                               ArrayList<Annotation> dates, long docElapse, String docTempStatus) {
         if (!sentenceStatusCache.containsKey(sentenceId)) {
             long elapse = datePriority.equals(EARLYFIRST) ? 1000000 : -1000000;
             String tempStatus = "";
@@ -340,7 +340,7 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
     }
 
 
-    private DateTime readReferenceDate(RecordRow recordRow, String referenceDateColumnName) {
+    protected DateTime readReferenceDate(RecordRow recordRow, String referenceDateColumnName) {
         String dateString = (String) recordRow.getValueByColumnName(referenceDateColumnName);
         if (dateString == null)
             return null;
@@ -366,24 +366,37 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
         return date;
     }
 
+    protected boolean checkExclusionClass(Annotation anno, Collection<Class<? extends Annotation>> exclusionClasses) {
+        for (Class<? extends Annotation> typeCls : exclusionClasses) {
+            if (typeCls.isAssignableFrom(anno.getClass()))
+                return false;
+        }
+        return true;
+    }
+
     protected void indexSegments(JCas jCas,
-                                 Collection<Class> includeClasses,
-                                 IntervalST<Integer> segementTree, ArrayList<Annotation> segments) {
+                                 Collection<Class<? extends Annotation>> includeClasses,
+                                 IntervalST<Integer> segementTree, ArrayList<Annotation> segments,
+                                 boolean checkOverlap, Collection<Class<? extends Annotation>> exclusionClasses) {
         for (Class segClass : includeClasses) {
             FSIndex annoIndex = jCas.getAnnotationIndex(segClass);
             Iterator annoIter = annoIndex.iterator();
             while (annoIter.hasNext()) {
                 Annotation segAnno = (Annotation) annoIter.next();
+                if (exclusionClasses != null && checkExclusionClass(segAnno, exclusionClasses)) {
+                    logger.finest(segAnno.getType().getShortName() + " belongs to one of exclusion Types, skip indexing.");
+                    continue;
+                }
                 Interval1D interval = new Interval1D(segAnno.getBegin(), segAnno.getEnd());
-                if (segementTree.get(interval) != null) {
-                    int existingSectionId = segementTree.get(interval);
-                    Annotation existingSection = segments.get(existingSectionId);
-                    if ((existingSection.getEnd() - existingSection.getBegin()) > (segAnno.getEnd() - segAnno.getBegin())) {
+                if (checkOverlap && segementTree.get(interval) != null) {
+                    int existingSegId = segementTree.get(interval);
+                    Annotation existingSeg = segments.get(existingSegId);
+                    if ((existingSeg.getEnd() - existingSeg.getBegin()) > (segAnno.getEnd() - segAnno.getBegin())) {
                         continue;
                     } else {
                         segementTree.remove(interval);
-                        segments.set(existingSectionId, segAnno);
-                        segementTree.put(interval, existingSectionId);
+                        segments.set(existingSegId, segAnno);
+                        segementTree.put(interval, existingSegId);
                     }
                 } else {
                     segementTree.put(interval, segments.size());
@@ -394,7 +407,7 @@ public class TemporalContext_AE_General extends JCasAnnotator_ImplBase implement
     }
 
 
-    private int getDistance(Date date, ConceptBASE concept) {
+    protected int getDistance(Date date, ConceptBASE concept) {
         if (date.getBegin() > concept.getEnd()) {
             return date.getBegin() - concept.getEnd();
         } else if (date.getEnd() < concept.getBegin()) {
