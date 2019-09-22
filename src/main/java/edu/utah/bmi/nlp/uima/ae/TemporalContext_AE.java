@@ -383,7 +383,7 @@ public class TemporalContext_AE extends JCasAnnotator_ImplBase implements RuleBa
             Iterator annoIter = annoIndex.iterator();
             while (annoIter.hasNext()) {
                 Annotation segAnno = (Annotation) annoIter.next();
-                if (exclusionClasses != null && checkExclusionClass(segAnno, exclusionClasses)) {
+                if (exclusionClasses != null && exclusionClasses.size()>0 && checkExclusionClass(segAnno, exclusionClasses)) {
                     logger.finest(segAnno.getType().getShortName() + " belongs to one of exclusion Types, skip indexing.");
                     continue;
                 }

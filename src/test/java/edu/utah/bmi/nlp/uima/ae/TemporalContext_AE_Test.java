@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class TemporalContext_AE_GeneralTest extends TemporalAnnotator_AETest {
+class TemporalContext_AE_Test extends TemporalAnnotator_AETest {
 
     protected AnalysisEngine temporalContextAE;
 
