@@ -126,7 +126,7 @@ public class TemporalContextChunker_AE extends TemporalContext_AE {
                 int previousSentenceId = sentenceTree.get(previousDateInterval);
                 Annotation previousSentence = sentences.get(previousSentenceId);
                 Interval1D sentenceInterval = new Interval1D(previousSentence.getBegin(), previousSentence.getEnd());
-                LinkedList<Integer> allDateIds = dateTree.getAll(sentenceInterval);
+                LinkedList<Integer> allDateIds = dateTree.getAllAsList(sentenceInterval);
                 if (allDateIds.size() > 1) {
 //                    This is just approximate,if multiple dates appear in one sentence, split on dates.
                     int counter = 0;
