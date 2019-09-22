@@ -322,7 +322,7 @@ public class TemporalContext_AE extends JCasAnnotator_ImplBase implements RuleBa
         String typeName = concept.getType().getShortName();
         if (sentenceTempDiffCache.containsKey(sentenceId) && sentenceTempDiffCache.get(sentenceId) != null) {
             if (saveDateDifference && setDiffMethods.containsKey(typeName))
-                AnnotationOper.setFeatureValue(setDiffMethods.get(typeName), concept, sentenceTempDiffCache.get(sentenceId) + "");
+                AnnotationOper.setFeatureObjValue(setDiffMethods.get(typeName), concept, sentenceTempDiffCache.get(sentenceId) + "");
             concept.setTemporality(sentenceStatusCache.get(sentenceId));
         } else if (inferAll) {
             if (saveDateDifference && setDiffMethods.containsKey(typeName))
