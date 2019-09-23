@@ -277,12 +277,14 @@ public class TemporalContext_AE extends JCasAnnotator_ImplBase implements RuleBa
                                HashMap<Integer, String> sentenceStatusCache,
                                IntervalST<Integer> dateTree,
                                ArrayList<Annotation> dates, long docElapse, String docTempStatus) {
+        String typeName = concept.getType().getShortName();
+        int counter = 0;
         if (!sentenceStatusCache.containsKey(sentenceId)) {
             long elapse = datePriority.equals(EARLYFIRST) ? 1000000 : -1000000;
             String tempStatus = "";
             int closestDistance = 1000000;
-            int counter = 0;
-            for (int dateId : dateTree.getAll(new Interval1D(sentence.getBegin(), sentence.getEnd()))) {
+            LinkedList<Integer> dateIds = dateTree.getAllAsList(new Interval1D(sentence.getBegin(), sentence.getEnd()));
+            for (int dateId : dateIds) {
                 counter++;
                 Date date = (Date) dates.get(dateId);
                 long diff = date.getElapse();
@@ -311,20 +313,25 @@ public class TemporalContext_AE extends JCasAnnotator_ImplBase implements RuleBa
                 }
             }
 //          if not date mention is found in the sentence, skip
-            if (counter > 0) {
+            if (counter == 1) {
                 sentenceTempDiffCache.put(sentenceId, elapse);
                 sentenceStatusCache.put(sentenceId, tempStatus);
+            } else if (counter > 1) {
+//                if multiple dates in a sentence will evaluate the distance for each concept in that sentence
+                if (saveDateDifference && setDiffMethods.containsKey(typeName))
+                    AnnotationOper.setFeatureObjValue(setDiffMethods.get(typeName), concept, elapse + "");
+                concept.setTemporality(tempStatus);
             } else {
                 sentenceTempDiffCache.put(sentenceId, null);
                 sentenceStatusCache.put(sentenceId, null);
             }
         }
-        String typeName = concept.getType().getShortName();
+
         if (sentenceTempDiffCache.containsKey(sentenceId) && sentenceTempDiffCache.get(sentenceId) != null) {
             if (saveDateDifference && setDiffMethods.containsKey(typeName))
                 AnnotationOper.setFeatureObjValue(setDiffMethods.get(typeName), concept, sentenceTempDiffCache.get(sentenceId) + "");
             concept.setTemporality(sentenceStatusCache.get(sentenceId));
-        } else if (inferAll) {
+        } else if (inferAll && counter == 0) {
             if (saveDateDifference && setDiffMethods.containsKey(typeName))
                 AnnotationOper.setFeatureValue(setDiffMethods.get(typeName), concept, docElapse + "");
             if (docTempStatus.length() > 0)
@@ -383,7 +390,7 @@ public class TemporalContext_AE extends JCasAnnotator_ImplBase implements RuleBa
             Iterator annoIter = annoIndex.iterator();
             while (annoIter.hasNext()) {
                 Annotation segAnno = (Annotation) annoIter.next();
-                if (exclusionClasses != null && exclusionClasses.size()>0 && checkExclusionClass(segAnno, exclusionClasses)) {
+                if (exclusionClasses != null && exclusionClasses.size() > 0 && checkExclusionClass(segAnno, exclusionClasses)) {
                     logger.finest(segAnno.getType().getShortName() + " belongs to one of exclusion Types, skip indexing.");
                     continue;
                 }
