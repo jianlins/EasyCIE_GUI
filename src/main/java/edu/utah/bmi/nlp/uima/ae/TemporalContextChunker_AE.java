@@ -150,9 +150,11 @@ public class TemporalContextChunker_AE extends TemporalContext_AE {
                         assignTemporalValuesInChunk(subChunkInterval, date, filteredConceptTree, filteredConcepts);
                     }
                     date = toChunkSectionIds.get(sectionId).get(i);
-                    subChunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
-                    logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(subChunkInterval.min, subChunkInterval.max));
-                    assignTemporalValuesInChunk(subChunkInterval, date, filteredConceptTree, filteredConcepts);
+                    if(currentSentence.getEnd()<chunkEnd) {
+                        subChunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
+                        logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(subChunkInterval.min, subChunkInterval.max));
+                        assignTemporalValuesInChunk(subChunkInterval, date, filteredConceptTree, filteredConcepts);
+                    }
                 } else {
                     Interval1D chunkInterval;
                     if (chunkBegin < currentSentence.getBegin() - 1) {
@@ -160,9 +162,11 @@ public class TemporalContextChunker_AE extends TemporalContext_AE {
                         logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(chunkInterval.min, chunkInterval.max));
                         assignTemporalValuesInChunk(chunkInterval, date, filteredConceptTree, filteredConcepts);
                     }
-                    chunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
-                    logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(chunkInterval.min, chunkInterval.max));
-                    assignTemporalValuesInChunk(chunkInterval, date, filteredConceptTree, filteredConcepts);
+                    if(currentSentence.getEnd()<chunkEnd) {
+                        chunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
+                        logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(chunkInterval.min, chunkInterval.max));
+                        assignTemporalValuesInChunk(chunkInterval, date, filteredConceptTree, filteredConcepts);
+                    }
                 }
                 chunkBegin = chunkEnd + 1;
                 if (chunkBegin > section.getEnd() + 1)
