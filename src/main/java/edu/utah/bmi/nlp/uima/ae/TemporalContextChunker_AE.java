@@ -113,6 +113,8 @@ public class TemporalContextChunker_AE extends TemporalContext_AE {
         for (int sectionId : toChunkSectionIds.keySet()) {
             Annotation section = sections.get(sectionId);
             int chunkBegin = section.getBegin();
+            if (toChunkSectionIds.get(sectionId) == null)
+                continue;
             for (int i = 0; i < toChunkSectionIds.get(sectionId).size(); i++) {
 //              Use next sentence begin to set current chunk end.
                 Date date = toChunkSectionIds.get(sectionId).get(i);
@@ -140,24 +142,25 @@ public class TemporalContextChunker_AE extends TemporalContext_AE {
                 Collections.sort(allDateIds);
                 if (allDateIds.size() > 1) {
 //                    This is just approximate,if multiple dates appear in one sentence, then .
+//                    System.out.println(chunkBegin+"~"+currentSentence.getBegin());
                     Interval1D subChunkInterval;
-                    if(chunkBegin<currentSentence.getBegin()-1) {
+                    if (chunkBegin < currentSentence.getBegin() - 1) {
                         subChunkInterval = new Interval1D(chunkBegin, currentSentence.getBegin() - 1);
                         logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(subChunkInterval.min, subChunkInterval.max));
                         assignTemporalValuesInChunk(subChunkInterval, date, filteredConceptTree, filteredConcepts);
                     }
                     date = toChunkSectionIds.get(sectionId).get(i);
-                    subChunkInterval = new Interval1D(currentSentence.getEnd(),chunkEnd);
+                    subChunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
                     logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(subChunkInterval.min, subChunkInterval.max));
                     assignTemporalValuesInChunk(subChunkInterval, date, filteredConceptTree, filteredConcepts);
                 } else {
                     Interval1D chunkInterval;
-                    if(chunkBegin<currentSentence.getBegin()-1) {
+                    if (chunkBegin < currentSentence.getBegin() - 1) {
                         chunkInterval = new Interval1D(chunkBegin, currentSentence.getBegin() - 1);
                         logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(chunkInterval.min, chunkInterval.max));
                         assignTemporalValuesInChunk(chunkInterval, date, filteredConceptTree, filteredConcepts);
                     }
-                    chunkInterval = new Interval1D(currentSentence.getEnd(),chunkEnd);
+                    chunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
                     logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(chunkInterval.min, chunkInterval.max));
                     assignTemporalValuesInChunk(chunkInterval, date, filteredConceptTree, filteredConcepts);
                 }
