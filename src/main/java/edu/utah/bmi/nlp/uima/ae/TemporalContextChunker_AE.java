@@ -118,14 +118,16 @@ public class TemporalContextChunker_AE extends TemporalContext_AE {
                 for (int i = 0; i < toChunkSectionIds.get(sectionId).size(); i++) {
 //              Use next sentence begin to set current chunk end.
                     Date date = toChunkSectionIds.get(sectionId).get(i);
+                    if (!sectionTree.contains(new Interval1D(date.getBegin(), date.getEnd())))
+                        continue;
                     int sentenceId = sentenceTree.get(new Interval1D(date.getBegin(), date.getEnd()));
                     Annotation currentSentence = sentences.get(sentenceId);
 //              make sure reach the last date mention of current sentence, if there are multiple date mentions-- to detect
 //              the correct next date in next sentence.
                     while (i < toChunkSectionIds.get(sectionId).size() - 1
-                            &&((toChunkSectionIds.get(sectionId).get(i + 1).getBegin() < currentSentence.getEnd())
+                            && ((toChunkSectionIds.get(sectionId).get(i + 1).getBegin() < currentSentence.getEnd())
                             || sentenceTree.get(new Interval1D(toChunkSectionIds.get(sectionId).get(i + 1).getBegin(),
-                            toChunkSectionIds.get(sectionId).get(i + 1).getBegin() + 1))==null)) {
+                            toChunkSectionIds.get(sectionId).get(i + 1).getBegin() + 1)) == null)) {
                         i++;
                     }
                     int chunkEnd;
