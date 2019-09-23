@@ -109,70 +109,76 @@ public class TemporalContextChunker_AE extends TemporalContext_AE {
 
         indexFilterConcepts(jCas, targetConceptClasses, filteredConceptTree, filteredConcepts, toChunkSectionIds,
                 sectionTree, sections, sentenceTree, sentences, dateTree, dates);
-
-        for (int sectionId : toChunkSectionIds.keySet()) {
-            Annotation section = sections.get(sectionId);
-            int chunkBegin = section.getBegin();
-            if (toChunkSectionIds.get(sectionId) == null)
-                continue;
-            for (int i = 0; i < toChunkSectionIds.get(sectionId).size(); i++) {
+        try {
+            for (int sectionId : toChunkSectionIds.keySet()) {
+                Annotation section = sections.get(sectionId);
+                int chunkBegin = section.getBegin();
+                if (toChunkSectionIds.get(sectionId) == null)
+                    continue;
+                for (int i = 0; i < toChunkSectionIds.get(sectionId).size(); i++) {
 //              Use next sentence begin to set current chunk end.
-                Date date = toChunkSectionIds.get(sectionId).get(i);
-                int sentenceId = sentenceTree.get(new Interval1D(date.getBegin(), date.getEnd()));
-                Annotation currentSentence = sentences.get(sentenceId);
+                    Date date = toChunkSectionIds.get(sectionId).get(i);
+                    int sentenceId = sentenceTree.get(new Interval1D(date.getBegin(), date.getEnd()));
+                    Annotation currentSentence = sentences.get(sentenceId);
 //              make sure reach the last date mention of current sentence, if there are multiple date mentions-- to detect
 //              the correct next date in next sentence.
-                while (i < toChunkSectionIds.get(sectionId).size() - 1 && toChunkSectionIds.get(sectionId).get(i + 1).getBegin() < currentSentence.getEnd()) {
-                    i++;
-                }
-
-                int chunkEnd;
-                if (i < toChunkSectionIds.get(sectionId).size() - 1) {
-                    Date nextDate = toChunkSectionIds.get(sectionId).get(i + 1);
-                    int nextSentenceId = sentenceTree.get(new Interval1D(nextDate.getBegin(), nextDate.getEnd()));
-                    Annotation nextDateSentence = sentences.get(nextSentenceId);
-                    chunkEnd = nextDateSentence.getBegin() - 1;
-                } else {
-                    chunkEnd = section.getEnd();
-                }
+                    while (i < toChunkSectionIds.get(sectionId).size() - 1
+                            &&((toChunkSectionIds.get(sectionId).get(i + 1).getBegin() < currentSentence.getEnd())
+                            || sentenceTree.get(new Interval1D(toChunkSectionIds.get(sectionId).get(i + 1).getBegin(),
+                            toChunkSectionIds.get(sectionId).get(i + 1).getBegin() + 1))==null)) {
+                        i++;
+                    }
+                    int chunkEnd;
+                    if (i < toChunkSectionIds.get(sectionId).size() - 1) {
+                        Date nextDate = toChunkSectionIds.get(sectionId).get(i + 1);
+                        int nextSentenceId = sentenceTree.get(new Interval1D(nextDate.getBegin(), nextDate.getEnd()));
+                        Annotation nextDateSentence = sentences.get(nextSentenceId);
+                        chunkEnd = nextDateSentence.getBegin() - 1;
+                    } else {
+                        chunkEnd = section.getEnd();
+                    }
 
 //              check if there are multiple date mentions, if so, do sub-chunks.
-                Interval1D currentChunkInterval = new Interval1D(chunkBegin, chunkEnd);
-                LinkedList<Integer> allDateIds = dateTree.getAllAsList(currentChunkInterval);
-                Collections.sort(allDateIds);
-                if (allDateIds.size() > 1) {
+                    Interval1D currentChunkInterval = new Interval1D(chunkBegin, chunkEnd);
+                    LinkedList<Integer> allDateIds = dateTree.getAllAsList(currentChunkInterval);
+                    Collections.sort(allDateIds);
+                    if (allDateIds.size() > 1) {
 //                    This is just approximate,if multiple dates appear in one sentence, then .
 //                    System.out.println(chunkBegin+"~"+currentSentence.getBegin());
-                    Interval1D subChunkInterval;
-                    if (chunkBegin < currentSentence.getBegin() - 1) {
-                        subChunkInterval = new Interval1D(chunkBegin, currentSentence.getBegin() - 1);
-                        logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(subChunkInterval.min, subChunkInterval.max));
-                        assignTemporalValuesInChunk(subChunkInterval, date, filteredConceptTree, filteredConcepts);
+                        Interval1D subChunkInterval;
+                        if (chunkBegin < currentSentence.getBegin() - 1) {
+                            subChunkInterval = new Interval1D(chunkBegin, currentSentence.getBegin() - 1);
+                            logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(subChunkInterval.min, subChunkInterval.max));
+                            assignTemporalValuesInChunk(subChunkInterval, date, filteredConceptTree, filteredConcepts);
+                        }
+                        date = toChunkSectionIds.get(sectionId).get(i);
+                        if (currentSentence.getEnd() < chunkEnd) {
+                            subChunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
+                            logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(subChunkInterval.min, subChunkInterval.max));
+                            assignTemporalValuesInChunk(subChunkInterval, date, filteredConceptTree, filteredConcepts);
+                        }
+                    } else {
+                        Interval1D chunkInterval;
+                        if (chunkBegin < currentSentence.getBegin() - 1) {
+                            chunkInterval = new Interval1D(chunkBegin, currentSentence.getBegin() - 1);
+                            logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(chunkInterval.min, chunkInterval.max));
+                            assignTemporalValuesInChunk(chunkInterval, date, filteredConceptTree, filteredConcepts);
+                        }
+                        if (currentSentence.getEnd() < chunkEnd) {
+                            chunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
+                            logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(chunkInterval.min, chunkInterval.max));
+                            assignTemporalValuesInChunk(chunkInterval, date, filteredConceptTree, filteredConcepts);
+                        }
                     }
-                    date = toChunkSectionIds.get(sectionId).get(i);
-                    if(currentSentence.getEnd()<chunkEnd) {
-                        subChunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
-                        logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(subChunkInterval.min, subChunkInterval.max));
-                        assignTemporalValuesInChunk(subChunkInterval, date, filteredConceptTree, filteredConcepts);
-                    }
-                } else {
-                    Interval1D chunkInterval;
-                    if (chunkBegin < currentSentence.getBegin() - 1) {
-                        chunkInterval = new Interval1D(chunkBegin, currentSentence.getBegin() - 1);
-                        logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(chunkInterval.min, chunkInterval.max));
-                        assignTemporalValuesInChunk(chunkInterval, date, filteredConceptTree, filteredConcepts);
-                    }
-                    if(currentSentence.getEnd()<chunkEnd) {
-                        chunkInterval = new Interval1D(currentSentence.getEnd(), chunkEnd);
-                        logger.finest(date.getNormDate() + ": " + jCas.getDocumentText().substring(chunkInterval.min, chunkInterval.max));
-                        assignTemporalValuesInChunk(chunkInterval, date, filteredConceptTree, filteredConcepts);
-                    }
+                    chunkBegin = chunkEnd + 1;
+                    if (chunkBegin > section.getEnd() + 1)
+                        break;
                 }
-                chunkBegin = chunkEnd + 1;
-                if (chunkBegin > section.getEnd() + 1)
-                    break;
-            }
 
+            }
+        } catch (Exception e) {
+            logger.warning(metaRecordRow.toString());
+            e.printStackTrace();
         }
 
 
