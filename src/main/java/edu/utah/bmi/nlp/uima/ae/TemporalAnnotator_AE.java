@@ -281,6 +281,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
      * For parse date mentions and save as annotations.
      *
      * @param jcas       JCas object
+     * @param seg   the segmentation of the document to be processed, e.g. a section or a paragraph.
      * @param dates      List of date spans grouped by types
      * @param recordDate document record date
      * @return a list of date mention annotations
