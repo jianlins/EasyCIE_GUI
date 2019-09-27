@@ -793,6 +793,9 @@ public class TasksOverviewController {
                         snippetPos = i;
                         col.setMaxWidth(dbPanel.getWidth() * 0.7);
                         widthStr = mainApp.tasks.getTask("settings").getValue("viewer/width/" + columnName).trim();
+                        if(tableView==debugTableView){
+                            widthStr="400";
+                        }
                         if (widthStr.length() > 0)
                             col.setPrefWidth(Integer.parseInt(widthStr));
                         else
