@@ -20,8 +20,10 @@ package edu.utah.bmi.nlp.uima.ae;
 import edu.utah.bmi.nlp.core.*;
 import edu.utah.bmi.nlp.fastcner.FastCNER;
 import edu.utah.bmi.nlp.fastcner.uima.FastCNER_AE_General;
+import edu.utah.bmi.nlp.fastner.FastNER;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Concept;
+import edu.utah.bmi.nlp.uima.common.AnnotationComparator;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
@@ -39,6 +41,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import static edu.utah.bmi.nlp.core.NERSpan.byRuleLength;
+import static edu.utah.bmi.nlp.core.NERSpan.scorewidth;
 
 
 /**
@@ -77,6 +82,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
     protected DateTime referenceDate;
     protected boolean globalCertainty = false;
     protected boolean saveInferredRecordDate = false;
+    protected boolean cner = true;
 
     protected LinkedHashMap<Double, String> categories = new LinkedHashMap<>();
 
@@ -134,7 +140,21 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
                 categories.put(upperBound, value);
             }
         }
+    }
 
+    protected LinkedHashMap<String, TypeDefinition> initFastNER(UimaContext cont, String ruleStr) {
+        IOUtil ioUtil = new IOUtil(ruleStr);
+        if (ioUtil.getSettings().containsKey("fastcner")) {
+            super.initFastNER(cont, ruleStr);
+        } else {
+            fastNER = new FastNER(ruleStr, caseSenstive);
+            if (markPseudo)
+                fastNER.setRemovePseudo(false);
+            fastNER.setCompareMethod(scorewidth);
+            fastNER.setWidthCompareMethod(byRuleLength);
+            cner = false;
+        }
+        return fastNER.getTypeDefinitions();
     }
 
     public void initPatterns() {
@@ -167,17 +187,39 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
         ArrayList<Annotation> sections = indexSections(jCas, includeSectionClasses, sectionTree);
         ArrayList<Annotation> sentences = indexSentences(jCas, targetConceptTypes, sectionTree);
 
-        ArrayList<Annotation> allDateMentions = processSegs(jCas, sections, recordDate);
-
-        allDateMentions.addAll(processSegs(jCas, sentences, recordDate));
-
+        ArrayList<Annotation> tokens = new ArrayList<>();
+        TreeMap<Integer, TreeSet<Integer>> section2TokenMap = new TreeMap<Integer, TreeSet<Integer>>();
+        TreeMap<Integer, TreeSet<Integer>> sentence2TokenMap = new TreeMap<Integer, TreeSet<Integer>>();
+        if (!cner) {
+            Iterator<? extends Annotation> annoIter = JCasUtil.iterator(jCas, TokenType);
+            while (annoIter.hasNext()) {
+                tokens.add(annoIter.next());
+            }
+            tokens.sort(new AnnotationComparator());
+            AnnotationOper.buildAnnoMap(sections, tokens, section2TokenMap);
+            AnnotationOper.buildAnnoMap(sentences, tokens, sentence2TokenMap);
+        }
+        ArrayList<Annotation> allDateMentions = processSegs(jCas, sections, recordDate, section2TokenMap, tokens);
+        allDateMentions.addAll(processSegs(jCas, sentences, recordDate, sentence2TokenMap, tokens));
         coordinateDateMentions(allDateMentions, jCas.getDocumentText().length());
     }
 
-    protected ArrayList<Annotation> processSegs(JCas jCas, ArrayList<Annotation> segs, DateTime recordDate) {
+    protected ArrayList<Annotation> processSegs(JCas jCas, ArrayList<Annotation> segs, DateTime recordDate,
+                                                TreeMap<Integer, TreeSet<Integer>> seg2TokenMap,
+                                                ArrayList<Annotation> tokens) {
         ArrayList<Annotation> allDateMentions = new ArrayList<>();
-        for (Annotation seg : segs) {
-            HashMap<String, ArrayList<Span>> dates = ((FastCNER) fastNER).processString(seg.getCoveredText());
+        for (int i = 0; i < segs.size(); i++) {
+            Annotation seg = segs.get(i);
+            HashMap<String, ArrayList<Span>> dates;
+            if (cner)
+                dates = ((FastCNER) fastNER).processString(seg.getCoveredText());
+            else {
+                ArrayList<Annotation> tokensInSeg = new ArrayList<Annotation>();
+                for (int tokenId : seg2TokenMap.get(i)) {
+                    tokensInSeg.add(tokens.get(tokenId));
+                }
+                dates = fastNER.processAnnotationList(tokensInSeg);
+            }
             allDateMentions = parseDateMentions(jCas, seg, dates, recordDate);
         }
         return allDateMentions;
@@ -281,15 +323,21 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
      * For parse date mentions and save as annotations.
      *
      * @param jcas       JCas object
-     * @param seg   the segmentation of the document to be processed, e.g. a section or a paragraph.
      * @param dates      List of date spans grouped by types
      * @param recordDate document record date
      * @return a list of date mention annotations
      */
     protected ArrayList<Annotation> parseDateMentions(JCas jcas, Annotation seg, HashMap<String, ArrayList<Span>> dates,
                                                       DateTime recordDate) {
-        String text = seg.getCoveredText();
-        int offset = seg.getBegin();
+        String text;
+        int offset;
+        if (cner) {
+            offset = seg.getBegin();
+            text = seg.getCoveredText();
+        } else {
+            text = jcas.getDocumentText();
+            offset = 0;
+        }
         String latestDateMention = "";
         ArrayList<Annotation> allDateMentions = new ArrayList<>();
         if (recordDate == null) {

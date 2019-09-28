@@ -55,6 +55,7 @@ class TemporalContext_AE_Test extends TemporalAnnotator_AETest {
         runner.reInitTypeSystem("target/generated-test-sources/customized", "target/generated-test-sources/");
         sectionDetector = AnalysisEngineFactory.createEngine(SectionDetectorR_AE.class, SectionDetectorR_AE.PARAM_RULE_STR, sectionRule);
         sentenceSegmentor = AnalysisEngineFactory.createEngine(RuSH_AE.class, RuSH_AE.PARAM_RULE_STR, rushRule,
+                RuSH_AE.PARAM_INCLUDE_PUNCTUATION,true,
                 RuSH_AE.PARAM_TOKEN_TYPE_NAME, Token.class.getCanonicalName());
     }
 
