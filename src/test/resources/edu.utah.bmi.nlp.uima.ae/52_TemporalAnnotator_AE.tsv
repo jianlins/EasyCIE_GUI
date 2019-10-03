@@ -1,0 +1,186 @@
+@fastner					
+##############					
+@CONCEPT_FEATURES	ABS_DATE	Concept			
+@CONCEPT_FEATURES	REL_DATE	Concept	Elapse	NumType
+					
+					
+@CATEGORY_VALUES	historical	-24			
+#include pod 5d					
+@CATEGORY_VALUES	dayone	36			
+# reported infection on day 32 stating infection happened 2 days ago.					
+@CATEGORY_VALUES	in30d	744			
+@CATEGORY_VALUES	after30d	10000000			
+					
+					
+\< 13 / \> 1910 \< 2050	1	ABS_DATE			
+\< 13 / \< 32 / \< 100	1	ABS_DATE			
+[on|since|until|till|scheduled|before|after|in] \( \< 13 / \< 32 / \< 100	1	ABS_DATE			
+[On|Since|Until|Till|Scheduled|Before|After|In] \( \< 13 / \< 32 / \< 100	1	ABS_DATE			
+[appointment|appoint|service] \w+ \( \< 13 / \< 32 / \< 100	1	ABS_DATE			
+[appointment|appoint|service] \( \< 13 / \< 32 / \< 100	1	ABS_DATE			
+[appointment|appoint|service] \( \> 1910 \< 2050	1	ABS_DATE			
+[Appointment|Appoint|Service] \w+ \( \< 13 / \< 32 / \< 100	1	ABS_DATE			
+[Appointment|Appoint|Service] \( \< 13 / \< 32 / \< 100	1	ABS_DATE			
+[Appointment|Appoint|Service] \( \> 1910 \< 2050	1	ABS_DATE			
+[hospitalized|hospitalized|hospital] \w+ \< 13 / \< 32 / \< 100	1	ABS_DATE			
+[Hospitalized|Hospitalized|Hospital] \w+ \< 13 / \< 32 / \< 100	1	ABS_DATE			
+\< 13 / \< 32 at \< 24 : \< 60	1	ABS_DATE			
+[age|ages] +\< 13 / \< 32	2	ABS_DATE	PSEUDO		
+					
+\< 13 / \< 32	1	ABS_DATE			
+					
+2 / 2	2	ABS_DATE	PSEUDO		
+\< 6 / 5 \) in	2	ABS_DATE	PSEUDO		
+strength \( \< 6 / 5	2	ABS_DATE	PSEUDO		
+strength \( \< 6 - \< 6 / 5	2	ABS_DATE	PSEUDO		
+str \( \< 6 / 5	2	ABS_DATE	PSEUDO		
+str \( \< 6 - \< 6 / 5	2	ABS_DATE	PSEUDO		
+\< 13 / \< 32 / \< 100 \) [mmHG|mmHg|mmhg]	2	ABS_DATE	PSEUDO		
+\< 13 / \< 32 \) [mmHG|mmHg|mmhg]	2	ABS_DATE	PSEUDO		
+					
+\< 13 / \< 32 / \> 1910 \< 2050	1	ABS_DATE			
+\< 13 - \< 32 - \> 1910 \< 2050	1	ABS_DATE			
+\< 13 . \< 32 . \> 1910 \< 2050	1	ABS_DATE			
+					
+lmp \( \< 13 . \< 32 . \> 1910 \< 2050	2	ABS_DATE	PSEUDO		
+					
+					
+#[\d|0\d|10|11|12][/|-|.][\d|0\d|1\d|2\d|30|31][/|-|.]\d\d.\d	2	ABS_DATE	PSEUDO		
+#\d.[|\s+][\w|\p|\b]([\d|0\d|10|11|12][/|-|.][\d|0\d|1\d|2\d|30|31][/|-|.]\d\d[|.\d]	2	ABS_DATE	PSEUDO		
+					
+\< 13 [/|.|-] \< 32 [/|.|-] \< 100 \> 1000	2	ABS_DATE	PSEUDO		
+					
+					
+					
+\< 13 [Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec] [of|,] \> 1910 \< 2050	1	ABS_DATE			
+\< 13 [Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec] \> 1910 \< 2050	1	ABS_DATE			
+					
+#[\w|\p|\b]([Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec][| +of][| +19\d\d| +20\d\d| +21\d\d])[\w|\p]	1	ABS_DATE			
+#[\w|\p|\b]([Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec] +[and|or] +([Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec][| +19\d\d| +20\d\d| +21\d\d])[\w|\p|\c|\C|\e]	1	ABS_DATE			
+					
+					
+[in|since|until|till|before|after] [mid|early|late|about] \( may [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[in|since|until|till|before|after] [mid|early|late|about] \( may \> 1910 \< 2050	1	ABS_DATE			
+					
+[In|Since|Until|Till|Before|After] [mid|early|late|about] \( may [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[In|Since|Until|Till|Before|After] [mid|early|late|about] \( may \> 1910 \< 2050	1	ABS_DATE			
+					
+[in|since|until|till|before|after] \( may [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[in|since|until|till|before|after] \( may \> 1910 \< 2050	1	ABS_DATE			
+					
+[In|Since|Until|Till|Before|After] \( may [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[In|Since|Until|Till|Before|After] \( may \> 1910 \< 2050	1	ABS_DATE			
+					
+					
+[January|February|March|April|May|June|July|August|September|October|Ocober|November|December] [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[January|February|March|April|May|June|July|August|September|October|Ocober|November|December] \> 1910 \< 2050	1	ABS_DATE			
+					
+[january|february|march|april|june|july|august|september|october|november|december] [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[january|february|march|april|june|july|august|september|october|november|december] \> 1910 \< 2050	1	ABS_DATE			
+					
+					
+[january|february|march|april|may|june|july|august|september|october|november|december] [and|or] [january|february|march|april|may|june|july|august|september|october|november|december] [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[january|february|march|april|may|june|july|august|september|october|november|december] [and|or] [january|february|march|april|may|june|july|august|september|october|november|december] \> 1910 \< 2050	1	ABS_DATE			
+					
+[January|February|March|April|May|June|July|August|September|October|Ocober|November|December] [and|or] [January|February|March|April|May|June|July|August|September|October|Ocober|November|December] [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[January|February|March|April|May|June|July|August|September|October|Ocober|November|December] [and|or] [January|February|March|April|May|June|July|August|September|October|Ocober|November|December] \> 1910 \< 2050	1	ABS_DATE			
+					
+[Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec] \< 32 [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec] \< 32  \> 1910 \< 2050	1	ABS_DATE			
+					
+[jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec] \< 32 [of|,] \> 1910 \< 2050	1	ABS_DATE			
+[jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec] \< 32  \> 1910 \< 2050	1	ABS_DATE			
+					
+[May|MAY|may] [is a|was|be]	2	ABS_DATE	PSEUDO		
+					
+[January|February|March|April|June|July|August|September|October|Ocober|November|December]	1	ABS_DATE			
+					
+[in|since|In|Since|Before|before|after|After|on|On] \w+ \( May	1	ABS_DATE			
+[in|since|In|Since|Before|before|after|After|on|On] \( May	1	ABS_DATE			
+[in|since|In|Since|Before|before|after|After|on|On] \w+ \( [Spring|Summer|Autumn|Winder|Fall|spring|summer|autumn|winter|fall]	1	ABS_DATE			
+					
+#[this|last|on|since|This|Last|On|Since|until|Until|Till|till|Before|before|after|After] +([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday])[\w|\p]	1	ABS_DATE			
+#last +[|\c+ +]([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday])[\w|\p]	1	ABS_DATE			
+#[this|last|on|since|This|Last|On|Since|until|Until|Till|till|Before|before|after|After] +[Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday] +[and|or] +([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday])[\w|\p]	1	ABS_DATE			
+#[Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday][| ][and|or] +([Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday])[\w|\p]	1	ABS_DATE			
+#([Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday])[| ][and|or] +[Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Satuarday|Sunday][\w|\p]	1	ABS_DATE			
+#[this|past|last] ([Spring|Summer|Autumn|Winder|Fall|spring|summer|autumn|winter|fall])	1	ABS_DATE			
+					
+					
+[in|since|In|Since|until|Until|Till|till|Before|before|after|After] \w+ \> 1910 \< 2050	1	ABS_DATE			
+[in|since|In|Since|until|Until|Till|till|Before|before|after|After] \> 1910 \< 2050	1	ABS_DATE			
+					
+#change it to context rules					
+#[\w|\p]in [mid |early |late ]([4|5|6|7|8|9]\ds)[\w|\p|\c|\C|\e]	1	ABS_DATE			
+#[mother|father|grandma|grandpa|passed away|diagnosed|dxed|died|diied][| +]\(([19|20|21]\d\d)\)	1	ABS_DATE			
+#[mother|father|grandma|grandpa|passed away|diagnosed|dxed|died|diied] +[|\c+ +]([19|20|21]\d\d)[\w|\p]	1	ABS_DATE			
+#([19|20|21]\d\d)[| +][-|~][| +][19|20|21]\d\d	1	ABS_DATE			
+#[19|20|21]\d\d[| +][-|~][| +]([19|20|21]\d\d)	1	ABS_DATE			
+#from ([19|20|21]\d\d)[| +]to[| +][19|20|21]\d\d	1	ABS_DATE			
+#from [19|20|21]\d\d[| +]to[| +]([19|20|21]\d\d)	1	ABS_DATE			
+#between ([19|20|21]\d\d)[| +]and[| +][19|20|21]\d\d	1	ABS_DATE			
+#between [19|20|21]\d\d[| +]and[| +]([19|20|21]\d\d)	1	ABS_DATE			
+#[\w|\p]([summer|autumn|winter|Summer|Autumn|Winter])[\w|\p]	1	ABS_DATE			
+#=[| +][\d|\d\d|\d\d\d][|.\d][| +]\(([19|20|21]\d\d)\)	1	ABS_DATE			
+#=[| +][\d|\d\d|\d\d\d][|.\d][| +]\(([19|20|21]\d\d)\)	1	ABS_DATE			
+#[\w|\p]([summer|autumn|winter|Summer|Autumn|Winter]) +[|\c+ +][reports|represents|is a|was|house|school|holiday|homes|time|presents|has][\w|\p]	2	ABS_DATE	PSEUDO		
+					
+#[\w|\p]([May|MAY]) +[report|represent|house|school|holiday|homes|time|present|need|consider|feel|felt]	2	ABS_DATE	PSEUDO		
+#[\w|\p]([Summer|Autumn]) +\C\C+	2	ABS_DATE	PSEUDO		
+#[Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday][|s])[\w|\p]	1	ABS_DATE			
+					
+last date [\w+|\w+ \w+|\w+ \w+ \w+|\w+ \w+ \w+ \w+] \( \< 13 / \< 32 / \< 100	1	ABS_DATE			
+last date [\w+|\w+ \w+|\w+ \w+ \w+|\w+ \w+ \w+ \w+] \( \< 13 / \< 32	1	ABS_DATE			
+					
+\< 13 [/|-|.] \> 1910 \< 2050	1	ABS_DATE			
+\> 1910 \< 2050 [mg|MG|UNIT|unit|ml|mcg]	2	ABS_DATE	PSEUDO		
+					
+					
+#[mother|father|grandma|grandpa|passed away|diagnosed|dxed|died|diied][| +]\(([\d|0\d|10|11|12][/|-|.]\d\d)\)	1	ABS_DATE			
+#[mother|father|grandma|grandpa|passed away|diagnosed|dxed|died|diied] +[|\c+ +]([\d|0\d|10|11|12][/|-|.]\d\d)[\w|\p]	1	ABS_DATE			
+#[\w|\p][dxed|died|diied|dx] +[|\c+ +][|\c+ +]([\d|0\d|10|11|12][/|-|.]\d\d)[\w|\p]	1	ABS_DATE			
+#[\w|\p][dxed|died|diied|dx] +[|\C\c+ +][|\C\c+ +]([\d|0\d|10|11|12][/|-|.]\d\d)[\w|\p]	1	ABS_DATE			
+					
+1 / [2|3|4|5] NS	2	ABS_DATE	PSEUDO		
+2 / [3|4|5] NS	2	ABS_DATE	PSEUDO		
+3 / [4|5] NS	2	ABS_DATE	PSEUDO		
+					
+[one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty] \) - [mo|month|months] [of|ago]	1	REL_DATE	ACTUAL	30	w
+[one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty] \) [mo|month|months] [of|ago]	1	REL_DATE	ACTUAL	30	w
+					
+[one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty] \) - [yrs|year|years|yr] [of|ago]	1	REL_DATE	ACTUAL	365	w
+[one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty] \) [yrs|year|years|yr] [of|ago]	1	REL_DATE	ACTUAL	365	w
+					
+					
+[one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty] \) - [wks|week|weeks] [of|ago]	1	REL_DATE	ACTUAL	7	w
+[one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty] \) [wks|week|weeks] [of|ago]	1	REL_DATE	ACTUAL	7	w
+					
+[one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty] \) - [d|day|days] [of|ago]	1	REL_DATE	ACTUAL	1	w
+[one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty] \) [d|day|days] [of|ago]	1	REL_DATE	ACTUAL	1	w
+
+yesterday	1	REL_DATE	ACTUAL	1	w
+the day before yesterday	1	REL_DATE	ACTUAL	2	w
+					
+\< 100 \) - [mo|month|months] [of|ago]	1	REL_DATE	ACTUAL	30	d
+\< 100 \) [mo|month|months] [of|ago]	1	REL_DATE	ACTUAL	30	d
+					
+\< 100 \) - [yrs|year|years|yr] [of|ago]	1	REL_DATE	ACTUAL	365	d
+\< 100 \) [yrs|year|years|yr] [of|ago]	1	REL_DATE	ACTUAL	365	d
+					
+					
+\< 100 \) - [wks|week|weeks] [of|ago]	1	REL_DATE	ACTUAL	7	d
+\< 100 \) [wks|week|weeks] [of|ago]	1	REL_DATE	ACTUAL	7	d
+					
+					
+\< 100 \) - [d|day|days] [of|ago]	1	REL_DATE	ACTUAL	1	d
+\< 100 \) [d|day|days] [of|ago]	1	REL_DATE	ACTUAL	1	d
+					
+					
+					
+					
+					
+#myocardial infarction of the basal 1/3 of the inferior wall.					
+\< 100 \) of the	2	ABS_DATE	PSEUDO		
+					
+#1/4th of the incision site					
+\< 10 / \< 10 th \) of the	2	ABS_DATE	PSEUDO		

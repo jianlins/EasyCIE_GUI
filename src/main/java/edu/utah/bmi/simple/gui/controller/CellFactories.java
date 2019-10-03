@@ -53,10 +53,13 @@ public class CellFactories {
                         cell.setBackground(new Background(new BackgroundFill(color, null, null)));
                         String html = cell.generateHTML();
                         TasksOverviewController.currentTasksOverviewController.updateHTMLEditor(html, item);
-                        if (e.getClickCount() == 2 &&
-                                (selectedTabIdx == 1 || selectedTabIdx == 2 || selectedTabIdx == 3)) {
-                            if (item instanceof RecordRow) {
-                                CellActions.showInEhost((RecordRow) item);
+                        if (e.getClickCount() == 2) {
+                            if (selectedTabIdx == 1 || selectedTabIdx == 2 || selectedTabIdx == 3) {
+                                if (item instanceof RecordRow) {
+                                    CellActions.showInEhost((RecordRow) item);
+                                }
+                            } else if (selectedTabIdx == 4) {
+
                             }
                         }
                     }

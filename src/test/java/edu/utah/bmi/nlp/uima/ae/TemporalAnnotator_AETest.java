@@ -101,6 +101,112 @@ class TemporalAnnotator_AETest {
     }
 
 
+    @Test
+    void test2() throws ResourceInitializationException, AnalysisEngineProcessException {
+        String inputText = "Record Date 1/27/2015\n" +
+                "HPI:\n" +
+                "Soft tissue infection two weeks ago. \n";
+        String recordDate = "01/20/2015", referenceDate = "01/02/2015";
+
+        String nerRule = "@fastner\n" +
+                "@CONCEPT_FEATURES\tINFECTION\tConcept\n" +
+                "infection\tINFECTION";
+        String tempRuleStr = "src/test/resources/edu.utah.bmi.nlp.uima.ae/52_TemporalAnnotator_AE.tsv";
+
+        init(new String[]{nerRule, tempRuleStr});
+
+        nerAE = AnalysisEngineFactory.createEngine(FastNER_AE_General.class, FastNER_AE_General.PARAM_RULE_STR, nerRule);
+
+        temporalAnnotatorAE = AnalysisEngineFactory.createEngine(TemporalAnnotator_AE.class,
+                TemporalAnnotator_AE.PARAM_RULE_STR, tempRuleStr,
+                TemporalAnnotator_AE.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
+                TemporalAnnotator_AE.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DTM",
+                TemporalAnnotator_AE.PARAM_INCLUDE_SECTIONS, "PresentHistory",
+                TemporalAnnotator_AE.PARAM_AROUND_CONCEPTS, "INFECTION");
+        jCas = addMeta(inputText, recordDate, referenceDate);
+        sectionDetector.process(jCas);
+        sentenceSegmentor.process(jCas);
+        nerAE.process(jCas);
+        System.out.println(JCasUtil.select(jCas, Concept.class));
+        temporalAnnotatorAE.process(jCas);
+        System.out.println(JCasUtil.select(jCas, Date.class));
+        assertTrue(JCasUtil.select(jCas, Date.class).size() == 1);
+        Date anno = JCasUtil.select(jCas, Date.class).iterator().next();
+        assertTrue(anno.getNormDate().equals("2015-01-06T00:00:00.000-07:00"));
+        System.out.println(inputText.substring(anno.getBegin(), anno.getEnd()));
+    }
+
+
+    @Test
+    void test3() throws ResourceInitializationException, AnalysisEngineProcessException {
+        String inputText = "Record Date 1/27/2015\n" +
+                "HPI:\n" +
+                "Soft tissue infection 1/7.2 \n";
+        String recordDate = "01/20/2015", referenceDate = "01/02/2015";
+
+        String nerRule = "@fastner\n" +
+                "@CONCEPT_FEATURES\tINFECTION\tConcept\n" +
+                "infection\tINFECTION";
+        String tempRuleStr = "src/test/resources/edu.utah.bmi.nlp.uima.ae/52_TemporalAnnotator_AE.tsv";
+
+        init(new String[]{nerRule, tempRuleStr});
+
+        nerAE = AnalysisEngineFactory.createEngine(FastNER_AE_General.class, FastNER_AE_General.PARAM_RULE_STR, nerRule);
+
+        temporalAnnotatorAE = AnalysisEngineFactory.createEngine(TemporalAnnotator_AE.class,
+                TemporalAnnotator_AE.PARAM_RULE_STR, tempRuleStr,
+                TemporalAnnotator_AE.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
+                TemporalAnnotator_AE.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DTM",
+                TemporalAnnotator_AE.PARAM_INCLUDE_SECTIONS, "PresentHistory",
+                TemporalAnnotator_AE.PARAM_AROUND_CONCEPTS, "INFECTION");
+        jCas = addMeta(inputText, recordDate, referenceDate);
+        sectionDetector.process(jCas);
+        sentenceSegmentor.process(jCas);
+        nerAE.process(jCas);
+        System.out.println(JCasUtil.select(jCas, Concept.class));
+        temporalAnnotatorAE.process(jCas);
+        System.out.println(JCasUtil.select(jCas, Date.class));
+//        assertTrue(JCasUtil.select(jCas, Date.class).size() == 1);
+        Date anno = JCasUtil.select(jCas, Date.class).iterator().next();
+        System.out.println(inputText.substring(anno.getBegin(), anno.getEnd()));
+    }
+
+    @Test
+    void test4() throws ResourceInitializationException, AnalysisEngineProcessException {
+        String inputText = "Record Date 1/27/2015\n" +
+                "HPI:\n" +
+                "Soft tissue infection the day before yesterday \n";
+        String recordDate = "01/20/2015", referenceDate = "01/02/2015";
+
+        String nerRule = "@fastner\n" +
+                "@CONCEPT_FEATURES\tINFECTION\tConcept\n" +
+                "infection\tINFECTION";
+        String tempRuleStr = "src/test/resources/edu.utah.bmi.nlp.uima.ae/52_TemporalAnnotator_AE.tsv";
+
+        init(new String[]{nerRule, tempRuleStr});
+
+        nerAE = AnalysisEngineFactory.createEngine(FastNER_AE_General.class, FastNER_AE_General.PARAM_RULE_STR, nerRule);
+
+        temporalAnnotatorAE = AnalysisEngineFactory.createEngine(TemporalAnnotator_AE.class,
+                TemporalAnnotator_AE.PARAM_RULE_STR, tempRuleStr,
+                TemporalAnnotator_AE.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
+                TemporalAnnotator_AE.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DTM",
+                TemporalAnnotator_AE.PARAM_INCLUDE_SECTIONS, "PresentHistory",
+                TemporalAnnotator_AE.PARAM_AROUND_CONCEPTS, "INFECTION");
+        jCas = addMeta(inputText, recordDate, referenceDate);
+        sectionDetector.process(jCas);
+        sentenceSegmentor.process(jCas);
+        nerAE.process(jCas);
+        System.out.println(JCasUtil.select(jCas, Concept.class));
+        temporalAnnotatorAE.process(jCas);
+        System.out.println(JCasUtil.select(jCas, Date.class));
+        assertTrue(JCasUtil.select(jCas, Date.class).size() == 1);
+        Date anno = JCasUtil.select(jCas, Date.class).iterator().next();
+        assertTrue(anno.getNormDate().equals("2015-01-18T00:00:00.000-07:00"));
+        System.out.println(inputText.substring(anno.getBegin(), anno.getEnd()));
+    }
+
+
     protected JCas addMeta(String text, String recordDate, String referenceDate) {
         JCas jCas = runner.initJCas();
         jCas.setDocumentText(text);
@@ -112,5 +218,6 @@ class TemporalAnnotator_AETest {
         srcDocInfo.addToIndexes();
         return jCas;
     }
+
 
 }

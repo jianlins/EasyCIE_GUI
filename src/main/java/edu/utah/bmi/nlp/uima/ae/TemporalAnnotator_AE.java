@@ -140,6 +140,14 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
                 categories.put(upperBound, value);
             }
         }
+//      default attribute is a string, parse it to an integer
+        for (Integer ruleId : this.fastNER.fastRule.ruleStore.keySet()) {
+            NERRule rule = this.fastNER.fastRule.ruleStore.get(ruleId);
+            if (rule.attributes.size() > 0) {
+                rule.attributes.set(0, Integer.parseInt("" + rule.attributes.get(0)));
+                this.fastNER.fastRule.ruleStore.put(ruleId, rule);
+            }
+        }
     }
 
     protected LinkedHashMap<String, TypeDefinition> initFastNER(UimaContext cont, String ruleStr) {
@@ -154,7 +162,9 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
             fastNER.setWidthCompareMethod(byRuleLength);
             cner = false;
         }
-        return fastNER.getTypeDefinitions();
+        LinkedHashMap<String, TypeDefinition> typeDefs = fastNER.getTypeDefinitions();
+        typeDefs.remove(DeterminantValueSet.TEMPORAL_CATEGORIES1.substring(1));
+        return typeDefs;
     }
 
     public void initPatterns() {
@@ -380,6 +390,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
             metaRecord.addCell(recordDateColumnName, recordDate);
             meta.setUri(metaRecord.serialize());
         }
+
         for (Map.Entry<String, ArrayList<Span>> entry : dates.entrySet()) {
             String typeOfDate = entry.getKey();
             switch (typeOfDate) {
@@ -440,6 +451,25 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
                 case "Dayw":
                     for (Span span : entry.getValue())
                         inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, 1, offset);
+                    break;
+                case "REL_DATE":
+                    for (Span span : entry.getValue()) {
+                        NERRule rule = fastNER.getMatchedRuleString(span);
+                        int unit = 0;
+                        if (rule.attributes.size() > 0) {
+                            unit = (int) rule.attributes.get(0);
+                        }
+                        String numericType = "d";
+                        if (rule.attributes.size() > 1) {
+                            numericType = ((String) rule.attributes.get(1)).substring(0, 1).toLowerCase();
+                        }
+                        if (numericType.equals("w")) {
+                            inferDateFromRelativeLiteralTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, unit, offset);
+                        } else {
+                            inferDateFromRelativeNumericTime(jcas, allDateMentions, typeOfDate, text, span, recordDate, unit, offset);
+                        }
+
+                    }
                     break;
             }
         }
@@ -533,6 +563,10 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
                 if (interval > 7) {
                     certainty = "uncertain";
                 }
+                addDateMentions(jcas, ConceptTypeConstructors, allDateMentions, typeName, certainty, span, offset, dt, getRuleInfo(span));
+            } else {
+//              deal with yesterday, the day before yesterday etc.
+                dt = recordDate.minusDays(unit);
                 addDateMentions(jcas, ConceptTypeConstructors, allDateMentions, typeName, certainty, span, offset, dt, getRuleInfo(span));
             }
         } catch (Exception e) {
