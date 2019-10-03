@@ -63,7 +63,8 @@ class TemporalAnnotator_AETest {
 
         runner.reInitTypeSystem("target/generated-test-sources/customized", "target/generated-test-sources/");
         sectionDetector = AnalysisEngineFactory.createEngine(SectionDetectorR_AE.class, SectionDetectorR_AE.PARAM_RULE_STR, sectionRule);
-        sentenceSegmentor = AnalysisEngineFactory.createEngine(RuSH_AE.class, RuSH_AE.PARAM_RULE_STR, rushRule,RuSH_AE.PARAM_TOKEN_TYPE_NAME,"Token");
+        sentenceSegmentor = AnalysisEngineFactory.createEngine(RuSH_AE.class, RuSH_AE.PARAM_RULE_STR, rushRule,
+                RuSH_AE.PARAM_TOKEN_TYPE_NAME,"Token",RuSH_AE.PARAM_INCLUDE_PUNCTUATION,true);
     }
 
     @Test
@@ -205,6 +206,38 @@ class TemporalAnnotator_AETest {
         assertTrue(anno.getNormDate().equals("2015-01-18T00:00:00.000-07:00"));
         System.out.println(inputText.substring(anno.getBegin(), anno.getEnd()));
     }
+
+    @Test
+    void test5() throws ResourceInitializationException, AnalysisEngineProcessException {
+        String inputText=
+                "HPI:\n" +
+                "Operation done 06/17/16 \n";
+        String recordDate = "01/20/2015", referenceDate = "01/02/2015";
+
+        String nerRule = "@fastner\n" +
+                "@CONCEPT_FEATURES\tINFECTION\tConcept\n" +
+                "infection\tINFECTION";
+        String tempRuleStr = "src/test/resources/edu.utah.bmi.nlp.uima.ae/52_TemporalAnnotator_AE.tsv";
+
+        init(new String[]{nerRule, tempRuleStr});
+
+        nerAE = AnalysisEngineFactory.createEngine(FastNER_AE_General.class, FastNER_AE_General.PARAM_RULE_STR, nerRule);
+
+        temporalAnnotatorAE = AnalysisEngineFactory.createEngine(TemporalAnnotator_AE.class,
+                TemporalAnnotator_AE.PARAM_RULE_STR, tempRuleStr,
+                TemporalAnnotator_AE.PARAM_RECORD_DATE_COLUMN_NAME, "DATE",
+                TemporalAnnotator_AE.PARAM_REFERENCE_DATE_COLUMN_NAME, "REF_DTM",
+                TemporalAnnotator_AE.PARAM_INCLUDE_SECTIONS, "PresentHistory",
+                TemporalAnnotator_AE.PARAM_AROUND_CONCEPTS, "INFECTION");
+        jCas = addMeta(inputText, recordDate, referenceDate);
+        sectionDetector.process(jCas);
+        sentenceSegmentor.process(jCas);
+        nerAE.process(jCas);
+        System.out.println(JCasUtil.select(jCas, Concept.class));
+        temporalAnnotatorAE.process(jCas);
+        System.out.println(JCasUtil.select(jCas, Date.class));
+    }
+
 
 
     protected JCas addMeta(String text, String recordDate, String referenceDate) {

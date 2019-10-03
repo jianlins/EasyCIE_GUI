@@ -396,6 +396,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
             switch (typeOfDate) {
                 case "Date":
                 case "CERTAIN_YEAR":
+                case "ABS_DATE":
                 case "CERTAIN_DATE":
                     ArrayList<Span> dateMentions = entry.getValue();
                     for (Span span : dateMentions) {
