@@ -235,7 +235,7 @@ class TemporalAnnotator_AETest {
         nerAE.process(jCas);
         System.out.println(JCasUtil.select(jCas, Concept.class));
         temporalAnnotatorAE.process(jCas);
-        System.out.println(JCasUtil.select(jCas, Date.class));
+        assertTrue(JCasUtil.select(jCas, Date.class).size() == 1);
     }
 
 

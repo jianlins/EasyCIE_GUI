@@ -49,6 +49,12 @@
                 <multiValued>false</multiValued>
                 <mandatory>false</mandatory>
             </configurationParameter>
+            <configurationParameter>
+                <name>NoteRuleId</name>
+                <type>Boolean</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
         </configurationParameters>
         <configurationParameterSettings>
             <nameValuePair>
@@ -71,6 +77,12 @@
             </nameValuePair>
             <nameValuePair>
                 <name>StrictNameMatch</name>
+                <value>
+                    <boolean>false</boolean>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>NoteRuleId</name>
                 <value>
                     <boolean>false</boolean>
                 </value>
