@@ -99,7 +99,7 @@ public class ConsoleLogger implements UIMALogger {
     }
 
     public void logString(String msg) {
-        syslogger.log(syslogger.getLevel(), msg);
+        syslogger.fine(msg);
     }
 
     @Override
