@@ -1,5 +1,5 @@
 /*
- * Copyright  2017  Department of Biomedical Informatics, University of Utah
+ * Copyright 2017 Department of Biomedical Informatics, University of Utah
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package edu.utah.bmi.nlp.easycie.writer;
+package edu.utah.bmi.nlp.uima.writer;
 
+import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
-import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
-import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
-import edu.utah.bmi.nlp.uima.writer.EhostConfigurator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -66,7 +64,7 @@ import java.util.logging.Logger;
  * will be written</li>
  * </ul>
  */
-public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_AE {
+public class EhostWriter_AE extends XMIWritter_AE {
     /**
      * Name of configuration parameter that must be set to the path of a
      * directory into which the output files will be written.
@@ -89,10 +87,10 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
 
     private String colorPool = "";
 
-    protected static HashMap<Class, LinkedHashSet<Method>> typeMethods = new HashMap<>();
+    protected HashMap<Class, LinkedHashSet<Method>> typeMethods = new HashMap<>();
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat(
-//            "EEE MMM dd HH:mm:ss zzz yyyy");
+// "EEE MMM dd HH:mm:ss zzz yyyy");
             "MM/dd/yy");
 
     public void initialize(UimaContext cont) {
@@ -131,13 +129,32 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (includeTypes.length() == 0) {
+            includeTypes = "Annotation";
+        }
+
+        String[] types = includeTypes.split(",");
+        Arrays.asList(types).forEach(e -> {
+            if (e.trim().length() > 0) {
+                Class<? extends Annotation> cls = AnnotationOper.getTypeClass(DeterminantValueSet.checkNameSpace(e.trim()));
+                if (cls != null)
+                    typeMethods.put(cls, getMethods(cls));
+            }
+        });
+
 
     }
 
 
     public void process(JCas jcas) throws AnalysisEngineProcessException {
-        Collection<Annotation> annotations = JCasUtil.select(jcas, Annotation.class);
+        ArrayList<Class> typeClasses = new ArrayList<>();
+        typeClasses.addAll(typeMethods.keySet());
+        ArrayList<Annotation>annotations=new ArrayList<>();
+        for (Class typecls : typeClasses) {
+            annotations.addAll(JCasUtil.select(jcas, typecls));
+        }
         File[] files = initialOutputXml(jcas);
+        System.out.println("\n\n"+files[1].getName());
         File outputXml = files[1];
         File sourceFile = files[0];
         try {
@@ -150,20 +167,24 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
     }
 
 
-    protected LinkedHashSet<Method> getMethods(Annotation annotation) {
-        if (typeMethods.containsKey(annotation.getClass())) {
-            return typeMethods.get(annotation.getClass());
+    protected LinkedHashSet<Method> getMethods(Class<? extends Annotation> cls) {
+        if (typeMethods.containsKey(cls)) {
+            return typeMethods.get(cls);
         } else {
             LinkedHashSet<Method> attributes = new LinkedHashSet<>();
-            getMethods(annotation.getClass(), attributes);
-            typeMethods.put(annotation.getClass(), attributes);
+            getMethods(cls, attributes);
+            typeMethods.put(cls, attributes);
             return attributes;
         }
     }
 
+    protected LinkedHashSet<Method> getMethods(Annotation annotation) {
+        return getMethods(annotation.getClass());
+    }
+
 
     public void getMethods(Class c, LinkedHashSet<Method> methods) {
-//        System.out.println(c.getSimpleName());
+// System.out.println(c.getSimpleName());
         if (c.getSimpleName().equals("Annotation")) {
             return;
         }
@@ -187,17 +208,29 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
         XMLStreamWriter xtw = initiateWritter(outputXmlStream, sourceFile);
         elementId = 0;
         for (Annotation annotation : annotations) {
-
             if (annotation instanceof SourceDocumentInformation || annotation instanceof DocumentAnnotation)
                 continue;
+            System.out.println(annotation.getType().getShortName());
             if (typeMethods.size() == 0)
                 writeEhostAnnotation(xtw, annotation);
             else if (typeMethods.containsKey(annotation.getClass())) {
-                logger.fine(annotation.getCoveredText());
-                writeEhostAnnotation(xtw, annotation);
+                if (typeMethods.get(annotation.getClass()) != null)
+                    continue;
+                else {
+                    logger.fine(annotation.getCoveredText());
+                    writeEhostAnnotation(xtw, annotation);
+                }
+            } else {
+                for (Class typeCls : typeMethods.keySet()) {
+                    if (typeCls.isInstance(annotation)) {
+                        typeMethods.put(annotation.getClass(), typeMethods.get(typeCls));
+                        writeEhostAnnotation(xtw, annotation);
+                        break;
+                    }
+                }
             }
         }
-        //		finish writing
+        // finish writing
         xtw.writeEndElement();
         xtw.writeEndDocument();
         xtw.flush();
@@ -239,7 +272,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
 
         xtw.writeEndElement();
         int attributeIds = 0;
-//        System.out.println(annotation.getType().getName() + "\t" + annotation.getCoveredText());
+// System.out.println(annotation.getType().getName() + "\t" + annotation.getCoveredText());
         if (!typeMethods.containsKey(annotation.getClass())) {
             typeMethods.put(annotation.getClass(), new LinkedHashSet<>());
             AnnotationOper.getMethods(annotation.getClass(), typeMethods.get(annotation.getClass()));
@@ -253,7 +286,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
             xtw.writeEndElement();
             xtw.writeStartElement("stringSlotMentionValue");
             String value = getMethodValue(method, annotation);
-//            System.out.println("\t"+value);
+// System.out.println("\t"+value);
             xtw.writeAttribute("value", value);
             xtw.writeEndElement();
             xtw.writeEndElement();
@@ -300,7 +333,7 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
             throws XMLStreamException {
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         XMLStreamWriter xtw = xof.createXMLStreamWriter(outputFileStream, "UTF-8");
-//		System.out.println(outputPath			+ sourcefileName + ".knowtator.xml");
+// System.out.println(outputPath + sourcefileName + ".knowtator.xml");
         xtw.writeStartDocument("UTF-8", "1.0");
         xtw.writeStartElement("annotations");
         xtw.writeAttribute("textSource", sourceFile.getAbsolutePath());
@@ -338,6 +371,4 @@ public class EhostWriter_AE extends edu.utah.bmi.nlp.easycie.writer.XMIWritter_A
         EhostConfigurator.setUp(new File(configDir, "projectschema.xml"), typeConfigs, colorPool, randomColor);
 
     }
-
-
 }

@@ -55,8 +55,11 @@ public class ImportExcelData extends Import {
         importDocTable = settingConfig.getValue(ConfigKeys.inputTableName);
         referenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
         inputFile = new File(documentPath);
-        annotator = inputFile.getName();
-        annotator = annotator.substring(0, annotator.lastIndexOf("."));
+        annotator = settingConfig.getValue(ConfigKeys.overWriteAnnotatorName);
+        if (annotator.trim().length() == 0) {
+            annotator = inputFile.getName();
+            annotator = annotator.substring(0, annotator.lastIndexOf("."));
+        }
         if (!checkFileExist(inputFile, ConfigKeys.importDir))
             return;
 
@@ -80,7 +83,7 @@ public class ImportExcelData extends Import {
         if (initSuccess) {
             updateGUIMessage("Start import....");
             importExcel(inputFile, datasetId, overwrite, sheetName,
-                    docNameColumnPos, txtColumnPos, dateColumnPos, conclusionColumnPos, startRowNum);
+                    docNameColumnPos, txtColumnPos, dateColumnPos, conclusionColumnPos, startRowNum, annotator);
             updateGUIMessage("Import complete");
         }
         dao.endBatchInsert();
@@ -115,7 +118,7 @@ public class ImportExcelData extends Import {
 
     protected void importExcel(File inputFile, String datasetId, boolean overWrite,
                                String sheetName, int docNameColumnPos, int txtColumnPos,
-                               int dateColumnPos, int conclusionColumnPos, int startRowNum) throws IOException {
+                               int dateColumnPos, int conclusionColumnPos, int startRowNum, String annotator) throws IOException {
         dao.initiateTableFromTemplate("DOCUMENTS_TABLE", importDocTable, overWrite);
         if (conclusionColumnPos != -1) {
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", referenceTable, overWrite);
@@ -123,8 +126,8 @@ public class ImportExcelData extends Import {
         HashMap<String, Integer> duplicateNames = new HashMap<>();
 
         int rowCounter = 0, counter = 1;
-        FileInputStream  fileIn = new FileInputStream(inputFile);
-        Workbook workbook =new XSSFWorkbook(fileIn);
+        FileInputStream fileIn = new FileInputStream(inputFile);
+        Workbook workbook = new XSSFWorkbook(fileIn);
         Sheet sheet = workbook.getSheet(sheetName);
         int total = sheet.getLastRowNum();
 
@@ -141,6 +144,7 @@ public class ImportExcelData extends Import {
                 }
                 RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
                         .addCell("DOC_NAME", docName)
+                        .addCell("ANNOTATOR", annotator)
                         .addCell("TEXT", row.getCell(txtColumnPos - 1));
                 Cell cell;
                 if (dateColumnPos != -1) {
