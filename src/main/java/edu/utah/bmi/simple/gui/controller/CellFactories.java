@@ -64,7 +64,7 @@ public class CellFactories {
                         }
                     }
                     if (e.getButton().equals(MouseButton.SECONDARY)) {
-                        if (selectedTabIdx == 2 || selectedTabIdx == 1) {
+                        if (selectedTabIdx == 2 || selectedTabIdx == 1 || selectedTabIdx == 3) {
 //                            System.out.println("Start debugging...");
                             TasksOverviewController.currentTasksOverviewController.currentGUITask.updateGUIMessage("Start debugging...");
                             if (cell.getItem() instanceof RecordRow) {
