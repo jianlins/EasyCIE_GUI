@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package edu.utah.bmi.nlp.uima.writer;
+package edu.utah.bmi.nlp.easycie.writer;
 
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.uima.common.AnnotationOper;
+import edu.utah.bmi.nlp.uima.writer.EhostConfigurator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.math.NumberUtils;

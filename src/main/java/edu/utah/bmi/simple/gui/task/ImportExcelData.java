@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -55,7 +56,7 @@ public class ImportExcelData extends Import {
         importDocTable = settingConfig.getValue(ConfigKeys.inputTableName);
         referenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
         inputFile = new File(documentPath);
-        annotator = settingConfig.getValue(ConfigKeys.overWriteAnnotatorName);
+        annotator = config.getValue(ConfigKeys.overWriteAnnotatorName);
         if (annotator.trim().length() == 0) {
             annotator = inputFile.getName();
             annotator = annotator.substring(0, annotator.lastIndexOf("."));
@@ -118,7 +119,7 @@ public class ImportExcelData extends Import {
 
     protected void importExcel(File inputFile, String datasetId, boolean overWrite,
                                String sheetName, int docNameColumnPos, int txtColumnPos,
-                               int dateColumnPos, int conclusionColumnPos, int startRowNum, String annotator) throws IOException {
+                               int dateColumnPos, int conclusionColumnPos, int startRowNum, String annotator) throws IOException, SQLException {
         dao.initiateTableFromTemplate("DOCUMENTS_TABLE", importDocTable, overWrite);
         if (conclusionColumnPos != -1) {
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", referenceTable, overWrite);
@@ -157,10 +158,11 @@ public class ImportExcelData extends Import {
                 }
                 dao.insertRecord(importDocTable, recordRow);
                 if (conclusionColumnPos != -1) {
-                    dao.insertRecord(referenceTable, new RecordRow()
+                    RecordRow rr = new RecordRow()
                             .addCell("DOC_NAME", docName)
-                            .addCell("TYPE", row.getCell(conclusionColumnPos - 1))
-                    );
+                            .addCell("ANNOTATOR", annotator)
+                            .addCell("TYPE", row.getCell(conclusionColumnPos - 1));
+                    dao.insertRecord(referenceTable, rr);
                 }
                 counter++;
                 updateGUIProgress(rowCounter, total);
