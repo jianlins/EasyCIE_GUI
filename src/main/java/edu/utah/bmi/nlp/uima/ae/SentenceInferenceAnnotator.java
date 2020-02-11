@@ -114,8 +114,9 @@ public class SentenceInferenceAnnotator extends JCasAnnotator_ImplBase implement
         HashSet<Integer> matchedSentenceOffsets = new HashSet<>();
         for (ArrayList<Object> inference : inferences) {
             ArrayList<Class> evidences = (ArrayList<Class>) inference.get(2);
-            checkMatch(jCas, topic, evidences, (String) inference.get(0), matchedSentenceOffsets);
-
+            boolean matched = checkMatch(jCas, topic, evidences, (String) inference.get(0), matchedSentenceOffsets);
+            if (matched)
+                break;
         }
     }
 
