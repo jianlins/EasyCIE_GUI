@@ -16,6 +16,7 @@ import java.io.File;
  */
 public class ViewDiffDB extends GUITask {
     protected String outputDB, diffTable, annotatorCompare, annotatorAgainst, inputTable;
+    private static String orderBy;
 
     public ViewDiffDB(TasksFX tasks) {
         initiate(tasks);
@@ -29,10 +30,12 @@ public class ViewDiffDB extends GUITask {
             annotatorCompare = tasks.getTask(ConfigKeys.maintask).getValue(ConfigKeys.annotator);
         }
         annotatorAgainst = config.getValue(ConfigKeys.referenceAnnotator);
+        orderBy=config.getValue(ConfigKeys.compareDisplayOrder).trim();
         config = tasks.getTask("settings");
         outputDB = config.getValue(ConfigKeys.writeDBConfigFileName);
         diffTable = config.getValue(ConfigKeys.compareTable).trim();
         inputTable = config.getValue(ConfigKeys.inputTableName);
+
     }
 
 
@@ -166,7 +169,11 @@ public class ViewDiffDB extends GUITask {
                 runId = lastLogRunId;
             }
             if (!runId.equals("-1")) {
-                filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId +" ORDER BY TYPE, COMMENTS,"+primeTable+".DOC_NAME";
+                if(orderBy!=null && orderBy.length()>0){
+                    filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId + " "+orderBy;
+                }else {
+                    filter = primeTable + ".annotator='" + annotator + "' AND " + primeTable + ".RUN_ID=" + runId + " ORDER BY TYPE, COMMENTS," + primeTable + ".DOC_NAME";
+                }
             }
         }
         return new String[]{sourceQuery, filter, annotatorLastRunid, lastLogRunId};
