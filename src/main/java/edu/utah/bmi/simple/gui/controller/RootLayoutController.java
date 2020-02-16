@@ -80,7 +80,7 @@ public class RootLayoutController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("About EasyCIE");
         alert.setHeaderText("EasyCIE");
-        alert.setContentText("Easy Clinical Information Extractor (version 3.0.2-SNAPSHOT)\n" +
+        alert.setContentText("Easy Clinical Information Extractor (version 3.0.2)\n" +
                 "By Jianlin Shi," +
                 "University of Utah School of Medicine,\n" +
                 "Biomedical Informatics");
