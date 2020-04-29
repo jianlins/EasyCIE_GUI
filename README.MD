@@ -13,4 +13,12 @@ EasyCIE(Easy Clinical Information Extractor) is a rule-based clinical informatio
 ### Additional developed rule sets
 https://github.com/jianlins/EasyCIE_Hub
 
- 
+### Citation
+If you are using EasyCIE for your research work and plan to publish, please consider cite one of the following publications where you consider as most fit:
+1.	Jianlin Shi, Siru Liu, Liese C.C. Pruitt, etc. Using natural language processing to improve EHR structured databased surgical site infection surveillance. AIMA symposium 2019, Washington D.C
+2.	Jianlin Shi, Kensaku Kawamoto, Wendy Kohlmann, etc. Extracting disease onset from family history comments in the electronic health record using Fast Healthcare Interoperability Resources. AIMA symposium 2019, Washington D.C.
+3. Jianlin Shi, Jianyin Shao, Kevin Graves, etc. A generic rule-based pipeline for patient cohort identification. AMIA Pre-Symposium n2c2 challenge workshop. 2018 San Francisco.
+4. Jianlin Shi, John F. Hurdle. Trie-based rule processing for clinical NLP: A use-case study of n-trie, making the ConText algorithm more efficient and scalable. J Biomed Inform 2018. 85:106–13. 
+5. Jianlin Shi, Danielle L. Mowery D, Mingyuan Zhang, et al. Extracting Intrauterine Device Usage from Clinical Texts Using Natural Language Processing. In: 2017 IEEE International Conference on Healthcare Informatics (ICHI). 2017. 568–71.
+6. Brian T. Bucher, Jianlin Shi, Jeffrey P Ferraro, et al. Portable Automated Surveillance of Surgical Site Infections Using Natural Language Processing: Development and Validation. (has been accepted to AMERICAN SURGICAL ASSOCIATION annual conference, the journal paper is currently under review)
+
