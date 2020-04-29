@@ -20,5 +20,5 @@ If you are using EasyCIE for your research work and plan to publish, please cons
 3. Jianlin Shi, Jianyin Shao, Kevin Graves, etc. A generic rule-based pipeline for patient cohort identification. AMIA Pre-Symposium n2c2 challenge workshop. 2018 San Francisco.
 4. Jianlin Shi, John F. Hurdle. Trie-based rule processing for clinical NLP: A use-case study of n-trie, making the ConText algorithm more efficient and scalable. J Biomed Inform 2018. 85:106–13. 
 5. Jianlin Shi, Danielle L. Mowery D, Mingyuan Zhang, et al. Extracting Intrauterine Device Usage from Clinical Texts Using Natural Language Processing. In: 2017 IEEE International Conference on Healthcare Informatics (ICHI). 2017. 568–71.
-6. Brian T. Bucher, Jianlin Shi, Jeffrey P Ferraro, et al. Portable Automated Surveillance of Surgical Site Infections Using Natural Language Processing: Development and Validation. (has been accepted to AMERICAN SURGICAL ASSOCIATION annual conference, the journal paper is currently under review)
+6. Brian T. Bucher, Jianlin Shi, Jeffrey P Ferraro, et al. Portable Automated Surveillance of Surgical Site Infections Using Natural Language Processing: Development and Validation. (has been accepted to AMERICAN SURGICAL ASSOCIATION 140th Annual Meeting 2020, and the journal paper is currently under review)
 
