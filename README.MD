@@ -9,4 +9,8 @@ EasyCIE(Easy Clinical Information Extractor) is a rule-based clinical informatio
 ### TODO
 1. Add a menu to allow import a CPE descriptor and set up a default element in the project configuraiton xml.
 1. Add a menu to allow import an AE descriptor directory and set up a default element in the project configuraiton xml.
+
+### Additional developed rule sets
+https://github.com/jianlins/EasyCIE_Hub
+
  
