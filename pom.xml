@@ -17,7 +17,7 @@
     </properties>
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.3-SNAPSHOT</version>
     <name>EasyCIE Project</name>
     <url>https://github.com/jianlins/EasyCIE_GUI</url>
     <description>The library of EasyCIE.</description>
@@ -178,20 +178,20 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-gpg-plugin</artifactId>-->
+<!--                <version>1.6</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>sign-artifacts</id>-->
+<!--                        <phase>verify</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>sign</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
 
 <!--            <plugin>-->
 <!--                <groupId>org.apache.maven.plugins</groupId>-->
@@ -230,20 +230,33 @@
                 <version>1.6</version>
                 <executions>
                     <execution>
-                        <id>update-version-in-gui</id>
+                        <id>default-feature-install</id>
                         <phase>validate</phase>
                         <configuration>
                             <target>
-                                <exec executable="bash">
-                                    <arg value="script/update_version_in_src.sh"/>
-                                    <arg value="${current.version}"/>
-                                </exec>
+                                <replaceregexp file="src/main/java/edu/utah/bmi/simple/gui/controller/RootLayoutController.java"
+                                               match="\(version [^\)]+\)" replace="\(version ${current.version}\)" byline="true"/>
                             </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
                         </goals>
                     </execution>
+<!--                    <execution>-->
+<!--                        <id>update-version-in-gui</id>-->
+<!--                        <phase>validate</phase>-->
+<!--                        <configuration>-->
+<!--                            <target>-->
+<!--                                <exec executable="bash">-->
+<!--                                    <arg value="script/update_version_in_src.sh"/>-->
+<!--                                    <arg value="${current.version}"/>-->
+<!--                                </exec>-->
+<!--                            </target>-->
+<!--                        </configuration>-->
+<!--                        <goals>-->
+<!--                            <goal>run</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
                     <execution>
                         <id>compile-jfx</id>
                         <phase>compile</phase>
@@ -443,24 +456,24 @@
             </plugin>
         </plugins>
     </build>
-<!--    <profiles>-->
-<!--        <profile>-->
-<!--            <id>allow-snapshots</id>-->
-<!--            <activation>-->
-<!--                <activeByDefault>true</activeByDefault>-->
-<!--            </activation>-->
-<!--            <repositories>-->
-<!--                <repository>-->
-<!--                    <id>snapshots-repo</id>-->
-<!--                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
-<!--                    <releases>-->
-<!--                        <enabled>false</enabled>-->
-<!--                    </releases>-->
-<!--                    <snapshots>-->
-<!--                        <enabled>true</enabled>-->
-<!--                    </snapshots>-->
-<!--                </repository>-->
-<!--            </repositories>-->
-<!--        </profile>-->
-<!--    </profiles>-->
+    <profiles>
+        <profile>
+            <id>allow-snapshots</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>snapshots-repo</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
 </project>

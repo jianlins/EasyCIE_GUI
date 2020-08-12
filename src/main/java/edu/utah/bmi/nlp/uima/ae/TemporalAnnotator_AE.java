@@ -328,16 +328,15 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
         return date;
     }
 
-
     /**
      * For parse date mentions and save as annotations.
      *
      * @param jcas       JCas object
+     * @param seg  segment boundary
      * @param dates      List of date spans grouped by types
      * @param recordDate document record date
      * @return a list of date mention annotations
-     */
-    protected ArrayList<Annotation> parseDateMentions(JCas jcas, Annotation seg, HashMap<String, ArrayList<Span>> dates,
+     */ ArrayList<Annotation> parseDateMentions(JCas jcas, Annotation seg, HashMap<String, ArrayList<Span>> dates,
                                                       DateTime recordDate) {
         String text;
         int offset;

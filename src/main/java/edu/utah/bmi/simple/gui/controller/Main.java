@@ -87,7 +87,7 @@ public class Main extends Application {
         String configFile = getLastConfigFile();
         currentConfigFile = new File(configFile);
         if (currentConfigFile.exists()) {
-            this.primaryStage.setTitle("EasyCIE(__" + currentConfigFile.getName() + "__)");
+            this.primaryStage.setTitle("EasyCIE(__"+currentConfigFile.getParentFile().getName()+"/" + currentConfigFile.getName() + "__)");
             refreshSettings();
         }
     }
@@ -119,7 +119,7 @@ public class Main extends Application {
             File file = fileChooser.showOpenDialog(null);
             if (file != null) {
                 currentConfigFile = file;
-                primaryStage.setTitle("EasyCIE(__" + file.getName() + "__)");
+                this.primaryStage.setTitle("EasyCIE(__"+currentConfigFile.getParentFile().getName()+"/" + currentConfigFile.getName() + "__)");
 
                 refreshSettings();
                 saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()) + "\n" + currentTaskName);
@@ -141,7 +141,7 @@ public class Main extends Application {
             File file = new File("conf/" + projectName + "/" + projectName + "_config.xml");
             if (file != null && file.exists()) {
                 currentConfigFile = file;
-                primaryStage.setTitle("EasyCIE(__" + file.getName() + "__)");
+                this.primaryStage.setTitle("EasyCIE(__"+currentConfigFile.getParentFile().getName()+"/" + currentConfigFile.getName() + "__)");
 
                 refreshSettings();
                 saveOpenLog(getRelativePath(currentConfigFile.getAbsolutePath()) + "\n" + currentTaskName);

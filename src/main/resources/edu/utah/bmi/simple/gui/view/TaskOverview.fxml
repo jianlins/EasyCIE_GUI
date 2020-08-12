@@ -18,9 +18,9 @@
     <stylesheets>
         <URL value="@panel.css" />
     </stylesheets>
-    <SplitPane dividerPositions="0.15" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <SplitPane dividerPositions="0.1" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
-            <AnchorPane maxWidth="400.0">
+            <AnchorPane maxWidth="160.0" prefWidth="70.0"  minWidth="60.0">
                 <children>
                     <TableView fx:id="tasklist" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <columns>
