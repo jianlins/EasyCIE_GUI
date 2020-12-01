@@ -1,23 +1,23 @@
 package edu.utah.bmi.nlp.easycie.reader;
 
+import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.easycie.MetaDataCommonFunctions;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
-import org.apache.uima.UIMA_IllegalArgumentException;
+import org.apache.uima.UimaContext;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.collection.CollectionException;
-import org.apache.uima.collection.CollectionReader_ImplBase;
 import org.apache.uima.examples.SourceDocumentInformation;
+import org.apache.uima.fit.component.CasCollectionReader_ImplBase;
+import org.apache.uima.fit.descriptor.ConfigurationParameter;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.util.Progress;
 import org.apache.uima.util.ProgressImpl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -25,64 +25,61 @@ import java.util.logging.Logger;
  *
  * @author Jianlin Shi on 5/20/16.
  */
-public class SQLTextReader extends CollectionReader_ImplBase {
-    public static Logger logger = Logger.getLogger(SQLTextReader.class.getCanonicalName());
+public class SQLTextReader extends CasCollectionReader_ImplBase {
+    public static Logger logger = IOUtil.getLogger(SQLTextReader.class);
+
     public static final String PARAM_DB_CONFIG_FILE = "DBConfigFile";
-    public static final String PARAM_DOC_TABLE_NAME = "DocTableName";
+    @ConfigurationParameter(name = PARAM_DB_CONFIG_FILE, mandatory = true,
+            description = "The db configuration file path.")
+    protected String dbConfigFilePath;
+
     public static final String PARAM_QUERY_SQL_NAME = "InputQueryName";
+    @ConfigurationParameter(name = PARAM_QUERY_SQL_NAME, mandatory = false, defaultValue = "masterInputQuery",
+            description = "The sql query name for querying input documents, default is 'masterInputQuery.'")
+    protected String querySqlName;
+
     public static final String PARAM_COUNT_SQL_NAME = "CountQueryName";
+    @ConfigurationParameter(name = PARAM_COUNT_SQL_NAME, mandatory = false, defaultValue = "masterCountQuery",
+            description = "The sql query name for querying the total number of input documents, defaul is 'masterCountQuery.'")
+    protected String countSqlName;
+
+    public static final String PARAM_DOC_TABLE_NAME = "DocTableName";
+    @ConfigurationParameter(name = PARAM_DOC_TABLE_NAME, mandatory = false, defaultValue = "DOCUMENTS",
+            description = "The document table name, default is 'DOCUMENTS.'")
+    protected String docTableName;
+
     public static final String PARAM_DOC_COLUMN_NAME = "DocColumnName";
+    @ConfigurationParameter(name = PARAM_DOC_COLUMN_NAME, mandatory = false, defaultValue = "TEXT",
+            description = "The name of the column that hold the input document text, default is 'TEXT.'")
+    protected String docColumnName;
+
     public static final String PARMA_TRIM_TEXT = "TrimText";
+    @ConfigurationParameter(name = PARMA_TRIM_TEXT, mandatory = false, defaultValue = "false",
+            description = "Whether to trim document text, default is 'false.'")
+    protected boolean trimText;
+
     public static final String PARAM_DATASET_ID = "DatasetId";
+    @ConfigurationParameter(name = PARAM_DATASET_ID, mandatory = false, defaultValue = "0",
+            description = "The dataset id (when multiple dataset is stored in the input table), default is '0.'")
+    protected String datasetId;
+
     protected File dbConfigFile;
-    protected String querySqlName, countSqlName, docColumnName, docTableName;
     public static EDAO dao = null;
     protected int mCurrentIndex, totalDocs;
     protected RecordRowIterator recordIterator;
     @Deprecated
     public static boolean debug = false;
-    public boolean trimText = false;
-    protected String datasetId;
 
 
-    public void initialize() {
+    public void initialize(UimaContext cont) {
         readConfigurations();
         this.mCurrentIndex = 0;
         addDocs();
     }
 
     protected void readConfigurations() {
-        if (System.getProperty("java.util.logging.config.file") == null &&
-                new File("logging.properties").exists()) {
-            System.setProperty("java.util.logging.config.file", "logging.properties");
-        }
-        try {
-            LogManager.getLogManager().readConfiguration();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        dbConfigFile = new File(readConfigureString(PARAM_DB_CONFIG_FILE, null));
+        dbConfigFile = new File(dbConfigFilePath);
         dao = EDAO.getInstance(this.dbConfigFile);
-        querySqlName = readConfigureString(PARAM_QUERY_SQL_NAME, "masterInputQuery");
-        countSqlName = readConfigureString(PARAM_COUNT_SQL_NAME, "masterCountQuery");
-        docColumnName = readConfigureString(PARAM_DOC_COLUMN_NAME, "TEXT");
-        docTableName = readConfigureString(PARAM_DOC_TABLE_NAME, "DOCUMENTS");
-        datasetId = readConfigureString(PARAM_DATASET_ID, "0");
-        Object value = this.getConfigParameterValue(PARMA_TRIM_TEXT);
-        if (value != null && value instanceof Boolean)
-            trimText = (Boolean) value;
-    }
-
-    protected String readConfigureString(String parameterName, String defaultValue) {
-        Object tmpObj = this.getConfigParameterValue(parameterName);
-        if (tmpObj == null) {
-            if (defaultValue == null) {
-                throw new UIMA_IllegalArgumentException("parameter not set", new Object[]{parameterName, this.getMetaData().getName()});
-            } else {
-                tmpObj = defaultValue;
-            }
-        }
-        return (tmpObj + "").trim();
     }
 
     protected void addDocs() {

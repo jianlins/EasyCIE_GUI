@@ -10,6 +10,7 @@ import org.apache.uima.cas.CASException;
 import org.apache.uima.collection.CollectionException;
 import org.apache.uima.collection.CollectionReader_ImplBase;
 import org.apache.uima.examples.SourceDocumentInformation;
+import org.apache.uima.fit.descriptor.ConfigurationParameter;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.util.Progress;
 import org.apache.uima.util.ProgressImpl;
@@ -30,46 +31,31 @@ public class SQLMetaTextReader extends SQLTextReader {
     public static Logger logger = Logger.getLogger(SQLMetaTextReader.class.getCanonicalName());
 
     public static final String PARAM_META_COLUMNS = "MetaColumns";
+    @ConfigurationParameter(name = PARAM_META_COLUMNS, mandatory = false, defaultValue = "",
+            description = "The column names of meta data.")
+    protected String metaColumnString;
+
     public static final String PARAM_APPEND_POS = "AppendPosition";
+
     public static final String PARAM_DECORATOR = "Decorator";
+    @ConfigurationParameter(name = PARAM_DECORATOR, mandatory = false, defaultValue = "{{,}}",
+            description = "The column names of meta data.")
+    protected String decoratorString;
+
+
     protected String appendPos = "prefix";
     protected ArrayList<String> metaColumns = new ArrayList<>();
     protected String[] decorator = new String[]{"{{", "}}"};
 
-    public void initialize() {
-        readConfigurations();
-        this.mCurrentIndex = 0;
-        addDocs();
-    }
-
     protected void readConfigurations() {
-        if (System.getProperty("java.util.logging.config.file") == null &&
-                new File("logging.properties").exists()) {
-            System.setProperty("java.util.logging.config.file", "logging.properties");
-        }
-        try {
-            LogManager.getLogManager().readConfiguration();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        dbConfigFile = new File(readConfigureString(PARAM_DB_CONFIG_FILE, null));
+        dbConfigFile = new File(dbConfigFilePath);
         dao = EDAO.getInstance(this.dbConfigFile);
-        querySqlName = readConfigureString(PARAM_QUERY_SQL_NAME, "masterInputQuery");
-        countSqlName = readConfigureString(PARAM_COUNT_SQL_NAME, "masterCountQuery");
-        docColumnName = readConfigureString(PARAM_DOC_COLUMN_NAME, "TEXT");
-        docTableName = readConfigureString(PARAM_DOC_TABLE_NAME, "DOCUMENTS");
-        datasetId = readConfigureString(PARAM_DATASET_ID, "0");
-        String metaColumnString = readConfigureString(PARAM_META_COLUMNS, "");
         for (String column : metaColumnString.split("[,; :]"))
             metaColumns.add(column.trim());
-        String decoratorString = readConfigureString(PARAM_DECORATOR, "{{,}}");
         decorator = decoratorString.split("[,; :]");
         if (decorator.length < 2) {
             decorator = new String[]{"{{", "}}"};
         }
-        Object value = this.getConfigParameterValue(PARMA_TRIM_TEXT);
-        if (value != null && value instanceof Boolean)
-            trimText = (Boolean) value;
     }
 
 

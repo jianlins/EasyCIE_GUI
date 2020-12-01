@@ -12,12 +12,17 @@ import edu.utah.bmi.nlp.easycie.reader.EhostReader;
 import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
 import edu.utah.bmi.nlp.uima.BunchMixInferenceWriter;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
-import edu.utah.bmi.simple.gui.controller.TasksOverviewController;
 import edu.utah.bmi.simple.gui.core.CommonFunc;
+import edu.utah.bmi.simple.gui.entry.SettingAb;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.comparator.NameFileComparator;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,17 +30,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
-
-import org.apache.commons.io.comparator.NameFileComparator;
-import org.apache.uima.collection.CollectionProcessingEngine;
-import org.apache.uima.collection.base_cpm.BaseCollectionReader;
-import org.apache.uima.collection.impl.CollectionProcessingEngine_impl;
-import org.apache.uima.fit.factory.CollectionReaderFactory;
-import org.apache.uima.resource.ResourceInitializationException;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -47,13 +43,18 @@ public class Import extends GUITask {
     protected EDAO dao;
     protected boolean print = true;
 
-    protected String inputPath, dbConfigFile, importDocTable, referenceTable, overWriteAnnotatorName, datasetId, rushRule;
+    protected String inputPath, dbConfigFile, importDocTable, referenceTable, overWriteAnnotatorName, datasetId, rushRule, convertTypeConfig;
     protected File inputDir;
     protected boolean overwrite = false, initSuccess = false;
     protected String includeTypes;
     protected char corpusType;
-    protected AdaptableCPEDescriptorRunner runner;
     private boolean report;
+    protected AdaptableCPEDescriptorRunner runner;
+    private String metaregex;
+    private Pattern namePattern;
+    private int bunch_id = -1, doc_id = -1, adm_dtm = -1, doc_dtm = -1;
+    private LinkedHashMap<String, Integer> metaPos = new LinkedHashMap<>();
+
 
     protected Import() {
 
@@ -76,12 +77,35 @@ public class Import extends GUITask {
 
         String annotationDir = config.getValue(ConfigKeys.annotationDir);
         String includeAnnotationTypes = config.getValue(ConfigKeys.includeAnnotationTypes);
+        convertTypeConfig = config.getValue("annotations/convertTypeConfig");
         overWriteAnnotatorName = config.getValue(ConfigKeys.overWriteAnnotatorName);
         String enableSentenceSegValue = config.getValue(ConfigKeys.enableSentenceSnippet);
         boolean enableSentenceSeg = enableSentenceSegValue.length() > 0 && (config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 't'
                 || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == 'T'
                 || config.getValue(ConfigKeys.enableSentenceSnippet).charAt(0) == '1');
 
+        metaregex = config.getValue("annotations/metaregex").trim();
+        if (metaregex.length() > 0) {
+            namePattern = Pattern.compile(metaregex);
+            LinkedHashMap<String, SettingAb> metadata = config.getChildSettings("annotations/metas");
+            for (String metaName : metadata.keySet()) {
+                metaPos.put(metaName, Integer.parseInt(metadata.get(metaName).getSettingValue().trim()));
+            }
+//            String value = config.getValue("annotations/bunch_id").trim();
+//            if (value.length() > 0)
+//                bunch_id = Integer.parseInt(value);
+//            value = config.getValue("annotations/adm_dtm").trim();
+//            if (value.length() > 0)
+//                adm_dtm = Integer.parseInt(value);
+//            value = config.getValue("annotations/doc_id").trim();
+//            if (value.length() > 0)
+//                doc_id = Integer.parseInt(value);
+//            value = config.getValue("annotations/doc_dtm").trim();
+//            if (value.length() > 0)
+//                doc_dtm = Integer.parseInt(value);
+
+
+        }
         importDocTable = settingConfig.getValue(ConfigKeys.inputTableName);
         referenceTable = settingConfig.getValue(ConfigKeys.referenceTable);
         if (importType.equals(ConfigKeys.paraTxtType)) {
@@ -115,6 +139,7 @@ public class Import extends GUITask {
             initSuccess = false;
             return;
         }
+        System.out.println(dbconfig.getAbsolutePath()+"\t"+dbconfig.exists());
         dao = EDAO.getInstance(dbconfig, true, false);
 
         initSuccess = true;
@@ -136,13 +161,7 @@ public class Import extends GUITask {
                     if (overWriteAnnotatorName.length() == 0)
                         overWriteAnnotatorName = "brat_import";
                     importBrat(inputDir, datasetId, overWriteAnnotatorName, referenceTable, rushRule, includeTypes, overwrite);
-                    Platform.runLater(() -> {
-                        TasksOverviewController tasksOverviewController = TasksOverviewController.currentTasksOverviewController;
-                        new ViewOutputDB(tasksOverviewController.mainApp.tasks, overWriteAnnotatorName).run();
-                        updateGUIProgress(1, 1);
-                        updateGUIMessage("Import annotation complete.");
-
-                    });
+                    runner.run();
                     break;
                 case ehost:
                     if (overWriteAnnotatorName.length() == 0)
@@ -211,11 +230,30 @@ public class Import extends GUITask {
         for (File file : fileArray) {
             if (print)
                 System.out.print("Import: " + file.getName() + "\t\t");
+            String fileName = file.getName();
             String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             ArrayList<RecordRow> records = new ArrayList<>();
-            RecordRow recordRow = new RecordRow().addCell("DATASET_ID", datasetId)
-                    .addCell("DOC_NAME", file.getName())
-                    .addCell("TEXT", content);
+            RecordRow recordRow = new RecordRow();
+            if (namePattern != null) {
+                Matcher matches = namePattern.matcher(fileName);
+                if (matches.find())
+                    recordRow = new RecordRow().addCell("DATASET_ID", datasetId);
+                for (String metaName : metaPos.keySet()) {
+                    int pos = metaPos.get(metaName);
+                    String value=matches.group(pos);
+                    String metaNameLower=metaName.toLowerCase().substring(metaName.length()-4);
+                    if (metaNameLower.equals("date") || metaNameLower.endsWith("dtm")){
+                        if (!value.endsWith("00:00:00"))
+                            value=value+ " 00:00:00";
+                    }
+                    recordRow.addCell(metaName, value);
+                    recordRow.addCell("TEXT",content);
+                }
+            } else {
+                recordRow.addCell("DATASET_ID", datasetId)
+                        .addCell("DOC_NAME", file.getName())
+                        .addCell("TEXT", content);
+            }
 
 //          specifically deal with n2c2 data
             if (content.startsWith("Record date:")) {
@@ -235,7 +273,7 @@ public class Import extends GUITask {
         System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
     }
 
-
+//  TODO need to remove this from uima pipeline to speed up initiation and avoid type conflicts.
     protected void importEhost(File inputDir, String datasetId, String annotator, String tableName,
                                String rush, String includeTypes, boolean overWrite) {
         if (overWrite)

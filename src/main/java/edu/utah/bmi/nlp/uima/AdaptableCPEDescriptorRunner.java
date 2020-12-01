@@ -998,6 +998,10 @@ public class AdaptableCPEDescriptorRunner implements StatusSetable {
                         ChildUimaContext_impl uimaContext_impl = (ChildUimaContext_impl) uimaContext;
                         for (Object configName : configurations.keySet()) {
                             Object value = configurations.get(configName);
+                            if (!configTypes.containsKey(configName)) {
+                                classLogger.info(String.format("Configure parameter %s is not available in processor %s", configName, processorName));
+                                continue;
+                            }
                             value = convertValueType(value, configTypes.get(configName));
                             uimaContext_impl.setSharedParam("/" + processorName + "/" + configName, value);
                             AnalysisComponent aeEngine = ae.getAnalysisComponent();
