@@ -1,6 +1,7 @@
 #Define which features will be assigned values in an annotation type (""""Concept"""" in this case)				
 @CONCEPT_FEATURES	DISEASE	Negation	Certainty	Temporality	Experiencer
 @CONCEPT_FEATURES	TREATMENT	Negation	Certainty	Temporality	Experiencer
+@CONCEPT_FEATURES	SYMPTOM	Negation	Certainty	Temporality	Experiencer
 
 #Define the values that a feature can have, the 1st value is the default value				
 #The following definitions will be used as an index for FastContext to find the corresponding Feature to assign the modifier				

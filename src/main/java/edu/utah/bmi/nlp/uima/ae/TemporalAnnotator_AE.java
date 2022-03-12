@@ -142,7 +142,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
         }
 //      default attribute is a string, parse it to an integer
         for (Integer ruleId : this.fastNER.fastRule.ruleStore.keySet()) {
-            NERRule rule = this.fastNER.fastRule.ruleStore.get(ruleId);
+            NERRule rule = (NERRule) this.fastNER.fastRule.ruleStore.get(ruleId);
             if (rule.attributes.size() > 0) {
                 rule.attributes.set(0, Integer.parseInt("" + rule.attributes.get(0)));
                 this.fastNER.fastRule.ruleStore.put(ruleId, rule);
@@ -236,7 +236,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
     }
 
     protected ArrayList<Annotation> indexSections(JCas jCas,
-                                                  HashSet<Class> includeSectionClasses,
+                                                  HashSet<Class<? extends Annotation>> includeSectionClasses,
                                                   IntervalST<Integer> sectionTree) {
         ArrayList<Annotation> sections = new ArrayList<>();
         for (Class sectionCls : includeSectionClasses) {
@@ -454,7 +454,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
                     break;
                 case "REL_DATE":
                     for (Span span : entry.getValue()) {
-                        NERRule rule = fastNER.getMatchedRuleString(span);
+                        NERRule rule = (NERRule) fastNER.getMatchedRuleString(span);
                         int unit = 0;
                         if (rule.attributes.size() > 0) {
                             unit = (int) rule.attributes.get(0);

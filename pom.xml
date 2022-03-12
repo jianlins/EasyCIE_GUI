@@ -6,7 +6,7 @@
 
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0</version>
     <properties>
         <!--for packaging jdk included version-->
         <!--<java.path>jdk1.8/bin/java</java.path>-->
@@ -14,7 +14,9 @@
         <!--for packaging without jdk version-->
         <java.path>java</java.path>
         <java.win.path>java</java.win.path>
-        <current.version>${version}</current.version>
+        <current.version>3.1.0</current.version>
+        <uimafitversion>2.5.0</uimafitversion>
+        <slf4j.version>1.7.36</slf4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <nlp.core.version>1.3.2.1-SNAPSHOT</nlp.core.version>
         <kotlin.version>1.4.10</kotlin.version>
@@ -72,9 +74,19 @@
             <version>1.1.6</version>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
             <artifactId>nlp-core</artifactId>
-            <version>${nlp.core.version}</version>
+            <version>1.3.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
@@ -84,7 +96,17 @@
         <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
             <artifactId>fastner</artifactId>
-            <version>${nlp.core.version}</version>
+            <version>1.3.3.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.17.2</version>
         </dependency>
         <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
@@ -251,28 +273,28 @@
                             <target>
                                 <replaceregexp
                                         file="src/main/java/edu/utah/bmi/simple/gui/controller/RootLayoutController.java"
-                                        match="\(version [^\)]+\)" replace="\(version ${version}\)" byline="true"/>
+                                        match="\(version [^\)]+\)" replace="\(version ${project.version}\)" byline="true"/>
                             </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
                         </goals>
                     </execution>
-                    <!--                    <execution>-->
-                    <!--                        <id>update-version-in-gui</id>-->
-                    <!--                        <phase>validate</phase>-->
-                    <!--                        <configuration>-->
-                    <!--                            <target>-->
-                    <!--                                <exec executable="bash">-->
-                    <!--                                    <arg value="script/update_version_in_src.sh"/>-->
-                    <!--                                    <arg value="${current.version}"/>-->
-                    <!--                                </exec>-->
-                    <!--                            </target>-->
-                    <!--                        </configuration>-->
-                    <!--                        <goals>-->
-                    <!--                            <goal>run</goal>-->
-                    <!--                        </goals>-->
-                    <!--                    </execution>-->
+                                        <execution>
+                                            <id>update-version-in-gui</id>
+                                            <phase>validate</phase>
+                                            <configuration>
+                                                <target>
+                                                    <exec executable="bash">
+                                                        <arg value="script/update_version_in_src.sh"/>
+                                                        <arg value="${current.version}"/>
+                                                    </exec>
+                                                </target>
+                                            </configuration>
+                                            <goals>
+                                                <goal>run</goal>
+                                            </goals>
+                                        </execution>
                     <execution>
                         <id>compile-jfx</id>
                         <phase>compile</phase>
@@ -299,7 +321,7 @@
                                 <copy todir="${project.build.directory}/deploy/licenses">
                                     <fileset dir="${project.basedir}/licenses"/>
                                 </copy>
-                                <copy file="${project.build.directory}/jfx/app/easycie-gui-${version}-jfx.jar"
+                                <copy file="${project.build.directory}/jfx/app/easycie-gui-${project.version}-jfx.jar"
                                       tofile="${project.build.directory}/deploy/easycie-gui.jar"/>
 
                                 <chmod file="${project.build.directory}/deploy/run_gui" perm="755"/>
@@ -314,7 +336,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.2.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -379,6 +401,21 @@
                                         <exclude>**/type/*_SQLTextReader.xml</exclude>
                                         <exclude>**/type/*_cpe__Type.xml</exclude>
                                     </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-demo-data</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/deploy/data/demo_input</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>data/demo_input</directory>
                                 </resource>
                             </resources>
                         </configuration>

@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.task;
 
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
-import org.apache.uima.tools.cpm.MyCpmFrame;
+//import org.apache.uima.tools.cpm.MyCpmFrame;
 
 public class TestCPEMain {
     public static void main(String[]args){

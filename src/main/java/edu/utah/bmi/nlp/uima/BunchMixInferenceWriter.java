@@ -204,7 +204,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
             runId = Integer.parseInt(previousRecordRow.getStrByColumnName("RUN_ID"));
         RecordRow recordRow = new RecordRow()
                 .addCell("RUN_ID", runId)
-                .addCell("DOC_NAME", previousRecordRow.getValueByColumnName(bunchColumnName))
+                .addCell(bunchColumnName, previousRecordRow.getValueByColumnName(bunchColumnName))
                 .addCell("TYPE", typeName)
                 .addCell("ANNOTATOR", annotator)
                 .addCell("BEGIN", 0)

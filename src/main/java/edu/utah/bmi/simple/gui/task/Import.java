@@ -273,7 +273,7 @@ public class Import extends GUITask {
         System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
     }
 
-//  TODO need to remove this from uima pipeline to speed up initiation and avoid type conflicts.
+    //  TODO need to remove this from uima pipeline to speed up initiation and avoid type conflicts.
     protected void importEhost(File inputDir, String datasetId, String annotator, String tableName,
                                String rush, String includeTypes, boolean overWrite) {
         if (overWrite)
