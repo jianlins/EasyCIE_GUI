@@ -120,7 +120,7 @@
   <debug>
     <log>
       <Section_Detector memo="display types of sections">SectionBody,SectionHeader</Section_Detector>
-      <RuSH memo="display types of RuSH (sentence segmentor and tokenizer) output"/>
+      <RuSH memo="display types of RuSH (sentence segmentor and tokenizer) output">Sentence</RuSH>
       <FastNER memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastNER>
       <FastContext memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastContext>
       <TemporalContext memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</TemporalContext>
@@ -190,7 +190,7 @@
       <compareTable memo="the table used to saved the annotations">DIFF</compareTable>
     </output>
     <debug>
-      <class>edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorStringDebugger</class>
+      <class>edu.utah.bmi.nlp.uima.GUICPEStringDebugger</class>
     </debug>
     <viewer>
       <bunchColumnName>BUNCH_ID</bunchColumnName>

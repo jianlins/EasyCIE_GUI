@@ -67,6 +67,14 @@
                 <multiValued>false</multiValued>
                 <mandatory>true</mandatory>
             </configurationParameter>
+            <configurationParameter>
+                <name>OverWriteTable</name>
+                <description>If table exists, whether clean the table at first
+                </description>
+                <type>Boolean</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
         </configurationParameters>
         <configurationParameterSettings>
             <nameValuePair>
@@ -109,6 +117,12 @@
                 <name>Version</name>
                 <value>
                     <string></string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>OverWriteTable</name>
+                <value>
+                    <boolean>false</boolean>
                 </value>
             </nameValuePair>
         </configurationParameterSettings>

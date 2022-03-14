@@ -37,6 +37,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
     public static final String PARAM_BUNCH_COLUMN_NAME = "BunchColumnName";
     public static final String PARAM_ANNOTATOR = DeterminantValueSet.PARAM_ANNOTATOR;
     public static final String PARAM_VERSION = DeterminantValueSet.PARAM_VERSION;
+    public static final String PARAM_OVERWRITETABLE = "OverWriteTable";
 
 
     public static String resultTableName, bunchColumnName;
@@ -58,6 +59,7 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
     protected RecordRow previousRecordRow = null;
     private String annotator;
     private int runId;
+    protected boolean overwriteTable = false;
 
 
     public void initialize(UimaContext cont) {
@@ -82,9 +84,14 @@ public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements R
             runId = Integer.parseInt((String) parameterObject);
         else
             runId = -2;
+        Object value = cont.getConfigParameterValue(PARAM_OVERWRITETABLE);
+        if (value instanceof Boolean)
+            this.overwriteTable = ((Boolean) value);
+        else
+            this.overwriteTable = value.toString().toLowerCase().startsWith("t");
         dao = EDAO.getInstance(new File(configFile));
 
-        dao.initiateTableFromTemplate("ANNOTATION_TABLE", resultTableName, false);
+        dao.initiateTableFromTemplate("ANNOTATION_TABLE", resultTableName, overwriteTable);
         BunchMixInferencer.parseRuleStr(inferenceStr, defaultBunchType, inferenceMap, typeCounter, ruleStore);
     }
 

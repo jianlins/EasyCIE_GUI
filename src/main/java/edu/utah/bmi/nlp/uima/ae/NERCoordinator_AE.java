@@ -2,6 +2,7 @@ package edu.utah.bmi.nlp.uima.ae;
 
 import edu.utah.bmi.nlp.core.*;
 import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
+import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
@@ -31,13 +32,9 @@ public class NERCoordinator_AE extends JCasAnnotator_ImplBase implements RuleBas
 		IOUtil ioUtil = new IOUtil(ruleStr, true);
 		for (ArrayList<String> row : ioUtil.getRuleCells()) {
 			if (row.size() > 1 && row.get(1).trim().length() > 0) {
-				String inclusionTypeName = DeterminantValueSet.checkNameSpace(row.get(1).trim());
-				try {
-					Class annoCls = Class.forName(inclusionTypeName).asSubclass(Annotation.class);
-					inclusions.add(annoCls);
-				} catch (ClassNotFoundException e) {
-					logger.fine(" NERCoordinator_AE rules contain undefined annotation type: " + row.get(1) + " at row " + row.get(0));
-				}
+				String inclusionTypeName = row.get(1).trim();
+				Class annoCls = AnnotationOper.getTypeClass(inclusionTypeName);
+				inclusions.add(annoCls);
 			}
 		}
 	}

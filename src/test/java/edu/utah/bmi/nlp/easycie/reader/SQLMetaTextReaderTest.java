@@ -1,6 +1,6 @@
 package edu.utah.bmi.nlp.easycie.reader;
 
-import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorGUIRunner;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.collection.CollectionReaderDescription;
@@ -14,10 +14,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class SQLMetaTextReaderTest {
-    private AdaptableCPEDescriptorRunner runner;
+    private AdaptableCPEDescriptorGUIRunner runner;
     private JCas jCas;
     private AnalysisEngine printer;
     private String typeDescriptor;
@@ -37,7 +35,7 @@ class SQLMetaTextReaderTest {
         }
 
 
-        runner = AdaptableCPEDescriptorRunner.getInstance("src/test/resources/desc/test_reader_cpe.xml", "test", "target/generated-test-sources/");
+        runner = AdaptableCPEDescriptorGUIRunner.getInstance("src/test/resources/desc/test_reader_cpe.xml", "test", "target/generated-test-sources/");
         runner.setUIMALogger(new ConsoleLogger());
     }
 

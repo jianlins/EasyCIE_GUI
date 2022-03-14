@@ -186,12 +186,8 @@ public class SQLWriterCasConsumer extends JCasAnnotator_ImplBase {
                     annotationGetFeatures.put(typeName, new LinkedHashMap<>());
                 Method getMethod = null;
                 if (!annotationGetFeatures.get(typeName).containsKey(featureName)) {
-                    try {
-                        getMethod = thisAnnotation.getClass().getMethod(AnnotationOper.inferGetMethodName(featureName));
-                        annotationGetFeatures.get(typeName).put(featureName, getMethod);
-                    } catch (NoSuchMethodException e) {
-                        e.printStackTrace();
-                    }
+                    getMethod = AnnotationOper.getFeatureMethod(AnnotationOper.getTypeClass("typeName"), featureName);
+                    annotationGetFeatures.get(typeName).put(featureName, getMethod);
                 } else {
                     getMethod = annotationGetFeatures.get(typeName).get(featureName);
                 }

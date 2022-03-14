@@ -22,9 +22,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.config.DefaultConfiguration;
+//import org.apache.log4j.BasicConfigurator;
 
 import java.awt.*;
 import java.io.File;
@@ -60,8 +58,7 @@ public class Main extends Application {
     private static String conf = "conf/config.xml";
 
     public static void main(String[] args) {
-        Configurator.initialize(new DefaultConfiguration());
-        Configurator.setRootLevel(Level.WARN);
+//        BasicConfigurator.configure();
         if (args.length > 0) {
             logFile = new File(args[0]);
         }
@@ -369,4 +366,5 @@ public class Main extends Application {
         return tasks.getTaskId(currentTaskName);
     }
 }
+
 

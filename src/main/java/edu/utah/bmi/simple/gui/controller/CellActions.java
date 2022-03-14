@@ -1,19 +1,16 @@
 package edu.utah.bmi.simple.gui.controller;
 
-import edu.utah.bmi.nlp.easycie.EhostExporter;
 import edu.utah.bmi.nlp.easycie.EhostLoggerExporter;
 import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorStringDebugger;
+import edu.utah.bmi.nlp.uima.GUICPEStringDebugger;
 import edu.utah.bmi.nlp.uima.Processable;
 import edu.utah.bmi.simple.gui.core.AnnotationLogger;
 import edu.utah.bmi.simple.gui.doubleclick.OpenEhost;
 import edu.utah.bmi.simple.gui.entry.StaticVariables;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -60,7 +57,7 @@ public class CellActions {
                         "SNIPPET", "BEGIN", "END", "SNIPPET_BEGIN");
                 debugRunner.showResults();
             } else {
-                AdaptableCPEDescriptorStringDebugger.classLogger.warning("Class not found: " + clsName);
+                GUICPEStringDebugger.classLogger.warning("Class not found: " + clsName);
             }
         }).start();
     }
@@ -116,7 +113,7 @@ public class CellActions {
                 exporter.export(outputs,content);
                 new OpenEhost(tasks, outputs.get(0).getStrByColumnName("ID") + ".txt").run();
             } else {
-                AdaptableCPEDescriptorStringDebugger.classLogger.warning("Class not found: " + clsName);
+                GUICPEStringDebugger.classLogger.warning("Class not found: " + clsName);
             }
         }).start();
     }

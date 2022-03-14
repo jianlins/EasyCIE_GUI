@@ -1,15 +1,9 @@
 package edu.utah.bmi.nlp.easycie.reader;
 
-import edu.utah.bmi.nlp.type.system.EntityBASE;
-import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
-import edu.utah.bmi.nlp.uima.AdaptableUIMACPERunner;
-import edu.utah.bmi.nlp.uima.ae.AnnotationPrinter;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorGUIRunner;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
 import org.apache.uima.analysis_engine.AnalysisEngine;
-import org.apache.uima.analysis_engine.AnalysisEngineDescription;
-import org.apache.uima.analysis_engine.impl.AnalysisEngineDescription_impl;
 import org.apache.uima.collection.CollectionReaderDescription;
-import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
@@ -17,16 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngine;
-import static org.junit.jupiter.api.Assertions.*;
 
 class SQLTextReaderTest {
-    private AdaptableCPEDescriptorRunner runner;
+    private AdaptableCPEDescriptorGUIRunner runner;
     private JCas jCas;
     private AnalysisEngine printer;
     private String typeDescriptor;
@@ -46,7 +38,7 @@ class SQLTextReaderTest {
         }
 
 
-        runner = AdaptableCPEDescriptorRunner.getInstance("src/test/resources/desc/test_reader_cpe.xml", "test", "target/generated-test-sources/");
+        runner = AdaptableCPEDescriptorGUIRunner.getInstance("src/test/resources/desc/test_reader_cpe.xml", "test", "target/generated-test-sources/");
         runner.setUIMALogger(new ConsoleLogger());
     }
 

@@ -1,10 +1,12 @@
 package edu.utah.bmi.nlp.uima.ae;
 
+import edu.utah.bmi.nlp.core.AnnotationDefinition;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.core.TypeDefinition;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.type.system.Token;
+import edu.utah.bmi.nlp.uima.common.AnnotationOper;
 import edu.utah.bmi.nlp.uima.common.UIMATypeFunctions;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
@@ -56,9 +58,7 @@ public class MetaDataAnnotator extends JCasAnnotator_ImplBase implements RuleBas
 		ArrayList<ArrayList<Object>> rules = new ArrayList<>();
 		IOUtil ioUtil = new IOUtil(ruleStr, true);
 		typeDefinitions = getTypeDefs(ruleStr, ioUtil);
-		for (TypeDefinition typeDefinition : typeDefinitions.values()) {
-			buildConstructor(typeDefinition);
-		}
+
 
 		for (ArrayList<String> row : ioUtil.getRuleCells()) {
 			String conclusion = row.get(1).trim();
@@ -114,21 +114,7 @@ public class MetaDataAnnotator extends JCasAnnotator_ImplBase implements RuleBas
 		return conditions;
 	}
 
-	private void buildConstructor(TypeDefinition typeDefinition) {
-		Class docType;
-		try {
-			if (!docTypeConstructorMap.containsKey(typeDefinition.shortTypeName)) {
-				docType = Class.forName(typeDefinition.fullTypeName);
-				Constructor cc = docType.getConstructor(JCas.class, int.class, int.class);
-				docTypeConstructorMap.put(typeDefinition.shortTypeName, cc);
-			}
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		}
 
-	}
 
 
 	@Override
@@ -148,17 +134,9 @@ public class MetaDataAnnotator extends JCasAnnotator_ImplBase implements RuleBas
 
 	private void saveAnnotation(JCas aJCas, String typeName) {
 		Constructor<? extends Annotation> annoConstructor = docTypeConstructorMap.get(typeName);
+		Class<? extends Annotation> aCls = AnnotationOper.getTypeClass(typeName);
 		Token anno = JCasUtil.selectByIndex(aJCas, Token.class, 0);
-		try {
-			Annotation conclusionAnno = annoConstructor.newInstance(aJCas, anno.getBegin(), anno.getEnd());
-			conclusionAnno.addToIndexes();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		}
+		AnnotationOper.createAnnotation(aJCas, new AnnotationDefinition(typeDefinitions.get(typeName)), aCls, anno.getBegin(), anno.getEnd() );
 	}
 
 	private ArrayList<String> getAnnotationTypes(RecordRow baseRecordRow) {

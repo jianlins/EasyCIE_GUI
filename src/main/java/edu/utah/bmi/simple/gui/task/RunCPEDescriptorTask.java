@@ -5,21 +5,17 @@ import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.easycie.reader.SQLTextReader;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
-import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
-import edu.utah.bmi.nlp.uima.AdaptableUIMACPETaskJCasRunner;
+import edu.utah.bmi.nlp.uima.GUICPERunner;
 import edu.utah.bmi.nlp.uima.BunchMixInferenceWriter;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
-import edu.utah.bmi.nlp.uima.loggers.UIMALogger;
 import edu.utah.bmi.simple.gui.entry.SettingAb;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import javafx.scene.control.Button;
-import org.apache.uima.collection.impl.cpm.container.CPEFactory;
 
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -33,7 +29,7 @@ public class RunCPEDescriptorTask extends GUITask {
     protected String readerDBConfigFileName, writerDBConfigFileName, inputTableName, snippetResultTable, docResultTable, bunchResultTable,
             ehostDir, bratDir, xmiDir, annotator, datasetId;
     public boolean report = false;
-    public AdaptableCPEDescriptorRunner runner;
+    public GUICPERunner runner;
     protected LinkedHashMap<String, String> componentsSettings;
     private String cpeDescriptor;
     protected TasksFX tasks;
@@ -94,7 +90,7 @@ public class RunCPEDescriptorTask extends GUITask {
         bunchResultTable = config.getValue(ConfigKeys.bunchResultTableName);
         String pipelineName = new File(cpeDescriptor).getName();
         pipelineName = pipelineName.substring(0, pipelineName.length() - 4);
-        runner = AdaptableCPEDescriptorRunner.getInstance(cpeDescriptor, annotator, new NLPDBLogger(writerDBConfigFileName, annotator),
+        runner = GUICPERunner.getInstance(cpeDescriptor, annotator, new NLPDBLogger(writerDBConfigFileName, annotator),
                 componentsSettings, "desc/type/" + pipelineName + "_" + annotator + "_Type.xml", "classes");
         ((NLPDBLogger) runner.getLogger()).setReportable(report);
         ((NLPDBLogger) runner.getLogger()).setTask(this);
@@ -102,7 +98,7 @@ public class RunCPEDescriptorTask extends GUITask {
         updateWriterConfigurations(runner);
     }
 
-    protected void updateReaderConfigurations(AdaptableCPEDescriptorRunner runner) {
+    protected void updateReaderConfigurations(GUICPERunner runner) {
         runner.updateReadDescriptorsConfiguration(DeterminantValueSet.PARAM_DB_CONFIG_FILE, readerDBConfigFileName);
         runner.updateReadDescriptorsConfiguration(DeterminantValueSet.PARAM_ANNOTATOR, annotator);
         runner.updateReadDescriptorsConfiguration(SQLTextReader.PARAM_DATASET_ID, datasetId);
@@ -110,7 +106,7 @@ public class RunCPEDescriptorTask extends GUITask {
     }
 
 
-    protected void updateWriterConfigurations(AdaptableCPEDescriptorRunner runner) {
+    protected void updateWriterConfigurations(GUICPERunner runner) {
 //        if (CPEFactory.lastCpeDescriptorUrl.length() > 0 ||
 //                new File(CPEFactory.lastCpeDescriptorUrl).getAbsolutePath().equals(new File(cpeDescriptor).getAbsolutePath())) {
 //            for (int writerId : runner.getWriterIds().values()) {

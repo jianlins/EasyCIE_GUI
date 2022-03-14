@@ -3,13 +3,11 @@ package edu.utah.bmi.simple.gui.task;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
-import edu.utah.bmi.nlp.core.TestGUITask;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.easycie.reader.BratReader;
 import edu.utah.bmi.nlp.easycie.reader.EhostReader;
-import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorGUIRunner;
 import edu.utah.bmi.nlp.uima.BunchMixInferenceWriter;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import edu.utah.bmi.simple.gui.core.CommonFunc;
@@ -49,7 +47,7 @@ public class Import extends GUITask {
     protected String includeTypes;
     protected char corpusType;
     private boolean report;
-    protected AdaptableCPEDescriptorRunner runner;
+    protected AdaptableCPEDescriptorGUIRunner runner;
     private String metaregex;
     private Pattern namePattern;
     private int bunch_id = -1, doc_id = -1, adm_dtm = -1, doc_dtm = -1;
@@ -280,7 +278,7 @@ public class Import extends GUITask {
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", tableName, overWrite);
 
 
-        runner = new AdaptableCPEDescriptorRunner("desc/cpe/import_cpe.xml", annotator, new NLPDBLogger(dao.getConfigFile().getAbsolutePath(), annotator));
+        runner = new AdaptableCPEDescriptorGUIRunner("desc/cpe/import_cpe.xml", annotator, new NLPDBLogger(dao.getConfigFile().getAbsolutePath(), annotator));
         ((NLPDBLogger) runner.getLogger()).setReportable(report);
         ((NLPDBLogger) runner.getLogger()).setTask(this);
         for (int writerId : runner.getWriterIds().values()) {

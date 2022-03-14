@@ -6,7 +6,7 @@
 
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
-    <version>3.1.0</version>
+    <version>3.1.0-SNAPSHOT</version>
     <properties>
         <!--for packaging jdk included version-->
         <!--<java.path>jdk1.8/bin/java</java.path>-->
@@ -14,12 +14,11 @@
         <!--for packaging without jdk version-->
         <java.path>java</java.path>
         <java.win.path>java</java.win.path>
-        <current.version>3.1.0</current.version>
-        <uimafitversion>2.5.0</uimafitversion>
-        <slf4j.version>1.7.36</slf4j.version>
+        <current.version>3.1.0-SNAPSHOT</current.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <nlp.core.version>1.3.2.1-SNAPSHOT</nlp.core.version>
+        <nlp.core.version>1.4.1.5-jdk1.8</nlp.core.version>
         <kotlin.version>1.4.10</kotlin.version>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <name>EasyCIE Project</name>
     <url>https://github.com/jianlins/EasyCIE_GUI</url>
@@ -74,50 +73,11 @@
             <version>1.1.6</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
-            <artifactId>nlp-core</artifactId>
-            <version>1.3.3.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.utah.bmi.nlp</groupId>
-            <artifactId>rush</artifactId>
+            <artifactId>easycie-console</artifactId>
             <version>${nlp.core.version}</version>
         </dependency>
-        <dependency>
-            <groupId>edu.utah.bmi.nlp</groupId>
-            <artifactId>fastner</artifactId>
-            <version>1.3.3.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.17.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.17.2</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.utah.bmi.nlp</groupId>
-            <artifactId>fastcontext</artifactId>
-            <version>${nlp.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.utah.bmi.nlp</groupId>
-            <artifactId>section-detector-r</artifactId>
-            <version>${nlp.core.version}</version>
-        </dependency>
+
         <!--<dependency>-->
         <!--<groupId>edu.utah.bmi.blulab</groupId>-->
         <!--<artifactId>domainontology</artifactId>-->
@@ -138,11 +98,6 @@
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-tools-ant</artifactId>
             <version>3.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.21.0.1</version>
         </dependency>
         <dependency>
             <groupId>ch.vorburger.mariaDB4j</groupId>
@@ -280,35 +235,35 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-                                        <execution>
-                                            <id>update-version-in-gui</id>
-                                            <phase>validate</phase>
-                                            <configuration>
-                                                <target>
-                                                    <exec executable="bash">
-                                                        <arg value="script/update_version_in_src.sh"/>
-                                                        <arg value="${current.version}"/>
-                                                    </exec>
-                                                </target>
-                                            </configuration>
-                                            <goals>
-                                                <goal>run</goal>
-                                            </goals>
-                                        </execution>
-                    <execution>
-                        <id>compile-jfx</id>
-                        <phase>compile</phase>
-                        <configuration>
-                            <target>
-                                <exec executable="bash">
-                                    <arg value="script/compile_jfx.sh"/>
-                                </exec>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
+                    <!--                    <execution>-->
+                    <!--                        <id>update-version-in-gui</id>-->
+                    <!--                        <phase>validate</phase>-->
+                    <!--                        <configuration>-->
+                    <!--                            <target>-->
+                    <!--                                <exec executable="bash">-->
+                    <!--                                    <arg value="script/update_version_in_src.sh"/>-->
+                    <!--                                    <arg value="${current.version}"/>-->
+                    <!--                                </exec>-->
+                    <!--                            </target>-->
+                    <!--                        </configuration>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>run</goal>-->
+                    <!--                        </goals>-->
+                    <!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>compile-jfx</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <configuration>-->
+<!--                            <target>-->
+<!--                                <exec executable="bash">-->
+<!--                                    <arg value="script/compile_jfx.sh"/>-->
+<!--                                </exec>-->
+<!--                            </target>-->
+<!--                        </configuration>-->
+<!--                        <goals>-->
+<!--                            <goal>run</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
                     <execution>
                         <id>reset_permission</id>
                         <phase>package</phase>
@@ -318,14 +273,17 @@
                                 <copy todir="${project.build.directory}/deploy/lib">
                                     <fileset dir="${project.basedir}/lib"/>
                                 </copy>
-                                <copy todir="${project.build.directory}/deploy/licenses">
-                                    <fileset dir="${project.basedir}/licenses"/>
+                                <copy todir="${project.build.directory}/deploy/lib">
+                                    <fileset dir="${project.basedir}/lib"/>
+                                </copy>
+                                <copy todir="${project.build.directory}/deploy/data/demo_input">
+                                    <fileset dir="${project.basedir}/data/demo_input"/>
                                 </copy>
                                 <copy file="${project.build.directory}/jfx/app/easycie-gui-${project.version}-jfx.jar"
                                       tofile="${project.build.directory}/deploy/easycie-gui.jar"/>
 
-                                <chmod file="${project.build.directory}/deploy/run_gui" perm="755"/>
-                                <chmod file="${project.build.directory}/deploy/run_gui.bat" perm="755"/>
+                                <chmod file="${project.build.directory}/deploy/run_gui" perm="775"/>
+                                <chmod file="${project.build.directory}/deploy/run_gui.bat" perm="775"/>
                             </target>
                         </configuration>
                         <goals>
@@ -336,7 +294,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.0.1</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -405,21 +363,6 @@
                             </resources>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>copy-demo-data</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/deploy/data/demo_input</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>data/demo_input</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
                     <!--<execution>-->
                     <!--<id>copy-input-data</id>-->
                     <!--<phase>package</phase>-->
@@ -460,7 +403,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>1.8</jvmTarget>
+                    <jvmTarget>${maven.compiler.target}</jvmTarget>
                 </configuration>
             </plugin>
             <plugin>
@@ -484,8 +427,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${maven.compiler.target}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -524,3 +467,4 @@
         </profile>
     </profiles>
 </project>
+

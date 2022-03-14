@@ -337,7 +337,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
      * @param recordDate document record date
      * @return a list of date mention annotations
      */ ArrayList<Annotation> parseDateMentions(JCas jcas, Annotation seg, HashMap<String, ArrayList<Span>> dates,
-                                                      DateTime recordDate) {
+                                                DateTime recordDate) {
         String text;
         int offset;
         if (cner) {

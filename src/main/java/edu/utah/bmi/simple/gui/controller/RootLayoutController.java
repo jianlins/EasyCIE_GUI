@@ -1,7 +1,7 @@
 package edu.utah.bmi.simple.gui.controller;
 
 import com.sun.javafx.application.HostServicesDelegate;
-import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
+import edu.utah.bmi.nlp.uima.GUICPERunner;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -80,7 +80,7 @@ public class RootLayoutController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("About EasyCIE");
         alert.setHeaderText("EasyCIE");
-        alert.setContentText("Easy Clinical Information Extractor (version 3.1.0)\n" +
+        alert.setContentText("Easy Clinical Information Extractor (version 3.1.0-SNAPSHOT)\n" +
                 "By Jianlin Shi," +
                 "University of Utah School of Medicine,\n" +
                 "Biomedical Informatics");
@@ -332,6 +332,6 @@ public class RootLayoutController {
 
     public void resetPipeline(ActionEvent actionEvent) {
         CPEFactory.reset();
-        AdaptableCPEDescriptorRunner.lastRunner = null;
+        GUICPERunner.lastRunner = null;
     }
 }

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
+import org.apache.uima.fit.factory.AnnotationFactory;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
@@ -73,9 +74,9 @@ public class RelationAnnotator extends JCasAnnotator_ImplBase implements RuleBas
                 String relationType = init.get(2);
                 relationDefs.put(relationType, new AnnotationDefinition(typeDefinitions.get(relationType)));
                 String[] srcTypeNames = init.get(4).split("[,:;]");
-                srcAnnoClassMap.put(srcTypeNames[0], AnnotationOper.getTypeClass(DeterminantValueSet.checkNameSpace(srcTypeNames[0])));
+                srcAnnoClassMap.put(srcTypeNames[0], AnnotationOper.getTypeClass(srcTypeNames[0]));
                 relationDefs.get(relationType).setFeatureValue(ARG1, srcTypeNames[0]);
-                srcAnnoClassMap.put(srcTypeNames[1], AnnotationOper.getTypeClass(DeterminantValueSet.checkNameSpace(srcTypeNames[1])));
+                srcAnnoClassMap.put(srcTypeNames[1], AnnotationOper.getTypeClass(srcTypeNames[1]));
                 relationDefs.get(relationType).setFeatureValue(ARG2, srcTypeNames[1]);
                 for (String featureValuePairStr : init.get(3).split("\\s*,\\s*")) {
                     String[] featureValuePair = featureValuePairStr.split("\\s*:\\s*");
@@ -467,11 +468,10 @@ public class RelationAnnotator extends JCasAnnotator_ImplBase implements RuleBas
 
     protected void addRelation(JCas jCas, int relationRuleId, Annotation ele1, Annotation ele2) {
         Class<? extends Annotation> relationCls = getAnnoClass(ruleStore.get(relationRuleId).ruleName);
-        Constructor<? extends Annotation> constructor = getConstructor(relationCls);
         try {
             int begin = ele1.getBegin() < ele2.getBegin() ? ele1.getBegin() : ele2.getBegin();
             int end = ele2.getEnd() > ele1.getEnd() ? ele2.getEnd() : ele1.getEnd();
-            Annotation anno = constructor.newInstance(jCas, begin, end);
+            Annotation anno = AnnotationFactory.createAnnotation(jCas, begin, end, relationCls);
             if (anno instanceof Relation) {
                 Relation relationAnno = (Relation) anno;
                 String relationTypeName = relationAnno.getType().getShortName();
@@ -493,17 +493,17 @@ public class RelationAnnotator extends JCasAnnotator_ImplBase implements RuleBas
                                 Class<? extends Annotation> srcCls = srcAnnoClassMap.get(value);
                                 Method getMethod = this.evidenceConceptGetFeatures.get(value).get(featureName);
                                 Object featureValue = getMethod.invoke(args.get(value));
-                                AnnotationOper.setFeatureValue(conclusionConceptSetFeatures.get(relationAnno.getClass()).get(featureName), relationAnno, featureValue == null ? null : featureValue.toString());
+                                AnnotationOper.setFeatureValue(featureName, relationAnno, featureValue == null ? null : featureValue.toString());
+//                                AnnotationOper.setFeatureValue(conclusionConceptSetFeatures.get(relationAnno.getClass()).get(featureName), relationAnno, featureValue == null ? null : featureValue.toString());
                             } else {
-                                AnnotationOper.setFeatureValue(conclusionConceptSetFeatures.get(relationAnno.getClass()).get(featureName), relationAnno, value);
+                                AnnotationOper.setFeatureValue(featureName, relationAnno, value);
+//                                AnnotationOper.setFeatureValue(conclusionConceptSetFeatures.get(relationAnno.getClass()).get(featureName), relationAnno, value);
                             }
                             break;
                     }
                 }
                 relationAnno.addToIndexes();
             }
-        } catch (InstantiationException e) {
-            e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {

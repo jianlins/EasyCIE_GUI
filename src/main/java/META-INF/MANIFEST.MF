@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: edu.utah.bmi.simple.gui.controller.Main
-

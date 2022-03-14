@@ -21,8 +21,6 @@ import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
-import edu.utah.bmi.nlp.rush.core.RuSH;
-import edu.utah.bmi.nlp.rush.uima.RuSH_AE;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.uima.ae.RuleBasedAEInf;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
@@ -48,32 +46,31 @@ import org.apache.uima.resource.ResourceInitializationException;
 
 import java.io.File;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * @author Jianlin Shi
  * Created on 7/9/17.
  */
-public class AdaptableCPEDescriptorStringDebugger implements Processable, StatusSetable {
-    public static Logger classLogger = IOUtil.getLogger(AdaptableCPEDescriptorStringDebugger.class);
-    protected AdaptableCPEDescriptorRunner runner;
-    public static HashMap<String, AdaptableCPEDescriptorStringDebugger> debuggers = new HashMap<>();
+public class GUICPEStringDebugger implements Processable, StatusSetable {
+    public static Logger classLogger = IOUtil.getLogger(GUICPEStringDebugger.class);
+    protected GUICPERunner runner;
+    public static HashMap<String, GUICPEStringDebugger> debuggers = new HashMap<>();
     protected ArrayList<AnalysisEngine> aes = new ArrayList<>();
     protected ArrayList<AnalysisEngine> logAes = new ArrayList<>();
     protected HashMap<String, String> logTypes = new HashMap<>();
     private JCas jCas;
     private GUITask guiTask;
 
-    protected AdaptableCPEDescriptorStringDebugger() {
+    protected GUICPEStringDebugger() {
 
     }
 
 
-    public static AdaptableCPEDescriptorStringDebugger getInstance(TasksFX tasks) {
+    public static GUICPEStringDebugger getInstance(TasksFX tasks) {
         TaskFX config = tasks.getTask(ConfigKeys.maintask);
         String cpeDescriptor = config.getValue("pipeLineSetting/CpeDescriptor");
-        LinkedHashMap<String, String> componentsSettings = AdaptableCPEDescriptorRunner.readPipelineConfigurations(config.getChildSettings("pipeLineSetting"));
+        LinkedHashMap<String, String> componentsSettings = GUICPERunner.readGUIPipelineConfigurations(config.getChildSettings("pipeLineSetting"));
         String annotator = config.getValue(ConfigKeys.annotator);
 
         config = tasks.getTask("debug");
@@ -95,7 +92,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
      * @return an instance of AdaptableCPEDescriptorRunner
      */
 
-    public static AdaptableCPEDescriptorStringDebugger getInstance(String cpeDescriptor, String annotator, String... options) {
+    public static GUICPEStringDebugger getInstance(String cpeDescriptor, String annotator, String... options) {
         return getInstance(cpeDescriptor, annotator, new LinkedHashMap<>(), new LinkedHashMap<>(), options);
     }
 
@@ -110,12 +107,12 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
      *                           3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
-    public static AdaptableCPEDescriptorStringDebugger getInstance(String cpeDescriptor, String annotator,
-                                                                   LinkedHashMap<String, String> externalSettingMap,
-                                                                   HashMap<String, String> logTypes, String... options) {
-        AdaptableCPEDescriptorStringDebugger debugger;
+    public static GUICPEStringDebugger getInstance(String cpeDescriptor, String annotator,
+                                                   LinkedHashMap<String, String> externalSettingMap,
+                                                   HashMap<String, String> logTypes, String... options) {
+        GUICPEStringDebugger debugger;
         String cpeName = FilenameUtils.getBaseName(cpeDescriptor) + "_" + annotator;
-        LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap = AdaptableCPEDescriptorRunner.parseExternalConfigMap(externalSettingMap);
+        LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap = GUICPERunner.parseExternalConfigMap(externalSettingMap);
         //      make sure to avoid overwrite tables
         for (String aeName : externalConfigMap.keySet()) {
             String lowerName = aeName.toLowerCase();
@@ -123,14 +120,14 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
                 externalConfigMap.get(aeName).put(SQLWriterCasConsumer.PARAM_OVERWRITETABLE, "false");
             }
         }
-        ArrayList<String> modifiedAes = AdaptableCPEDescriptorRunner.modifiedChecker.checkModifiedAEs(cpeDescriptor, externalConfigMap);
+        ArrayList<String> modifiedAes = GUICPERunner.modifiedChecker.checkModifiedAEs(cpeDescriptor, externalConfigMap);
 
-        ArrayList<String> modifiedLoggers = AdaptableCPEDescriptorRunner.modifiedChecker.checkModifiedLoggers(logTypes);
-        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance(cpeDescriptor, annotator, new ConsoleLogger(), modifiedAes,
+        ArrayList<String> modifiedLoggers = GUICPERunner.modifiedChecker.checkModifiedLoggers(logTypes);
+        GUICPERunner runner = GUICPERunner.getInstance(cpeDescriptor, annotator, new ConsoleLogger(), modifiedAes,
                 externalConfigMap, options);
         if (!debuggers.containsKey(cpeName) || modifiedAes == null) {
             classLogger.finest("Cpe descriptor modification detected.");
-            debugger = new AdaptableCPEDescriptorStringDebugger(runner, logTypes);
+            debugger = new GUICPEStringDebugger(runner, logTypes);
             debugger.buildAEs();
             debuggers.put(cpeName, debugger);
         } else if (modifiedAes != null && modifiedAes.size() > 0) {
@@ -168,7 +165,7 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
     }
 
 
-    public AdaptableCPEDescriptorStringDebugger(AdaptableCPEDescriptorRunner runner, HashMap<String, String> logTypes) {
+    public GUICPEStringDebugger(GUICPERunner runner, HashMap<String, String> logTypes) {
         this.runner = runner;
         this.logTypes = logTypes;
     }
@@ -287,8 +284,8 @@ public class AdaptableCPEDescriptorStringDebugger implements Processable, Status
                     logTypes.put(aeName, "");
                 }
                 if (types.indexOf("Stbegin") != -1 || types.indexOf("Stend") != -1) {
-                    RuSH_AE.logger.setLevel(Level.FINEST);
-                    RuSH.logger.setLevel(Level.FINEST);
+//                    RuSH_AE.logger.setLevel(Level.FINEST);
+//                    RuSH.logger.setLevel(Level.FINEST);
                 }
                 classLogger.finest("Add logger for AE:\"" + cpeName + "\". Will log annotation types: " + types);
                 logAes.add(createAnalysisEngine(AnnotationLogger.class, new Object[]{
