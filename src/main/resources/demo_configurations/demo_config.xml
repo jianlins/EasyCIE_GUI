@@ -3,7 +3,7 @@
 <configurations>
   <import>
     <documents>
-      <corpusDir memo="The directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/input</corpusDir>
+      <corpusDir memo="The directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/demo_input</corpusDir>
       <includeFileTypes memo="Filter files by extension names (separate by comma). If not filter defined, all files will be read">txt</includeFileTypes>
     </documents>
     <excelData>
@@ -16,18 +16,21 @@
     </excelData>
     <annotations memo="support Brat and eHOST format, the format will be automatically detected.">
       <projectDir memo="the directory that hosts the eHOST project" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/annotations/</projectDir>
-      <includeAnnotationTypes></includeAnnotationTypes>
-      <convertTypeConfig memo="Configuration file of type conversions" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">{configDir}/00_ehost_type_conversions.tsv</convertTypeConfig>
+      <includeAnnotationTypes/>
+      <convertTypeConfig memo="Configuration file of type conversions" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">conf/pe_radiology/00_ehost_type_conversions.tsv</convertTypeConfig>
       <enableSentenceSnippet>true</enableSentenceSnippet>
       <overWriteAnnotatorName memo="if a name is set, all the annotations' annotator will be overwritten by this name">gold</overWriteAnnotatorName>
-      <metaregex memo="If your file name contains meta information, use this to parse the information out">(\d+)_(\d{4}-\d{2}-\d{2})_(\d+_\w+)_(\d{4}-\d{2}-\d{2})</metaregex>
-      <bunch_id memo="1st group that matched in metaregex">1</bunch_id>
-      <adm_dtm memo="2nd group that matched in metaregex">2</adm_dtm>
-      <doc_id memo="3rd group that matched in metaregex">3</doc_id>
-      <doc_dtm memo="4th group that matched in metaregex">4</doc_dtm>
+      <metaregex memo="If your file name contains meta information, use this to parse the information out">(\d+)_(\d{4}-\d{2}-\d{2})_(\d+)_([\w-,]+)_(\d{4}-\d{2}-\d{2})</metaregex>
+      <metas>
+        <BUNCH_ID memo="1st group that matched in metaregex">1</BUNCH_ID>
+        <DOC_NAME memo="3rd group that matched in metaregex">3</DOC_NAME>
+        <NOTE_TYPE memo="type of the note">4</NOTE_TYPE>
+        <DATE memo="4th group that matched in metaregex">5</DATE>
+        <REF_DTM memo="2nd group that matched in metaregex">2</REF_DTM>
+      </metas>
     </annotations>
     <ontology>
-      <owlFile memo="ontology owl file" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/test/colonoscopyQuality.owl</owlFile>
+      <owlFile memo="ontology owl file" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/pe_radiology/colonoscopyQuality.owl</owlFile>
       <exportDir memo="the directory to export the rule files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">conf</exportDir>
     </ontology>
     <executes>
@@ -68,7 +71,7 @@
         <AutoExpanScope memo="">true</AutoExpanScope>
       </FastContext>
       <TemporalContext>
-        <RuleFileOrStr memo="" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener"></RuleFileOrStr>
+        <RuleFileOrStr memo="" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener"/>
         <IntervalDaysBeforeReferenceDate memo="">30</IntervalDaysBeforeReferenceDate>
         <TargetConceptTypeName memo="">edu.utah.bmi.nlp.type.system.Concept</TargetConceptTypeName>
         <InferTemporalStatusForAllTargetConcept memo="">true</InferTemporalStatusForAllTargetConcept>
@@ -82,7 +85,7 @@
         <RemoveOverlap memo="">true</RemoveOverlap>
       </FeatureInferencer>
       <FeatureMerger>
-        <RuleFileOrStr memo="" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener"/>
+        <RuleFileOrStr memo="" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener"></RuleFileOrStr>
         <InSitu memo="">true</InSitu>
       </FeatureMerger>
       <DocInferencer>
@@ -99,15 +102,15 @@
       </SQLWriter>
       <PatInferenceWriter>
         <RuleFileOrStr memo="" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">{configDir}/90_PatInference_AE.tsv</RuleFileOrStr>
-        <BunchColumnName>PAT_ID</BunchColumnName>
-        <DBConfigFile  doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">{configDir}/{dbPrefix}{batchId}.xml</DBConfigFile>
+        <BunchColumnName>BUNCH_ID</BunchColumnName>
+        <DBConfigFile doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">{configDir}/{dbPrefix}{batchId}.xml</DBConfigFile>
       </PatInferenceWriter>
     </pipeLineSetting>
     <annotators memo="Mark current annotations with annotator: ">
-      <current>{annotator}</current>
+      <current>v0</current>
     </annotators>
     <view>
-      <queryName>DocSnippet</queryName>
+      <queryName>BunchDocSnippet</queryName>
     </view>
     <executes>
       <RunEasyCIE memo="run Pipeline hai_cpe">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunEasyCIE>
@@ -170,7 +173,7 @@
     <import>
       <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">{configDir}/{dbPrefix}{batchId}.xml</dbFile>
       <table memo="the table used to saved the txt corpus">SAMPLES</table>
-      <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">HAI</datasetId>
+      <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">demo</datasetId>
       <overwrite memo="if the table exist, whether overwrite it">true</overwrite>
     </import>
     <reference>

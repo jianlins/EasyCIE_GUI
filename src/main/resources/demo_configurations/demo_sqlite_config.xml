@@ -68,7 +68,9 @@
     <queryStatements>
         <item>
             <name>queryDocs</name>
-            <sql>SELECT DOC_ID,DATASET_ID, DOC_NAME, BUNCH_ID, TEXT SNIPPET,TEXT DOC_TEXT, DATE,REF_DATE, INSERT_DTM FROM {tableName}</sql>
+            <sql>SELECT DOC_ID,BUNCH_ID, DOC_NAME, NOTE_TYPE, TEXT SNIPPET,TEXT DOC_TEXT, DATE,REF_DATE, INSERT_DTM
+                FROM {tableName}
+            </sql>
         </item>
         <item>
             <name>queryAnnos</name>
@@ -78,26 +80,63 @@
         </item>
         <item>
             <name>querySnippetAnnos</name>
-            <sql>SELECT RS.ID,RS.DOC_NAME, RS.TYPE,RS.SNIPPET, RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,IT.TEXT DOC_TEXT,
+            <sql>SELECT RS.ID,RS.DOC_NAME, RS.TYPE,RS.SNIPPET, RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,
                 RS.FEATURES,IT.DATE, IT.REF_DATE,RS.COMMENTS,RS.ANNOTATOR,RS.RUN_ID FROM
                 {tableName} RS JOIN {inputTable} IT ON RS.DOC_NAME=IT.DOC_NAME
             </sql>
         </item>
         <item>
             <name>queryDocSnippetAnnos</name>
-            <sql>SELECT RD.ID,IT.BUNCH_ID,RD.DOC_NAME,RD.TYPE DOC_TYPE, RD.FEATURES DOC_FEATURES, RS.ID RSID, RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,IT.TEXT DOC_TEXT,
-                RS.FEATURES,IT.DATE, IT.REF_DATE,RS.COMMENTS,RD.ANNOTATOR,RD.RUN_ID
+            <sql>SELECT RD.ID, RD.DOC_NAME, RD.TYPE DOC_TYPE, RD.FEATURES DOC_FEATURES, RS.ID RSID,
+                RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,
+                RS.FEATURES,RS.COMMENTS,RD.ANNOTATOR,RD.RUN_ID
                 FROM
-                {docResultTable} RD LEFT OUTER JOIN {tableName} RS ON RD.DOC_NAME=RS.DOC_NAME AND RD.RUN_ID=RS.RUN_ID JOIN {inputTable} IT ON RD.DOC_NAME=IT.DOC_NAME
+                {docResultTable} RD LEFT OUTER JOIN {tableName} RS ON RD.DOC_NAME=RS.DOC_NAME AND RD.RUN_ID=RS.RUN_ID
             </sql>
         </item>
         <item>
             <name>queryBunchDocSnippetAnnos</name>
-            <sql>SELECT RD.ID ,IT.BUNCH_ID,RD.DOC_NAME,RB.TYPE BUNCH_TYPE, RD.TYPE DOC_TYPE, RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,
+            <sql>SELECT RD.ID ,IT.BUNCH_ID,RD.DOC_NAME,IT.NOTE_TYPE, RB.TYPE BUNCH_TYPE,RB.FEATURES B_FEATURES, RD.TYPE
+                DOC_TYPE, RD.FEATURES D_FEATURES,
+                RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,
                 RS.FEATURES,IT.DATE, IT.REF_DATE,RS.COMMENTS,RS.ANNOTATOR,RB.RUN_ID
                 FROM {bunchResultTable} RB JOIN {inputTable} IT ON RB.BUNCH_ID=IT.BUNCH_ID
                 JOIN {docResultTable} RD ON IT.DOC_NAME=RD.DOC_NAME AND RB.RUN_ID=RD.RUN_ID
                 LEFT OUTER JOIN {tableName} RS ON RD.DOC_NAME=RS.DOC_NAME AND RB.RUN_ID=RS.RUN_ID
+            </sql>
+        </item>
+        <item>
+            <name>querySepAnnos</name>
+            <sql>SELECT ID,DOC_NAME,TYPE,SNIPPET,BEGIN,END,SNIPPET_BEGIN,TEXT,FEATURES,COMMENTS,ANNOTATOR,RUN_ID FROM
+                {tableName} RS
+            </sql>
+        </item>
+        <item>
+            <name>querySnippetSepAnnos</name>
+            <sql>SELECT RS.ID,RS.DOC_NAME, RS.TYPE,RS.SNIPPET, RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,
+                RS.FEATURES, RS.COMMENTS,RS.ANNOTATOR,RS.RUN_ID FROM
+                {tableName} RS
+            </sql>
+        </item>
+        <item>
+            <name>queryDocSnippetSepAnnos</name>
+            <sql>SELECT RD.ID,RD.BUNCH_ID,RD.DOC_NAME,RD.TYPE DOC_TYPE, RD.FEATURES DOC_FEATURES, RS.ID RSID,
+                RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,
+                RS.FEATURES, RS.COMMENTS,RD.ANNOTATOR,RD.RUN_ID
+                FROM
+                {docResultTable} RD LEFT OUTER JOIN {tableName} RS ON RD.DOC_NAME=RS.DOC_NAME
+            </sql>
+        </item>
+        <item>
+            <name>queryBunchDocSnippetSepAnnos</name>
+            <sql>SELECT RD.BUNCH_ID,RD.DOC_NAME,RB.TYPE BUNCH_TYPE, RB.FEATURES B_FEATURES,RD.TYPE DOC_TYPE, RD.FEATURES
+                DOC_FEATURES,
+                RS.TYPE,RS.SNIPPET,RS.BEGIN,RS.END,RS.SNIPPET_BEGIN,
+                RS.FEATURES, REF_DATE REF_DATE,RS.COMMENTS,RS.ANNOTATOR,RB.RUN_ID
+                FROM {bunchResultTable} RB
+                JOIN {docResultTable} RD ON RB.BUNCH_ID=RD.BUNCH_ID AND RB.RUN_ID=RD.RUN_ID
+                LEFT OUTER JOIN {tableName} RS ON RD.DOC_NAME=RS.DOC_NAME AND RB.RUN_ID=RS.RUN_ID
+                JOIN HAI_PATOS_18 S ON S.BUNCH_ID=RD.BUNCH_ID LIMIT 200
             </sql>
         </item>
         <item>
@@ -132,7 +171,10 @@
         </item>
         <item>
             <name>masterInputQuery</name>
-            <sql>SELECT DOC_ID, DATASET_ID,BUNCH_ID PAT_ID,DOC_NAME,TEXT,DATE,REF_DATE FROM {tableName} WHERE DATASET_ID = ?;
+            <sql>SELECT DOC_ID, DATASET_ID,BUNCH_ID PAT_ID,BUNCH_ID,DOC_NAME,NOTE_TYPE,TEXT,DATE, REF_DATE FROM
+                {tableName}
+                WHERE DATASET_ID
+                = ?;
             </sql>
         </item>
         <item>
@@ -192,6 +234,7 @@
             <sql>
                 <item>
                     CREATE TABLE {tableName}(ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    BUNCH_ID INTEGER,
                     DOC_NAME TEXT,
                     ANNOTATOR TEXT,
                     RUN_ID INT,
@@ -219,9 +262,9 @@
                 </item>
             </sql>
             <returnKey>ID</returnKey>
-            <insert>INSERT INTO {tableName} (DOC_NAME,ANNOTATOR, RUN_ID,TYPE,BEGIN,END,SNIPPET_BEGIN, TEXT,
+            <insert>INSERT INTO {tableName} (BUNCH_ID, DOC_NAME,ANNOTATOR, RUN_ID,TYPE,BEGIN,END,SNIPPET_BEGIN, TEXT,
                 FEATURES,SNIPPET,COMMENTS)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?);
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?);
             </insert>
             <query>SELECT * FROM {tableName} WHERE ANNOTATOR=?;</query>
             <drop>
@@ -238,6 +281,7 @@
                     DATASET_ID CHAR(10),
                     BUNCH_ID INTEGER,
                     DOC_NAME TEXT,
+                    NOTE_TYPE TEXT,
                     TEXT TEXT,
                     DATE DATETIME,
                     REF_DATE DATETIME,
@@ -253,10 +297,11 @@
                     CREATE INDEX IF NOT EXISTS {tableName}_BUNCH_IND ON {tableName} (BUNCH_ID);
                 </item>
             </sql>
-            <insert>INSERT INTO {tableName} (DATASET_ID, BUNCH_ID,DOC_NAME, TEXT,DATE,REF_DATE,INSERT_DTM) VALUES
-                (?,?,?,?,?,?,CURRENT_TIMESTAMP);
+            <insert>INSERT INTO {tableName} (DATASET_ID, BUNCH_ID,DOC_NAME, NOTE_TYPE, TEXT,DATE,REF_DATE,INSERT_DTM)
+                VALUES
+                (?,?,?,?,?,?,?,CURRENT_TIMESTAMP);
             </insert>
-            <query>SELECT * FROM {tableName} WHERE DOC_NAME=?;</query>
+            <query>SELECT * FROM {tableName} WHERE DOC_NAME=?</query>
             <drop>
                 <item>DROP TABLE {tableName};</item>
             </drop>
