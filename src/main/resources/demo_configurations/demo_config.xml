@@ -113,7 +113,7 @@
       <queryName>BunchDocSnippet</queryName>
     </view>
     <executes>
-      <RunEasyCIE memo="run Pipeline hai_cpe">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunEasyCIE>
+      <RunEasyCIE memo="run Pipeline cpe">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunEasyCIE>
       <ViewOutputInDB memo="View the output in database">edu.utah.bmi.simple.gui.task.ViewOutputDB</ViewOutputInDB>
     </executes>
   </easycie>
@@ -142,7 +142,7 @@
       <referenceRunId memo="run id of reference annotator. Default is the latest run id when leave blank"/>
       <referenceTable>REFERENCE</referenceTable>
       <strictCompare>false</strictCompare>
-      <typeFilter memo="limit the comparison to a certain type">HAI_Doc</typeFilter>
+      <typeFilter memo="limit the comparison to a certain type">DIS_Doc</typeFilter>
       <typeFeatureFilters memo="a file consists of types and corresponding features that need to be compared" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">{configDir}/compare_config.tsv</typeFeatureFilters>
     </compare>
     <executes>
