@@ -26,7 +26,7 @@
         <DOC_NAME memo="3rd group that matched in metaregex">3</DOC_NAME>
         <NOTE_TYPE memo="type of the note">4</NOTE_TYPE>
         <DATE memo="4th group that matched in metaregex">5</DATE>
-        <REF_DTM memo="2nd group that matched in metaregex">2</REF_DTM>
+        <REF_DATE memo="2nd group that matched in metaregex">2</REF_DATE>
       </metas>
     </annotations>
     <ontology>
