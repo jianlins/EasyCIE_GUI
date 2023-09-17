@@ -1,7 +1,11 @@
 package edu.utah.bmi.simple.gui.controller;
 
+import edu.utah.bmi.nlp.sql.ColumnInfo;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorStringDebugger;
+import edu.utah.bmi.nlp.uima.Processable;
+import edu.utah.bmi.simple.gui.doubleclick.OpenEhost;
 import edu.utah.bmi.simple.gui.entry.TaskFX;
 import edu.utah.bmi.simple.gui.entry.TasksFX;
 import edu.utah.bmi.simple.gui.task.ConfigKeys;
@@ -15,6 +19,8 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 public class CellFactories {

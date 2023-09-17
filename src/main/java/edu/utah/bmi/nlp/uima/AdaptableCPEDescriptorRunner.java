@@ -44,6 +44,7 @@ import org.apache.uima.collection.base_cpm.CasProcessor;
 import org.apache.uima.collection.impl.CollectionProcessingEngine_impl;
 import org.apache.uima.collection.impl.cpm.engine.CPMEngine;
 import org.apache.uima.collection.impl.metadata.CpeDefaultValues;
+import org.apache.uima.collection.impl.metadata.cpe.CasProcessorDeploymentParamImpl;
 import org.apache.uima.collection.impl.metadata.cpe.CpeDescriptorFactory;
 import org.apache.uima.collection.metadata.*;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
@@ -78,9 +79,9 @@ import static edu.utah.bmi.nlp.core.DeterminantValueSet.defaultSuperTypeName;
  * @author Jianlin Shi
  * Created on 7/9/17.
  */
-public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
-    public static Logger classLogger = IOUtil.getLogger(AdaptableCPEDescriptorGUIRunner.class);
-    public static AdaptableCPEDescriptorGUIRunner lastRunner = null;
+public class AdaptableCPEDescriptorRunner implements StatusSetable {
+    public static Logger classLogger = IOUtil.getLogger(AdaptableCPEDescriptorRunner.class);
+    public static AdaptableCPEDescriptorRunner lastRunner = null;
     protected static ModifiedChecker modifiedChecker = new ModifiedChecker();
     protected String annotator, runnerName;
     protected CpeDescription currentCpeDesc;
@@ -112,12 +113,12 @@ public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
     private String typeXMLAbsolutPath = "";
 
 
-    protected AdaptableCPEDescriptorGUIRunner() {
+    protected AdaptableCPEDescriptorRunner() {
 
     }
 
 
-    public static AdaptableCPEDescriptorGUIRunner getInstance(TasksFX tasks) {
+    public static AdaptableCPEDescriptorRunner getInstance(TasksFX tasks) {
         TaskFX config = tasks.getTask(ConfigKeys.maintask);
         String cpeDescriptor = config.getValue("pipeLineSetting/CpeDescriptor");
         LinkedHashMap<String, String> componentsSettings = readPipelineConfigurations(config.getChildSettings("pipeLineSetting"));
@@ -137,7 +138,7 @@ public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
      * @return an instance of AdaptableCPEDescriptorRunner
      */
 
-    public static AdaptableCPEDescriptorGUIRunner getInstance(String cpeDescriptor, String annotator, String... options) {
+    public static AdaptableCPEDescriptorRunner getInstance(String cpeDescriptor, String annotator, String... options) {
         return getInstance(cpeDescriptor, annotator, null, new LinkedHashMap<>(), options);
     }
 
@@ -152,7 +153,7 @@ public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
      * @return an instance of AdaptableCPEDescriptorRunner
      */
 
-    public static AdaptableCPEDescriptorGUIRunner getInstance(String cpeDescriptor, String annotator, UIMALogger logger, String... options) {
+    public static AdaptableCPEDescriptorRunner getInstance(String cpeDescriptor, String annotator, UIMALogger logger, String... options) {
         return getInstance(cpeDescriptor, annotator, logger, new LinkedHashMap<>(), options);
     }
 
@@ -168,14 +169,14 @@ public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
      *                              3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
-    public static AdaptableCPEDescriptorGUIRunner getInstance(String cpeDescriptor, String annotator, LinkedHashMap<String, String> externalRuleConfigMap, String... options) {
+    public static AdaptableCPEDescriptorRunner getInstance(String cpeDescriptor, String annotator, LinkedHashMap<String, String> externalRuleConfigMap, String... options) {
         return getInstance(cpeDescriptor, annotator, null, externalRuleConfigMap, options);
     }
 
-    public static AdaptableCPEDescriptorGUIRunner getInstance(String cpeDescriptor, String annotator,
-                                                              UIMALogger logger,
-                                                              LinkedHashMap<String, String> externalSettingMap,
-                                                              String... options) {
+    public static AdaptableCPEDescriptorRunner getInstance(String cpeDescriptor, String annotator,
+                                                           UIMALogger logger,
+                                                           LinkedHashMap<String, String> externalSettingMap,
+                                                           String... options) {
         LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap = parseExternalConfigMap(externalSettingMap);
         ArrayList<String> modifiedAes = modifiedChecker.checkModifiedAEs(cpeDescriptor, externalConfigMap);
         return getInstance(cpeDescriptor, annotator, logger, modifiedAes, externalConfigMap, options);
@@ -193,10 +194,10 @@ public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
      *                          3. The location of class source files for auto-gen type systems
      * @return an instance of AdaptableCPEDescriptorRunner
      */
-    public static AdaptableCPEDescriptorGUIRunner getInstance(String cpeDescriptor, String annotator,
-                                                              UIMALogger logger, ArrayList<String> modifiedAes,
-                                                              LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap,
-                                                              String... options) {
+    public static AdaptableCPEDescriptorRunner getInstance(String cpeDescriptor, String annotator,
+                                                           UIMALogger logger, ArrayList<String> modifiedAes,
+                                                           LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap,
+                                                           String... options) {
         String cpeName = FilenameUtils.getBaseName(cpeDescriptor) + "_" + annotator;
         if (lastRunner != null && lastRunner.runnerName.equals(cpeName) && modifiedAes != null) {
             if (modifiedAes.size() > 0) {
@@ -212,7 +213,7 @@ public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
                 else
                     classLogger.finest("Configuration modification detected: " + modifiedAes);
             }
-            lastRunner = new AdaptableCPEDescriptorGUIRunner(cpeDescriptor, annotator, logger, externalConfigMap, options);
+            lastRunner = new AdaptableCPEDescriptorRunner(cpeDescriptor, annotator, logger, externalConfigMap, options);
             lastRunner.runnerName = cpeName;
         }
         lastRunner.setUIMALogger(logger);
@@ -228,7 +229,7 @@ public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
      *                      2. The location of compiled classes for auto-gen type systems
      *                      3. The location of class source files for auto-gen type systems
      */
-    public AdaptableCPEDescriptorGUIRunner(String cpeDescriptor, String annotator, UIMALogger logger, String... options) {
+    public AdaptableCPEDescriptorRunner(String cpeDescriptor, String annotator, UIMALogger logger, String... options) {
         this.externalConfigMap = new LinkedHashMap<>();
         this.annotator = annotator;
         setUIMALogger(logger);
@@ -245,9 +246,9 @@ public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
      *                          2. The location of compiled classes for auto-gen type systems
      *                          3. The location of class source files for auto-gen type systems
      */
-    public AdaptableCPEDescriptorGUIRunner(String cpeDescriptor, String annotator, UIMALogger logger,
-                                           LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap,
-                                           String... options) {
+    public AdaptableCPEDescriptorRunner(String cpeDescriptor, String annotator, UIMALogger logger,
+                                        LinkedHashMap<String, LinkedHashMap<String, String>> externalConfigMap,
+                                        String... options) {
         this.annotator = annotator;
         this.externalConfigMap = externalConfigMap;
         setUIMALogger(logger);
@@ -997,10 +998,6 @@ public class AdaptableCPEDescriptorGUIRunner implements StatusSetable {
                         ChildUimaContext_impl uimaContext_impl = (ChildUimaContext_impl) uimaContext;
                         for (Object configName : configurations.keySet()) {
                             Object value = configurations.get(configName);
-                            if (!configTypes.containsKey(configName)) {
-                                classLogger.info(String.format("Configure parameter %s is not available in processor %s", configName, processorName));
-                                continue;
-                            }
                             value = convertValueType(value, configTypes.get(configName));
                             uimaContext_impl.setSharedParam("/" + processorName + "/" + configName, value);
                             AnalysisComponent aeEngine = ae.getAnalysisComponent();

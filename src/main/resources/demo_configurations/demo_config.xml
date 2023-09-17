@@ -3,7 +3,7 @@
 <configurations>
   <import>
     <documents>
-      <corpusDir memo="The directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/demo_input</corpusDir>
+      <corpusDir memo="The directory that stores the txt files" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigDirectoryChooser">data/input</corpusDir>
       <includeFileTypes memo="Filter files by extension names (separate by comma). If not filter defined, all files will be read">txt</includeFileTypes>
     </documents>
     <excelData>
@@ -20,14 +20,11 @@
       <convertTypeConfig memo="Configuration file of type conversions" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">{configDir}/00_ehost_type_conversions.tsv</convertTypeConfig>
       <enableSentenceSnippet>true</enableSentenceSnippet>
       <overWriteAnnotatorName memo="if a name is set, all the annotations' annotator will be overwritten by this name">gold</overWriteAnnotatorName>
-      <metaregex memo="If your file name contains meta information, use this to parse the information out">(\d+)_(\d{4}-\d{2}-\d{2})_(\d+)_([\w-,]+)_(\d{4}-\d{2}-\d{2})</metaregex>
-      <metas>
-        <BUNCH_ID memo="1st group that matched in metaregex">1</BUNCH_ID>
-        <DOC_NAME memo="3rd group that matched in metaregex">3</DOC_NAME>
-        <NOTE_TYPE memo="type of the note">4</NOTE_TYPE>
-        <DATE memo="4th group that matched in metaregex">5</DATE>
-        <REF_DTM memo="2nd group that matched in metaregex">2</REF_DTM>
-      </metas>
+      <metaregex memo="If your file name contains meta information, use this to parse the information out">(\d+)_(\d{4}-\d{2}-\d{2})_(\d+_\w+)_(\d{4}-\d{2}-\d{2})</metaregex>
+      <bunch_id memo="1st group that matched in metaregex">1</bunch_id>
+      <adm_dtm memo="2nd group that matched in metaregex">2</adm_dtm>
+      <doc_id memo="3rd group that matched in metaregex">3</doc_id>
+      <doc_dtm memo="4th group that matched in metaregex">4</doc_dtm>
     </annotations>
     <ontology>
       <owlFile memo="ontology owl file" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">conf/test/colonoscopyQuality.owl</owlFile>
@@ -102,7 +99,7 @@
       </SQLWriter>
       <PatInferenceWriter>
         <RuleFileOrStr memo="" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser" openClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileOpener">{configDir}/90_PatInference_AE.tsv</RuleFileOrStr>
-        <BunchColumnName>BUNCH_ID</BunchColumnName>
+        <BunchColumnName>PAT_ID</BunchColumnName>
         <DBConfigFile  doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">{configDir}/{dbPrefix}{batchId}.xml</DBConfigFile>
       </PatInferenceWriter>
     </pipeLineSetting>
@@ -110,7 +107,7 @@
       <current>{annotator}</current>
     </annotators>
     <view>
-      <queryName>BunchDocSnippet</queryName>
+      <queryName>DocSnippet</queryName>
     </view>
     <executes>
       <RunEasyCIE memo="run Pipeline hai_cpe">edu.utah.bmi.simple.gui.task.RunCPEDescriptorTask</RunEasyCIE>
@@ -120,7 +117,7 @@
   <debug>
     <log>
       <Section_Detector memo="display types of sections">SectionBody,SectionHeader</Section_Detector>
-      <RuSH memo="display types of RuSH (sentence segmentor and tokenizer) output">Sentence</RuSH>
+      <RuSH memo="display types of RuSH (sentence segmentor and tokenizer) output"/>
       <FastNER memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastNER>
       <FastContext memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</FastContext>
       <TemporalContext memo="display types of RuSH (sentence segmentor and tokenizer) output">Concept</TemporalContext>
@@ -173,7 +170,7 @@
     <import>
       <dbFile memo="the db file(or configuration file) used to saved the txt corpus" doubleClick="edu.utah.bmi.simple.gui.doubleclick.ConfigFileChooser">{configDir}/{dbPrefix}{batchId}.xml</dbFile>
       <table memo="the table used to saved the txt corpus">SAMPLES</table>
-      <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">demo1</datasetId>
+      <datasetId memo="data set id (Default is '0'. Use to differentiate different dataset in the same table.)">HAI</datasetId>
       <overwrite memo="if the table exist, whether overwrite it">true</overwrite>
     </import>
     <reference>
@@ -190,7 +187,7 @@
       <compareTable memo="the table used to saved the annotations">DIFF</compareTable>
     </output>
     <debug>
-      <class>edu.utah.bmi.nlp.uima.GUICPEStringDebugger</class>
+      <class>edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorStringDebugger</class>
     </debug>
     <viewer>
       <bunchColumnName>BUNCH_ID</bunchColumnName>

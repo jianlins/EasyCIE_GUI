@@ -1,11 +1,8 @@
 @fastner		
 @CONCEPT_FEATURES	DISEASE	Concept
-@CONCEPT_FEATURES	SYMPTOM	Concept
 @CONCEPT_FEATURES	TREATMENT	Concept
 
 #Abdominal incision packed with WTD gauze, erythema appears to be resolving.
-murmurs	SYMPTOM
-gallops	SYMPTOM
 congestive heart failure	DISEASE
 heart failure	DISEASE
 pancreatic cysts	DISEASE
@@ -14,9 +11,6 @@ diabetes	DISEASE
 hematuria	DISEASE
 hypertension	DISEASE
 subdural bleed	DISEASE
-Ulceration	DISEASE
-Cellulitis	DISEASE
-Xanax	TREATMENT
 feeding tube	TREATMENT
 crystalloids	TREATMENT
 IV fluid	TREATMENT

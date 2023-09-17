@@ -3,11 +3,12 @@ package edu.utah.bmi.simple.gui.task;
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
 import edu.utah.bmi.nlp.core.GUITask;
 import edu.utah.bmi.nlp.core.IOUtil;
+import edu.utah.bmi.nlp.easycie.reader.BratReader;
+import edu.utah.bmi.nlp.easycie.reader.EhostToDBReader;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.easycie.reader.EhostReader;
-import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorGUIRunner;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
 import edu.utah.bmi.nlp.uima.BunchMixInferenceWriter;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import edu.utah.bmi.simple.gui.core.CommonFunc;
@@ -42,17 +43,17 @@ public class Import extends GUITask {
     protected boolean print = true;
 
     protected String inputPath, dbConfigFile, importDocTable, referenceTable, overWriteAnnotatorName, datasetId, rushRule, convertTypeConfig;
-    protected File inputDir;
+    protected File inputDir, solrDir;
     protected boolean overwrite = false, initSuccess = false;
     protected String includeTypes;
     protected char corpusType;
-    private boolean report;
-    protected AdaptableCPEDescriptorGUIRunner runner;
+    private boolean report, indexSolr;
+    protected AdaptableCPEDescriptorRunner runner;
     private String metaregex;
     private Pattern namePattern;
     private int bunch_id = -1, doc_id = -1, adm_dtm = -1, doc_dtm = -1;
     private LinkedHashMap<String, Integer> metaPos = new LinkedHashMap<>();
-
+    private String coreName;
 
     protected Import() {
 
@@ -68,10 +69,16 @@ public class Import extends GUITask {
         }
         updateGUIMessage("Initiate configurations..");
         TaskFX config = tasks.getTask("import");
+        String indexSolrStr = config.getValue("documents/indexSolr");
+        indexSolr = indexSolrStr.startsWith("t") || indexSolrStr.startsWith("1");
+
+
         TaskFX settingConfig = tasks.getTask("settings");
         String documentDir = config.getValue(ConfigKeys.importDir);
         String includeFileTypes = config.getValue(ConfigKeys.includeFileTypes);
 
+
+        coreName = settingConfig.getValue("import/solrCoreName");
 
         String annotationDir = config.getValue(ConfigKeys.annotationDir);
         String includeAnnotationTypes = config.getValue(ConfigKeys.includeAnnotationTypes);
@@ -137,7 +144,27 @@ public class Import extends GUITask {
             initSuccess = false;
             return;
         }
-        System.out.println(dbconfig.getAbsolutePath()+"\t"+dbconfig.exists());
+
+        if (indexSolr) {
+            String solrDirStr = settingConfig.getValue("import/solrDir");
+            solrDir = new File(solrDirStr);
+            if (overwrite && solrDir.exists()) {
+                try {
+                    FileUtils.deleteDirectory(solrDir);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (!solrDir.exists()) {
+                System.out.println(String.format("%s doesn't exist, try to create one...", solrDir.getAbsolutePath()));
+                try {
+                    FileUtils.forceMkdir(solrDir);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        System.out.println(dbconfig.getAbsolutePath() + "\t" + dbconfig.exists());
         dao = EDAO.getInstance(dbconfig, true, false);
 
         initSuccess = true;
@@ -165,7 +192,6 @@ public class Import extends GUITask {
                     if (overWriteAnnotatorName.length() == 0)
                         overWriteAnnotatorName = "ehost_import";
                     importEhost(inputDir, datasetId, overWriteAnnotatorName, referenceTable, rushRule, includeTypes, overwrite);
-                    runner.run();
                     break;
                 case n2c2:
                     importN2C2(inputDir, datasetId, importDocTable, referenceTable, overwrite);
@@ -238,14 +264,14 @@ public class Import extends GUITask {
                     recordRow = new RecordRow().addCell("DATASET_ID", datasetId);
                 for (String metaName : metaPos.keySet()) {
                     int pos = metaPos.get(metaName);
-                    String value=matches.group(pos);
-                    String metaNameLower=metaName.toLowerCase().substring(metaName.length()-4);
-                    if (metaNameLower.equals("date") || metaNameLower.endsWith("dtm")){
+                    String value = matches.group(pos);
+                    String metaNameLower = metaName.toLowerCase().substring(metaName.length() - 4);
+                    if (metaNameLower.equals("date") || metaNameLower.endsWith("dtm")) {
                         if (!value.endsWith("00:00:00"))
-                            value=value+ " 00:00:00";
+                            value = value + " 00:00:00";
                     }
                     recordRow.addCell(metaName, value);
-                    recordRow.addCell("TEXT",content);
+                    recordRow.addCell("TEXT", content);
                 }
             } else {
                 recordRow.addCell("DATASET_ID", datasetId)
@@ -261,6 +287,9 @@ public class Import extends GUITask {
                 recordRow.addCell("BUNCH_ID", file.getName().substring(0, file.getName().indexOf("_")));
             }
             records.add(recordRow);
+
+
+
             dao.insertRecords(tableName, records);
             if (print)
                 System.out.println("success");
@@ -268,17 +297,48 @@ public class Import extends GUITask {
             counter++;
         }
         dao.close();
+
         System.out.println("Totally " + counter + (counter > 1 ? " documents have" : " document has") + " been imported successfully.");
     }
 
-    //  TODO need to remove this from uima pipeline to speed up initiation and avoid type conflicts.
+
     protected void importEhost(File inputDir, String datasetId, String annotator, String tableName,
-                               String rush, String includeTypes, boolean overWrite) {
+                               String rushRule, String includeTypes, boolean overWrite) {
+        dao.initiateTableFromTemplate("ANNOTATION_TABLE", referenceTable, overWrite);
+        int runId = dao.getLastId("LOG")+1;
+        EhostToDBReader ehostToDBReader = new EhostToDBReader(metaregex, metaPos, convertTypeConfig, includeTypes, "UTF-8", annotator, rushRule,runId);
+        java.sql.Date startDate=new java.sql.Date(System.currentTimeMillis());
+        Collection<File> files = FileUtils.listFiles(inputDir, new String[]{"txt"}, true);
+        File[] fileArray = new File[files.size()];
+        files.toArray(fileArray);
+        Arrays.sort(fileArray, NameFileComparator.NAME_COMPARATOR);
+        int total = files.size();
+        int fileCounter = 0;
+        for (File file : fileArray) {
+            ArrayList<RecordRow> annotations = ehostToDBReader.parseSingleDoc(file);
+            dao.insertRecords(referenceTable, annotations);
+            updateGUIProgress(fileCounter, total);
+            fileCounter++;
+        }
+        java.sql.Date endDate=new java.sql.Date(System.currentTimeMillis());
+        dao.insertRecord("LOG",new RecordRow().addCell("ANNOTATOR",overWriteAnnotatorName)
+        .addCell("START_DTM", startDate).addCell("END_DTM",endDate)
+        .addCell("NUM_NOTES",fileArray.length).addCell("COMMENTS","Import ehost project from "+inputDir.getAbsolutePath()));
+        dao.close();
+        System.out.println("Totally " + fileCounter + (fileCounter > 1 ? " documents have" : " document has") + " been imported successfully (" + fileCounter + " notes).");
+        popDialog("Message", "Import success", "Totally " + fileCounter + (fileCounter > 1 ? " documents have" : " document has")
+                + " been imported successfully(" + fileCounter + " notes). \n\nThe original documents are imported directly to DATASET_ID: '" + datasetId
+                + "_ORIG'.\n\nEach document was split into individual notes with DATASET_ID: '" + datasetId + "'.");
+    }
+
+    protected void importBrat(File inputDir, String datasetId, String annotator, String tableName, String rush, String includeTypes,
+                              boolean overWrite) {
         if (overWrite)
             dao.initiateTableFromTemplate("ANNOTATION_TABLE", tableName, overWrite);
 
-
-        runner = new AdaptableCPEDescriptorGUIRunner("desc/cpe/import_cpe.xml", annotator, new NLPDBLogger(dao.getConfigFile().getAbsolutePath(), annotator));
+        if (annotator.length() == 0)
+            annotator = "brat_import";
+        runner = new AdaptableCPEDescriptorRunner("desc/cpe/import_cpe.xml", annotator, new NLPDBLogger(dao.getConfigFile().getAbsolutePath(), annotator));
         ((NLPDBLogger) runner.getLogger()).setReportable(report);
         ((NLPDBLogger) runner.getLogger()).setTask(this);
         for (int writerId : runner.getWriterIds().values()) {
@@ -289,25 +349,13 @@ public class Import extends GUITask {
             runner.updateDescriptorConfiguration(writerId, SQLWriterCasConsumer.PARAM_DOC_TABLENAME, referenceTable);
             runner.updateDescriptorConfiguration(writerId, BunchMixInferenceWriter.PARAM_TABLENAME, referenceTable);
         }
-        runner.setCollectionReaderDescriptor("desc/ae/EhostReader.xml", EhostReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
-                EhostReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, EhostReader.PARAM_READ_TYPES, includeTypes,
-                EhostReader.PARAM_PRINT, print);
-        runner.addConceptTypes(EhostReader.getTypeDefinitions(inputDir.getAbsolutePath()));
+        runner.setCollectionReaderDescriptor("desc/ae/BratReader.xml", BratReader.PARAM_INPUTDIR, inputDir.getAbsolutePath(),
+                BratReader.PARAM_OVERWRITE_ANNOTATOR_NAME, annotator, BratReader.PARAM_READ_TYPES, includeTypes,
+                BratReader.PARAM_PRINT, print);
+        runner.addConceptTypes(BratReader.getTypeDefinitions(inputDir.getAbsolutePath()));
         runner.reInitTypeSystem("desc/type/" + annotator + ".xml");
         runner.attachTypeDescriptorToReader();
 
-    }
-
-    protected void importBrat(File inputDir, String datasetId, String annotator, String tableName, String rush, String includeTypes,
-                              boolean overWrite) {
-        ImportBrat importBrat = new ImportBrat(dbConfigFile, this, overWrite);
-        NLPDBLogger dblogger = new NLPDBLogger(dbConfigFile, annotator);
-        Object runId = dblogger.getRunid();
-        dblogger.logStartTime();
-        int total = importBrat.run(inputDir.getAbsolutePath(), annotator, runId, tableName, rush, includeTypes);
-        dblogger.logCompletToDB(total, "Annotations of " + total + "  documents imported.");
-        dblogger.collectionProcessComplete("");
-        dao.close();
     }
 
     protected boolean checkDirExist(File inputDir, String relativePath, String paraName) {

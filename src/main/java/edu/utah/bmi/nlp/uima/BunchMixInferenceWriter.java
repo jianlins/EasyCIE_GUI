@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package edu.utah.bmi.nlp.uima;
 
 import edu.utah.bmi.nlp.core.DeterminantValueSet;
@@ -23,238 +28,209 @@ import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
 
-/**
- * Allows the inference based on multiple document types.
- * Rule format:
- * Question name    Bunch Conclusion Type   Evidence Type 1, Evidence Type 2...
- */
 public class BunchMixInferenceWriter extends JCasAnnotator_ImplBase implements RuleBasedAEInf {
     public static Logger logger = IOUtil.getLogger(BunchMixInferenceWriter.class);
-    public static final String PARAM_SQLFILE = DeterminantValueSet.PARAM_DB_CONFIG_FILE;
+    public static final String PARAM_SQLFILE = "DBConfigFile";
     public static final String PARAM_TABLENAME = "ResultTableName";
     public static final String PARAM_AUTO_ID_ENABLED = "AutoIdEnabled";
-    public static final String PARAM_RULE_STR = DeterminantValueSet.PARAM_RULE_STR;
+    public static final String PARAM_RULE_STR = "RuleFileOrStr";
     public static final String PARAM_BUNCH_COLUMN_NAME = "BunchColumnName";
-    public static final String PARAM_ANNOTATOR = DeterminantValueSet.PARAM_ANNOTATOR;
-    public static final String PARAM_VERSION = DeterminantValueSet.PARAM_VERSION;
+    public static final String PARAM_ANNOTATOR = "Annotator";
+    public static final String PARAM_VERSION = "Version";
     public static final String PARAM_OVERWRITETABLE = "OverWriteTable";
-
-
-    public static String resultTableName, bunchColumnName;
+    public static String resultTableName;
+    public static String bunchColumnName;
     public static EDAO dao = null;
-    //                          topic   rules
-    protected LinkedHashMap<String, ArrayList<ArrayList<Object>>> inferenceMap = new LinkedHashMap<>();
-    protected HashMap<String, String> defaultBunchType = new HashMap<>();
+    protected LinkedHashMap<String, ArrayList<ArrayList<Object>>> inferenceMap = new LinkedHashMap();
+    protected HashMap<String, String> defaultBunchType = new HashMap();
     protected boolean autoIdEnabled;
-    //                   type name, Type
-    protected HashMap<String, Type> typeMap = new HashMap<>();
-    //     type counter
-    protected HashMap<String, Integer> typeCounter = new HashMap<>();
-
-    protected HashMap<Integer, ArrayList<String>> ruleStore = new HashMap<>();
-
-    //  a bunch can be used to represent an encounter or a patient that have a bunch of documents bundled with.
+    protected HashMap<String, Type> typeMap = new HashMap();
+    protected HashMap<String, Integer> typeCounter = new HashMap();
+    protected HashMap<Integer, ArrayList<String>> ruleStore = new HashMap();
     protected int previousBunchId = -1;
-
     protected RecordRow previousRecordRow = null;
     private String annotator;
     private int runId;
     protected boolean overwriteTable = false;
 
-
-    public void initialize(UimaContext cont) {
-        Object parameterObject = cont.getConfigParameterValue(PARAM_SQLFILE);
-        String configFile = parameterObject != null ? (String) parameterObject : "conf/sqliteconfig.xml";
-
-        parameterObject = cont.getConfigParameterValue(PARAM_TABLENAME);
-        resultTableName = parameterObject != null && parameterObject.toString().trim().length() > 0 ? (String) parameterObject : "OUTPUT";
-        parameterObject = cont.getConfigParameterValue(PARAM_BUNCH_COLUMN_NAME);
-        bunchColumnName = parameterObject != null && parameterObject.toString().trim().length() > 0 ? (String) parameterObject : "BUNCH_ID";
-        parameterObject = cont.getConfigParameterValue(PARAM_AUTO_ID_ENABLED);
-        if (parameterObject != null && parameterObject instanceof Boolean && (Boolean) parameterObject != true)
-            autoIdEnabled = false;
-        String inferenceStr = (String) cont.getConfigParameterValue(PARAM_RULE_STR);
-        parameterObject = cont.getConfigParameterValue(PARAM_ANNOTATOR);
-        if (parameterObject != null && parameterObject instanceof String)
-            annotator = (String) parameterObject;
-        else
-            annotator = "uima";
-        parameterObject = cont.getConfigParameterValue(PARAM_VERSION);
-        if (parameterObject != null && parameterObject instanceof String && parameterObject.toString().trim().length() > 0)
-            runId = Integer.parseInt((String) parameterObject);
-        else
-            runId = -2;
-        Object value = cont.getConfigParameterValue(PARAM_OVERWRITETABLE);
-        if (value instanceof Boolean)
-            this.overwriteTable = ((Boolean) value);
-        else
-            this.overwriteTable = value.toString().toLowerCase().startsWith("t");
-        dao = EDAO.getInstance(new File(configFile));
-
-        dao.initiateTableFromTemplate("ANNOTATION_TABLE", resultTableName, overwriteTable);
-        BunchMixInferencer.parseRuleStr(inferenceStr, defaultBunchType, inferenceMap, typeCounter, ruleStore);
+    public BunchMixInferenceWriter() {
     }
 
-//
-//    protected void parseRuleStr(String ruleStr) {
-//        IOUtil ioUtil = new IOUtil(ruleStr, true);
-//        for (ArrayList<String> initRow : ioUtil.getInitiations()) {
-//            if (initRow.get(1).startsWith("@DefaultBunchConclusion") || initRow.get(1).startsWith("&DefaultBunchConclusion")) {
-//                String topic = initRow.get(2).trim();
-//                String defaultDocTypeName = initRow.get(3).trim();
-//                defaultBunchTypes.put(topic, defaultDocTypeName);
-//            }
-//        }
-//        for (ArrayList<String> row : ioUtil.getRuleCells()) {
-//            if (row.size() < 4) {
-//                System.err.println("Format error in the visit inference rule " + row.get(0) + "." +
-//                        "\n\t" + row);
-//            }
-//            int ruleId = Integer.parseInt(row.get(0));
-//            String topic = row.get(1).trim();
-//            if (!inferenceMap.containsKey(topic))
-//                inferenceMap.put(topic, new ArrayList<>());
-//            ArrayList<Object> inference = new ArrayList<>();
-////            0. ruleId; 1. bunch question name (topic); 2. bunch conclusion type; 2. evidence types;
-////			add visit conclusion type
-//            inference.add(ruleId);
-//            String visitTypeName = row.get(2).trim();
-//            inference.add(visitTypeName);
-//            String evidenceDocTypes = row.get(3).trim();
-////            save the value space for future counting support
-//            HashMap<String, Integer> evidencesMap = new HashMap<>();
-//            for (String evidenceDocType : evidenceDocTypes.split("[,;\\|]")) {
-//                evidenceDocType = evidenceDocType.trim();
-//                evidencesMap.put(evidenceDocType, 1);
-//                typeCounter.put(evidenceDocType, 0);
-//
-//            }
-//            inference.add(evidencesMap);
-//            inferenceMap.get(topic).add(inference);
-//        }
-//
-//
-//    }
+    public void initialize(UimaContext cont) {
+        Object parameterObject = cont.getConfigParameterValue("DBConfigFile");
+        String configFile = parameterObject != null ? (String)parameterObject : "conf/sqliteconfig.xml";
+        parameterObject = cont.getConfigParameterValue("ResultTableName");
+        resultTableName = parameterObject != null && parameterObject.toString().trim().length() > 0 ? (String)parameterObject : "OUTPUT";
+        parameterObject = cont.getConfigParameterValue("BunchColumnName");
+        bunchColumnName = parameterObject != null && parameterObject.toString().trim().length() > 0 ? (String)parameterObject : "BUNCH_ID";
+        parameterObject = cont.getConfigParameterValue("AutoIdEnabled");
+        if (parameterObject != null && parameterObject instanceof Boolean && !(Boolean)parameterObject) {
+            this.autoIdEnabled = false;
+        }
+
+        String inferenceStr = (String)cont.getConfigParameterValue("RuleFileOrStr");
+        parameterObject = cont.getConfigParameterValue("Annotator");
+        if (parameterObject != null && parameterObject instanceof String) {
+            this.annotator = (String)parameterObject;
+        } else {
+            this.annotator = "uima";
+        }
+
+        parameterObject = cont.getConfigParameterValue("Version");
+        if (parameterObject != null && parameterObject instanceof String && parameterObject.toString().trim().length() > 0) {
+            this.runId = Integer.parseInt((String)parameterObject);
+        } else {
+            this.runId = -2;
+        }
+
+        Object value = cont.getConfigParameterValue("OverWriteTable");
+        if (value instanceof Boolean) {
+            this.overwriteTable = (Boolean)value;
+        } else {
+            this.overwriteTable = value.toString().toLowerCase().startsWith("t");
+        }
+
+        dao = EDAO.getInstance(new File(configFile));
+        dao.initiateTableFromTemplate("ANNOTATION_TABLE", resultTableName, this.overwriteTable);
+        BunchMixInferencer.parseRuleStr(inferenceStr, this.defaultBunchType, this.inferenceMap, this.typeCounter, this.ruleStore);
+    }
 
     public void process(JCas jCas) throws AnalysisEngineProcessException {
         CAS cas = jCas.getCas();
-        if (typeMap.size() == 0) {
-            initMaps(cas);
+        if (this.typeMap.size() == 0) {
+            this.initMaps(cas);
         }
-        String serializedString;
+
         RecordRow recordRow = new RecordRow();
         FSIterator it = jCas.getAnnotationIndex(SourceDocumentInformation.type).iterator();
-        SourceDocumentInformation e;
         if (it.hasNext()) {
-            e = (SourceDocumentInformation) it.next();
-            serializedString = e.getUri();
+            SourceDocumentInformation e = (SourceDocumentInformation)it.next();
+            String serializedString = e.getUri();
             recordRow.deserialize(serializedString);
         }
+
         Object value = recordRow.getValueByColumnName(bunchColumnName);
         int currentBunchId = value == null ? 0 : Integer.parseInt(value.toString());
-        if (previousBunchId == -1) {
-            previousBunchId = currentBunchId;
-            previousRecordRow = recordRow;
-            clearCounter();
-        } else if (previousBunchId != currentBunchId) {
-            evaluateVisitCounts(previousRecordRow);
-            previousBunchId = currentBunchId;
-            previousRecordRow = recordRow;
-            clearCounter();
+        if (this.previousBunchId == -1) {
+            this.previousBunchId = currentBunchId;
+            this.previousRecordRow = recordRow;
+            this.clearCounter();
+        } else if (this.previousBunchId != currentBunchId) {
+            this.evaluateVisitCounts(this.previousRecordRow);
+            this.previousBunchId = currentBunchId;
+            this.previousRecordRow = recordRow;
+            this.clearCounter();
         }
 
-
-        if (typeMap.size() == 0) {
-            initMaps(cas);
+        if (this.typeMap.size() == 0) {
+            this.initMaps(cas);
         }
 
-        for (String typeName : typeCounter.keySet()) {
-            Iterator<AnnotationFS> iter = CasUtil.iterator(cas, typeMap.get(typeName));
-            while (iter.hasNext()) {
+        Iterator var9 = this.typeCounter.keySet().iterator();
+
+        while(var9.hasNext()) {
+            String typeName = (String)var9.next();
+            Iterator<AnnotationFS> iter = CasUtil.iterator(cas, (Type)this.typeMap.get(typeName));
+
+            while(iter.hasNext()) {
                 iter.next();
-                if (typeCounter.containsKey(typeName))
-                    typeCounter.put(typeName, typeCounter.get(typeName) + 1);
-                else
-                    typeCounter.put(typeName, 1);
-
+                if (this.typeCounter.containsKey(typeName)) {
+                    this.typeCounter.put(typeName, (Integer)this.typeCounter.get(typeName) + 1);
+                } else {
+                    this.typeCounter.put(typeName, 1);
+                }
             }
         }
 
     }
 
     protected void evaluateVisitCounts(RecordRow previousRecordRow) {
-        for (String topic : inferenceMap.keySet()) {
-            ArrayList<ArrayList<Object>> rules = inferenceMap.get(topic);
+        Iterator var2 = this.inferenceMap.keySet().iterator();
+
+        while(var2.hasNext()) {
+            String topic = (String)var2.next();
+            ArrayList<ArrayList<Object>> rules = (ArrayList)this.inferenceMap.get(topic);
             boolean matched = true;
-            for (ArrayList<Object> rule : rules) {
-                HashMap<String, Integer> evidencesMap = (HashMap<String, Integer>) rule.get(2);
+            Iterator var6 = rules.iterator();
+
+            label40:
+            while(var6.hasNext()) {
+                ArrayList<Object> rule = (ArrayList)var6.next();
+                HashMap<String, Integer> evidencesMap = (HashMap)rule.get(2);
                 matched = true;
-                for (String typeName : evidencesMap.keySet()) {
-                    if (!typeCounter.containsKey(typeName) || typeCounter.get(typeName) < evidencesMap.get(typeName))
-                        matched = false;
-                }
-                if (matched) {
-                    addBunchConclusion(previousRecordRow, rule);
-                    break;
+                Iterator var9 = evidencesMap.keySet().iterator();
+
+                while(true) {
+                    String typeName;
+                    do {
+                        if (!var9.hasNext()) {
+                            if (matched) {
+                                this.addBunchConclusion(previousRecordRow, rule);
+                                break label40;
+                            }
+                            continue label40;
+                        }
+
+                        typeName = (String)var9.next();
+                    } while(this.typeCounter.containsKey(typeName) && (Integer)this.typeCounter.get(typeName) >= (Integer)evidencesMap.get(typeName));
+
+                    matched = false;
                 }
             }
+
             if (!matched) {
-                addBunchConclusion(previousRecordRow, Arrays.asList(new String[]{"", defaultBunchType.get(topic), ""}));
+                this.addBunchConclusion(previousRecordRow, Arrays.asList("", (String)this.defaultBunchType.get(topic), ""));
             }
         }
 
     }
 
     protected void addBunchConclusion(RecordRow previousRecordRow, List<Object> rule) {
-        String typeName = (String) rule.get(1);
-        if (runId == -2 && previousRecordRow.getValueByColumnName("RUN_ID") != null)
-            runId = Integer.parseInt(previousRecordRow.getStrByColumnName("RUN_ID"));
-        RecordRow recordRow = new RecordRow()
-                .addCell("RUN_ID", runId)
-                .addCell(bunchColumnName, previousRecordRow.getValueByColumnName(bunchColumnName))
-                .addCell("TYPE", typeName)
-                .addCell("ANNOTATOR", annotator)
-                .addCell("BEGIN", 0)
-                .addCell("END", 1)
-                .addCell("SNIPPET_BEGIN", 1)
-                .addCell("TEXT", "B")
-                .addCell("FEATURES", "")
-                .addCell("SNIPPET", "B");
-//        String visitConclusion = (String) rule.get(1);
-        if (runId > -1)
+        String typeName = (String)rule.get(1);
+        if (this.runId == -2 && previousRecordRow.getValueByColumnName("RUN_ID") != null) {
+            this.runId = Integer.parseInt(previousRecordRow.getStrByColumnName("RUN_ID"));
+        }
+
+        RecordRow recordRow = (new RecordRow()).addCell("RUN_ID", this.runId).addCell(bunchColumnName, previousRecordRow.getValueByColumnName(bunchColumnName)).addCell("TYPE", typeName).addCell("ANNOTATOR", this.annotator).addCell("BEGIN", 0).addCell("END", 1).addCell("SNIPPET_BEGIN", 1).addCell("TEXT", "B").addCell("FEATURES", "").addCell("SNIPPET", "B");
+        if (this.runId > -1) {
             dao.insertRecord(resultTableName, recordRow);
-        else
+        } else {
             AnnotationLogger.records.add(recordRow);
+        }
+
     }
 
-    /**
-     * Initiate typeMap and featureMap, so that Type and Feature can be easier and faster called
-     *
-     * @param cas UIMA CAS object
-     */
     protected void initMaps(CAS cas) {
-        for (String typeName : typeCounter.keySet()) {
+        Iterator var2 = this.typeCounter.keySet().iterator();
+
+        while(var2.hasNext()) {
+            String typeName = (String)var2.next();
             Type type = CasUtil.getAnnotationType(cas, DeterminantValueSet.checkNameSpace(typeName));
-            if (!typeMap.containsKey(typeName))
-                typeMap.put(typeName, type);
+            if (!this.typeMap.containsKey(typeName)) {
+                this.typeMap.put(typeName, type);
+            }
         }
+
     }
 
     protected void clearCounter() {
-        for (String typeName : typeCounter.keySet()) {
-            typeCounter.put(typeName, 0);
-        }
-    }
+        Iterator var1 = this.typeCounter.keySet().iterator();
 
+        while(var1.hasNext()) {
+            String typeName = (String)var1.next();
+            this.typeCounter.put(typeName, 0);
+        }
+
+    }
 
     public void collectionProcessComplete() {
-        if (previousBunchId != -1 && previousRecordRow != null) {
-            evaluateVisitCounts(previousRecordRow);
+        if (this.previousBunchId != -1 && this.previousRecordRow != null) {
+            this.evaluateVisitCounts(this.previousRecordRow);
         }
+
     }
 
-    @Override
     public LinkedHashMap<String, TypeDefinition> getTypeDefs(String ruleStr) {
-        return new LinkedHashMap<>();
+        return new LinkedHashMap();
     }
 }

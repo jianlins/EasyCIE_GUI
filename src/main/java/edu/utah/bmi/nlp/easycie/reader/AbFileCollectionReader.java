@@ -89,7 +89,7 @@ public class AbFileCollectionReader extends CollectionReader_ImplBase {
     protected int mCurrentIndex;
 
     /**
-     * @see org.apache.uima.collection.CollectionReader_ImplBase#initialize()
+     * @see CollectionReader_ImplBase#initialize()
      */
     public void initialize() throws ResourceInitializationException {
         File directory = new File(((String) getConfigParameterValue(PARAM_INPUTDIR)).trim());
@@ -141,7 +141,7 @@ public class AbFileCollectionReader extends CollectionReader_ImplBase {
     }
 
     /**
-     * @see org.apache.uima.collection.CollectionReader#getNext(org.apache.uima.cas.CAS)
+     * @see org.apache.uima.collection.CollectionReader#getNext(CAS)
      */
     public void getNext(CAS aCAS) throws IOException, CollectionException {
         JCas jcas;

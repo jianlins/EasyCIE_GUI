@@ -60,7 +60,7 @@ import javax.swing.border.TitledBorder;
 import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
-import edu.utah.bmi.nlp.uima.GUICPERunner;
+import edu.utah.bmi.nlp.uima.AdaptableCPEDescriptorRunner;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
 import org.apache.uima.UIMAException;
 import org.apache.uima.UIMAFramework;
@@ -185,7 +185,7 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
 
     private CollectionProcessingEngine mCPE;
 
-    private GUICPERunner adaptableUIMACPEDescriptorRunner;
+    private AdaptableCPEDescriptorRunner adaptableUIMACPEDescriptorRunner;
 
     private boolean indeterminateProgressPause;
 
@@ -577,7 +577,7 @@ public class AdaptableCpmPanel extends JPanel implements ActionListener, FileSel
 //            // start processing
 //            mCPE.process();
 
-            adaptableUIMACPEDescriptorRunner = GUICPERunner.getInstance(currentCpeDesc.getSourceUrl().getFile(), "", logger, "classes");
+            adaptableUIMACPEDescriptorRunner = new AdaptableCPEDescriptorRunner(currentCpeDesc.getSourceUrl().getFile(), "", logger, "classes");
             adaptableUIMACPEDescriptorRunner.compileCPE();
             mCPE = adaptableUIMACPEDescriptorRunner.getmCPE();
             adaptableUIMACPEDescriptorRunner.run();

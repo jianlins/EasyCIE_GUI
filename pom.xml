@@ -3,10 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>edu.utah.bmi.nlp</groupId>
-    <artifactId>easycie-gui</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
     <properties>
         <!--for packaging jdk included version-->
         <!--<java.path>jdk1.8/bin/java</java.path>-->
@@ -14,12 +10,14 @@
         <!--for packaging without jdk version-->
         <java.path>java</java.path>
         <java.win.path>java</java.win.path>
-        <current.version>3.1.0-SNAPSHOT</current.version>
+        <current.version>3.0.4-SNAPSHOT</current.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <nlp.core.version>1.4.1.5-jdk1.8</nlp.core.version>
-        <kotlin.version>1.4.10</kotlin.version>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <nlp.core.version>1.3.2.1-SNAPSHOT</nlp.core.version>
+        <kotlin.version>1.3.50</kotlin.version>
     </properties>
+    <groupId>edu.utah.bmi.nlp</groupId>
+    <artifactId>easycie-gui</artifactId>
+    <version>3.0.3-SNAPSHOT</version>
     <name>EasyCIE Project</name>
     <url>https://github.com/jianlins/EasyCIE_GUI</url>
     <description>The library of EasyCIE.</description>
@@ -58,9 +56,9 @@
     </distributionManagement>
     <dependencies>
         <dependency>
-            <groupId>org.dom4j</groupId>
+            <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
-            <version>2.1.3</version>
+            <version>1.6.1</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -74,14 +72,33 @@
         </dependency>
         <dependency>
             <groupId>edu.utah.bmi.nlp</groupId>
-            <artifactId>easycie-console</artifactId>
+            <artifactId>nlp-core</artifactId>
             <version>${nlp.core.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>edu.utah.bmi.nlp</groupId>
+            <artifactId>rush</artifactId>
+            <version>${nlp.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.utah.bmi.nlp</groupId>
+            <artifactId>fastner</artifactId>
+            <version>${nlp.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.utah.bmi.nlp</groupId>
+            <artifactId>fastcontext</artifactId>
+            <version>${nlp.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.utah.bmi.nlp</groupId>
+            <artifactId>section-detector-r</artifactId>
+            <version>${nlp.core.version}</version>
+        </dependency>
         <!--<dependency>-->
-        <!--<groupId>edu.utah.bmi.blulab</groupId>-->
-        <!--<artifactId>domainontology</artifactId>-->
-        <!--<version>2016.12.2-SNAPSHOT</version>-->
+            <!--<groupId>edu.utah.bmi.blulab</groupId>-->
+            <!--<artifactId>domainontology</artifactId>-->
+            <!--<version>2016.12.2-SNAPSHOT</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>commons-cli</groupId>
@@ -98,6 +115,11 @@
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-tools-ant</artifactId>
             <version>3.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.21.0.1</version>
         </dependency>
         <dependency>
             <groupId>ch.vorburger.mariaDB4j</groupId>
@@ -124,18 +146,13 @@
         <dependency>
             <groupId>edu.utah.bmi.pojava</groupId>
             <artifactId>pojava</artifactId>
-            <version>3.0.9</version>
+            <version>3.0.8</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.5.2</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.solr</groupId>
-            <artifactId>solr-solrj</artifactId>
-            <version>8.6.2</version>
         </dependency>
     </dependencies>
     <build>
@@ -161,61 +178,52 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.zenjava</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>8.8.3</version>
-                <configuration>
-                    <mainClass>edu.utah.bmi.simple.gui.controller.Main</mainClass>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-gpg-plugin</artifactId>-->
+<!--                <version>1.6</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>sign-artifacts</id>-->
+<!--                        <phase>verify</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>sign</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
 
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-gpg-plugin</artifactId>-->
-            <!--                <version>1.6</version>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <id>sign-artifacts</id>-->
-            <!--                        <phase>verify</phase>-->
-            <!--                        <goals>-->
-            <!--                            <goal>sign</goal>-->
-            <!--                        </goals>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
-
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-dependency-plugin</artifactId>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <id>copy-dependencies</id>-->
-            <!--                        <phase>prepare-package</phase>-->
-            <!--                        <goals>-->
-            <!--                            <goal>copy-dependencies</goal>-->
-            <!--                        </goals>-->
-            <!--                        <configuration>-->
-            <!--                            <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
-            <!--                            <overWriteReleases>false</overWriteReleases>-->
-            <!--                            <overWriteSnapshots>false</overWriteSnapshots>-->
-            <!--                            <overWriteIfNewer>true</overWriteIfNewer>-->
-            <!--                            <excludeGroupIds>org.apache.maven.plugins</excludeGroupIds>-->
-            <!--                            <excludeGroupIds>junit</excludeGroupIds>-->
-            <!--                            <excludeGroupIds>org.apache.maven</excludeGroupIds>-->
-            <!--                            <excludeGroupIds>ch.vorburger.mariaDB4j</excludeGroupIds>-->
-            <!--                        </configuration>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-jar-plugin</artifactId>-->
-            <!--                <version>2.3.1</version>-->
-            <!--                <configuration>-->
-            <!--                    <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
-            <!--                </configuration>-->
-            <!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-dependency-plugin</artifactId>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>copy-dependencies</id>-->
+<!--                        <phase>prepare-package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-dependencies</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
+<!--                            <overWriteReleases>false</overWriteReleases>-->
+<!--                            <overWriteSnapshots>false</overWriteSnapshots>-->
+<!--                            <overWriteIfNewer>true</overWriteIfNewer>-->
+<!--                            <excludeGroupIds>org.apache.maven.plugins</excludeGroupIds>-->
+<!--                            <excludeGroupIds>junit</excludeGroupIds>-->
+<!--                            <excludeGroupIds>org.apache.maven</excludeGroupIds>-->
+<!--                            <excludeGroupIds>ch.vorburger.mariaDB4j</excludeGroupIds>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-jar-plugin</artifactId>-->
+<!--                <version>2.3.1</version>-->
+<!--                <configuration>-->
+<!--                    <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -226,37 +234,22 @@
                         <phase>validate</phase>
                         <configuration>
                             <target>
-                                <replaceregexp
-                                        file="src/main/java/edu/utah/bmi/simple/gui/controller/RootLayoutController.java"
-                                        match="\(version [^\)]+\)" replace="\(version ${project.version}\)" byline="true"/>
+                                <replaceregexp file="src/main/java/edu/utah/bmi/simple/gui/controller/RootLayoutController.java"
+                                               match="\(version [^\)]+\)" replace="\(version ${current.version}\)" byline="true"/>
                             </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>
                         </goals>
                     </execution>
-                    <!--                    <execution>-->
-                    <!--                        <id>update-version-in-gui</id>-->
-                    <!--                        <phase>validate</phase>-->
-                    <!--                        <configuration>-->
-                    <!--                            <target>-->
-                    <!--                                <exec executable="bash">-->
-                    <!--                                    <arg value="script/update_version_in_src.sh"/>-->
-                    <!--                                    <arg value="${current.version}"/>-->
-                    <!--                                </exec>-->
-                    <!--                            </target>-->
-                    <!--                        </configuration>-->
-                    <!--                        <goals>-->
-                    <!--                            <goal>run</goal>-->
-                    <!--                        </goals>-->
-                    <!--                    </execution>-->
 <!--                    <execution>-->
-<!--                        <id>compile-jfx</id>-->
-<!--                        <phase>package</phase>-->
+<!--                        <id>update-version-in-gui</id>-->
+<!--                        <phase>validate</phase>-->
 <!--                        <configuration>-->
 <!--                            <target>-->
 <!--                                <exec executable="bash">-->
-<!--                                    <arg value="script/compile_jfx.sh"/>-->
+<!--                                    <arg value="script/update_version_in_src.sh"/>-->
+<!--                                    <arg value="${current.version}"/>-->
 <!--                                </exec>-->
 <!--                            </target>-->
 <!--                        </configuration>-->
@@ -265,25 +258,35 @@
 <!--                        </goals>-->
 <!--                    </execution>-->
                     <execution>
+                        <id>compile-jfx</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <target>
+                                <exec executable="bash">
+                                    <arg value="script/compile_jfx.sh"/>
+                                </exec>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <id>reset_permission</id>
                         <phase>package</phase>
                         <configuration>
                             <target>
                                 <mkdir dir="${project.build.directory}/deploy/data"/>
                                 <copy todir="${project.build.directory}/deploy/lib">
-                                    <fileset dir="${project.basedir}/lib"/>
+                                    <fileset dir="${project.basedir}/lib"></fileset>
                                 </copy>
-                                <copy todir="${project.build.directory}/deploy/lib">
-                                    <fileset dir="${project.basedir}/lib"/>
+                                <copy todir="${project.build.directory}/deploy/licenses">
+                                    <fileset dir="${project.basedir}/licenses"></fileset>
                                 </copy>
-                                <copy todir="${project.build.directory}/deploy/data/demo_input">
-                                    <fileset dir="${project.basedir}/data/demo_input"/>
-                                </copy>
-                                <copy file="${project.build.directory}/jfx/app/easycie-gui-${project.version}-jfx.jar"
-                                      tofile="${project.build.directory}/deploy/easycie-gui.jar"/>
+                                <copy file="${project.build.directory}/jfx/app/easycie-gui-${current.version}-jfx.jar" tofile="${project.build.directory}/deploy/easycie-gui.jar"/>
 
-                                <chmod file="${project.build.directory}/deploy/run_gui" perm="775"/>
-                                <chmod file="${project.build.directory}/deploy/run_gui.bat" perm="775"/>
+                                <chmod file="${project.build.directory}/deploy/run_gui" perm="755"/>
+                                <chmod file="${project.build.directory}/deploy/run_gui.bat" perm="755"/>
                             </target>
                         </configuration>
                         <goals>
@@ -364,24 +367,31 @@
                         </configuration>
                     </execution>
                     <!--<execution>-->
-                    <!--<id>copy-input-data</id>-->
-                    <!--<phase>package</phase>-->
-                    <!--<goals>-->
-                    <!--<goal>copy-resources</goal>-->
-                    <!--</goals>-->
-                    <!--<configuration>-->
-                    <!--<outputDirectory>${project.build.directory}/deploy/data/input</outputDirectory>-->
-                    <!--<resources>-->
-                    <!--<resource>-->
-                    <!--<directory>data/input</directory>-->
-                    <!--</resource>-->
-                    <!--</resources>-->
-                    <!--</configuration>-->
+                        <!--<id>copy-input-data</id>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>copy-resources</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<outputDirectory>${project.build.directory}/deploy/data/input</outputDirectory>-->
+                            <!--<resources>-->
+                                <!--<resource>-->
+                                    <!--<directory>data/input</directory>-->
+                                <!--</resource>-->
+                            <!--</resources>-->
+                        <!--</configuration>-->
                     <!--</execution>-->
                 </executions>
             </plugin>
 
-
+            <plugin>
+                <groupId>com.zenjava</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>8.8.3</version>
+                <configuration>
+                    <mainClass>edu.utah.bmi.simple.gui.controller.Main</mainClass>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -403,7 +413,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>${maven.compiler.target}</jvmTarget>
+                    <jvmTarget>1.8</jvmTarget>
                 </configuration>
             </plugin>
             <plugin>
@@ -427,8 +437,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>${maven.compiler.target}</source>
-                    <target>${maven.compiler.target}</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -467,4 +477,3 @@
         </profile>
     </profiles>
 </project>
-

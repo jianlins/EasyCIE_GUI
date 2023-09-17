@@ -180,14 +180,14 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
                     if (domain.equals("AnnotationBase") || domain.equals("Annotation"))
                         continue;
                     String featureName = feature.getShortName();
-                    Object value=AnnotationOper.getFeatureValue(featureName, thisAnnotation);
+                    String value = getValue(thisAnnotation, featureName);
 //					System.out.println(featureName + ":v" + value);
 
                     switch (featureName) {
                         case "Annotator":
                             record.addCell("ANNOTATOR", this.annotator);
                         default:
-                            if (value != null && (value+"").trim().length() > 0) {
+                            if (value != null && value.trim().length() > 0) {
                                 sb.append(featureName + ": " + value);
 //                sb.append(value);
                                 sb.append("\n");
@@ -255,6 +255,37 @@ public class AnnotationLogger extends JCasAnnotator_ImplBase {
         return record;
     }
 
+    private String getValue(Annotation thisAnnotation, String featureName) {
+        String value = "";
+        Class cls = thisAnnotation.getClass();
+        if (!getMethodsMap.containsKey(cls)) {
+            getMethodsMap.put(cls, new HashMap<>());
+        }
+        try {
+            if (!getMethodsMap.get(cls).containsKey(featureName)) {
+                Method m = null;
+                String methodName = AnnotationOper.inferGetMethodName(featureName);
+                m = thisAnnotation.getClass().getMethod(methodName);
+                value = m.invoke(thisAnnotation) + "";
+                getMethodsMap.get(cls).put(featureName, m);
+            } else {
+                Object obj = getMethodsMap.get(cls).get(featureName).invoke(thisAnnotation);
+                if (obj instanceof FSArray) {
+                    value = serilizeFSArray((FSArray) obj);
+//					System.out.println(value);
+                } else {
+                    value = obj + "";
+                }
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return value;
+    }
 
     private String serilizeFSArray(FSArray ary) {
         StringBuilder sb = new StringBuilder();

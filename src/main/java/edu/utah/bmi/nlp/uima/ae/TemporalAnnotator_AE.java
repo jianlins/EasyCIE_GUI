@@ -142,7 +142,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
         }
 //      default attribute is a string, parse it to an integer
         for (Integer ruleId : this.fastNER.fastRule.ruleStore.keySet()) {
-            NERRule rule = (NERRule) this.fastNER.fastRule.ruleStore.get(ruleId);
+            NERRule rule = this.fastNER.fastRule.ruleStore.get(ruleId);
             if (rule.attributes.size() > 0) {
                 rule.attributes.set(0, Integer.parseInt("" + rule.attributes.get(0)));
                 this.fastNER.fastRule.ruleStore.put(ruleId, rule);
@@ -236,7 +236,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
     }
 
     protected ArrayList<Annotation> indexSections(JCas jCas,
-                                                  HashSet<Class<? extends Annotation>> includeSectionClasses,
+                                                  HashSet<Class> includeSectionClasses,
                                                   IntervalST<Integer> sectionTree) {
         ArrayList<Annotation> sections = new ArrayList<>();
         for (Class sectionCls : includeSectionClasses) {
@@ -337,7 +337,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
      * @param recordDate document record date
      * @return a list of date mention annotations
      */ ArrayList<Annotation> parseDateMentions(JCas jcas, Annotation seg, HashMap<String, ArrayList<Span>> dates,
-                                                DateTime recordDate) {
+                                                      DateTime recordDate) {
         String text;
         int offset;
         if (cner) {
@@ -454,7 +454,7 @@ public class TemporalAnnotator_AE extends FastCNER_AE_General {
                     break;
                 case "REL_DATE":
                     for (Span span : entry.getValue()) {
-                        NERRule rule = (NERRule) fastNER.getMatchedRuleString(span);
+                        NERRule rule = fastNER.getMatchedRuleString(span);
                         int unit = 0;
                         if (rule.attributes.size() > 0) {
                             unit = (int) rule.attributes.get(0);

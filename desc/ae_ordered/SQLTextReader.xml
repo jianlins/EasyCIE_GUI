@@ -65,6 +65,13 @@
                 <mandatory>false</mandatory>
             </configurationParameter>
             <configurationParameter>
+                <name>EnableBunchDetection</name>
+                <description>Whether to enable bunch detection. When enabled, the last document in a bunch will be added a BunchEnd annotation.</description>
+                <type>Boolean</type>
+                <multiValued>false</multiValued>
+                <mandatory>false</mandatory>
+            </configurationParameter>
+            <configurationParameter>
                 <name>DocColumnName</name>
                 <description>The column name of text in DocTable.
                 </description>
@@ -104,6 +111,12 @@
                 <name>CountQueryName</name>
                 <value>
                     <string>masterCountQuery</string>
+                </value>
+            </nameValuePair>
+            <nameValuePair>
+                <name>EnableBunchDetection</name>
+                <value>
+                    <boolean>true</boolean>
                 </value>
             </nameValuePair>
             <nameValuePair>

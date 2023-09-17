@@ -1,9 +1,14 @@
 package edu.utah.bmi.nlp.uima;
 
+import edu.utah.bmi.nlp.core.DeterminantValueSet;
+import edu.utah.bmi.nlp.easycie.writer.SQLWriterCasConsumer;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
+import edu.utah.bmi.nlp.sql.RecordRowIterator;
+import edu.utah.bmi.nlp.sql.TDAO;
 import edu.utah.bmi.nlp.uima.loggers.ConsoleLogger;
 import edu.utah.bmi.nlp.uima.loggers.NLPDBLogger;
+import org.apache.uima.collection.base_cpm.CasProcessor;
 import org.apache.uima.collection.impl.CollectionReaderDescription_impl;
 import org.apache.uima.collection.metadata.CpeCasProcessor;
 import org.apache.uima.collection.metadata.CpeCollectionReader;
@@ -20,7 +25,7 @@ import static java.lang.Thread.sleep;
 public class AdaptableUIMACPEDescriptorRunnerTest {
     @Test
     public void testBasic() throws CpeDescriptorException {
-        AdaptableCPEDescriptorGUIRunner runner = new AdaptableCPEDescriptorGUIRunner("desc/cpe/n2c2_mi2.xml", "test", null);
+        AdaptableCPEDescriptorRunner runner = new AdaptableCPEDescriptorRunner("desc/cpe/n2c2_mi2.xml", "test", null);
         CpeCasProcessor[] cpeCasProcessors = runner.currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors();
         for (CpeCasProcessor cpeCasProcessor : cpeCasProcessors) {
             System.out.println(cpeCasProcessor.getName());
@@ -35,7 +40,7 @@ public class AdaptableUIMACPEDescriptorRunnerTest {
                 "@splitter:|\n" +
                 "very concept|ConceptA\n" +
                 "tee|ConceptB");
-        AdaptableCPEDescriptorGUIRunner runner = AdaptableCPEDescriptorGUIRunner.getInstance("desc/cpe/n2c2_mi2.xml", null, configs);
+        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/n2c2_mi2.xml", null, configs);
         CpeCasProcessor[] cpeCasProcessors = runner.currentCpeDesc.getCpeCasProcessors().getAllCpeCasProcessors();
         for (CpeCasProcessor cpeCasProcessor : cpeCasProcessors) {
             System.out.println(cpeCasProcessor.getName());
@@ -54,7 +59,7 @@ public class AdaptableUIMACPEDescriptorRunnerTest {
                 "tee|ConceptB");
         configs.put("SQL_Meta_Text_Reader/MetaColumns", "Code,Label");
 
-        AdaptableCPEDescriptorGUIRunner runner = AdaptableCPEDescriptorGUIRunner.getInstance("desc/cpe/demo_meta_cpe.xml", null, configs);
+        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/demo_meta_cpe.xml", null, configs);
         LinkedHashMap<String, LinkedHashMap<String, String>> configMap = new LinkedHashMap<>();
         CpeCollectionReader[] readers = runner.currentCpeDesc.getAllCollectionCollectionReaders();
         for (CpeCollectionReader reader : readers) {
@@ -92,7 +97,7 @@ public class AdaptableUIMACPEDescriptorRunnerTest {
 //        configs.put("SentenceInferencer/"+DeterminantValueSet.PARAM_RULE_STR, "");+
         File dbConfigFile = new File("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml");
         EDAO dao = EDAO.getInstance(dbConfigFile, true, false);
-        AdaptableCPEDescriptorGUIRunner runner = AdaptableCPEDescriptorGUIRunner.getInstance("desc/cpe/smoke_cpe2.xml", "test",
+        AdaptableCPEDescriptorRunner runner = AdaptableCPEDescriptorRunner.getInstance("desc/cpe/smoke_cpe2.xml", "test",
                 new NLPDBLogger("/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/conf/smoke3/sqliteconfig.xml", "test"), configs
                 , "classes");
 //        runner.setUIMALogger(new ConsoleLogger());

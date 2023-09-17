@@ -5,6 +5,8 @@ import edu.utah.bmi.nlp.easycie.MetaDataCommonFunctions;
 import edu.utah.bmi.nlp.sql.EDAO;
 import edu.utah.bmi.nlp.sql.RecordRow;
 import edu.utah.bmi.nlp.sql.RecordRowIterator;
+import edu.utah.bmi.nlp.type.system.BunchEnd;
+import org.apache.uima.UIMA_IllegalArgumentException;
 import org.apache.uima.UimaContext;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
@@ -63,13 +65,29 @@ public class SQLTextReader extends CasCollectionReader_ImplBase {
             description = "The dataset id (when multiple dataset is stored in the input table), default is '0.'")
     protected String datasetId;
 
+    public static final String PARAM_ENABLE_BUNCH_DETECTION = "EnableBunchDetection";
+    @ConfigurationParameter(name = PARAM_ENABLE_BUNCH_DETECTION, mandatory = false, defaultValue = "true",
+            description = "Whether to enable bunch detection. When enabled, the last document in a bunch will" +
+                    " be added a BunchEnd annotation.")
+    protected boolean enableBunchDetection;
+
+    public static final String PARAM_BUNCH_COLUMN_NAME = "BunchColumnName";
+    @ConfigurationParameter(name = PARAM_BUNCH_COLUMN_NAME, mandatory = false, defaultValue = "BUNCH_ID",
+            description = "The name of the column to hold the bunch ids.")
+    protected String bunchColumnName;
+
+    public static final String PARAM_DOCID_COLUMN_NAME = "DocIdColumnName";
+    @ConfigurationParameter(name = PARAM_DOCID_COLUMN_NAME, mandatory = false, defaultValue = "DOC_ID",
+            description = "The name of the column to hold the bunch ids.")
+    protected String docIdColumnName;
+
     protected File dbConfigFile;
     public static EDAO dao = null;
     protected int mCurrentIndex, totalDocs;
     protected RecordRowIterator recordIterator;
+    protected RecordRow previousRecordRow = null;
     @Deprecated
     public static boolean debug = false;
-
 
     public void initialize(UimaContext cont) {
         readConfigurations();
@@ -81,43 +99,87 @@ public class SQLTextReader extends CasCollectionReader_ImplBase {
         dbConfigFile = new File(dbConfigFilePath);
         dao = EDAO.getInstance(this.dbConfigFile);
     }
+    protected String readConfigureString(String parameterName, String defaultValue) {
+        Object tmpObj = this.getConfigParameterValue(parameterName);
+        if (tmpObj == null) {
+            if (defaultValue == null) {
+                throw new UIMA_IllegalArgumentException("parameter not set", new Object[]{parameterName, this.getMetaData().getName()});
+            } else {
+                tmpObj = defaultValue;
+            }
+        }
+        return (tmpObj + "").trim();
+    }
 
     protected void addDocs() {
         totalDocs = dao.countRecords(countSqlName, docTableName, datasetId);
         if (logger.isLoggable(Level.INFO))
             System.out.println("Total documents need to be processed: " + totalDocs);
         recordIterator = dao.queryRecordsFromPstmt(querySqlName, docTableName, datasetId);
+        if (enableBunchDetection) {
+            if (recordIterator != null && recordIterator.hasNext()) {
+                previousRecordRow = recordIterator.next();
+            }
+        }
     }
 
     public boolean hasNext() {
-
-        return recordIterator != null && recordIterator.hasNext();
+        if (!enableBunchDetection)
+            return recordIterator != null && recordIterator.hasNext();
+        return previousRecordRow != null;
     }
 
     public void getNext(CAS aCAS) throws CollectionException {
-        RecordRow currentRecord = recordIterator.next();
-        String text = (String) currentRecord.getValueByColumnName(docColumnName);
+        if (!enableBunchDetection) {
+            RecordRow currentRecord = recordIterator.next();
+            logger.finest(currentRecord.getStrByColumnName(bunchColumnName) + "\t" + currentRecord.getStrByColumnName(docIdColumnName));
+            getJCas(aCAS, currentRecord);
+        } else {
+            JCas jCas = getJCas(aCAS, previousRecordRow);
+            logger.finest(previousRecordRow.getStrByColumnName(bunchColumnName) + "\t" + previousRecordRow.getStrByColumnName(docIdColumnName));
+            if ((recordIterator != null && recordIterator.hasNext())) {
+                RecordRow currentRecord = recordIterator.next();
+                if (!currentRecord.getValueByColumnName(bunchColumnName).equals(previousRecordRow.getValueByColumnName(bunchColumnName))) {
+                    BunchEnd bunchEnd = new BunchEnd(jCas);
+                    bunchEnd.addToIndexes();
+                    logger.finest("\tBunchEnd");
+                }
+                previousRecordRow = currentRecord;
+            } else {
+                BunchEnd bunchEnd = new BunchEnd(jCas);
+                bunchEnd.addToIndexes();
+                logger.finest("\tBunchEnd");
+                previousRecordRow = null;
+            }
+        }
+        mCurrentIndex++;
+    }
+
+    protected JCas getJCas(CAS aCAS, RecordRow recordRow) {
+        String text = recordRow.getStrByColumnName(docColumnName);
+        String docId = recordRow.getStrByColumnName(docIdColumnName);
+        if (text == null)
+            text = "No NOTES associated.";
+        if (docId == null || docId.equals("0")) {
+            recordRow.addCell(docIdColumnName, "0");
+        }
         if (trimText) {
             text = text.replaceAll("(\\n[^\\w\\p{Punct}]+\\n)", "\n\n")
                     .replaceAll("(\\n\\s*)+(?:\\n)", "\n\n")
                     .replaceAll("^(\\n\\s*)+(?:\\n)", "")
                     .replaceAll("[^\\w\\p{Punct}\\s]", " ");
         }
-        logger.finest("Read document: " + currentRecord.getStrByColumnName("DOC_NAME"));
-        if (text == null)
-            text = "";
-        JCas jcas;
+        JCas jCas = null;
         try {
-            jcas = aCAS.getJCas();
-        } catch (CASException var6) {
-            throw new CollectionException(var6);
+            jCas = aCAS.getJCas();
+            jCas.setDocumentText(text);
+            SourceDocumentInformation srcDocInfo = MetaDataCommonFunctions.genSourceDocumentInformationAnno(jCas, recordRow, docColumnName, text.length());
+            srcDocInfo.setLastSegment(this.mCurrentIndex == this.totalDocs);
+            srcDocInfo.addToIndexes();
+        } catch (CASException e) {
+            logger.warning(e.toString());
         }
-        jcas.setDocumentText(text);
-        SourceDocumentInformation srcDocInfo = MetaDataCommonFunctions.genSourceDocumentInformationAnno(jcas, currentRecord, docColumnName, text.length());
-
-        srcDocInfo.setLastSegment(this.mCurrentIndex == this.totalDocs);
-        srcDocInfo.addToIndexes();
-        mCurrentIndex++;
+        return jCas;
     }
 
 

@@ -1,3 +1,2 @@
-#!/usr/bin/env bash
 cd "$( dirname "$0" )";
 ${java.path} -cp "lib/*:./classes" edu.utah.bmi.simple.gui.controller.Main

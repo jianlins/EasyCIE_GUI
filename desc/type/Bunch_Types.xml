@@ -44,5 +44,11 @@
                 </featureDescription>
             </features>
         </typeDescription>
+        <typeDescription>
+            <name>edu.utah.bmi.nlp.type.system.BunchEnd</name>
+            <description/>
+            <supertypeName>edu.utah.bmi.nlp.type.system.EntityBASE</supertypeName>
+            <features/>
+        </typeDescription>
     </types>
 </typeSystemDescription>
