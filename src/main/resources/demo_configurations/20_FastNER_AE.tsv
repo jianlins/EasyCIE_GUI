@@ -11,8 +11,10 @@ diabetes	DISEASE
 hematuria	DISEASE
 hypertension	DISEASE
 subdural bleed	DISEASE
+Pulmonary embolism	DISEASE
 feeding tube	TREATMENT
 crystalloids	TREATMENT
 IV fluid	TREATMENT
 Diltiazem	TREATMENT
 Lopressor	TREATMENT
+IVC filter	TREATMENT

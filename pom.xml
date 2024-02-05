@@ -17,7 +17,7 @@
     </properties>
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>easycie-gui</artifactId>
-    <version>3.0.3-SNAPSHOT</version>
+    <version>3.0.4-SNAPSHOT</version>
     <name>EasyCIE Project</name>
     <url>https://github.com/jianlins/EasyCIE_GUI</url>
     <description>The library of EasyCIE.</description>
@@ -227,7 +227,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.6</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>default-feature-install</id>
@@ -242,21 +242,6 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>update-version-in-gui</id>-->
-<!--                        <phase>validate</phase>-->
-<!--                        <configuration>-->
-<!--                            <target>-->
-<!--                                <exec executable="bash">-->
-<!--                                    <arg value="script/update_version_in_src.sh"/>-->
-<!--                                    <arg value="${current.version}"/>-->
-<!--                                </exec>-->
-<!--                            </target>-->
-<!--                        </configuration>-->
-<!--                        <goals>-->
-<!--                            <goal>run</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
                     <execution>
                         <id>compile-jfx</id>
                         <phase>compile</phase>
@@ -366,21 +351,21 @@
                             </resources>
                         </configuration>
                     </execution>
-                    <!--<execution>-->
-                        <!--<id>copy-input-data</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>copy-resources</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<outputDirectory>${project.build.directory}/deploy/data/input</outputDirectory>-->
-                            <!--<resources>-->
-                                <!--<resource>-->
-                                    <!--<directory>data/input</directory>-->
-                                <!--</resource>-->
-                            <!--</resources>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
+                    <execution>
+                        <id>copy-demo-data</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/deploy/data/demo_input</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>data/demo_input</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 

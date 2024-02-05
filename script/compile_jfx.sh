@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-module load maven3
-module load jdk/jdk1.8
+module load maven
+module load jdk/zulu-jdk8
 mvn jfx:build-jar
